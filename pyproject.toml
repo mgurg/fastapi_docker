@@ -29,9 +29,8 @@ source = "init"
 [tool.coverage.run]
 parallel = true
 source = [
-    "docs_src",
-    "tests",
-    "sqlmodel"
+    "app",
+    "tests"
 ]
 
 [tool.coverage.report]
