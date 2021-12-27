@@ -1,0 +1,12 @@
+version: '3'
+services:
+  web:
+    build:
+        context: .
+        dockerfile: ./Dockerfile
+    volumes:
+      - ./app:/app
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+    env_file: ./app/.env
