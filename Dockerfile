@@ -13,7 +13,11 @@ COPY ./app /app
 
 WORKDIR /app
 
-CMD [ "python", "./main.py" ]
-# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
+# EXPOSE 80
 
-EXPOSE 5678
+# CMD [ "python", "./main.py" ]
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", ":5000", "main:app"]
+
+
+# EXPOSE 5678
