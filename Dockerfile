@@ -1,5 +1,7 @@
 # pull official base image
-FROM python:3.8
+FROM python:3.8-slim-bullseye
+
+RUN useradd -r -s /bin/bash alex
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -9,7 +11,8 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
-COPY ./app /app
+USER alex
+COPY --chown=alex:alex ./app /app
 
 WORKDIR /app
 
