@@ -18,9 +18,9 @@ WORKDIR /app
 
 # EXPOSE 80
 
-# CMD [ "python", "./main.py" ]
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
-ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", ":5000", "main:app"]
+CMD [ "python", "./main.py" ]
+# ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000" "--reload", "--debug"]
+# ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", ":5000", "main:app"]
 
 
 # EXPOSE 5678

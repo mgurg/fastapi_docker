@@ -10,6 +10,8 @@ fastapi = "^0.70.1"
 uvicorn = {extras = ["standard"], version = "^0.16.0"}
 requests = "^2.26.0"
 gunicorn = "^20.1.0"
+aioaws = "^0.12"
+fastapi-websocket-pubsub = "^0.1.21"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
