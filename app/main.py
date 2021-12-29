@@ -1,10 +1,12 @@
 # import asyncio
 import asyncio
+import mimetypes
 import random
 from datetime import date, datetime, time
 from typing import Dict, List, Optional
 from uuid import UUID
 
+import boto3
 import uvicorn
 
 # requires `pip install aioaws`
@@ -112,12 +114,29 @@ def read_item(item_id: int, q: Optional[str] = None):
 async def upload_aws_s3(file: UploadFile = File(...)):
     print(settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name)
 
-    ACCESS_KEY = settings.s3_access_key
-    SECRET_KEY = settings.s3_secret_access_key
+    # https://www.youtube.com/watch?v=JKlOlDFwsao
+    # https://github.com/search?q=upload_fileobj+fastapi&type=code
+    s3 = boto3.resource(
+        service_name="s3",
+        region_name=settings.s3_region,
+        aws_access_key_id=settings.s3_access_key,
+        aws_secret_access_key=settings.s3_secret_access_key,
+    )
 
-    session = Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-    s3 = session.resource("s3")
-    your_bucket = s3.Bucket(settings.s3_bucket_name)
+    # bucket names
+    for bucket in s3.buckets.all():
+        print(bucket.name)
+
+    s3.Bucket(settings.s3_bucket_name).upload_fileobject()
+
+    # session = Session(aws_access_key_id=settings.s3_access_key, aws_secret_access_key=settings.s3_secret_access_key)
+    # s3 = session.resource("s3")
+    # your_bucket = s3.Bucket(settings.s3_bucket_name)
+
+    # filename = file.filename
+    # data = file.file._file
+
+    # s3.Bucket(settings.s3_bucket_name).upload_file(key=filename, fileobject=data)
 
     # for s3_file in your_bucket.objects.all():
     #     print(s3_file.key)
@@ -136,6 +155,30 @@ async def upload_aws_s3(file: UploadFile = File(...)):
     # print(settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name)
     return {"region": settings.s3_region, "files": "files", "filename": file.filename}
     # return {"filename": file.filename}
+
+
+@app.get("/s3/sign")
+def sign_s3_upload(objectName: str):
+    boto3_session = boto3.Session(
+        region_name=settings.s3_region,
+        aws_access_key_id=settings.s3_access_key,
+        aws_secret_access_key=settings.s3_secret_access_key,
+    )
+
+    s3 = boto3_session.client("s3")
+    mime_type, _ = mimetypes.guess_type(objectName)
+    presigned_url = s3.generate_presigned_url(
+        "put_object",
+        Params={
+            "Bucket": settings.s3_bucket_name,
+            "Key": objectName,
+            "ContentType": mime_type,
+            "ACL": "public-read",
+        },
+        ExpiresIn=3600,
+    )
+
+    return {"signedUrl": presigned_url}
 
 
 if __name__ == "__main__":
