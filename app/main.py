@@ -119,16 +119,16 @@ async def upload_aws_s3(file: UploadFile = File(...)):
     s3 = session.resource("s3")
     your_bucket = s3.Bucket(settings.s3_bucket_name)
 
-    for s3_file in your_bucket.objects.all():
-        print(s3_file.key)
+    # for s3_file in your_bucket.objects.all():
+    #     print(s3_file.key)
 
-    s3 = S3Client(
-        AsyncClient,
-        S3Config(
-            settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name + ".com"
-        ),
-    )
-    await s3.upload("path/to/upload-to.txt", b"this the content")
+    # s3 = S3Client(
+    #     AsyncClient,
+    #     S3Config(
+    #         settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name + ".com"
+    #     ),
+    # )
+    # await s3.upload("path/to/upload-to.txt", b"this the content")
 
     # files = [f for f in s3.list()]
 
