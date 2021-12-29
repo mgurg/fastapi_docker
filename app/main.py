@@ -127,7 +127,14 @@ async def upload_aws_s3(file: UploadFile = File(...)):
     for bucket in s3.buckets.all():
         print(bucket.name)
 
-    s3.Bucket(settings.s3_bucket_name).upload_fileobject()
+    s3.Bucket(settings.s3_bucket_name).upload_fileobj(
+        Fileobj=file.file,
+        Key="img.png",
+        # ExtraArgs={
+        #     "ContentType": "image/png",
+        #     "ACL": "public-read",
+        # },
+    )
 
     # session = Session(aws_access_key_id=settings.s3_access_key, aws_secret_access_key=settings.s3_secret_access_key)
     # s3 = session.resource("s3")
