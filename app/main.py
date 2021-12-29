@@ -1,9 +1,9 @@
 # import asyncio
 import random
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import uvicorn
-from fastapi import FastAPI, WebSocket
+from fastapi import Cookie, Depends, FastAPI, Query, WebSocket, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
@@ -21,6 +21,7 @@ app.add_middleware(
 class Notifier:
     def __init__(self):
         self.connections: List[WebSocket] = []
+        self.active_users: Dict = {}
         self.generator = self.get_notification_generator()
 
     async def get_notification_generator(self):
@@ -31,14 +32,22 @@ class Notifier:
     async def push(self, msg: str):
         await self.generator.asend(msg)
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, client_id: int):
+        if client_id != 123:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         await websocket.accept()
         self.connections.append(websocket)
+        self.active_users[client_id] = websocket
 
-    def remove(self, websocket: WebSocket):
-        self.connections.remove(websocket)
+    def remove(self, websocket: WebSocket, client_id: int):
+        try:
+            self.connections.remove(websocket)
+            del self.active_users
+        except KeyError as ex:
+            print("No such key: '%s'" % ex.message)
 
     async def _notify(self, message: str):
+        print(self.active_users)
         living_connections = []
         while len(self.connections) > 0:
             # Looping like this is necessary in case a disconnection is handled
@@ -52,15 +61,15 @@ class Notifier:
 notifier = Notifier()
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await notifier.connect(websocket)
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await notifier.connect(websocket, client_id)
     try:
         while True:
             data = await websocket.receive_text()
             await websocket.send_text(f"Message text was: {data}")
     except WebSocketDisconnect:
-        notifier.remove(websocket)
+        notifier.remove(websocket, client_id)
 
 
 @app.get("/push/{message}")
@@ -105,8 +114,8 @@ def read_item(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
 
 
-# if __name__ == "__main__":
-# if settings.ENV != "production":
-# uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+if __name__ == "__main__":
+    # if settings.ENV != "production":
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
 # else:
 #     uvicorn.run("main:app")
