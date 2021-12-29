@@ -1,6 +1,7 @@
 # import asyncio
 import random
 from typing import Dict, List, Optional
+from uuid import UUID
 
 import uvicorn
 from fastapi import Cookie, Depends, FastAPI, Query, WebSocket, status
@@ -33,8 +34,9 @@ class Notifier:
         await self.generator.asend(msg)
 
     async def connect(self, websocket: WebSocket, client_id: int):
-        if client_id != 123:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        # if client_id != 123:
+        #     await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+
         await websocket.accept()
         self.connections.append(websocket)
         self.active_users[client_id] = websocket
@@ -48,14 +50,16 @@ class Notifier:
 
     async def _notify(self, message: str):
         print(self.active_users)
-        living_connections = []
-        while len(self.connections) > 0:
-            # Looping like this is necessary in case a disconnection is handled
-            # during await websocket.send_text(message)
-            websocket = self.connections.pop()
-            await websocket.send_text(message)
-            living_connections.append(websocket)
-        self.connections = living_connections
+        for connection in self.connections:
+            await connection.send_text(message)
+        # living_connections = []
+        # while len(self.connections) > 0:
+        #     # Looping like this is necessary in case a disconnection is handled
+        #     # during await websocket.send_text(message)
+        #     websocket = self.connections.pop()
+        #     await websocket.send_text(message)
+        #     living_connections.append(websocket)
+        # self.connections = living_connections
 
 
 notifier = Notifier()
@@ -86,27 +90,6 @@ async def startup():
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-
-
-# @app.websocket("/ws")
-# async def websocket_endpoint(websocket: WebSocket):
-#     print("Accepting client connection...")
-#     await websocket.accept()
-#     while True:
-#         try:
-#             # Wait for any message from the client
-#             ws_text = await websocket.receive_text()
-#             if ws_text == "ping":
-#                 await websocket.send_json({"ping": "pong"})
-#             else:
-#                 # Send message to the client
-#                 resp = {"value": random.uniform(0, 1)}
-#                 # await asyncio.sleep(0.1)
-#                 await websocket.send_json(resp)
-#         except Exception as e:
-#             print("error:", e)
-#             break
-#     print("Bye..")
 
 
 @app.get("/items/{item_id}")
