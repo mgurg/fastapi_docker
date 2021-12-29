@@ -12,6 +12,9 @@ requests = "^2.26.0"
 gunicorn = "^20.1.0"
 aioaws = "^0.12"
 fastapi-websocket-pubsub = "^0.1.21"
+python-multipart = "^0.0.5"
+python-dotenv = "^0.19.2"
+boto3 = "^1.20.26"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

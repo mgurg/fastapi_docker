@@ -1,12 +1,22 @@
 # import asyncio
+import asyncio
 import random
+from datetime import date, datetime, time
 from typing import Dict, List, Optional
 from uuid import UUID
 
 import uvicorn
-from fastapi import Cookie, Depends, FastAPI, Query, WebSocket, status
+
+# requires `pip install aioaws`
+from aioaws.s3 import S3Client, S3Config
+from boto3.session import Session
+from config.settings import get_settings
+from fastapi import Cookie, Depends, FastAPI, File, Query, UploadFile, WebSocket, status
 from fastapi.middleware.cors import CORSMiddleware
+from httpx import AsyncClient
 from starlette.websockets import WebSocket, WebSocketDisconnect
+
+settings = get_settings()
 
 app = FastAPI()
 
@@ -19,6 +29,7 @@ app.add_middleware(
 )
 
 # https://github.com/tiangolo/fastapi/issues/258
+# https://github.com/cthwaite/fastapi-websocket-broadcast/blob/master/app.py
 class Notifier:
     def __init__(self):
         self.connections: List[WebSocket] = []
@@ -89,12 +100,42 @@ async def startup():
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": "World", "time": datetime.utcnow()}
 
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
+
+
+@app.post("/upload/")
+async def upload_aws_s3(file: UploadFile = File(...)):
+    print(settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name)
+
+    ACCESS_KEY = settings.s3_access_key
+    SECRET_KEY = settings.s3_secret_access_key
+
+    session = Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+    s3 = session.resource("s3")
+    your_bucket = s3.Bucket(settings.s3_bucket_name)
+
+    for s3_file in your_bucket.objects.all():
+        print(s3_file.key)
+
+    s3 = S3Client(
+        AsyncClient,
+        S3Config(
+            settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name + ".com"
+        ),
+    )
+    await s3.upload("path/to/upload-to.txt", b"this the content")
+
+    # files = [f for f in s3.list()]
+
+    # # print(settings.s3_region)
+    # print(settings.s3_access_key, settings.s3_secret_access_key, settings.s3_region, settings.s3_bucket_name)
+    return {"region": settings.s3_region, "files": "files", "filename": file.filename}
+    # return {"filename": file.filename}
 
 
 if __name__ == "__main__":
