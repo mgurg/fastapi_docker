@@ -2,10 +2,11 @@ import io
 import mimetypes
 
 import boto3
-from config.settings import get_settings
 from fastapi import APIRouter, File, UploadFile
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
+
+from app.config import get_settings
 
 settings = get_settings()
 s3_router = APIRouter()

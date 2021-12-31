@@ -1,9 +1,12 @@
+# fastapi_docker/app/config.py
+
+import logging
 import os
 from functools import lru_cache
-from pathlib import Path
 
-from dotenv import load_dotenv
 from pydantic import BaseSettings
+
+log = logging.getLogger("uvicorn")
 
 
 class Settings(BaseSettings):
@@ -21,4 +24,5 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> BaseSettings:
+    log.info("Loading config settings from the environment...")
     return Settings()

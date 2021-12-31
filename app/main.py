@@ -1,30 +1,56 @@
+# fastapi_docker/app/main.py
+import logging
 from datetime import datetime
 from typing import Dict, List, Optional
 
 import uvicorn
-from config.settings import get_settings
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from routers.aws_s3 import s3_router
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
+from app.api.aws_s3 import s3_router
+from app.config import get_settings
+
+log = logging.getLogger("uvicorn")
 settings = get_settings()
 
-app = FastAPI()
+origins = ["http://localhost", "http://localhost:8080", "*"]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-app.include_router(
-    s3_router,
-    prefix="/s3",
-    tags=["AWS_S3"],
-)
+def create_application() -> FastAPI:
+    """
+    Create base FastAPI app with CORS middlewares and routes loaded
+    Returns:
+        FastAPI: [description]
+    """
+    app = FastAPI(title="Wave Payroll")
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.include_router(
+        s3_router,
+        prefix="/s3",
+        tags=["AWS_S3"],
+    )
+
+    return app
+
+
+app = create_application()
 
 
 # https://github.com/tiangolo/fastapi/issues/258
@@ -77,8 +103,14 @@ notifier = Notifier()
 
 @app.on_event("startup")
 async def startup():
+    log.info("🚀 Starting up and initializing app...")
     # Prime the push notification generator
     await notifier.generator.asend(None)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    log.info("⏳ Shutting down...")
 
 
 @app.websocket("/ws/{client_id}")
@@ -105,11 +137,12 @@ def read_root():
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+    return {"item_id_no": item_id, "q": q}
 
 
 if __name__ == "__main__":
-    # if settings.ENV != "production":
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+    if settings.ENV == "production":
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+        # uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
 # else:
 #     uvicorn.run("main:app")
