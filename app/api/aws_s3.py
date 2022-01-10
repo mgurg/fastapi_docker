@@ -96,23 +96,18 @@ async def upload_aws_s3(file: UploadFile = File(...)):
 
 @s3_router.get("/sign")
 def sign_s3_upload(objectName: str):
-    boto3_session = boto3.Session(
-        region_name=settings.s3_region,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_access_key,
-    )
 
-    s3 = boto3_session.client("s3")
-    mime_type, _ = mimetypes.guess_type(objectName)
-    presigned_url = s3.generate_presigned_url(
-        "put_object",
-        Params={
-            "Bucket": settings.s3_bucket_name,
-            "Key": objectName,
-            "ContentType": mime_type,
-            "ACL": "public-read",
-        },
+    file_name = "file_name"
+    file_type = "text/plain"
+
+    s3 = boto3.client("s3")
+
+    presigned_post = s3.generate_presigned_post(
+        Bucket=settings.s3_bucket_name,
+        Key=file_name,
+        Fields={"acl": "public-read", "Content-Type": file_type},
+        Conditions=[{"acl": "public-read"}, {"Content-Type": file_type}],
         ExpiresIn=3600,
     )
 
-    return {"signedUrl": presigned_url}
+    return {"data": presigned_post, "url": "https://%s.s3.amazonaws.com/%s" % (settings.s3_bucket_name, file_name)}
