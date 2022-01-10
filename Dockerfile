@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.8-slim-bullseye
+FROM python:3.10-slim-bullseye
 
 RUN useradd -r -s /bin/bash alex
 
