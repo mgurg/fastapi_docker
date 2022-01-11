@@ -5,7 +5,7 @@ services:
         context: .
         dockerfile: ./Dockerfile
     volumes:
-      - ./app:/app
+      - ./app:/src/app
     ports:
       - "5000:5000"
       - "5678:5678"

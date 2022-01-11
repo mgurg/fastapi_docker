@@ -143,6 +143,5 @@ def read_item(item_id: int, q: Optional[str] = None):
 if __name__ == "__main__":
     if settings.ENV == "production":
         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-        # uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
-# else:
-#     uvicorn.run("main:app")
+    else:
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)

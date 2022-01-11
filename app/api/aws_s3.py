@@ -1,5 +1,6 @@
 import io
 import mimetypes
+import uuid
 
 import boto3
 from fastapi import APIRouter, File, UploadFile
@@ -12,18 +13,55 @@ settings = get_settings()
 s3_router = APIRouter()
 
 
-s3 = boto3.resource(
+s3_resource = boto3.resource(
     service_name="s3",
     region_name=settings.s3_region,
     aws_access_key_id=settings.s3_access_key,
     aws_secret_access_key=settings.s3_secret_access_key,
 )
 
+s3_client = boto3.client(
+    "s3",
+    region_name=settings.s3_region,
+    aws_access_key_id=settings.s3_access_key,
+    aws_secret_access_key=settings.s3_secret_access_key,
+)
+
+
+@s3_router.post("/create_bucket")
+async def post_create_bucket():
+
+    prefix = "mgu"
+    bucket_name = prefix + "-" + str(uuid.uuid4().hex)
+    location = {"LocationConstraint": settings.s3_region}
+
+    # print("######")
+    # print(bucket_name)
+
+    response = s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
+
+    # print(response)
+    return bucket_name
+
+
+@s3_router.get("/list_buckets")
+async def get_buckets_list():
+
+    response = s3_client.list_buckets()
+
+    print("Listing Amazon S3 Buckets:")
+
+    for bucket in response["Buckets"]:
+        print(f"-- {bucket['Name']}")
+
+
+# -------------------------------------------
+
 
 @s3_router.get("/get_bucket_names")
 async def get_all_bucket_names():
     s3_buckets = []
-    for bucket in s3.buckets.all():
+    for bucket in s3_resource.buckets.all():
         s3_buckets.append(bucket.name)
     return s3_buckets
 
@@ -40,7 +78,7 @@ async def get_s3(s3_obj: str):
     Streamed image
     """
     f = io.BytesIO()
-    s3.Bucket(settings.s3_bucket_name).download_fileobj(s3_obj, f)
+    s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(s3_obj, f)
     f.seek(0)
     return StreamingResponse(
         f, media_type="image/jpg", headers={"Content-Disposition": 'inline; filename="%s.jpg"' % (object,)}
@@ -54,10 +92,10 @@ async def upload_aws_s3(file: UploadFile = File(...)):
     # https://github.com/search?q=upload_fileobj+fastapi&type=code
 
     # bucket names
-    for bucket in s3.buckets.all():
+    for bucket in s3_resource.buckets.all():
         print(bucket.name)
 
-    s3.Bucket(settings.s3_bucket_name).upload_fileobj(
+    s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(
         Fileobj=file.file,
         Key="img.png",
         # ExtraArgs={

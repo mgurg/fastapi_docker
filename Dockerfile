@@ -11,16 +11,15 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
-USER alex
+#USER alex
 COPY --chown=alex:alex ./app /src/app
 
 WORKDIR /src
 
 # EXPOSE 80
 
-# CMD [ "python", "./main.py" ]
 # ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000" "--reload", "--debug"]
-CMD uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload --debug --reload
+CMD uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload --debug --reload-dir /src/app
 # ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", ":5000", "app.main:app"]
 
 
