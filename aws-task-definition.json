@@ -29,7 +29,7 @@
       "memoryReservation": 128,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "142827160281.dkr.ecr.eu-north-1.amazonaws.com/aws-ecs-ecr",
+      "image": "142827160281.dkr.ecr.eu-central-1.amazonaws.com/amzn-ecs-ecr",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -46,18 +46,18 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "aws-ecs-ecr"
+      "name": "amzn-ecs-ecr"
     }
   ],
   "placementConstraints": [],
-  "memory": "256",
+  "memory": null,
   "taskRoleArn": "arn:aws:iam::142827160281:role/ecsTaskExecutionRole",
   "compatibilities": [
     "EXTERNAL",
     "EC2"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:eu-north-1:142827160281:task-definition/aws-ecs-task-definition:6",
-  "family": "aws-ecs-task-definition",
+  "taskDefinitionArn": "arn:aws:ecs:eu-central-1:142827160281:task-definition/amzn-ecs-task-definition:1",
+  "family": "amzn-ecs-task-definition",
   "requiresAttributes": [
     {
       "targetId": null,
@@ -90,8 +90,8 @@
   ],
   "networkMode": null,
   "runtimePlatform": null,
-  "cpu": "128",
-  "revision": 6,
+  "cpu": null,
+  "revision": 1,
   "status": "ACTIVE",
   "inferenceAccelerators": null,
   "proxyConfiguration": null,
