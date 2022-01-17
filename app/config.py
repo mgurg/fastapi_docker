@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     s3_secret_access_key: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
     s3_bucket_name: str = os.getenv("AWS_S3_BUCKET")
 
+    db_host: str = os.getenv("DB_HOST")
+    db_port: str = os.getenv("DB_PORT")
+    db_name: str = os.getenv("DB_DATABASE")
+    db_user: str = os.getenv("DB_USERNAME")
+    db_password: str = os.getenv("DB_PASSWORD")
+
     class Config:
         env_prefix = ""
         env_file_encoding = "utf-8"

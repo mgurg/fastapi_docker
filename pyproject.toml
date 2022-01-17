@@ -15,6 +15,9 @@ fastapi-websocket-pubsub = "^0.1.21"
 python-multipart = "^0.0.5"
 python-dotenv = "^0.19.2"
 boto3 = "^1.20.26"
+psycopg2-binary = "^2.9.3"
+sqlmodel = "^0.0.6"
+alembic = "^1.7.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
