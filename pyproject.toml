@@ -18,6 +18,7 @@ boto3 = "^1.20.26"
 psycopg2-binary = "^2.9.3"
 sqlmodel = "^0.0.6"
 alembic = "^1.7.5"
+pydantic = {extras = ["email"], version = "^1.9.0"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

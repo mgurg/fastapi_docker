@@ -23,4 +23,4 @@ CMD uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload --debug --reload-di
 # ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", ":5000", "app.main:app"]
 
 
-# EXPOSE 5678
+# EXPOSE 5432

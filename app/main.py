@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from app.api.aws_s3 import s3_router
+from app.api.user import user_router
 from app.config import get_settings
 
 log = logging.getLogger("uvicorn")
@@ -45,6 +46,12 @@ def create_application() -> FastAPI:
         s3_router,
         prefix="/s3",
         tags=["AWS_S3"],
+    )
+
+    app.include_router(
+        user_router,
+        prefix="/usr",
+        tags=["USER"],
     )
 
     return app
