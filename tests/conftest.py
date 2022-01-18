@@ -3,6 +3,9 @@
 import os
 
 import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel.pool import StaticPool
 from starlette.testclient import TestClient
 
 from app.config import get_settings
@@ -10,6 +13,17 @@ from app.main import create_application
 
 # def get_settings_override():
 #     return Settings(testing=1, database_url=os.environ.get("DATABASE_TEST_URL"))
+
+
+@pytest.fixture(name="session")
+def session_fixture():
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
+
+
+# ------
 
 
 @pytest.fixture(scope="module")
@@ -25,7 +39,7 @@ def test_app():
     # tear down
 
 
-# # new
+# new
 # @pytest.fixture(scope="module")
 # def test_app_with_db():
 #     # set up

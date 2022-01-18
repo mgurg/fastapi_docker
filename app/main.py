@@ -24,15 +24,7 @@ def create_application() -> FastAPI:
     Returns:
         FastAPI: [description]
     """
-    app = FastAPI(title="Wave Payroll")
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    app = FastAPI()
 
     app.add_middleware(
         CORSMiddleware,
