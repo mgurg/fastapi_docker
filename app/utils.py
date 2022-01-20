@@ -11,7 +11,7 @@ from botocore.exceptions import ClientError
 
 def get_secret():
 
-    secret_name = "aws-ecs-creditentials"
+    secret_name = "amzn-db-credentials"
     region_name = "eu-central-1"
 
     # Create a Secrets Manager client
@@ -46,7 +46,7 @@ def get_secret():
             # Deal with the exception here, and/or rethrow at your discretion.
             raise e
     else:
-        # Decrypts secret using the associated KMS CMK.
+        # Decrypts secret using the associated KMS key.
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
         if "SecretString" in get_secret_value_response:
             secret = get_secret_value_response["SecretString"]
