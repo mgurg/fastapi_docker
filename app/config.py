@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from pydantic import BaseSettings
 
-# from app.utils import get_secret
+from app.utils import get_secret
 
 log = logging.getLogger("uvicorn")
 
@@ -19,14 +19,14 @@ class Settings(BaseSettings):
     s3_secret_access_key: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
     s3_bucket_name: str = os.getenv("AWS_S3_BUCKET")
 
-    # if environment != "dev":
-    #     secrets = get_secret()
+    if environment != "dev":
+        secrets = get_secret()
 
-    db_host: str = os.getenv("DB_HOST")
-    db_port: str = os.getenv("DB_PORT")
-    db_name: str = os.getenv("DB_DATABASE")
-    db_user: str = os.getenv("DB_USERNAME")
-    db_password: str = os.getenv("DB_PASSWORD")
+    db_host: str = os.getenv("DB_HOST", secrets["host"])
+    db_port: str = os.getenv("DB_PORT", secrets["port"])
+    db_name: str = os.getenv("DB_DATABASE", secrets["db_name"])
+    db_user: str = os.getenv("DB_USERNAME", secrets["username"])
+    db_password: str = os.getenv("DB_PASSWORD", secrets["password"])
 
     class Config:
         env_prefix = ""
