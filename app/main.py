@@ -11,6 +11,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 from app.api.aws_s3 import s3_router
 from app.api.user import user_router
 from app.config import get_settings
+from app.utils import get_secret
 
 log = logging.getLogger("uvicorn")
 settings = get_settings()
@@ -131,7 +132,8 @@ async def push_to_connected_websockets(message: str):
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World", "time": datetime.utcnow()}
+    secret = get_secret()
+    return {"Hello": "World", "time": datetime.utcnow(), "S": f'{secret["port"]}'}
 
 
 @app.get("/items/{item_id}")

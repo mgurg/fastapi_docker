@@ -6,27 +6,33 @@ from functools import lru_cache
 
 from pydantic import BaseSettings
 
-from app.utils import get_secret
+# from app.utils import get_secret
 
 log = logging.getLogger("uvicorn")
 
 
 class Settings(BaseSettings):
 
-    environment: str = os.getenv("WORKING_ENVIRONMENT", "production")
+    environment: str = os.getenv("WORKING_ENVIRONMENT")
     s3_region: str = os.getenv("AWS_S3_DEFAULT_REGION")
     s3_access_key: str = os.getenv("AWS_S3_ACCESS_KEY_ID")
     s3_secret_access_key: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
     s3_bucket_name: str = os.getenv("AWS_S3_BUCKET")
 
-    if environment != "dev":
-        secrets = get_secret()
+    # if environment != "test":
+    #     secrets = get_secret()
 
-    db_host: str = os.getenv("DB_HOST", secrets["host"])
-    db_port: str = os.getenv("DB_PORT", secrets["port"])
-    db_name: str = os.getenv("DB_DATABASE", secrets["db_name"])
-    db_user: str = os.getenv("DB_USERNAME", secrets["username"])
-    db_password: str = os.getenv("DB_PASSWORD", secrets["password"])
+    #     db_host: str = os.getenv("DB_HOST", f'{secrets["host"]}')
+    #     db_port: str = os.getenv("DB_PORT", f'{secrets["port"]}')
+    #     db_name: str = os.getenv("DB_DATABASE", f'{secrets["db_name"]}')
+    #     db_user: str = os.getenv("DB_USERNAME", f'{secrets["username"]}')
+    #     db_password: str = os.getenv("DB_PASSWORD", f'{secrets["password"]}')
+    # else:
+    db_host: str = os.getenv("DB_HOST")
+    db_port: str = os.getenv("DB_PORT")
+    db_name: str = os.getenv("DB_DATABASE")
+    db_user: str = os.getenv("DB_USERNAME")
+    db_password: str = os.getenv("DB_PASSWORD")
 
     class Config:
         env_prefix = ""
