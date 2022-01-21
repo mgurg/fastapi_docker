@@ -11,7 +11,7 @@ from botocore.exceptions import ClientError
 
 def get_secret():
 
-    secret_name = "amzn-db-credentials"
+    secret_name = "arn:aws:secretsmanager:eu-central-1:142827160281:secret:amzn-db-credentials-W6uN2Y"
     region_name = "eu-central-1"
 
     # Create a Secrets Manager client
@@ -56,7 +56,9 @@ def get_secret():
     # Your code goes here.
     if secret:
         secrets = json.loads(secret)
+        return secrets
     elif decoded_binary_secret:
         secrets = json.loads(decoded_binary_secret)
+        return secrets
 
-    return secrets
+    return {"port": 8888}
