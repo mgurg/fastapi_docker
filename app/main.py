@@ -150,11 +150,11 @@ def read_root():
 def read_item(item_id: int, q: Optional[str] = None):
     try:
         logger.debug("Get")
-        client = boto3.client("secretsmanager", region_name="eu-central-1")
+        # client = boto3.client("secretsmanager", region_name="eu-central-1")
 
-        response = client.get_secret_value(SecretId="amzn-db-credentials")
-        database_secrets = json.loads(response["SecretString"])
-        # secret = get_secret()
+        # response = client.get_secret_value(SecretId="amzn-db-credentials")
+        # database_secrets = json.loads(response["SecretString"])
+        secret = get_secret()
         logger.debug("secret")
         # logger.debug(f'{secret["port"]}')
     except Exception as ex:
