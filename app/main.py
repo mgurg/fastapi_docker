@@ -1,6 +1,7 @@
 # fastapi_docker/app/main.py
 import logging
 import sys
+import traceback
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -145,10 +146,13 @@ def read_root():
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
     try:
+        logger.debug("Get")
         secret = get_secret()
+        logger.debug("secret")
         logger.debug(f'{secret["port"]}')
     except Exception as ex:
         logger.error(f"### Secrets failed: {ex}")
+        logger.error(traceback.format_exc())
 
     return {"item_id_no": item_id, "q": q}
 
