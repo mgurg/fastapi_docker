@@ -139,14 +139,6 @@ async def push_to_connected_websockets(message: str):
 
 @app.get("/")
 def read_root():
-    # secret = get_secret()
-    try:
-        a = 1 / 0
-    except Exception as ex:
-        logger.error(f"Request failed: {ex}")
-    finally:
-        logger.info("Request ended")
-
     return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
 
 
@@ -154,6 +146,7 @@ def read_root():
 def read_item(item_id: int, q: Optional[str] = None):
     try:
         secret = get_secret()
+        logger.debug(f'{secret["port"]}')
     except Exception as ex:
         logger.error(f"### Secrets failed: {ex}")
 
