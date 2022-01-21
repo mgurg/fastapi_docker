@@ -132,8 +132,8 @@ async def push_to_connected_websockets(message: str):
 
 @app.get("/")
 def read_root():
-    secret = get_secret()
-    return {"Hello": "World", "time": datetime.utcnow(), "S": f'{secret["port"]}'}
+    # secret = get_secret()
+    return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
 
 
 @app.get("/items/{item_id}")
