@@ -1,8 +1,11 @@
 # fastapi_docker/app/main.py
 import logging
+import sys
 from datetime import datetime
 from typing import Dict, List, Optional
 
+# from loguru import logger
+import loguru
 import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -51,6 +54,9 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
+logger = loguru.logger
+logger.remove()
+logger.add("./app/logs/logs.log", format="{time} - {level} - {message} ", level="DEBUG")
 
 
 # https://github.com/tiangolo/fastapi/issues/258
@@ -103,6 +109,7 @@ notifier = Notifier()
 
 @app.on_event("startup")
 async def startup():
+    logger.debug("That's it, beautiful and simple logging!")
     log.info("🚀 Starting up and initializing app...")
     # Prime the push notification generator
     await notifier.generator.asend(None)
@@ -133,12 +140,23 @@ async def push_to_connected_websockets(message: str):
 @app.get("/")
 def read_root():
     # secret = get_secret()
+    try:
+        a = 1 / 0
+    except Exception as ex:
+        logger.error(f"Request failed: {ex}")
+    finally:
+        logger.info("Request ended")
+
     return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
 
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
-    secret = get_secret()
+    try:
+        secret = get_secret()
+    except Exception as ex:
+        logger.error(f"### Secrets failed: {ex}")
+
     return {"item_id_no": item_id, "q": q}
 
 
