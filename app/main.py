@@ -1,11 +1,14 @@
 # fastapi_docker/app/main.py
+import json
 import logging
 import sys
 import traceback
 from datetime import datetime
 from typing import Dict, List, Optional
+from urllib import response
 
 # from loguru import logger
+import boto3
 import loguru
 import uvicorn
 from fastapi import FastAPI, WebSocket
@@ -147,9 +150,13 @@ def read_root():
 def read_item(item_id: int, q: Optional[str] = None):
     try:
         logger.debug("Get")
-        secret = get_secret()
+        client = boto3.client("secretsmanager")
+
+        response = client.get_secret_value(SecretId="amzn-db-credentials")
+        database_secrets = json.loads(response["SecretString"])
+        # secret = get_secret()
         logger.debug("secret")
-        logger.debug(f'{secret["port"]}')
+        # logger.debug(f'{secret["port"]}')
     except Exception as ex:
         logger.error(f"### Secrets failed: {ex}")
         logger.error(traceback.format_exc())
