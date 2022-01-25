@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-fastapi = "^0.70.1"
+fastapi = "^0.73"
 uvicorn = {extras = ["standard"], version = "^0.16.0"}
 requests = "^2.26.0"
 gunicorn = "^20.1.0"
@@ -20,6 +20,8 @@ sqlmodel = "^0.0.6"
 alembic = "^1.7.5"
 pydantic = {extras = ["email"], version = "^1.9.0"}
 loguru = "^0.5.3"
+passlib = {extras = ["argon2"], version = "^1.7.4"}
+disposable-email-domains = "^0.0.72"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
