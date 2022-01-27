@@ -34,6 +34,7 @@ CREATE TABLE users (
     tz varchar(64),
     lang varchar(8),
     user_role_id int,
+    tos boolean,
     deleted_at timestamptz,
     created_at timestamptz,
     updated_at timestamptz

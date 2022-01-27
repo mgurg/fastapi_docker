@@ -2,6 +2,7 @@
 
 import os
 
+import loguru
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine

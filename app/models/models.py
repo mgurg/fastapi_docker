@@ -43,3 +43,12 @@ class UserCreateIn(SQLModel):  # OK
     last_name: str
     user_role_uuid: Optional[uuid.UUID]
     # details: Optional[UsersDetailsCreate]
+
+
+class UserRegisterIn(SQLModel):  # OK
+    email: EmailStr
+    password: str
+    password_confirmation: str
+    tos: bool
+    tz: Optional[str]
+    lang: Optional[str]

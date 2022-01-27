@@ -25,7 +25,7 @@ from app.main import app
 #     # assert data["id"] is not None
 
 
-def test_get_user(session: Session):
+def test_post_register(session: Session):
     def get_session_override():
         return session
 
