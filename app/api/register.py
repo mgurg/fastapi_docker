@@ -3,14 +3,19 @@ from datetime import datetime, timedelta
 
 from disposable_email_domains import blocklist
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPBearer
 from passlib.hash import argon2
-from sqlalchemy import false, func
+from sqlalchemy import func
 from sqlmodel import Session, select
+from stdnum.pl import nip
 
-from app.config import get_settings
 from app.db import get_session
-from app.models.models import StandardResponse, UserRegisterIn, Users
+from app.models.models import (
+    StandardResponse,
+    UserActivateOut,
+    UserFirstRunIn,
+    UserRegisterIn,
+    Users,
+)
 from app.service.helpers import get_uuid
 from app.service.password import Password
 
@@ -20,7 +25,6 @@ register_router = APIRouter()
 @register_router.post("/add", response_model=StandardResponse)
 async def auth_register(*, session: Session = Depends(get_session), users: UserRegisterIn):
     res = UserRegisterIn.from_orm(users)
-    # TODO: Trim input data, save if rules accepted on backend
 
     if res.email.strip().split("@")[1] in blocklist:
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
@@ -69,7 +73,63 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     return {"ok": True}
 
 
-@register_router.get("/users", name="user:Profile")
-async def user_get_all(*, session: Session = Depends(get_session)):
-    users = session.exec(select(Users)).all()
-    return users
+@register_router.get("/activate/{token}", response_model=UserActivateOut)
+async def auth_activate(*, session: Session = Depends(get_session), token):
+    db_user = session.exec(
+        select(Users)
+        .where(Users.service_token == token)
+        .where(Users.is_active == False)
+        .where(Users.service_token_valid_to > datetime.utcnow())
+        .where(Users.deleted_at == None)
+    ).one_or_none()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return db_user
+
+
+@register_router.post("/first_run", response_model=StandardResponse)
+async def auth_first_run(*, session: Session = Depends(get_session), user: UserFirstRunIn):
+    res = UserFirstRunIn.from_orm(user)
+
+    if not nip.is_valid(res.nip):  # 123-456-32-18
+        raise HTTPException(status_code=404, detail="Invalid NIP number")
+
+    db_user = session.exec(
+        select(Users)
+        .where(Users.service_token == res.token)
+        .where(Users.is_active == 0)
+        .where(Users.service_token_valid_to > datetime.utcnow())
+        .where(Users.deleted_at == None)
+    ).one_or_none()
+
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_package = {
+        "first_name": res.first_name,
+        "last_name": res.last_name,
+        "is_active": 1,
+        "service_token": None,
+        "service_token_valid_to": None,
+        "updated_at": datetime.utcnow(),
+    }
+
+    # !TODO: Save NIP in customers table
+    # import requests
+    # url = "https://rejestr.io/api/v1/krs/28860"
+    # payload={}
+    # headers = {
+    #   'Authorization': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+    # }
+    # response = requests.request("GET", url, headers=headers, data=payload)
+    # print(response.text)
+
+    for key, value in update_package.items():
+        setattr(db_user, key, value)
+
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+
+    return {"ok": True}

@@ -52,3 +52,14 @@ class UserRegisterIn(SQLModel):  # OK
     tos: bool
     tz: Optional[str]
     lang: Optional[str]
+
+
+class UserActivateOut(SQLModel):  # OK
+    email: EmailStr
+
+
+class UserFirstRunIn(SQLModel):  # OK
+    first_name: str
+    last_name: str
+    nip: str
+    token: str
