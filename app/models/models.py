@@ -12,10 +12,10 @@ class StandardResponse(SQLModel):  # OK
 
 
 class Users(SQLModel, table=True):
-    __tablename__ = "user"
+    __tablename__ = "users"
     id: Optional[int] = Field(default=None, primary_key=True)
     client_id: int
-    psswd: str
+    password: str
     email: Optional[EmailStr]
     phone: Optional[str]
     first_name: Optional[str]

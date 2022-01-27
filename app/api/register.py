@@ -5,18 +5,19 @@ from disposable_email_domains import blocklist
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from passlib.hash import argon2
-from sqlalchemy import func
+from sqlalchemy import false, func
 from sqlmodel import Session, select
 
 from app.config import get_settings
 from app.db import get_session
 from app.models.models import StandardResponse, UserRegisterIn, Users
+from app.service.helpers import get_uuid
 from app.service.password import Password
 
 register_router = APIRouter()
 
 
-@register_router.post("/register", response_model=StandardResponse)
+@register_router.post("/add", response_model=StandardResponse)
 async def auth_register(*, session: Session = Depends(get_session), users: UserRegisterIn):
     res = UserRegisterIn.from_orm(users)
     # TODO: Trim input data, save if rules accepted on backend
@@ -48,7 +49,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
         password=pass_hash,
         user_role_id=2,
         created_at=datetime.utcnow(),
-        is_active=0,
+        is_active=False,
         tz=res.tz,
         lang=res.lang,
         uuid=get_uuid(),  # str(uuid.uuid4()),

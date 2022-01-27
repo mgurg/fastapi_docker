@@ -1,44 +1,42 @@
-import pytest
+from faker import Faker
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
-from sqlmodel.pool import StaticPool
-
-from app.db import get_session
-from app.main import app
-
-# def test_create_user(session: Session):
-#     def get_session_override():
-#         return session
-
-#     app.dependency_overrides[get_session] = get_session_override
-
-#     client = TestClient(app)
-
-#     response = client.post("usr/add", json={"client_id": "Deadpond", "email": "mm@nn.pl"})
-#     app.dependency_overrides.clear()
-#     data = response.json()
-
-#     assert response.status_code == 200
-#     # assert data["name"] == "Deadpond"
-#     # assert data["secret_name"] == "Dive Wilson"
-#     # assert data["age"] is None
-#     # assert data["id"] is not None
 
 
-def test_post_register(session: Session):
-    def get_session_override():
-        return session
+def test_post_register_ok(client: TestClient):
+    fake = Faker("pl_PL")
+    password = fake.password()
 
-    app.dependency_overrides[get_session] = get_session_override
+    data = {
+        "email": fake.email(),
+        "password": password,
+        "password_confirmation": password,
+        "tos": True,
+        "tz": fake.timezone(),
+        "lang": "pl_PL",
+    }
 
-    client = TestClient(app)
+    response = client.post("register/add", json=data)
 
-    response = client.get("/user/users")
-    app.dependency_overrides.clear()
     data = response.json()
 
     assert response.status_code == 200
-    # assert data["name"] == "Deadpond"
-    # assert data["secret_name"] == "Dive Wilson"
-    # assert data["age"] is None
-    # assert data["id"] is not None
+    assert data["ok"] == True
+
+
+def test_post_register_wrong_password(client: TestClient):
+    fake = Faker("pl_PL")
+
+    data = {
+        "email": fake.email(),
+        "password": fake.password(),
+        "password_confirmation": fake.password(),
+        "tos": True,
+        "tz": fake.timezone(),
+        "lang": "pl_PL",
+    }
+
+    response = client.post("register/add", json=data)
+    data = response.json()
+
+    assert response.status_code == 400
+    assert data["detail"] == "Password and password confirmation not match"

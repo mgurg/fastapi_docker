@@ -42,10 +42,8 @@ def uuid_convert(o: uuid.uuid4) -> str:
 def get_uuid() -> uuid.uuid4:
     """Generate SQLModel safe UUID (without leading zero), https://github.com/tiangolo/sqlmodel/pull/26"""
 
-    value = uuid.uuid4().hex
-    if value[0] == "0":
-        value.replace("0", str(randint(0, 9)), 1)
+    val = uuid.uuid4()
+    while val.hex[0] == "0":
+        val = uuid.uuid4()
 
-    value = str(randint(0, 9)) * (32 - len(value)) + value
-
-    return value
+    return val
