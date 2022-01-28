@@ -45,7 +45,7 @@ def create_application() -> FastAPI:
 
     app.include_router(
         register_router,
-        prefix="/register",
+        prefix="/auth",
         tags=["USER"],
     )
 

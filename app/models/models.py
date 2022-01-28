@@ -11,18 +11,58 @@ class StandardResponse(SQLModel):  # OK
     ok: bool
 
 
+class LoginHistory(SQLModel, table=True):
+    __tablename__ = "login_history"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: Optional[int]
+    login_date: datetime
+    ip_address: Optional[str]
+    user_agent: Optional[str]
+    os: Optional[str]
+    browser: Optional[str]
+    browser_lang: Optional[str]
+    ipinfo: Optional[str]
+    ip_address: Optional[str]
+    failed_login: Optional[str]
+    failed_passwd: Optional[str]
+
+
+# class UsersOrg(SQLModel, table=True):
+#     __tablename__ = "users_organisation"
+#     id: Optional[int] = Field(default=None, primary_key=True)
+#     uuid: Optional[str]
+#     name: Optional[str]
+#     description: Optional[str]
+#     phone_1: Optional[str]
+#     phone_1_name: Optional[str]
+#     phone_2: Optional[str]
+#     phone_2_name: Optional[str]
+#     phone_3: Optional[str]
+#     phone_3_name: Optional[str]
+#     email_1: Optional[str]
+#     email_2: Optional[str]
+#     email_3: Optional[str]
+#     id_address_1: Optional[str]
+#     id_address_2: Optional[str]
+#     id_address_3: Optional[str]
+#     nip: Optional[str]
+#     regon: Optional[str]
+#     created_at: Optional[str]
+#     updated_a: Optional[str]
+
+
 class Users(SQLModel, table=True):
     __tablename__ = "users"
     id: Optional[int] = Field(default=None, primary_key=True)
     client_id: int
     password: str
-    email: Optional[EmailStr]
-    phone: Optional[str]
+    email: Optional[EmailStr] = Field(sa_column_kwargs={"unique": True})
+    phone: Optional[str] = Field(sa_column_kwargs={"unique": True})
     first_name: Optional[str]
     last_name: Optional[str]
     auth_token: Optional[str]
     auth_token_valid_to: Optional[datetime]
-    is_active: int
+    is_active: bool
     service_token: Optional[str]
     service_token_valid_to: Optional[datetime]
     # user_role_id: int = Field(default=None, foreign_key="roles.id")
@@ -63,3 +103,25 @@ class UserFirstRunIn(SQLModel):  # OK
     last_name: str
     nip: str
     token: str
+
+
+class UserLoginIn(SQLModel):  # OK
+    email: EmailStr
+    password: Optional[str]
+    permanent: bool
+
+
+class UserLoginOut(SQLModel):  # OK
+    auth_token: str
+    first_name: str
+    last_name: str
+    tz: str
+    lang: str
+    uuid: uuid.UUID
+    # role_FK: RolesWithPermissionsReturn
+
+
+class UserSetPassIn(SQLModel):  # OK
+    token: str
+    password: str
+    password_confirmation: str
