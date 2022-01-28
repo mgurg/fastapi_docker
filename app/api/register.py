@@ -231,7 +231,7 @@ async def auth_verify(*, session: Session = Depends(get_session), token: str):
 @register_router.get("/remind-password/{user_email}", response_model=StandardResponse)
 async def auth_remind(*, session: Session = Depends(get_session), user_email: EmailStr):
     db_user = session.exec(
-        select(Users).where(Users.email == user_email).where(Users.is_active == 1).where(Users.deleted_at == None)
+        select(Users).where(Users.email == user_email).where(Users.is_active == True).where(Users.deleted_at == None)
     ).one_or_none()
     if db_user is None:
         raise HTTPException(status_code=404, detail="Invalid email")
@@ -266,7 +266,7 @@ async def auth_set_password(*, session: Session = Depends(get_session), user: Us
     db_user = session.exec(
         select(Users)
         .where(Users.service_token == res.token)
-        .where(Users.is_active == 1)
+        .where(Users.is_active == True)
         .where(Users.service_token_valid_to > datetime.utcnow())
         .where(Users.deleted_at == None)
     ).one_or_none()
