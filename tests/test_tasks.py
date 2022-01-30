@@ -34,7 +34,39 @@ def test_list_task(session: Session, client: TestClient):
     data = response.json()
 
     assert response.status_code == 200
-    assert data["ok"] == True
+
+
+def test_get_task(session: Session, client: TestClient):
+
+    fake = Faker("pl_PL")
+    for i in range(5):
+        new_task = Tasks(
+            uuid=get_uuid(),
+            client_id=2,
+            author_id=1,
+            title=fake.paragraph(nb_sentences=1),
+            description=fake.paragraph(nb_sentences=5),
+            date_from=datetime.utcnow(),
+            date_to=datetime.utcnow(),
+            priority="p1",
+            type="t2",
+            connected_tasks=1,
+            created_at=datetime.utcnow(),
+        )
+        session.add(new_task)
+        session.commit()
+
+    task = session.exec(select(Tasks).order_by(func.random())).first()
+
+    response = client.get("/tasks/" + str(task.uuid))
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["uuid"] == str(task.uuid)
+    assert data["title"] == task.title
+    assert data["description"] == task.description
+    assert data["priority"] == task.priority
+    assert data["type"] == task.type
 
 
 def test_add_task(session: Session, client: TestClient):
