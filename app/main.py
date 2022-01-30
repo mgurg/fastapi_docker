@@ -17,6 +17,7 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from app.api.aws_s3 import s3_router
 from app.api.register import register_router
+from app.api.tasks import task_router
 from app.api.user import user_router
 from app.config import get_settings
 from app.utils import get_secret
@@ -46,13 +47,19 @@ def create_application() -> FastAPI:
     app.include_router(
         register_router,
         prefix="/auth",
-        tags=["USER"],
+        tags=["REGISTER"],
     )
 
     app.include_router(
         user_router,
         prefix="/user",
         tags=["USER"],
+    )
+
+    app.include_router(
+        task_router,
+        prefix="/tasks",
+        tags=["TASK"],
     )
 
     app.include_router(
