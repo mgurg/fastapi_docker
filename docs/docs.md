@@ -7,6 +7,21 @@ Poetry:
 poetry config virtualenvs.in-project true
 ```
 
+export do pliku requirements.txt:
+```bash
+poetry export -f requirements.txt --output requirements.txt
+```
+
+## Tests
+
+Code coverage:
+```
+coverage run -m pytest -v tests && coverage report -m
+
+coverage run -m pytest tests
+coverage report
+coverage html
+```
 
 ## Performance tests:
 ```
@@ -113,7 +128,7 @@ CREATE TABLE tasks (
 ```
 
 
-Tasks:
+Comments:
 
 ```sql
 CREATE TABLE comments (

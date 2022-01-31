@@ -15,7 +15,7 @@ def test_list_task(session: Session, client: TestClient):
     fake = Faker("pl_PL")
     for i in range(5):
         new_task = Tasks(
-            uuid=get_uuid(),
+            uuid=get_uuid(),  # TODO 00000000-0000-0000-0000-000000000000
             client_id=2,
             author_id=1,
             title=fake.paragraph(nb_sentences=1),
