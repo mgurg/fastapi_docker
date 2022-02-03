@@ -29,13 +29,13 @@ async def user_get_all(
     offset: int = 0,
     limit: int = Query(default=20, lte=100),
 ):
-    users = session.exec(select(Tasks).offset(offset).limit(limit)).all()
+    users = session.exec(select(Tasks).where(Tasks.deleted_at == None).offset(offset).limit(limit)).all()
     return users
 
 
 @task_router.get("/{uuid}", response_model=TaskIndexResponse, name="List tasks")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
-    users = session.exec(select(Tasks).where(Tasks.uuid == uuid)).first()
+    users = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).first()
     return users
 
 
