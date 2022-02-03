@@ -64,7 +64,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     return {"ok": True}
 
 
-@task_router.patch("/edit/{uuid}", response_model=StandardResponse, name="task:Tasks")
+@task_router.patch("/{uuid}", response_model=StandardResponse, name="task:Tasks")
 async def user_get_all(*, session: Session = Depends(get_session), uuid, task: TaskEditIn):
 
     db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
@@ -83,7 +83,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
     return {"ok": True}
 
 
-@task_router.patch("/delete/{uuid}", response_model=StandardResponse, name="task:Tasks")
+@task_router.delete("/{uuid}", response_model=StandardResponse, name="task:Tasks")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
 
     db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()

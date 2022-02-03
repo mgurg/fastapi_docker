@@ -118,7 +118,7 @@ def test_edit_task(session: Session, client: TestClient):
         "description": fake.paragraph(nb_sentences=5),
     }
 
-    response = client.patch("/tasks/edit/" + str(task_uuid.uuid), json=new_user)
+    response = client.patch("/tasks/" + str(task_uuid.uuid), json=new_user)
     data = response.json()
 
     assert response.status_code == 200
@@ -147,7 +147,7 @@ def test_delete_task(session: Session, client: TestClient):
 
     task_uuid = session.exec(select(Tasks).order_by(func.random())).first()  # random row
 
-    response = client.patch("/tasks/delete/" + str(task_uuid.uuid))
+    response = client.delete("/tasks/" + str(task_uuid.uuid))
     data = response.json()
 
     assert response.status_code == 200
