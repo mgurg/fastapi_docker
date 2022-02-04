@@ -31,6 +31,7 @@ s3_client = boto3.client(
 
 
 @s3_router.get("/healthcheck")
+@logger.catch()
 async def get_buckets_list():
     logger.info("👋 from S3 route")
     data = {
