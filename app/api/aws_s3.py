@@ -71,7 +71,7 @@ async def remove_bucket(bucket_name: str):
 
 
 @s3_router.get("/get_s3_obj/")
-async def get_s3(s3_obj: str, bucket_name: str = "manuto"):
+async def get_s3(s3_obj: str, bucket_name: str):
     """
     Retreives an s3 jpg image and streams it back.
     ### Request Body
@@ -124,10 +124,10 @@ def sign_s3_upload(objectName: str):
 
 
 @s3_router.get("/download_signed_url")
-def sign_s3_download(objectName: str):
+def sign_s3_download(objectName: str, file: str):
 
     url = s3_client.generate_presigned_url(
-        ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": "TPNE.jpeg"}, ExpiresIn=3600
+        ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": file}, ExpiresIn=3600
     )
 
     return url

@@ -157,6 +157,8 @@ async def push_to_connected_websockets(message: str):
 
 @app.get("/")
 def read_root():
+    # TODO: Health heck for DB & Storage
+    # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
 
 

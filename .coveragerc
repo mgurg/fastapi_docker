@@ -5,6 +5,7 @@ parallel = true
 source = app
 omit = 
     .venv/*
+    app/*/__init__.py
 
 [pytest]
 junit_family=xunit1
