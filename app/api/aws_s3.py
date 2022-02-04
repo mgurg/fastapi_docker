@@ -1,9 +1,11 @@
 import io
+import logging
 import mimetypes
 import uuid
 
 import boto3
 from fastapi import APIRouter, File, UploadFile
+from loguru import logger
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 
@@ -30,9 +32,12 @@ s3_client = boto3.client(
 
 @s3_router.get("/healthcheck")
 async def get_buckets_list():
+    logger.info("👋 from S3 route")
     data = {
         "region": settings.s3_region,
         "bucket": settings.s3_bucket_name[0:10],
+        "key_id": settings.s3_access_key[0:4],
+        "access_key": settings.s3_secret_access_key[0:4],
     }
 
     return data
@@ -55,6 +60,7 @@ async def post_create_bucket():
 
 
 @s3_router.get("/list_buckets")
+@logger.catch()
 async def get_buckets_list():
     s3_buckets = []
     response = s3_client.list_buckets()
@@ -100,6 +106,7 @@ async def get_s3(s3_obj: str, bucket_name: str):
 
 
 @s3_router.post("/upload/{objectName}")
+@logger.catch()
 async def upload_aws_s3(objectName: str, file: UploadFile = File(...)):
 
     # https://www.youtube.com/watch?v=JKlOlDFwsao

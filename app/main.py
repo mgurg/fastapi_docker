@@ -1,18 +1,11 @@
 # fastapi_docker/app/main.py
-import json
-import logging
-import sys
 import traceback
 from datetime import datetime
 from typing import Dict, List, Optional
-from urllib import response
 
-# from loguru import logger
-import boto3
-import loguru
-import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from app.api.aws_s3 import s3_router
@@ -22,7 +15,13 @@ from app.api.user import user_router
 from app.config import get_settings
 from app.utils import get_secret
 
-log = logging.getLogger("uvicorn")
+logger.add(
+    "./app/logs/logs.log", format="{time} - {level} - {message} ", level="DEBUG", backtrace=False, diagnose=True
+)
+
+# logger.add("logs/main.log", rotation="2 weeks",
+#            backtrace=False, diagnose=True)
+
 settings = get_settings()
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
@@ -72,9 +71,6 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-logger = loguru.logger
-logger.remove()
-logger.add("./app/logs/logs.log", format="{time} - {level} - {message} ", level="DEBUG")
 
 
 # https://github.com/tiangolo/fastapi/issues/258
@@ -128,14 +124,14 @@ notifier = Notifier()
 @app.on_event("startup")
 async def startup():
     logger.debug("That's it, beautiful and simple logging!")
-    log.info("🚀 Starting up and initializing app...")
+    logger.info("🚀 Starting up and initializing app...")
     # Prime the push notification generator
     await notifier.generator.asend(None)
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    log.info("⏳ Shutting down...")
+    logger.info("⏳ Shutting down...")
 
 
 @app.websocket("/ws/{client_id}")
