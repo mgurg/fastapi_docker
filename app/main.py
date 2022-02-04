@@ -3,6 +3,7 @@ import traceback
 from datetime import datetime
 from typing import Dict, List, Optional
 
+import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
