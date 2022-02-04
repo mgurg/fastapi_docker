@@ -30,23 +30,9 @@ s3_client = boto3.client(
 )
 
 
-@s3_router.get("/healthcheck")
-@logger.catch()
-async def get_buckets_list():
-    logger.info("👋 from S3 route")
-    data = {
-        "region": settings.s3_region,
-        "bucket": settings.s3_bucket_name[0:10],
-        "key_id": settings.s3_access_key[0:4],
-        "access_key": settings.s3_secret_access_key[0:4],
-    }
-
-    return data
-
-
 @s3_router.post("/create_bucket")
 async def post_create_bucket():
-
+    logger.info("👋 from S3 route")
     prefix = "mgu"
     bucket_name = prefix + "-" + "dc5b9aefbee54953824d9fc327df7faf"  # str(uuid.uuid4().hex)
     # mgu-dc5b9aefbee54953824d9fc327df7faf
