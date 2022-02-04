@@ -65,6 +65,7 @@ jobs:
             --build-arg AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             --build-arg AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" \
             --build-arg AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
+            --build-arg AWS_S3_DEFAULT_REGION="${{ secrets.AWS_S3_DEFAULT_REGION }}" \
             --build-arg FLASK_SECRET_KEY="${{ secrets.FLASK_SECRET_KEY }}" \
             --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
             --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \

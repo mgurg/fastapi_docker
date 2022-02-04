@@ -28,6 +28,16 @@ s3_client = boto3.client(
 )
 
 
+@s3_router.get("/healthcheck")
+async def get_buckets_list():
+    data = {
+        "region": settings.s3_region,
+        "bucket": settings.s3_bucket_name[0:10],
+    }
+
+    return data
+
+
 @s3_router.post("/create_bucket")
 async def post_create_bucket():
 
