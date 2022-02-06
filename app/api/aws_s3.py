@@ -101,14 +101,14 @@ async def upload_aws_s3(objectName: str, file: UploadFile = File(...)):
 
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(
         Fileobj=file.file,
-        Key=objectName,
+        Key=f"folder/{objectName}",
         # ExtraArgs={
         #     "ContentType": "image/png",
         #     "ACL": "public-read",
         # },
     )
 
-    return {"region": settings.s3_region, "files": "files", "filename": file.filename}
+    return {"region": settings.s3_region, "files": "files", "filename": f"folder/{file.filename}"}
 
 
 @s3_router.get("/upload_signed_url")
@@ -128,10 +128,10 @@ def sign_s3_upload(objectName: str):
 
 
 @s3_router.get("/download_signed_url")
-def sign_s3_download(objectName: str, file: str):
+def sign_s3_download(file: str):
 
     url = s3_client.generate_presigned_url(
-        ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": file}, ExpiresIn=3600
+        ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": f"folder/{file}"}, ExpiresIn=3600
     )
 
     return url

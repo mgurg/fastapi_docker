@@ -114,10 +114,13 @@ CREATE TABLE tasks (
     uuid uuid,
     client_id int,
     author_id int,
+    assigned_to_id int.
     title varchar(128),
     description varchar(256),
     date_from timestamptz,
     date_to timestamptz,
+    duration int,
+    is_active boolean,
     priority varchar(128),
     type varchar(128),
     connected_tasks int,
