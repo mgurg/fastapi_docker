@@ -114,7 +114,7 @@ CREATE TABLE tasks (
     uuid uuid,
     client_id int,
     author_id int,
-    assigned_to_id int.
+    assignee_id int,
     title varchar(128),
     description varchar(256),
     date_from timestamptz,

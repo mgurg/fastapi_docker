@@ -16,6 +16,7 @@ class Tasks(SQLModel, table=True):
     uuid: uuid.UUID
     client_id: int
     author_id: int
+    assignee_id: Optional[int]
     title: str
     # TODO: Full text search
     # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
@@ -23,6 +24,8 @@ class Tasks(SQLModel, table=True):
     description: str
     date_from: Optional[datetime]
     date_to: Optional[datetime]
+    duration: Optional[int]
+    is_active: Optional[bool]
     priority: str
     type: str
     connected_tasks: Optional[int]
@@ -33,10 +36,14 @@ class Tasks(SQLModel, table=True):
 
 class TaskIndexResponse(SQLModel):
     uuid: uuid.UUID
+    author_id: int
+    assignee_id: Optional[int]
     title: str
     description: str
     date_from: Optional[datetime]
     date_to: Optional[datetime]
+    duration: Optional[int]
+    is_active: Optional[bool]
     priority: str
     type: str
 
