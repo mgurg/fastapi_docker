@@ -4,70 +4,11 @@ from decimal import Decimal
 from typing import Any, List, Optional
 
 from pydantic import EmailStr, Json
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
 
 
 class StandardResponse(SQLModel):  # OK
     ok: bool
-
-
-class Tasks(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
-    client_id: int
-    author_id: int
-    assignee_id: Optional[int]
-    title: str
-    # TODO: Full text search
-    # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
-    # https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
-    description: str
-    date_from: Optional[datetime]
-    date_to: Optional[datetime]
-    duration: Optional[int]
-    is_active: Optional[bool]
-    priority: str
-    type: str
-    connected_tasks: Optional[int]
-    deleted_at: Optional[datetime]
-    created_at: datetime
-    updated_at: Optional[datetime]
-
-
-class TaskIndexResponse(SQLModel):
-    uuid: uuid.UUID
-    author_id: int
-    assignee_id: Optional[int]
-    title: str
-    description: str
-    date_from: Optional[datetime]
-    date_to: Optional[datetime]
-    duration: Optional[int]
-    is_active: Optional[bool]
-    priority: str
-    type: str
-
-
-class TaskAddIn(SQLModel):
-    author_id: int
-    title: str
-    description: str
-    date_from: Optional[datetime]
-    date_to: Optional[datetime]
-    priority: str
-    type: str
-    connected_tasks: int
-
-
-class TaskEditIn(SQLModel):
-    author_id: Optional[int]
-    title: Optional[str]
-    description: Optional[str]
-    date_from: Optional[datetime]
-    date_to: Optional[datetime]
-    priority: Optional[str]
-    type: Optional[str]
-    connected_tasks: Optional[int]
 
 
 class LoginHistory(SQLModel, table=True):
@@ -133,6 +74,8 @@ class Users(SQLModel, table=True):
     updated_at: Optional[datetime]
     uuid: uuid.UUID
 
+    usr_FK: List["Tasks"] = Relationship(back_populates="tasks_fk")
+
 
 class UserCreateIn(SQLModel):  # OK
     email: EmailStr
@@ -190,3 +133,67 @@ class UserIndexResponse(SQLModel):
     first_name: str
     last_name: str
     uuid: uuid.UUID
+
+
+class Tasks(SQLModel, table=True):
+    __tablename__ = "tasks"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    client_id: int
+    # author_id: int
+    assignee_id: Optional[int]
+    title: str
+    # TODO: Full text search
+    # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
+    # https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
+    description: str
+    date_from: Optional[datetime]
+    date_to: Optional[datetime]
+    duration: Optional[int]
+    is_active: Optional[bool]
+    priority: str
+    type: str
+    connected_tasks: Optional[int]
+    deleted_at: Optional[datetime]
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    author_id: Optional[int] = Field(default=None, foreign_key="users.id")
+    tasks_fk: Optional[Users] = Relationship(back_populates="usr_FK")
+
+
+class TaskIndexResponse(SQLModel):
+    uuid: uuid.UUID
+    # author_id: int
+    assignee_id: Optional[int]
+    title: str
+    description: str
+    date_from: Optional[datetime]
+    date_to: Optional[datetime]
+    duration: Optional[int]
+    is_active: Optional[bool]
+    priority: str
+    type: str
+    tasks_fk: Optional[UserIndexResponse]
+
+
+class TaskAddIn(SQLModel):
+    author_id: int
+    title: str
+    description: str
+    date_from: Optional[datetime]
+    date_to: Optional[datetime]
+    priority: str
+    type: str
+    connected_tasks: int
+
+
+class TaskEditIn(SQLModel):
+    # author_id: Optional[int]
+    title: Optional[str]
+    description: Optional[str]
+    date_from: Optional[datetime]
+    date_to: Optional[datetime]
+    priority: Optional[str]
+    type: Optional[str]
+    connected_tasks: Optional[int]

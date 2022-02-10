@@ -33,7 +33,7 @@ async def user_get_all(
     return users
 
 
-@task_router.get("/{uuid}", response_model=TaskIndexResponse, name="List tasks")
+@task_router.get("/{uuid}", response_model=TaskIndexResponse, name="Get task")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
     users = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).first()
     return users
