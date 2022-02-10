@@ -1,44 +1,72 @@
-import pytest
+from datetime import datetime, timedelta
+
+from faker import Faker
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
-from sqlmodel.pool import StaticPool
+from passlib.hash import argon2
+from sqlalchemy import func
+from sqlmodel import Session, select
 
-from app.db import get_session
-from app.main import app
-
-# def test_create_user(session: Session):
-#     def get_session_override():
-#         return session
-
-#     app.dependency_overrides[get_session] = get_session_override
-
-#     client = TestClient(app)
-
-#     response = client.post("usr/add", json={"client_id": "Deadpond", "email": "mm@nn.pl"})
-#     app.dependency_overrides.clear()
-#     data = response.json()
-
-#     assert response.status_code == 200
-#     # assert data["name"] == "Deadpond"
-#     # assert data["secret_name"] == "Dive Wilson"
-#     # assert data["age"] is None
-#     # assert data["id"] is not None
+from app.models.models import Users
+from app.service.helpers import get_uuid
 
 
-def test_get_user(session: Session):
-    def get_session_override():
-        return session
+def test_list_users(session: Session, client: TestClient):
+    fake = Faker("pl_PL")
 
-    app.dependency_overrides[get_session] = get_session_override
+    for i in range(5):
+        email = fake.email()
+        token = fake.hexify("^" * 32)
 
-    client = TestClient(app)
+        new_user = Users(
+            client_id=fake.random_digit(),
+            email=email,
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            service_token=token,
+            service_token_valid_to=datetime.now() + timedelta(days=1),
+            password=argon2.hash(fake.password()),
+            user_role_id=2,
+            created_at=datetime.utcnow(),
+            is_active=False,
+            tz=fake.timezone(),
+            lang=fake.language_code(),
+            uuid=get_uuid(),
+        )
+        session.add(new_user)
+        session.commit()
 
-    response = client.get("/user/users")
-    app.dependency_overrides.clear()
+    response = client.get("user/index")
     data = response.json()
-
     assert response.status_code == 200
-    # assert data["name"] == "Deadpond"
-    # assert data["secret_name"] == "Dive Wilson"
-    # assert data["age"] is None
-    # assert data["id"] is not None
+
+
+def test_get_user(session: Session, client: TestClient):
+    fake = Faker("pl_PL")
+
+    for i in range(5):
+        new_user = Users(
+            client_id=2,
+            email=fake.email(),
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            service_token=fake.hexify("^" * 32),
+            service_token_valid_to=datetime.now() + timedelta(days=1),
+            password=argon2.hash(fake.password()),
+            user_role_id=2,
+            created_at=datetime.utcnow(),
+            is_active=False,
+            tz=fake.timezone(),
+            lang=fake.language_code(),
+            uuid=get_uuid(),
+        )
+        session.add(new_user)
+        session.commit()
+
+    user_uuid = session.exec(select(Users).where(Users.client_id == 2).order_by(func.random())).first()
+
+    response = client.get("user/" + str(user_uuid.uuid))
+    data = response.json()
+    assert response.status_code == 200
+    assert data["first_name"] == user_uuid.first_name
+    assert data["last_name"] == user_uuid.last_name
+    assert data["uuid"] == str(user_uuid.uuid)

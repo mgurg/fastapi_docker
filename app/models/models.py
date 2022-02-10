@@ -184,3 +184,9 @@ class UserSetPassIn(SQLModel):  # OK
     token: str
     password: str
     password_confirmation: str
+
+
+class UserIndexResponse(SQLModel):
+    first_name: str
+    last_name: str
+    uuid: uuid.UUID
