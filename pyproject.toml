@@ -27,7 +27,7 @@ python-stdnum = "^1.17"
 user-agents = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
+pytest = "^7"
 mypy = "0.930"
 flake8 = "^3.9.2"
 black = {version = "^22.1", python = "^3.8"}
