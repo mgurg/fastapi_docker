@@ -74,7 +74,7 @@ class Users(SQLModel, table=True):
     updated_at: Optional[datetime]
     uuid: uuid.UUID
 
-    usr_FK: List["Tasks"] = Relationship(back_populates="tasks_fk")
+    usr_FK: List["Tasks"] = Relationship(back_populates="author")
 
 
 class UserCreateIn(SQLModel):  # OK
@@ -159,7 +159,7 @@ class Tasks(SQLModel, table=True):
     updated_at: Optional[datetime]
 
     author_id: Optional[int] = Field(default=None, foreign_key="users.id")
-    tasks_fk: Optional[Users] = Relationship(back_populates="usr_FK")
+    author: Optional[Users] = Relationship(back_populates="usr_FK")
 
 
 class TaskIndexResponse(SQLModel):
@@ -174,7 +174,7 @@ class TaskIndexResponse(SQLModel):
     is_active: Optional[bool]
     priority: str
     type: str
-    tasks_fk: Optional[UserIndexResponse]
+    author: Optional[UserIndexResponse]
 
 
 class TaskAddIn(SQLModel):

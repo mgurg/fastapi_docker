@@ -80,7 +80,7 @@ class TaskIndexResponse(SQLModel):
     is_active: Optional[bool]
     priority: str
     type: str
-    tasks_fk: Optional[UserIndexResponse] # nazwa taka jak relacji 
+    tasks_fk: Optional[UserIndexResponse] # nazwa taka jak relacji, nie musi być to taka sama nazwa jak nazwa w BD 
 ```
 
 
