@@ -15,6 +15,7 @@ from app.models.models import (
     TaskEditIn,
     TaskIndexResponse,
     Tasks,
+    Users,
 )
 from app.service.helpers import get_uuid
 from app.service.password import Password
@@ -44,11 +45,17 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
 
     res = TaskAddIn.from_orm(task)
 
+    db_assignee = session.exec(
+        select(Users).where(Users.uuid == res.assignee).where(Users.deleted_at == None)
+    ).one_or_none()
+    if not db_assignee:
+        raise HTTPException(status_code=404, detail="Assignee not found")
+
     new_task = Tasks(
         uuid=get_uuid(),
         client_id=2,
         author_id=1,
-        assignee_id=1,
+        assignee_id=db_assignee.id,
         title=res.title,
         description=res.description,
         date_from=res.date_from,

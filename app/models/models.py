@@ -74,7 +74,7 @@ class Users(SQLModel, table=True):
     updated_at: Optional[datetime]
     uuid: uuid.UUID
 
-    usr_FK: List["Tasks"] = Relationship(back_populates="author")
+    usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
 
 
 class UserCreateIn(SQLModel):  # OK
@@ -141,7 +141,7 @@ class Tasks(SQLModel, table=True):
     uuid: uuid.UUID
     client_id: int
     # author_id: int
-    assignee_id: Optional[int]
+    # assignee_id: Optional[int]
     title: str
     # TODO: Full text search
     # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
@@ -158,14 +158,14 @@ class Tasks(SQLModel, table=True):
     created_at: datetime
     updated_at: Optional[datetime]
 
-    author_id: Optional[int] = Field(default=None, foreign_key="users.id")
-    author: Optional[Users] = Relationship(back_populates="usr_FK")
+    assignee_id: Optional[int] = Field(default=None, foreign_key="users.id")
+    assignee: Optional[Users] = Relationship(back_populates="usr_FK")
 
 
 class TaskIndexResponse(SQLModel):
     uuid: uuid.UUID
     # author_id: int
-    assignee_id: Optional[int]
+    # assignee_id: Optional[int]
     title: str
     description: str
     date_from: Optional[datetime]
@@ -174,11 +174,12 @@ class TaskIndexResponse(SQLModel):
     is_active: Optional[bool]
     priority: str
     type: str
-    author: Optional[UserIndexResponse]
+    assignee: Optional[UserIndexResponse]
 
 
 class TaskAddIn(SQLModel):
-    author_id: int
+    # author_id: int
+    assignee: uuid.UUID
     title: str
     description: str
     date_from: Optional[datetime]

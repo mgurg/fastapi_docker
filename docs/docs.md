@@ -46,6 +46,9 @@ Tabela `Tasks` ma powiązanie (`author_id`) do tabeli `Users` skąd pobieram dod
 
 ```sql
 ALTER TABLE public.tasks ADD CONSTRAINT tasks_fk FOREIGN KEY (author_id) REFERENCES public.users(id);
+
+ALTER TABLE public.tasks ADD CONSTRAINT tasks_assignee_fk FOREIGN KEY (assignee_id) REFERENCES public.users(id);
+
 ```
 
 Modyfikacja modeli

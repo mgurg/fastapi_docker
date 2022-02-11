@@ -73,8 +73,33 @@ def test_add_task(session: Session, client: TestClient):
 
     fake = Faker("pl_PL")
 
+    for i in range(5):
+        email = fake.email()
+        token = fake.hexify("^" * 32)
+        uuid = get_uuid()
+
+        new_user = Users(
+            client_id=2,
+            email=email,
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            service_token=token,
+            service_token_valid_to=datetime.now() + timedelta(days=1),
+            password=argon2.hash(fake.password()),
+            user_role_id=2,
+            created_at=datetime.utcnow(),
+            is_active=True,
+            tz=fake.timezone(),
+            lang=fake.language_code(),
+            uuid=uuid,
+        )
+        session.add(new_user)
+        session.commit()
+
+    assignee = session.exec(select(Users).order_by(func.random())).first()
+
     new_user = {
-        "author_id": 1,
+        "assignee": str(uuid),
         "title": fake.paragraph(nb_sentences=1),
         "description": fake.paragraph(nb_sentences=1),
         "date_from": "2022-01-30T11:44:36.081Z",
