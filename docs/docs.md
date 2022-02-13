@@ -68,7 +68,7 @@ Modyfikacja modeli
 usr_FK: List["Tasks"] = Relationship(back_populates="tasks_fk")
 ```
 
-Listowanie wyników razemz relacjami
+Listowanie wyników razem z relacjami
 
 ```python
 class TaskIndexResponse(SQLModel):
@@ -163,7 +163,21 @@ CREATE TABLE files (
 );
 
 ```
+
 Tasks:
+
+Da powtarzających się zadań: 
+
+  * *Reminder Count*  - The maximum number of reminders that can be triggered for the event.
+  * *Reminder Interval*  - The reminder interval.
+  * *Reminder Unit* - The reminder unit to identify the reminder interval in minutes, hours, or days.
+  * *Created At* - It stores the date and time at which the event is created.
+  * *Updated At*  - It stores the date and time at which the event is updated.
+  * *Scheduled At* -It stores the date and time on the Calendar.
+  * *Triggered At* - It stores the date and time at which the event was triggered.
+  * *Content* - The column used to store the event content.
+
+
 
 ```sql
 CREATE TABLE tasks (
