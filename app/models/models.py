@@ -3,7 +3,7 @@ from datetime import datetime, time
 from decimal import Decimal
 from typing import Any, List, Optional
 
-from pydantic import EmailStr, Json
+from pydantic import EmailStr, HttpUrl, Json
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
 
 
@@ -135,6 +135,12 @@ class UserIndexResponse(SQLModel):
     uuid: uuid.UUID
 
 
+class TaskFileLink(SQLModel, table=True):
+    __tablename__ = "task_files_link"
+    task_id: Optional[int] = Field(default=None, foreign_key="tasks.id", primary_key=True)
+    file_id: Optional[int] = Field(default=None, foreign_key="files.id", primary_key=True)
+
+
 class Tasks(SQLModel, table=True):
     __tablename__ = "tasks"
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -161,6 +167,49 @@ class Tasks(SQLModel, table=True):
     assignee_id: Optional[int] = Field(default=None, foreign_key="users.id")
     assignee: Optional[Users] = Relationship(back_populates="usr_FK")
 
+    file: List["Files"] = Relationship(back_populates="task", link_model=TaskFileLink)
+
+
+class Files(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    client_id: int
+    owner_id: int
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+    deleted_at: Optional[datetime]
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    task: List[Tasks] = Relationship(back_populates="file", link_model=TaskFileLink)
+
+
+class TaskBasicInfo(SQLModel):
+    title: str
+
+
+class FileResponse(SQLModel):
+    uuid: uuid.UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+
+    # task: List[TaskBasicInfo]
+
+
+class FileUrlResponse(SQLModel):
+    uuid: uuid.UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+    url: HttpUrl
+
+    # task: List[TaskBasicInfo]
+
 
 class TaskIndexResponse(SQLModel):
     uuid: uuid.UUID
@@ -175,6 +224,29 @@ class TaskIndexResponse(SQLModel):
     priority: str
     type: str
     assignee: Optional[UserIndexResponse]
+
+
+class FileBasicInfo(SQLModel):
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+
+
+class TaskSingleResponse(SQLModel):
+    uuid: uuid.UUID
+    # author_id: int
+    # assignee_id: Optional[int]
+    title: str
+    description: str
+    date_from: Optional[datetime]
+    date_to: Optional[datetime]
+    duration: Optional[int]
+    is_active: Optional[bool]
+    priority: str
+    type: str
+    assignee: Optional[UserIndexResponse]
+    file: List[FileBasicInfo]
 
 
 class TaskAddIn(SQLModel):

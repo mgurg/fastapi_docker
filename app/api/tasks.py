@@ -15,6 +15,7 @@ from app.models.models import (
     TaskEditIn,
     TaskIndexResponse,
     Tasks,
+    TaskSingleResponse,
     Users,
 )
 from app.service.helpers import get_uuid
@@ -30,14 +31,14 @@ async def user_get_all(
     offset: int = 0,
     limit: int = Query(default=20, lte=100),
 ):
-    users = session.exec(select(Tasks).where(Tasks.deleted_at == None).offset(offset).limit(limit)).all()
-    return users
+    tasks = session.exec(select(Tasks).where(Tasks.deleted_at == None).offset(offset).limit(limit)).all()
+    return tasks
 
 
-@task_router.get("/{uuid}", response_model=TaskIndexResponse, name="Get task")
+@task_router.get("/{uuid}", response_model=TaskSingleResponse, name="Get task")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
-    users = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).first()
-    return users
+    tasks = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).first()
+    return tasks
 
 
 @task_router.post("/add", response_model=StandardResponse, name="task:Tasks")

@@ -10,6 +10,8 @@ from loguru import logger
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from app.api.aws_s3 import s3_router
+from app.api.events import event_router
+from app.api.files import file_router
 from app.api.register import register_router
 from app.api.tasks import task_router
 from app.api.user import user_router
@@ -60,6 +62,18 @@ def create_application() -> FastAPI:
         task_router,
         prefix="/tasks",
         tags=["TASK"],
+    )
+
+    app.include_router(
+        file_router,
+        prefix="/files",
+        tags=["FILE"],
+    )
+
+    app.include_router(
+        event_router,
+        prefix="/events",
+        tags=["EVENT"],
     )
 
     # app.include_router(
