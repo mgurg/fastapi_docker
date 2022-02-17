@@ -278,7 +278,8 @@ class TaskSingleResponse(SQLModel):
     priority: str
     type: str
     assignee: Optional[UserIndexResponse]
-    file: List[FileBasicInfo]
+    file: Optional[List[FileBasicInfo]]
+    event: Optional[EventsBasicInfo]
 
 
 class TaskAddIn(SQLModel):

@@ -38,8 +38,12 @@ async def user_get_all(
 
 @task_router.get("/{uuid}", response_model=TaskSingleResponse, name="Get task")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
-    tasks = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).first()
-    return tasks
+    task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
+    # tasks = dict(tasks)
+    print("#############")
+    print(task)
+    print("#############")
+    return task
 
 
 @task_router.post("/add", response_model=StandardResponse, name="task:Tasks")
