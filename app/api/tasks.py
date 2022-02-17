@@ -1,15 +1,16 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import HTTPBearer
 from passlib.hash import argon2
-from sqlalchemy import func
+from sqlalchemy import func, true
 from sqlmodel import Session, select
 
 from app.config import get_settings
 from app.db import get_session
 from app.models.models import (
+    Events,
     StandardResponse,
     TaskAddIn,
     TaskEditIn,
@@ -46,17 +47,40 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
 
     res = TaskAddIn.from_orm(task)
 
-    db_assignee = session.exec(
-        select(Users).where(Users.uuid == res.assignee).where(Users.deleted_at == None)
-    ).one_or_none()
-    if not db_assignee:
-        raise HTTPException(status_code=404, detail="Assignee not found")
+    assignee = None
+    if res.assignee is not None:
+        db_assignee = session.exec(
+            select(Users).where(Users.uuid == res.assignee).where(Users.deleted_at == None)
+        ).one_or_none()
+        if not db_assignee:
+            raise HTTPException(status_code=404, detail="Assignee not found")
+        assignee = db_assignee.id
+
+    new_event = Events(
+        uuid=get_uuid(),
+        client_id=2,
+        recurring=True,
+        interval=1,
+        unit="DAILY",
+        at_mo=True,
+        at_tu=True,
+        at_we=True,
+        at_th=True,
+        at_fr=True,
+        at_sa=True,
+        at_su=True,
+        start_at=datetime.utcnow(),
+        whole_day=False,
+        end_type="COUNTER",  # 'DATE
+        ends_at=datetime.utcnow() + timedelta(days=2),
+        reminder_count=3,
+    )
 
     new_task = Tasks(
         uuid=get_uuid(),
         client_id=2,
         author_id=1,
-        assignee_id=db_assignee.id,
+        assignee_id=assignee,
         title=res.title,
         description=res.description,
         date_from=res.date_from,
@@ -65,9 +89,11 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         duration=0,
         is_active=True,
         type=res.type,
-        connected_tasks=res.connected_tasks,
+        connected_tasks=None,
         created_at=datetime.utcnow(),
+        event=new_event,  # FK
     )
+
     session.add(new_task)
     session.commit()
     session.refresh(new_task)

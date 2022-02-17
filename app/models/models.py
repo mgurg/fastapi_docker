@@ -2,6 +2,7 @@ import uuid as uuid
 from datetime import datetime, time
 from decimal import Decimal
 from typing import Any, List, Optional
+from xmlrpc.client import boolean
 
 from pydantic import EmailStr, HttpUrl, Json
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
@@ -141,6 +142,33 @@ class TaskFileLink(SQLModel, table=True):
     file_id: Optional[int] = Field(default=None, foreign_key="files.id", primary_key=True)
 
 
+class Events(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    client_id: int
+    recurring: bool
+    interval: int
+    unit: str
+    at_mo: bool
+    at_tu: bool
+    at_we: bool
+    at_th: bool
+    at_fr: bool
+    at_sa: bool
+    at_su: bool
+    start_at: datetime
+    whole_day: bool
+    end_type: str
+    ends_at: datetime
+    reminder_count: int
+
+    event_FK: List["Tasks"] = Relationship(back_populates="event")
+
+
+class EventsBasicInfo(SQLModel):
+    uuid: uuid.UUID
+
+
 class Tasks(SQLModel, table=True):
     __tablename__ = "tasks"
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -168,6 +196,9 @@ class Tasks(SQLModel, table=True):
     assignee: Optional[Users] = Relationship(back_populates="usr_FK")
 
     file: List["Files"] = Relationship(back_populates="task", link_model=TaskFileLink)
+
+    event_id: Optional[int] = Field(default=None, foreign_key="events.id")
+    event: Optional[Events] = Relationship(back_populates="event_FK")
 
 
 class Files(SQLModel, table=True):
@@ -224,6 +255,7 @@ class TaskIndexResponse(SQLModel):
     priority: str
     type: str
     assignee: Optional[UserIndexResponse]
+    event: Optional[EventsBasicInfo]
 
 
 class FileBasicInfo(SQLModel):
@@ -250,15 +282,28 @@ class TaskSingleResponse(SQLModel):
 
 
 class TaskAddIn(SQLModel):
-    # author_id: int
-    assignee: uuid.UUID
     title: str
     description: str
+    assignee: Optional[uuid.UUID]
+    priority: Optional[str]
+    type: str  # single / planned / reccuring
+    # planned:
     date_from: Optional[datetime]
     date_to: Optional[datetime]
-    priority: str
-    type: str
-    connected_tasks: int
+    whole_day: Optional[bool]
+    # recurring:
+    reccuring: Optional[bool]
+    interval: Optional[int]
+    unit: Optional[str] = "DAILY"
+    at_Mo: Optional[bool]
+    at_Tu: Optional[bool]
+    at_We: Optional[bool]
+    at_Th: Optional[bool]
+    at_Fr: Optional[bool]
+    at_Sa: Optional[bool]
+    at_Su: Optional[bool]
+
+    # connected_tasks: int
 
 
 class TaskEditIn(SQLModel):

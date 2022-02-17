@@ -11,7 +11,6 @@ uvicorn = {extras = ["standard"], version = "^0.16.0"}
 requests = "^2.26.0"
 gunicorn = "^20.1.0"
 aioaws = "^0.12"
-fastapi-websocket-pubsub = "^0.1.21"
 python-multipart = "^0.0.5"
 python-dotenv = "^0.19.2"
 boto3 = "^1.20.26"
@@ -25,6 +24,7 @@ disposable-email-domains = "^0.0.72"
 Faker = "^11.3.0"
 python-stdnum = "^1.17"
 user-agents = "^2.2.0"
+pendulum = "^2.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"
