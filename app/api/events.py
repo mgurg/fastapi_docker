@@ -49,10 +49,10 @@ async def file_get_all(
 
         frequency = {0: "YEARLY", 1: "MONTHLY", 2: "WEEKLY", 3: "DAILY"}
 
-        days = [0, 1, 2, 3, 4, 5, 6]
-        d = [True, False, True, False, True, False, True]
-        e = zip(*itertools.compress(days, d))
-        print(e)
+        # days = [0, 1, 2, 3, 4, 5, 6]
+        # d = [True, False, True, False, True, False, True]
+        # e = zip(*itertools.compress(days, d))
+        # print(e)
 
         if event["unit"] == "YEARLY":
             freq = 0

@@ -60,25 +60,27 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
             raise HTTPException(status_code=404, detail="Assignee not found")
         assignee = db_assignee.id
 
-    new_event = Events(
-        uuid=get_uuid(),
-        client_id=2,
-        recurring=True,
-        interval=1,
-        unit="DAILY",
-        at_mo=res.at_Mo,
-        at_tu=res.at_Tu,
-        at_we=res.at_We,
-        at_th=res.at_Th,
-        at_fr=res.at_Fr,
-        at_sa=res.at_Sa,
-        at_su=res.at_Su,
-        start_at=datetime.utcnow(),
-        whole_day=False,
-        end_type="COUNTER",  # 'DATE
-        ends_at=datetime.utcnow() + timedelta(days=2),
-        reminder_count=3,
-    )
+    new_event = None
+    if not [x for x in (res.at_Mo, res.at_Tu) if x is None]:
+        new_event = Events(
+            uuid=get_uuid(),
+            client_id=2,
+            recurring=True,
+            interval=1,
+            unit="DAILY",
+            at_mo=res.at_Mo,
+            at_tu=res.at_Tu,
+            at_we=res.at_We,
+            at_th=res.at_Th,
+            at_fr=res.at_Fr,
+            at_sa=res.at_Sa,
+            at_su=res.at_Su,
+            start_at=datetime.utcnow(),
+            whole_day=False,
+            end_type="COUNTER",  # 'DATE
+            ends_at=datetime.utcnow() + timedelta(days=2),
+            reminder_count=3,
+        )
 
     new_task = Tasks(
         uuid=get_uuid(),
