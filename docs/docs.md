@@ -38,6 +38,25 @@ Simple token stored in DB, queried each time from Database.
 
 ## DB Tables:
 
+
+
+Kopia bazy danych:
+
+```
+pg_dump -h [host address] -Fc -o -U [database user] <database name> > [dump file]
+```
+
+```
+pg_dumpall -U myuser -h 67.8.78.10 --clean --file=mydb_backup.dump
+pg_dump --dbname=postgresql://username:password@127.0.0.1:5432/mydatabase
+```
+
+
+
+---
+
+
+
 Relacje pomiędzy tabelami `1:1` (Users & Task):
 
 Tabela `Tasks` ma powiązanie (`author_id`) do tabeli `Users` skąd pobieram dodatkowe dane o użytkowniku. Ustalenie relacji w DB: 
