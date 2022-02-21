@@ -61,7 +61,9 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         assignee = db_assignee.id
 
     new_event = None
-    if not [x for x in (res.at_Mo, res.at_Tu) if x is None]:
+    req_fields = [res.at_Mo, res.at_Tu, res.at_We, res.at_Th, res.at_Fr, res.at_Sa, res.at_Su, res.unit]
+
+    if all(v is not None for v in req_fields):
         new_event = Events(
             uuid=get_uuid(),
             client_id=2,

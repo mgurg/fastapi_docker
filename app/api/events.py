@@ -47,39 +47,22 @@ async def file_get_all(
         id = event.id
         event = event.dict()
 
-        frequency = {0: "YEARLY", 1: "MONTHLY", 2: "WEEKLY", 3: "DAILY"}
+        freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
+        freq = freq_matrix[event["unit"]]
 
-        # days = [0, 1, 2, 3, 4, 5, 6]
-        # d = [True, False, True, False, True, False, True]
-        # e = zip(*itertools.compress(days, d))
-        # print(e)
+        days_matrix = [
+            event["at_mo"],
+            event["at_tu"],
+            event["at_we"],
+            event["at_th"],
+            event["at_fr"],
+            event["at_sa"],
+            event["at_su"],
+        ]
 
-        if event["unit"] == "YEARLY":
-            freq = 0
-        if event["unit"] == "MONTHLY":
-            freq = 1
-        if event["unit"] == "WEEKLY":
-            freq = 2
-        if event["unit"] == "DAILY":
-            freq = 3
+        days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
 
         interval = event["interval"]
-
-        days = []
-        if event["at_mo"] == True:
-            days.append(0)
-        if event["at_tu"] == True:
-            days.append(1)
-        if event["at_we"] == True:
-            days.append(2)
-        if event["at_th"] == True:
-            days.append(3)
-        if event["at_fr"] == True:
-            days.append(4)
-        if event["at_sa"] == True:
-            days.append(5)
-        if event["at_su"] == True:
-            days.append(6)
 
         dt_start = event["start_at"]
 
@@ -110,39 +93,28 @@ async def file_get_all(
 
 
 @event_router.get("/{uuid}", name="event:Profile")
-async def file_get_all(*, session: Session = Depends(get_session), dt_from="2022-02-01", dt_to="2022-02-28"):
-    uuid = "4a6fb4e3-de96-42e6-bf61-63d47b3d89dd"
+async def file_get_all(*, session: Session = Depends(get_session), dt_from="2022-02-01", dt_to="2022-02-28", uuid):
     task = session.exec(select(Tasks).where(Tasks.uuid == uuid)).one_or_none()
-    event = session.exec(select(Events).where(Events.id == task.event_id)).one_or_none()
-    ev = event.dict()
+    _event = session.exec(select(Events).where(Events.id == task.event_id)).one_or_none()
+    event = _event.dict()
 
-    if ev["unit"] == "YEARLY":
-        freq = 0
-    if ev["unit"] == "MONTHLY":
-        freq = 1
-    if ev["unit"] == "WEEKLY":
-        freq = 2
-    if ev["unit"] == "DAILY":
-        freq = 3
+    freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
+    freq = freq_matrix[event["unit"]]
 
-    interval = ev["interval"]
+    days_matrix = [
+        event["at_mo"],
+        event["at_tu"],
+        event["at_we"],
+        event["at_th"],
+        event["at_fr"],
+        event["at_sa"],
+        event["at_su"],
+    ]
 
-    if ev["at_mo"] == True:
-        days.append(0)
-    if ev["at_tu"] == True:
-        days.append(1)
-    if ev["at_we"] == True:
-        days.append(2)
-    if ev["at_th"] == True:
-        days.append(3)
-    if ev["at_fr"] == True:
-        days.append(4)
-    if ev["at_sa"] == True:
-        days.append(5)
-    if ev["at_su"] == True:
-        days.append(6)
+    days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
 
-    dt_start = ev["start_at"]
+    interval = event["interval"]
+    dt_start = event["start_at"]
 
     rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start)
     dt_after = pendulum.from_format(dt_from, "YYYY-MM-DD", tz="UTC")
@@ -158,28 +130,13 @@ async def file_get_all(*, session: Session = Depends(get_session), dt_from="2022
         details["event_date"] = pendulum.instance(e, tz="UTC").to_iso8601_string()
         events_dict.append(details)
 
-    #   events: [
-    # {
-    #   title: '1st of the Month',
-    #   details: 'Everything is funny as long as it is happening to someone else',
-    #   date: getCurrentDay(1),
-    #   bgcolor: 'orange'
-    # },
-    # {
-    #   title: 'Sisters Birthday',
-    #   details: 'Buy a nice present',
-    #   date: getCurrentDay(4),
-    #   bgcolor: 'green',
-    #   icon: 'fas fa-birthday-cake'
-    # },
-
     # https://dateutil.readthedocs.io/en/stable/rrule.html
 
     return events_dict
 
 
-@event_router.get("/valid", name="event:Valid")
-async def event_valid():
+@event_router.get("/v/")
+def event_valid():
     print("$$$$$$$$$$$$$$$$$$")
     data = {
         "month_day": "5522",
