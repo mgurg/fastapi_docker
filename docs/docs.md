@@ -23,6 +23,12 @@ coverage report
 coverage html
 ```
 
+Flake check
+
+```
+flake8 ./app --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+```
+
 ## Performance tests:
 ```
 sudo siege -t10S -c100 0.0.0.0:5000
@@ -260,7 +266,26 @@ Predefiniowane tryby:
 - Co tydzień, czwartek
 - Co miesiąc 3.XX
 - Co roku 3.02.XXX
-- 
+
+
+
+Pola:
+
+- recurring
+- start_at - data rozpoczęcia
+- ends_at - data zakończenia
+- interval - liczba jednostek
+- at_Mo
+- at_Tu
+- at_We
+- at_Th
+- at_Fr
+- at_Sa
+- at_Su
+- all_day
+
+
+
 
 ```sql
 CREATE TABLE events (

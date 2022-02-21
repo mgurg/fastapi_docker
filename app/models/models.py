@@ -2,10 +2,9 @@ import uuid as uuid
 from datetime import datetime, time
 from decimal import Decimal
 from typing import Any, List, Optional
-from xmlrpc.client import boolean
 
 from pydantic import EmailStr, HttpUrl, Json
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class StandardResponse(SQLModel):  # OK
