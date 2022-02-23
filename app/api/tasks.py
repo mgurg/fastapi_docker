@@ -3,6 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import HTTPBearer
+from loguru import logger
 from passlib.hash import argon2
 from sqlalchemy import func, true
 from sqlmodel import Session, select
@@ -47,6 +48,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
 
 
 @task_router.post("/add", response_model=StandardResponse, name="task:Tasks")
+@logger.catch()
 async def user_get_all(*, session: Session = Depends(get_session), task: TaskAddIn):
 
     res = TaskAddIn.from_orm(task)

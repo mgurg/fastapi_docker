@@ -242,6 +242,10 @@ CREATE TABLE tasks (
     created_at timestamptz,
     updated_at timestamptz
 );
+
+ALTER TABLE public.tasks ADD CONSTRAINT tasks_assignee_fk FOREIGN KEY (assignee_id) REFERENCES public.users(id);
+ALTER TABLE public.tasks ADD CONSTRAINT task_event_fk FOREIGN KEY (event_id) REFERENCES events(id);
+
 ```
 
 
