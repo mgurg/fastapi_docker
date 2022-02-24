@@ -38,6 +38,14 @@ sudo siege -t10S -c100 0.0.0.0:5000
 
 Simple token stored in DB, queried each time from Database.
 
+### Docker
+
+```bash
+docker ps
+docker exec -it 64a05bfedffb sh
+
+```
+
 
 
 
@@ -238,6 +246,8 @@ CREATE TABLE tasks (
     priority varchar(128),
     type varchar(128),
     connected_tasks int,
+    date_from timestamptz, 	-- needed?
+    date_to timestamptz, 	-- neded?
     deleted_at timestamptz,
     created_at timestamptz,
     updated_at timestamptz
