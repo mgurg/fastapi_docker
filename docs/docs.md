@@ -283,6 +283,7 @@ Pola:
 - at_Sa
 - at_Su
 - all_day
+- duration
 
 
 
