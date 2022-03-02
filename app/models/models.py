@@ -173,15 +173,12 @@ class Tasks(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
     client_id: int
-    # author_id: int
-    # assignee_id: Optional[int]
     title: str
-    # TODO: Full text search
-    # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
-    # https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
     description: str
     date_from: Optional[datetime]
     date_to: Optional[datetime]
+    time_from: Optional[time]
+    time_to: Optional[time]
     duration: Optional[int]
     is_active: Optional[bool]
     priority: str
@@ -198,6 +195,10 @@ class Tasks(SQLModel, table=True):
 
     event_id: Optional[int] = Field(default=None, foreign_key="events.id")
     event: Optional[Events] = Relationship(back_populates="event_FK")
+
+    # TODO: Full text search
+    # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
+    # https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
 
 
 class Files(SQLModel, table=True):

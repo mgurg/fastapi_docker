@@ -355,6 +355,10 @@ CREATE TABLE tasks (
     connected_tasks int,
     date_from timestamptz, 	-- needed?
     date_to timestamptz, 	-- neded?
+    time_from time with time zone NULL;
+    time_to time with time zone NULL;
+    all_day bool NULL;
+    recurring bool NULL;
     deleted_at timestamptz,
     created_at timestamptz,
     updated_at timestamptz
