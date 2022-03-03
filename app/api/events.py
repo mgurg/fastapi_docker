@@ -12,11 +12,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from passlib.hash import argon2
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload, selectinload
 from sqlmodel import Session, select
 
 from app.config import get_settings
 from app.db import get_session
-from app.models.models import Events, Tasks
+from app.models.models import Events, TaskIndexResponse, Tasks
 from app.validation.validation import Validation
 
 event_router = APIRouter()
@@ -159,11 +160,68 @@ async def file_get_all(*, session: Session = Depends(get_session)):
     return pendulum.now("Europe/Paris").format("HH:mm:ssZ")
 
 
-def parse_non_recurring():
-    print("NON")
+def parse_non_recurring(data):
+    start_raw = data["date_from"]
+    end_raw = data["date_from"]
+
+    temp_dict = {
+        "uuid": uuid.uuid4(),
+        "task_uuid": data["uuid"],
+        "bgcolor": "orange",
+        "title": data["title"],
+        "details": data["description"],
+        "start": data["date_from"],
+        "end": data["date_to"],
+    }
+
+    if data["all_day"] == False:
+        temp_dict["time"] = "10:00"
+        temp_dict["duration"] = "90"
+
+    return temp_dict
 
 
-@event_router.get("/index", name="event:Index")
+def parse_recurring(dt_from, dt_to, tsk, event):
+    freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
+    freq = freq_matrix[event["freq"]]
+
+    days_matrix = [
+        event["at_mo"],
+        event["at_tu"],
+        event["at_we"],
+        event["at_th"],
+        event["at_fr"],
+        event["at_sa"],
+        event["at_su"],
+    ]
+
+    days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
+    interval = event["interval"]
+    dt_start = event["date_from"]
+    dt_end = event["date_to"]
+
+    rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start, until=dt_end)
+    gen_events = rule.between(after=pendulum.parse(dt_from), before=pendulum.parse(dt_to), inc=True)
+
+    # print(freq, days, interval, dt_start)
+
+    for e in gen_events:
+        temp_dict = {
+            "uuid": uuid.uuid4(),
+            "task_uuid": tsk["uuid"],
+            "title": tsk["title"],
+            "desc": tsk["description"],
+            "start": e,
+            "end": e,
+        }
+        if event["all_day"] == False:
+            temp_dict["time"] = "10:00"
+            temp_dict["duration"] = "90"
+
+    return temp_dict
+
+
+@event_router.get("/index", name="event:Index")  # response_model=List[TaskIndexResponse],
 async def file_get_all(
     *,
     session: Session = Depends(get_session),
@@ -171,69 +229,90 @@ async def file_get_all(
     dt_to="2022-03-28",
 ):
 
-    events_dict = []
-    events = session.exec(select(Events).where(Events.start_at >= dt_from)).all()
+    # https://dateutil.readthedocs.io/en/stable/rrule.html
 
-    # Task details
-    ids = []
-    for event in events:
-        ids.append(event.id)
+    # daily = rrule(freq=DAILY, interval=2, count=31, dtstart=dt_start)
+    # workdays = rrule(freq=WEEKLY, byweekday=[0, 1, 2, 3, 4], count=31, dtstart=dt_start)
+    # weekend = rrule(freq=WEEKLY, byweekday=[5, 6], count=31, dtstart=dt_start)
+    # weekly = rrule(freq=WEEKLY, interval=2, byweekday=[5], count=31, dtstart=dt_start)
+    # weekly_at_days = rrule(freq=WEEKLY, byweekday=[0, 2, 4], count=31, dtstart=dt_start)
+    # monthly = rrule(freq=MONTHLY, interval=2, count=31, dtstart=dt_start)
+    # yearly = rrule(freq=YEARLY, interval=2, count=31, dtstart=dt_start)
 
-    task = session.exec(select(Tasks).where(Tasks.event_id.in_(ids))).all()  # chainMap
+    # tasks = (
+    #     session.exec(select(Tasks).options(joinedload(Tasks.events)).where(Tasks.date_from >= dt_from)).unique().all()
+    # )
 
-    tsk_dict = {}
-    for t in list(task):
-        tsk_dict[t.event_id] = t.dict()
-    #
+    tasks = session.exec(select(Tasks).where(Tasks.date_from >= dt_from)).all()
 
-    for event in events:
-        id = event.id
-        event = event.dict()
+    calendar = []
 
-        freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
-        freq = freq_matrix[event["unit"]]
+    for task in tasks:
+        # if task.recurring == False:
+        #     temp_dict = parse_non_recurring(task.dict())
+        #     calendar.append(temp_dict)
+        if task.recurring == True:
+            tsk = task.dict()
+            for event in task.events:
+                event = event.dict()
 
-        days_matrix = [
-            event["at_mo"],
-            event["at_tu"],
-            event["at_we"],
-            event["at_th"],
-            event["at_fr"],
-            event["at_sa"],
-            event["at_su"],
-        ]
+                gen = parse_recurring(dt_from, dt_to, tsk, event)
+                calendar.append(gen)
 
-        days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
+    return calendar
 
-        interval = event["interval"]
+    # --------
+    # events_dict = []
+    # events = session.exec(select(Events).where(Events.start_at >= dt_from)).all()
 
-        dt_start = event["start_at"]
+    # # Task details
+    # ids = []
+    # for event in events:
+    #     ids.append(event.id)
 
-        # https://dateutil.readthedocs.io/en/stable/rrule.html
+    # task = session.exec(select(Tasks).where(Tasks.event_id.in_(ids))).all()  # chainMap
 
-        # daily = rrule(freq=DAILY, interval=2, count=31, dtstart=dt_start)
-        # workdays = rrule(freq=WEEKLY, byweekday=[0, 1, 2, 3, 4], count=31, dtstart=dt_start)
-        # weekend = rrule(freq=WEEKLY, byweekday=[5, 6], count=31, dtstart=dt_start)
-        # weekly = rrule(freq=WEEKLY, interval=2, byweekday=[5], count=31, dtstart=dt_start)
-        # weekly_at_days = rrule(freq=WEEKLY, byweekday=[0, 2, 4], count=31, dtstart=dt_start)
-        # monthly = rrule(freq=MONTHLY, interval=2, count=31, dtstart=dt_start)
-        # yearly = rrule(freq=YEARLY, interval=2, count=31, dtstart=dt_start)
+    # tsk_dict = {}
+    # for t in list(task):
+    #     tsk_dict[t.event_id] = t.dict()
+    # #
 
-        rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start)
-        dt_after = pendulum.from_format(dt_from, "YYYY-MM-DD", tz="UTC")
-        dt_before = pendulum.from_format(dt_to, "YYYY-MM-DD", tz="UTC")
-        gen_events = rule.between(after=dt_after, before=dt_before, inc=True)
+    # for event in events:
+    #     id = event.id
+    #     event = event.dict()
 
-        for e in gen_events:
-            details = {}
-            details["uuid"] = str(tsk_dict[id]["uuid"])
-            details["title"] = tsk_dict[id]["title"]
-            details["description"] = tsk_dict[id]["description"]
+    #     freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
+    #     freq = freq_matrix[event["unit"]]
 
-            details["event_date"] = pendulum.instance(e, tz="UTC").to_iso8601_string()
-            events_dict.append(details)
+    #     days_matrix = [
+    #         event["at_mo"],
+    #         event["at_tu"],
+    #         event["at_we"],
+    #         event["at_th"],
+    #         event["at_fr"],
+    #         event["at_sa"],
+    #         event["at_su"],
+    #     ]
 
-    return events_dict
+    #     days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
+
+    #     interval = event["interval"]
+
+    #     dt_start = event["start_at"]
+
+    #     rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start)
+    #     dt_after = pendulum.from_format(dt_from, "YYYY-MM-DD", tz="UTC")
+    #     dt_before = pendulum.from_format(dt_to, "YYYY-MM-DD", tz="UTC")
+    #     gen_events = rule.between(after=dt_after, before=dt_before, inc=True)
+
+    #     for e in gen_events:
+    #         details = {}
+    #         details["uuid"] = str(tsk_dict[id]["uuid"])
+    #         details["title"] = tsk_dict[id]["title"]
+    #         details["description"] = tsk_dict[id]["description"]
+
+    #         details["event_date"] = pendulum.instance(e, tz="UTC").to_iso8601_string()
+    #         events_dict.append(details)
 
 
 @event_router.get("/{uuid}", name="event:Profile")

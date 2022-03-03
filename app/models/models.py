@@ -148,7 +148,7 @@ class TaskEventLink(SQLModel, table=True):
 
 
 class EventsBasicInfo(SQLModel):
-    uuid: uuid.UUID
+    uuid: Optional[uuid.UUID]
 
 
 class Tasks(SQLModel, table=True):
@@ -180,6 +180,11 @@ class Tasks(SQLModel, table=True):
 
     events: List["Events"] = Relationship(back_populates="tasks", link_model=TaskEventLink)
 
+    # sa_relationship_kwargs={
+    #     "primaryjoin": "Events.id==TaskEventLink.event_id",
+    #     "secondaryjoin": "TaskEventLink.task_id==Tasks.id",
+    # },
+
     # event_id: Optional[int] = Field(default=None, foreign_key="events.id")
     # event: Optional[Events] = Relationship(back_populates="event_FK")
 
@@ -189,6 +194,7 @@ class Tasks(SQLModel, table=True):
 
 
 class Events(SQLModel, table=True):
+    __tablename__ = "events"
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
     client_id: int
@@ -269,7 +275,7 @@ class TaskIndexResponse(SQLModel):
     priority: str
     type: str
     assignee: Optional[UserIndexResponse]
-    event: Optional[EventsBasicInfo]
+    events: Optional[List[EventsBasicInfo]]
 
 
 class FileBasicInfo(SQLModel):

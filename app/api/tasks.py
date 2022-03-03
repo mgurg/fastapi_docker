@@ -35,16 +35,13 @@ async def user_get_all(
     limit: int = Query(default=20, lte=100),
 ):
     tasks = session.exec(select(Tasks).where(Tasks.deleted_at == None).offset(offset).limit(limit)).all()
+
     return tasks
 
 
 @task_router.get("/{uuid}", response_model=TaskSingleResponse, name="Get task")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
     task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
-    # tasks = dict(tasks)
-    print("#############")
-    print(task)
-    print("#############")
     return task
 
 
