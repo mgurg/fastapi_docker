@@ -1,11 +1,13 @@
 import json
 import uuid as uuid
 from random import randint
-from uuid import UUID
 
 from requests import request
 
 from app.config import get_settings
+
+# from uuid import UUID
+
 
 settings = get_settings()
 

@@ -2,6 +2,7 @@ import itertools
 import json
 import operator
 import pprint
+import uuid as uuid
 from datetime import datetime
 from typing import List
 
@@ -35,6 +36,8 @@ async def file_get_all(*, session: Session = Depends(get_session)):
             "date_from": "2022-03-10 12:03:57.108",
             "date_to": "2022-03-13 12:03:57.108",
             "recurring": False,
+            "all_day": False,
+            "color": "orange",
         },
         {
             "uuid": "4a6fb4e3-de96-42e6-bf61-63d47b3d89dd",
@@ -43,10 +46,12 @@ async def file_get_all(*, session: Session = Depends(get_session)):
             "date_from": "2022-03-02 12:03:57.108",
             "date_to": "2022-03-20 13:03:57.108",
             "recurring": True,
+            "all_day": False,
+            "color": "red",
             "event": [
                 {
                     "freq": "DAILY",
-                    "interval": 2,
+                    "interval": 1,
                     "date_from": "2022-03-02 12:03:57",
                     "date_to": "2022-03-10 13:03:57",
                     "at_mo": True,
@@ -79,19 +84,34 @@ async def file_get_all(*, session: Session = Depends(get_session)):
             "date_from": "2022-03-10 12:03:57.108",
             "date_to": "2022-03-13 12:03:57.108",
             "recurring": False,
+            "all_day": True,
+            "color": "green",
         },
     ]
 
     print(events_dict)
+    parse_non_recurring()
 
     calendar = []
     for event in events_dict:
         if event["recurring"] == False:
+            start_raw = event["date_from"]
+            end_raw = event["date_from"]
+
             temp_dict = {
-                "uuid": event["uuid"],
+                "uuid": uuid.uuid4(),
+                "task_uuid": event["uuid"],
+                "bgcolor": "orange",
                 "title": event["title"],
-                "desc": event["desc"],
+                "details": event["desc"],
+                "start": event["date_from"],
+                "end": event["date_to"],
             }
+
+            if event["all_day"] == False:
+                temp_dict["time"] = "10:00"
+                temp_dict["duration"] = "90"
+
             calendar.append(temp_dict)
 
         if event["recurring"] == True:
@@ -122,15 +142,25 @@ async def file_get_all(*, session: Session = Depends(get_session)):
 
                 for e in gen_events:
                     temp_dict = {
-                        "uuid": event["uuid"],
+                        "uuid": uuid.uuid4(),
+                        "task_uuid": event["uuid"],
                         "title": event["title"],
                         "desc": event["desc"],
                         "start": e,
+                        "end": e,
                     }
+                    if event["all_day"] == False:
+                        temp_dict["time"] = "10:00"
+                        temp_dict["duration"] = "90"
+
                     calendar.append(temp_dict)
                     print(e)
 
-    return calendar
+    return pendulum.now("Europe/Paris").format("HH:mm:ssZ")
+
+
+def parse_non_recurring():
+    print("NON")
 
 
 @event_router.get("/index", name="event:Index")

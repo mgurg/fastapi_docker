@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta
 from typing import List
 
+import pendulum
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import HTTPBearer
 from loguru import logger
@@ -65,7 +66,8 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     new_event = None
     req_fields = [res.at_Mo, res.at_Tu, res.at_We, res.at_Th, res.at_Fr, res.at_Sa, res.at_Su, res.unit]
 
-    if all(v is not None for v in req_fields):
+    new_event = None
+    if (all(v is not None for v in req_fields)) & (res.recurring == True):
         new_event = Events(
             uuid=get_uuid(),
             client_id=2,
@@ -79,11 +81,10 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
             at_fr=res.at_Fr,
             at_sa=res.at_Sa,
             at_su=res.at_Su,
-            start_at=datetime.utcnow(),
-            whole_day=False,
-            end_type="COUNTER",  # 'DATE
-            ends_at=datetime.utcnow() + timedelta(days=2),
-            reminder_count=3,
+            date_from=datetime.utcnow(),
+            date_to=datetime.utcnow() + timedelta(days=3),
+            occurrence_number=10,
+            all_day=res.all_day,
         )
 
     new_task = Tasks(
@@ -95,21 +96,23 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         description=res.description,
         date_from=res.date_from,
         date_to=res.date_to,
-        time_from="16:52:02",
-        time_to="16:52:02",
+        time_from=pendulum.instance(res.date_from).format("HH:mm:ssZ"),
+        time_to=pendulum.instance(res.date_to).format("HH:mm:ssZ"),
         priority=res.priority,
         duration=0,
         is_active=True,
+        all_day=res.all_day,
+        recurring=res.recurring,
         type=res.type,
-        connected_tasks=None,
         created_at=datetime.utcnow(),
-        event=new_event,  # FK
+        events=[new_event],
     )
 
     session.add(new_task)
     session.commit()
     session.refresh(new_task)
 
+    print(type(res.date_from))
     return {"ok": True}
 
 

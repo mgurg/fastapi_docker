@@ -141,27 +141,10 @@ class TaskFileLink(SQLModel, table=True):
     file_id: Optional[int] = Field(default=None, foreign_key="files.id", primary_key=True)
 
 
-class Events(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
-    client_id: int
-    recurring: bool
-    interval: int
-    unit: str
-    at_mo: bool
-    at_tu: bool
-    at_we: bool
-    at_th: bool
-    at_fr: bool
-    at_sa: bool
-    at_su: bool
-    start_at: datetime
-    whole_day: bool
-    end_type: str
-    ends_at: datetime
-    reminder_count: int
-
-    event_FK: List["Tasks"] = Relationship(back_populates="event")
+class TaskEventLink(SQLModel, table=True):
+    __tablename__ = "task_events_link"
+    task_id: Optional[int] = Field(default=None, foreign_key="tasks.id", primary_key=True)
+    event_id: Optional[int] = Field(default=None, foreign_key="events.id", primary_key=True)
 
 
 class EventsBasicInfo(SQLModel):
@@ -173,6 +156,7 @@ class Tasks(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
     client_id: int
+    author_id: Optional[int]
     title: str
     description: str
     date_from: Optional[datetime]
@@ -183,7 +167,8 @@ class Tasks(SQLModel, table=True):
     is_active: Optional[bool]
     priority: str
     type: str
-    connected_tasks: Optional[int]
+    all_day: bool
+    recurring: bool
     deleted_at: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]
@@ -193,12 +178,41 @@ class Tasks(SQLModel, table=True):
 
     file: List["Files"] = Relationship(back_populates="task", link_model=TaskFileLink)
 
-    event_id: Optional[int] = Field(default=None, foreign_key="events.id")
-    event: Optional[Events] = Relationship(back_populates="event_FK")
+    events: List["Events"] = Relationship(back_populates="tasks", link_model=TaskEventLink)
+
+    # event_id: Optional[int] = Field(default=None, foreign_key="events.id")
+    # event: Optional[Events] = Relationship(back_populates="event_FK")
 
     # TODO: Full text search
     # https://github.com/jorzel/postgres-full-text-search?ref=pythonawesome.com
     # https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
+
+
+class Events(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    client_id: int
+    recurring: bool
+    freq: str
+    interval: int
+    date_from: datetime
+    date_to: datetime
+    occurrence_number: Optional[int]
+    all_day: bool
+    recurring: bool
+    time_from: Optional[time]
+    time_to: Optional[time]
+    duration: Optional[int]
+    at_mo: bool
+    at_tu: bool
+    at_we: bool
+    at_th: bool
+    at_fr: bool
+    at_sa: bool
+    at_su: bool
+
+    # event_FK: List["Tasks"] = Relationship(back_populates="event")
+    tasks: List[Tasks] = Relationship(back_populates="events", link_model=TaskEventLink)
 
 
 class Files(SQLModel, table=True):
@@ -291,9 +305,9 @@ class TaskAddIn(SQLModel):
     # planned:
     date_from: Optional[datetime]
     date_to: Optional[datetime]
-    whole_day: Optional[bool]
+    all_day: bool
     # recurring:
-    reccuring: Optional[bool]
+    recurring: bool
     interval: Optional[int]
     unit: Optional[str] = "DAILY"
     at_Mo: Optional[bool]
