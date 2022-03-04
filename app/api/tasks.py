@@ -60,10 +60,9 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
             raise HTTPException(status_code=404, detail="Assignee not found")
         assignee = db_assignee.id
 
-    new_event = None
+    events = []
     req_fields = [res.at_Mo, res.at_Tu, res.at_We, res.at_Th, res.at_Fr, res.at_Sa, res.at_Su, res.unit]
 
-    new_event = None
     if (all(v is not None for v in req_fields)) & (res.recurring == True):
         new_event = Events(
             uuid=get_uuid(),
@@ -83,6 +82,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
             occurrence_number=10,
             all_day=res.all_day,
         )
+        events = [new_event]
 
     new_task = Tasks(
         uuid=get_uuid(),
@@ -102,7 +102,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         recurring=res.recurring,
         type=res.type,
         created_at=datetime.utcnow(),
-        events=[new_event],
+        events=events,
     )
 
     session.add(new_task)

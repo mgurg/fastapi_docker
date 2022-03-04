@@ -2,9 +2,9 @@ import itertools
 import json
 import operator
 import pprint
-import uuid as uuid
 from datetime import datetime
 from typing import List
+from uuid import uuid4
 
 import pendulum
 from dateutil.rrule import DAILY, MONTHLY, WEEKLY, YEARLY, rrule, rrulestr
@@ -100,7 +100,7 @@ async def file_get_all(*, session: Session = Depends(get_session)):
             end_raw = event["date_from"]
 
             temp_dict = {
-                "uuid": uuid.uuid4(),
+                "uuid": uuid4(),
                 "task_uuid": event["uuid"],
                 "bgcolor": "orange",
                 "title": event["title"],
@@ -119,7 +119,7 @@ async def file_get_all(*, session: Session = Depends(get_session)):
             for rule in event["event"]:
 
                 freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
-                freq = freq_matrix[rule["freq"]]
+                freq = freq_matrix[rule["freq"].upper()]
 
                 days_matrix = [
                     rule["at_mo"],
@@ -143,7 +143,7 @@ async def file_get_all(*, session: Session = Depends(get_session)):
 
                 for e in gen_events:
                     temp_dict = {
-                        "uuid": uuid.uuid4(),
+                        "uuid": uuid4(),
                         "task_uuid": event["uuid"],
                         "title": event["title"],
                         "desc": event["desc"],
@@ -165,7 +165,7 @@ def parse_non_recurring(data):
     end_raw = data["date_from"]
 
     temp_dict = {
-        "uuid": uuid.uuid4(),
+        "uuid": uuid4(),
         "task_uuid": data["uuid"],
         "bgcolor": "orange",
         "title": data["title"],
@@ -202,23 +202,8 @@ def parse_recurring(dt_from, dt_to, tsk, event):
 
     rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start, until=dt_end)
     gen_events = rule.between(after=pendulum.parse(dt_from), before=pendulum.parse(dt_to), inc=True)
-
+    return gen_events
     # print(freq, days, interval, dt_start)
-
-    for e in gen_events:
-        temp_dict = {
-            "uuid": uuid.uuid4(),
-            "task_uuid": tsk["uuid"],
-            "title": tsk["title"],
-            "desc": tsk["description"],
-            "start": e,
-            "end": e,
-        }
-        if event["all_day"] == False:
-            temp_dict["time"] = "10:00"
-            temp_dict["duration"] = "90"
-
-    return temp_dict
 
 
 @event_router.get("/index", name="event:Index")  # response_model=List[TaskIndexResponse],
@@ -248,114 +233,62 @@ async def file_get_all(
     calendar = []
 
     for task in tasks:
-        # if task.recurring == False:
-        #     temp_dict = parse_non_recurring(task.dict())
-        #     calendar.append(temp_dict)
+        if task.recurring == False:
+            temp_dict = parse_non_recurring(task.dict())
+            calendar.append(temp_dict)
         if task.recurring == True:
             tsk = task.dict()
             for event in task.events:
                 event = event.dict()
 
-                gen = parse_recurring(dt_from, dt_to, tsk, event)
-                calendar.append(gen)
+                gen_events = parse_recurring(dt_from, dt_to, tsk, event)
+                for e in gen_events:
+                    temp_dict = {
+                        "uuid": uuid4(),
+                        "task_uuid": tsk["uuid"],
+                        "title": tsk["title"],
+                        "desc": tsk["description"],
+                        "start": e,
+                        "end": e,
+                    }
+                    if event["all_day"] == False:
+                        temp_dict["time"] = "10:00"
+                        temp_dict["duration"] = "90"
+                    calendar.append(temp_dict)
 
     return calendar
 
-    # --------
-    # events_dict = []
-    # events = session.exec(select(Events).where(Events.start_at >= dt_from)).all()
-
-    # # Task details
-    # ids = []
-    # for event in events:
-    #     ids.append(event.id)
-
-    # task = session.exec(select(Tasks).where(Tasks.event_id.in_(ids))).all()  # chainMap
-
-    # tsk_dict = {}
-    # for t in list(task):
-    #     tsk_dict[t.event_id] = t.dict()
-    # #
-
-    # for event in events:
-    #     id = event.id
-    #     event = event.dict()
-
-    #     freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
-    #     freq = freq_matrix[event["unit"]]
-
-    #     days_matrix = [
-    #         event["at_mo"],
-    #         event["at_tu"],
-    #         event["at_we"],
-    #         event["at_th"],
-    #         event["at_fr"],
-    #         event["at_sa"],
-    #         event["at_su"],
-    #     ]
-
-    #     days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
-
-    #     interval = event["interval"]
-
-    #     dt_start = event["start_at"]
-
-    #     rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start)
-    #     dt_after = pendulum.from_format(dt_from, "YYYY-MM-DD", tz="UTC")
-    #     dt_before = pendulum.from_format(dt_to, "YYYY-MM-DD", tz="UTC")
-    #     gen_events = rule.between(after=dt_after, before=dt_before, inc=True)
-
-    #     for e in gen_events:
-    #         details = {}
-    #         details["uuid"] = str(tsk_dict[id]["uuid"])
-    #         details["title"] = tsk_dict[id]["title"]
-    #         details["description"] = tsk_dict[id]["description"]
-
-    #         details["event_date"] = pendulum.instance(e, tz="UTC").to_iso8601_string()
-    #         events_dict.append(details)
-
 
 @event_router.get("/{uuid}", name="event:Profile")
-async def file_get_all(*, session: Session = Depends(get_session), dt_from="2022-02-01", dt_to="2022-02-28", uuid):
+async def file_get_all(*, session: Session = Depends(get_session), dt_from="2022-03-01", dt_to="2022-03-28", uuid):
+
     task = session.exec(select(Tasks).where(Tasks.uuid == uuid)).one_or_none()
-    _event = session.exec(select(Events).where(Events.id == task.event_id)).one_or_none()
-    event = _event.dict()
+    calendar = []
 
-    freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
-    freq = freq_matrix[event["unit"]]
+    if task.recurring == False:
+        temp_dict = parse_non_recurring(task.dict())
+        calendar.append(temp_dict)
+    if task.recurring == True:
+        tsk = task.dict()
+        for event in task.events:
+            event = event.dict()
 
-    days_matrix = [
-        event["at_mo"],
-        event["at_tu"],
-        event["at_we"],
-        event["at_th"],
-        event["at_fr"],
-        event["at_sa"],
-        event["at_su"],
-    ]
+            gen_events = parse_recurring(dt_from, dt_to, tsk, event)
+            for e in gen_events:
+                temp_dict = {
+                    "uuid": uuid4(),
+                    "task_uuid": tsk["uuid"],
+                    "title": tsk["title"],
+                    "desc": tsk["description"],
+                    "start": e,
+                    "end": e,
+                }
+                if event["all_day"] == False:
+                    temp_dict["time"] = "10:00"
+                    temp_dict["duration"] = "90"
+                calendar.append(temp_dict)
 
-    days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
-
-    interval = event["interval"]
-    dt_start = event["start_at"]
-
-    rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start)
-    dt_after = pendulum.from_format(dt_from, "YYYY-MM-DD", tz="UTC")
-    dt_before = pendulum.from_format(dt_to, "YYYY-MM-DD", tz="UTC")
-    gen_events = rule.between(after=dt_after, before=dt_before, inc=True)
-
-    events_dict = []
-
-    for e in gen_events:
-        details = {}
-        details["title"] = task.title
-        details["uuid"] = str(task.uuid)
-        details["event_date"] = pendulum.instance(e, tz="UTC").to_iso8601_string()
-        events_dict.append(details)
-
-    # https://dateutil.readthedocs.io/en/stable/rrule.html
-
-    return events_dict
+    return calendar
 
 
 @event_router.get("/v/")
