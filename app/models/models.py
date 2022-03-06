@@ -316,7 +316,7 @@ class TaskAddIn(SQLModel):
     # recurring:
     recurring: bool
     interval: Optional[int]
-    unit: Optional[str] = "DAILY"
+    freq: Optional[str] = "DAILY"
     at_Mo: Optional[bool]
     at_Tu: Optional[bool]
     at_We: Optional[bool]
@@ -324,7 +324,7 @@ class TaskAddIn(SQLModel):
     at_Fr: Optional[bool]
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
-    color: str = "#2980B9"
+    color: str = "green"
 
     # connected_tasks: int
 
