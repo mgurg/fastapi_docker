@@ -87,9 +87,9 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     time_from = None
     time_to = None
 
-    if (res.date_from is not None):
+    if res.date_from is not None:
         time_from = pendulum.instance(res.date_from).format("HH:mm:ssZ")
-    if ((res.date_to is not None):    
+    if res.date_to is not None:
         time_to = pendulum.instance(res.date_to).format("HH:mm:ssZ")
 
     new_task = Tasks(
