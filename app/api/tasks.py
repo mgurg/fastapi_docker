@@ -84,6 +84,14 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         )
         events = [new_event]
 
+    time_from = None
+    time_to = None
+
+    if (res.date_from is not None):
+        time_from = pendulum.instance(res.date_from).format("HH:mm:ssZ")
+    if ((res.date_to is not None):    
+        time_to = pendulum.instance(res.date_to).format("HH:mm:ssZ")
+
     new_task = Tasks(
         uuid=get_uuid(),
         client_id=2,
@@ -94,8 +102,8 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         color=res.color,
         date_from=res.date_from,
         date_to=res.date_to,
-        time_from=pendulum.instance(res.date_from).format("HH:mm:ssZ"),
-        time_to=pendulum.instance(res.date_to).format("HH:mm:ssZ"),
+        time_from=time_from,
+        time_to=time_to,
         priority=res.priority,
         duration=0,
         is_active=True,
