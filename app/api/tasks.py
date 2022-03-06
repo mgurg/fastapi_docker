@@ -140,12 +140,24 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    update_package = {"deleted_at": datetime.utcnow()}  # soft delete
-    for key, value in update_package.items():
-        setattr(db_task, key, value)
+    # db_task.events.remove()
 
-    session.add(db_task)
+    # TODO: Delete Events
+    for event in db_task.events:
+        db_event = session.exec(select(Events).where(Events.id == event.id)).one()
+        db_task.events.remove(event)
+        session.delete(db_event)
+        session.commit()
+
+    session.delete(db_task)
     session.commit()
-    session.refresh(db_task)
+
+    # update_package = {"deleted_at": datetime.utcnow()}  # soft delete
+    # for key, value in update_package.items():
+    #     setattr(db_task, key, value)
+
+    # session.add(db_task)
+    # session.commit()
+    # session.refresh(db_task)
 
     return {"ok": True}
