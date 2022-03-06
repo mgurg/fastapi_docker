@@ -247,7 +247,7 @@ async def file_get_all(
                         "uuid": uuid4(),
                         "task_uuid": tsk["uuid"],
                         "title": tsk["title"],
-                        "desc": tsk["description"],
+                        "details": tsk["description"],
                         "start": pendulum.instance(e).to_date_string(),
                         "end": pendulum.instance(e).to_date_string(),
                         "bgcolor": "red",
