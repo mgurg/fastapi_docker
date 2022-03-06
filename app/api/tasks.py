@@ -61,7 +61,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         assignee = db_assignee.id
 
     events = []
-    req_fields = [res.at_Mo, res.at_Tu, res.at_We, res.at_Th, res.at_Fr, res.at_Sa, res.at_Su, res.unit]
+    req_fields = [res.at_Mo, res.at_Tu, res.at_We, res.at_Th, res.at_Fr, res.at_Sa, res.at_Su, res.freq]
 
     if (all(v is not None for v in req_fields)) & (res.recurring == True):
         new_event = Events(
