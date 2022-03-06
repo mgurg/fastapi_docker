@@ -167,11 +167,11 @@ def parse_non_recurring(data):
     temp_dict = {
         "uuid": uuid4(),
         "task_uuid": data["uuid"],
-        "bgcolor": "orange",
         "title": data["title"],
         "details": data["description"],
-        "start": data["date_from"],
-        "end": data["date_to"],
+        "start": pendulum.instance(data["date_from"]).to_date_string(),
+        "end": pendulum.instance(data["date_to"]).to_date_string(),
+        "bgcolor": "blue",
     }
 
     if data["all_day"] == False:
@@ -248,8 +248,9 @@ async def file_get_all(
                         "task_uuid": tsk["uuid"],
                         "title": tsk["title"],
                         "desc": tsk["description"],
-                        "start": e,
-                        "end": e,
+                        "start": pendulum.instance(e).to_date_string(),
+                        "end": pendulum.instance(e).to_date_string(),
+                        "bgcolor": "red",
                     }
                     if event["all_day"] == False:
                         temp_dict["time"] = "10:00"
