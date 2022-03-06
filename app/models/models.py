@@ -277,6 +277,7 @@ class TaskIndexResponse(SQLModel):
     type: str
     assignee: Optional[UserIndexResponse]
     events: Optional[List[EventsBasicInfo]]
+    created_at: datetime
 
 
 class FileBasicInfo(SQLModel):
