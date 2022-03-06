@@ -159,6 +159,7 @@ class Tasks(SQLModel, table=True):
     author_id: Optional[int]
     title: str
     description: str
+    color: str
     date_from: Optional[datetime]
     date_to: Optional[datetime]
     time_from: Optional[time]
@@ -323,6 +324,7 @@ class TaskAddIn(SQLModel):
     at_Fr: Optional[bool]
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
+    color: str = "#2980B9"
 
     # connected_tasks: int
 

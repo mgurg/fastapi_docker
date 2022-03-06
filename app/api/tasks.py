@@ -91,6 +91,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         assignee_id=assignee,
         title=res.title,
         description=res.description,
+        color=res.color,
         date_from=res.date_from,
         date_to=res.date_to,
         time_from=pendulum.instance(res.date_from).format("HH:mm:ssZ"),

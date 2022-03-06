@@ -171,7 +171,7 @@ def parse_non_recurring(data):
         "details": data["description"],
         "start": pendulum.instance(data["date_from"]).to_date_string(),
         "end": pendulum.instance(data["date_to"]).to_date_string(),
-        "bgcolor": "blue",
+        "bgcolor": data["color"],
     }
 
     if data["all_day"] == False:
@@ -250,7 +250,7 @@ async def file_get_all(
                         "details": tsk["description"],
                         "start": pendulum.instance(e).to_date_string(),
                         "end": pendulum.instance(e).to_date_string(),
-                        "bgcolor": "red",
+                        "bgcolor": tsk["color"],
                     }
                     if event["all_day"] == False:
                         temp_dict["time"] = "10:00"
