@@ -305,6 +305,14 @@ dnspython = ">=1.15.0"
 idna = ">=2.0.0"
 
 [[package]]
+name = "exrex"
+version = "0.10.5"
+description = "Irregular methods for regular expressions"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "faker"
 version = "11.4.0"
 description = "Faker is a Python package that generates fake data for you."
@@ -691,6 +699,20 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
 [[package]]
+name = "pydantic-factories"
+version = "1.2.6"
+description = "Mock data generation for pydantic based models"
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[package.dependencies]
+exrex = "*"
+faker = "*"
+pydantic = "*"
+typing-extensions = "*"
+
+[[package]]
 name = "pyflakes"
 version = "2.3.1"
 description = "passive checker of Python programs"
@@ -1058,7 +1080,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "8399be223ea3dfcda304f98ae4ec708435e9af0292e4ccd728415b00d82eaaf6"
+content-hash = "08d3570ccf0d0783f249ada0453f3308febb737f3cdd10eb8bc1fd6cae7a4621"
 
 [metadata.files]
 aioaws = [
@@ -1296,6 +1318,9 @@ dnspython = [
 email-validator = [
     {file = "email_validator-1.1.3-py2.py3-none-any.whl", hash = "sha256:5675c8ceb7106a37e40e2698a57c056756bf3f272cfa8682a4f87ebd95d8440b"},
     {file = "email_validator-1.1.3.tar.gz", hash = "sha256:aa237a65f6f4da067119b7df3f13e89c25c051327b2b5b66dc075f33d62480d7"},
+]
+exrex = [
+    {file = "exrex-0.10.5.tar.gz", hash = "sha256:3fb8b18fd9832eaff8b13dc042a4f63b13c5d684ee069f70a23ddfc6bcb708f3"},
 ]
 faker = [
     {file = "Faker-11.4.0-py3-none-any.whl", hash = "sha256:c9e8557368706a094b5caf52113dd21412f8c9f06fcf00acd08dacb1cf014ed4"},
@@ -1656,6 +1681,10 @@ pydantic = [
     {file = "pydantic-1.9.0-cp39-cp39-win_amd64.whl", hash = "sha256:2cc6a4cb8a118ffec2ca5fcb47afbacb4f16d0ab8b7350ddea5e8ef7bcc53a16"},
     {file = "pydantic-1.9.0-py3-none-any.whl", hash = "sha256:085ca1de245782e9b46cefcf99deecc67d418737a1fd3f6a4f511344b613a5b3"},
     {file = "pydantic-1.9.0.tar.gz", hash = "sha256:742645059757a56ecd886faf4ed2441b9c0cd406079c2b4bee51bcc3fbcd510a"},
+]
+pydantic-factories = [
+    {file = "pydantic-factories-1.2.6.tar.gz", hash = "sha256:9707b053b54842fce8af964c0c8a9fcc67ad28c9655cb100e4fdeb23e9bf68c5"},
+    {file = "pydantic_factories-1.2.6-py3-none-any.whl", hash = "sha256:b8731f6a05a32fc369d55243fa836182e139abd9ad4051424d37c8221d876e98"},
 ]
 pyflakes = [
     {file = "pyflakes-2.3.1-py2.py3-none-any.whl", hash = "sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3"},

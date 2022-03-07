@@ -3,8 +3,12 @@ from datetime import datetime, time
 from decimal import Decimal
 from typing import Any, List, Optional
 
+from faker import Faker
 from pydantic import EmailStr, HttpUrl, Json
+from pydantic_factories import ModelFactory, Use
 from sqlmodel import Field, Relationship, SQLModel
+
+from app.service.helpers import get_uuid
 
 
 class StandardResponse(SQLModel):  # OK
@@ -348,3 +352,40 @@ class TaskEditIn(SQLModel):
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
     color: Optional[str]
+
+
+class TaskCreateFactory(ModelFactory):
+    __model__ = Tasks
+    uuid = get_uuid()
+    client_id = 2
+    author_id: 2
+    title = Use(Faker().name)
+    description = Use(Faker().name)
+    priority = Use(Faker().name)
+    type = Use(Faker().name)
+    color = Use(Faker().safe_color_name)
+    recurring = Use(Faker().boolean)
+
+    # date_from: Optional[datetime]
+    # date_to: Optional[datetime]
+    # time_from: Optional[time]
+    # time_to: Optional[time]
+    # duration: Optional[int]
+    # is_active: Optional[bool]
+    # priority: Optional[str]
+    # type: Optional[str]
+    # all_day: Optional[bool]
+    # recurring: bool
+    # deleted_at: Optional[datetime]
+    # created_at: datetime
+    # updated_at: Optional[datetime]
+
+    # name = Use(Faker().name)
+    # degree = None
+    # age = None
+    # student_id = None
+    # date = None
+    # wallet_id = None
+    # alias = None
+    # invitation_state = None
+    # connection_id = None

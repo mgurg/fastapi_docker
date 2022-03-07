@@ -25,6 +25,7 @@ Faker = "^11.3.0"
 python-stdnum = "^1.17"
 user-agents = "^2.2.0"
 pendulum = "^2.1.2"
+pydantic-factories = "^1.2.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"

@@ -6,7 +6,7 @@ from passlib.hash import argon2
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from app.models.models import Tasks, Users
+from app.models.models import TaskCreateFactory, Tasks, Users
 from app.service.helpers import get_uuid
 
 
@@ -172,17 +172,31 @@ def test_add_recurring_task(session: Session, client: TestClient):
 
 def test_list_task(session: Session, client: TestClient):
 
+    tasks = TaskCreateFactory.batch(size=5)
+    for task in tasks:
+        session.add(task)
+        session.commit()
+        session.refresh(task)
+
     response = client.get("/tasks/index")
     data = response.json()
-    print(data)
+    # print(data)
     assert response.status_code == 200
 
 
 # def test_get_task(session: Session, client: TestClient):
 
-#     task = session.exec(select(Tasks).order_by(func.random())).first()
+#     task = TaskCreateFactory.build()
+#     task.uuid = "12daa1b3-5748-45ae-a9b6-5166f4946ac0"
 
-#     response = client.get("/tasks/" + str(task.uuid))
+#     session.add(task)
+#     session.commit()
+#     session.refresh(task)
+
+#     # task = session.exec(select(Tasks).order_by(func.random())).first()
+#     task = session.exec(select(Tasks).where(Tasks.uuid == "12daa1b3-5748-45ae-a9b6-5166f4946ac0")).first()
+
+#     response = client.get("/tasks/12daa1b3-5748-45ae-a9b6-5166f4946ac0")
 #     data = response.json()
 
 #     assert response.status_code == 200
@@ -196,6 +210,13 @@ def test_list_task(session: Session, client: TestClient):
 # def test_edit_single_task(session: Session, client: TestClient):
 
 #     fake = Faker("pl_PL")
+
+#     task = TaskCreateFactory.build()
+#     # account.account_id = "EbLbndnlx4SZpgP3aB49SVWGNgE38qfXvl3LW"
+
+#     session.add(task)
+#     session.commit()
+#     session.refresh(task)
 
 #     task_uuid = session.exec(
 #         select(Tasks).where(Tasks.recurring == False).where(Tasks.date_from == None).order_by(func.random())
