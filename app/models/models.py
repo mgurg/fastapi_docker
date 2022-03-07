@@ -166,9 +166,9 @@ class Tasks(SQLModel, table=True):
     time_to: Optional[time]
     duration: Optional[int]
     is_active: Optional[bool]
-    priority: str
-    type: str
-    all_day: bool
+    priority: Optional[str]
+    type: Optional[str]
+    all_day: Optional[bool]
     recurring: bool
     deleted_at: Optional[datetime]
     created_at: datetime
@@ -302,6 +302,7 @@ class TaskSingleResponse(SQLModel):
     assignee: Optional[UserIndexResponse]
     file: Optional[List[FileBasicInfo]]
     event: Optional[EventsBasicInfo]
+    created_at: datetime
 
 
 class TaskAddIn(SQLModel):
@@ -309,12 +310,10 @@ class TaskAddIn(SQLModel):
     description: str
     assignee: Optional[uuid.UUID]
     priority: Optional[str]
-    type: str  # single / planned / reccuring
-    # planned:
+    type: Optional[str]  # single / planned / reccuring
     date_from: Optional[datetime]
     date_to: Optional[datetime]
-    all_day: bool
-    # recurring:
+    all_day: Optional[bool]
     recurring: bool
     interval: Optional[int]
     freq: Optional[str] = "DAILY"
@@ -327,15 +326,25 @@ class TaskAddIn(SQLModel):
     at_Su: Optional[bool]
     color: str = "green"
 
-    # connected_tasks: int
-
 
 class TaskEditIn(SQLModel):
     # author_id: Optional[int]
     title: Optional[str]
     description: Optional[str]
-    date_from: Optional[datetime]
-    date_to: Optional[datetime]
+    assignee: Optional[uuid.UUID]
     priority: Optional[str]
     type: Optional[str]
-    connected_tasks: Optional[int]
+    date_from: Optional[datetime]
+    date_to: Optional[datetime]
+    all_day: Optional[bool]
+    recurring: Optional[bool]
+    interval: Optional[int]
+    freq: Optional[str]
+    at_Mo: Optional[bool]
+    at_Tu: Optional[bool]
+    at_We: Optional[bool]
+    at_Th: Optional[bool]
+    at_Fr: Optional[bool]
+    at_Sa: Optional[bool]
+    at_Su: Optional[bool]
+    color: Optional[str]

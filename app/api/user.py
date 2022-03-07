@@ -16,13 +16,19 @@ user_router = APIRouter()
 
 @user_router.get("/index", response_model=List[UserIndexResponse], name="user:Profile")
 async def user_get_all(*, session: Session = Depends(get_session)):
-    users = session.exec(select(Users).where(Users.client_id == 2).where(Users.deleted_at == None)).all()
+    users = session.exec(
+        select(Users).where(Users.client_id == 2).where(Users.is_active == True).where(Users.deleted_at == None)
+    ).all()
     return users
 
 
 @user_router.get("/{uuid}", response_model=UserIndexResponse, name="user:Profile")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
     users = session.exec(
-        select(Users).where(Users.client_id == 2).where(Users.uuid == uuid).where(Users.deleted_at == None)
+        select(Users)
+        .where(Users.client_id == 2)
+        .where(Users.uuid == uuid)
+        .where(Users.is_active == True)
+        .where(Users.deleted_at == None)
     ).first()
     return users

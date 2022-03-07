@@ -62,7 +62,9 @@ def test_get_user(session: Session, client: TestClient):
         session.add(new_user)
         session.commit()
 
-    user_uuid = session.exec(select(Users).where(Users.client_id == 2).order_by(func.random())).first()
+    user_uuid = session.exec(
+        select(Users).where(Users.is_active == True).where(Users.client_id == 2).order_by(func.random())
+    ).first()
 
     response = client.get("user/" + str(user_uuid.uuid))
     data = response.json()

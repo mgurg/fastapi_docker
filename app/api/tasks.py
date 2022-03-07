@@ -118,11 +118,11 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     session.commit()
     session.refresh(new_task)
 
-    print(type(res.date_from))
     return {"ok": True}
 
 
 @task_router.patch("/{uuid}", response_model=StandardResponse, name="task:Tasks")
+@logger.catch()
 async def user_get_all(*, session: Session = Depends(get_session), uuid, task: TaskEditIn):
 
     db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()

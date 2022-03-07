@@ -23,141 +23,141 @@ from app.validation.validation import Validation
 event_router = APIRouter()
 
 
-@event_router.get("/list", name="event:Index")
-async def file_get_all(*, session: Session = Depends(get_session)):
+# @event_router.get("/list", name="event:Index")
+# async def file_get_all(*, session: Session = Depends(get_session)):
 
-    start = datetime.strptime("2022-03-01", "%Y-%m-%d")
-    end = datetime.strptime("2022-03-28", "%Y-%m-%d")
+#     start = datetime.strptime("2022-03-01", "%Y-%m-%d")
+#     end = datetime.strptime("2022-03-28", "%Y-%m-%d")
 
-    events_dict = [
-        {
-            "uuid": "38ec4397-643e-42be-b937-169f443a81a1",
-            "title": "Task #1",
-            "desc": "Desc #1",
-            "date_from": "2022-03-10 12:03:57.108",
-            "date_to": "2022-03-13 12:03:57.108",
-            "recurring": False,
-            "all_day": False,
-            "color": "orange",
-        },
-        {
-            "uuid": "4a6fb4e3-de96-42e6-bf61-63d47b3d89dd",
-            "title": "Task #2",
-            "desc": "Desc #2",
-            "date_from": "2022-03-02 12:03:57.108",
-            "date_to": "2022-03-20 13:03:57.108",
-            "recurring": True,
-            "all_day": False,
-            "color": "red",
-            "event": [
-                {
-                    "freq": "DAILY",
-                    "interval": 1,
-                    "date_from": "2022-03-02 12:03:57",
-                    "date_to": "2022-03-10 13:03:57",
-                    "at_mo": True,
-                    "at_tu": None,
-                    "at_we": None,
-                    "at_th": None,
-                    "at_fr": None,
-                    "at_sa": None,
-                    "at_su": None,
-                },
-                {
-                    "freq": "DAILY",
-                    "interval": 1,
-                    "date_from": "2022-03-10 12:03:57",
-                    "date_to": "2022-03-20 13:03:57",
-                    "at_mo": None,
-                    "at_tu": None,
-                    "at_we": None,
-                    "at_th": None,
-                    "at_fr": None,
-                    "at_sa": None,
-                    "at_su": None,
-                },
-            ],
-        },
-        {
-            "uuid": "d68146e0-a19e-4820-bac5-22c3f5b754e5",
-            "title": "Task #3",
-            "desc": "Desc #3",
-            "date_from": "2022-03-10 12:03:57.108",
-            "date_to": "2022-03-13 12:03:57.108",
-            "recurring": False,
-            "all_day": True,
-            "color": "green",
-        },
-    ]
+#     events_dict = [
+#         {
+#             "uuid": "38ec4397-643e-42be-b937-169f443a81a1",
+#             "title": "Task #1",
+#             "desc": "Desc #1",
+#             "date_from": "2022-03-10 12:03:57.108",
+#             "date_to": "2022-03-13 12:03:57.108",
+#             "recurring": False,
+#             "all_day": False,
+#             "color": "orange",
+#         },
+#         {
+#             "uuid": "4a6fb4e3-de96-42e6-bf61-63d47b3d89dd",
+#             "title": "Task #2",
+#             "desc": "Desc #2",
+#             "date_from": "2022-03-02 12:03:57.108",
+#             "date_to": "2022-03-20 13:03:57.108",
+#             "recurring": True,
+#             "all_day": False,
+#             "color": "red",
+#             "event": [
+#                 {
+#                     "freq": "DAILY",
+#                     "interval": 1,
+#                     "date_from": "2022-03-02 12:03:57",
+#                     "date_to": "2022-03-10 13:03:57",
+#                     "at_mo": True,
+#                     "at_tu": None,
+#                     "at_we": None,
+#                     "at_th": None,
+#                     "at_fr": None,
+#                     "at_sa": None,
+#                     "at_su": None,
+#                 },
+#                 {
+#                     "freq": "DAILY",
+#                     "interval": 1,
+#                     "date_from": "2022-03-10 12:03:57",
+#                     "date_to": "2022-03-20 13:03:57",
+#                     "at_mo": None,
+#                     "at_tu": None,
+#                     "at_we": None,
+#                     "at_th": None,
+#                     "at_fr": None,
+#                     "at_sa": None,
+#                     "at_su": None,
+#                 },
+#             ],
+#         },
+#         {
+#             "uuid": "d68146e0-a19e-4820-bac5-22c3f5b754e5",
+#             "title": "Task #3",
+#             "desc": "Desc #3",
+#             "date_from": "2022-03-10 12:03:57.108",
+#             "date_to": "2022-03-13 12:03:57.108",
+#             "recurring": False,
+#             "all_day": True,
+#             "color": "green",
+#         },
+#     ]
 
-    print(events_dict)
-    parse_non_recurring()
+#     print(events_dict)
+#     parse_non_recurring()
 
-    calendar = []
-    for event in events_dict:
-        if event["recurring"] == False:
-            start_raw = event["date_from"]
-            end_raw = event["date_from"]
+#     calendar = []
+#     for event in events_dict:
+#         if event["recurring"] == False:
+#             start_raw = event["date_from"]
+#             end_raw = event["date_from"]
 
-            temp_dict = {
-                "uuid": uuid4(),
-                "task_uuid": event["uuid"],
-                "bgcolor": "orange",
-                "title": event["title"],
-                "details": event["desc"],
-                "start": event["date_from"],
-                "end": event["date_to"],
-            }
+#             temp_dict = {
+#                 "uuid": uuid4(),
+#                 "task_uuid": event["uuid"],
+#                 "bgcolor": "orange",
+#                 "title": event["title"],
+#                 "details": event["desc"],
+#                 "start": event["date_from"],
+#                 "end": event["date_to"],
+#             }
 
-            if event["all_day"] == False:
-                temp_dict["time"] = "10:00"
-                temp_dict["duration"] = "90"
+#             if event["all_day"] == False:
+#                 temp_dict["time"] = "10:00"
+#                 temp_dict["duration"] = "90"
 
-            calendar.append(temp_dict)
+#             calendar.append(temp_dict)
 
-        if event["recurring"] == True:
-            for rule in event["event"]:
+#         if event["recurring"] == True:
+#             for rule in event["event"]:
 
-                freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
-                freq = freq_matrix[rule["freq"].upper()]
+#                 freq_matrix = {"YEARLY": 0, "MONTHLY": 1, "WEEKLY": 2, "DAILY": 3}
+#                 freq = freq_matrix[rule["freq"].upper()]
 
-                days_matrix = [
-                    rule["at_mo"],
-                    rule["at_tu"],
-                    rule["at_we"],
-                    rule["at_th"],
-                    rule["at_fr"],
-                    rule["at_sa"],
-                    rule["at_su"],
-                ]
+#                 days_matrix = [
+#                     rule["at_mo"],
+#                     rule["at_tu"],
+#                     rule["at_we"],
+#                     rule["at_th"],
+#                     rule["at_fr"],
+#                     rule["at_sa"],
+#                     rule["at_su"],
+#                 ]
 
-                days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
-                interval = rule["interval"]
-                dt_start = datetime.strptime(rule["date_from"], "%Y-%m-%d %H:%M:%S")
-                dt_end = datetime.strptime(rule["date_to"], "%Y-%m-%d %H:%M:%S")
+#                 days = list(itertools.compress([0, 1, 2, 3, 4, 5, 6], days_matrix))
+#                 interval = rule["interval"]
+#                 dt_start = datetime.strptime(rule["date_from"], "%Y-%m-%d %H:%M:%S")
+#                 dt_end = datetime.strptime(rule["date_to"], "%Y-%m-%d %H:%M:%S")
 
-                rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start, until=dt_end)
-                gen_events = rule.between(after=start, before=end, inc=True)
+#                 rule = rrule(freq=freq, interval=interval, byweekday=days, count=31, dtstart=dt_start, until=dt_end)
+#                 gen_events = rule.between(after=start, before=end, inc=True)
 
-                print(freq, days, interval, dt_start)
+#                 print(freq, days, interval, dt_start)
 
-                for e in gen_events:
-                    temp_dict = {
-                        "uuid": uuid4(),
-                        "task_uuid": event["uuid"],
-                        "title": event["title"],
-                        "desc": event["desc"],
-                        "start": e,
-                        "end": e,
-                    }
-                    if event["all_day"] == False:
-                        temp_dict["time"] = "10:00"
-                        temp_dict["duration"] = "90"
+#                 for e in gen_events:
+#                     temp_dict = {
+#                         "uuid": uuid4(),
+#                         "task_uuid": event["uuid"],
+#                         "title": event["title"],
+#                         "desc": event["desc"],
+#                         "start": e,
+#                         "end": e,
+#                     }
+#                     if event["all_day"] == False:
+#                         temp_dict["time"] = "10:00"
+#                         temp_dict["duration"] = "90"
 
-                    calendar.append(temp_dict)
-                    print(e)
+#                     calendar.append(temp_dict)
+#                     print(e)
 
-    return pendulum.now("Europe/Paris").format("HH:mm:ssZ")
+#     return pendulum.now("Europe/Paris").format("HH:mm:ssZ")
 
 
 def parse_non_recurring(data):
