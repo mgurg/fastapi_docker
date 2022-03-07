@@ -54,7 +54,7 @@ def test_get_user(session: Session, client: TestClient):
             password=argon2.hash(fake.password()),
             user_role_id=2,
             created_at=datetime.utcnow(),
-            is_active=False,
+            is_active=True,
             tz=fake.timezone(),
             lang=fake.language_code(),
             uuid=get_uuid(),

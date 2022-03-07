@@ -31,7 +31,7 @@ pytest = "^7"
 mypy = "0.930"
 flake8 = "^3.9.2"
 black = {version = "^22.1", python = "^3.8"}
-coverage = {extras = ["toml"], version = "^5.5"}
+coverage = {extras = ["toml"], version = "^6"}
 isort = "^5.9.3"
 autoflake = "^1.4"
 

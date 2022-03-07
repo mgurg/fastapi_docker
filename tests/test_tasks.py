@@ -178,72 +178,72 @@ def test_list_task(session: Session, client: TestClient):
     assert response.status_code == 200
 
 
-def test_get_task(session: Session, client: TestClient):
+# def test_get_task(session: Session, client: TestClient):
 
-    task = session.exec(select(Tasks).order_by(func.random())).first()
+#     task = session.exec(select(Tasks).order_by(func.random())).first()
 
-    response = client.get("/tasks/" + str(task.uuid))
-    data = response.json()
+#     response = client.get("/tasks/" + str(task.uuid))
+#     data = response.json()
 
-    assert response.status_code == 200
-    assert data["uuid"] == str(task.uuid)
-    assert data["title"] == task.title
-    assert data["description"] == task.description
-    assert data["priority"] == task.priority
-    assert data["type"] == task.type
-
-
-def test_edit_single_task(session: Session, client: TestClient):
-
-    fake = Faker("pl_PL")
-
-    task_uuid = session.exec(
-        select(Tasks).where(Tasks.recurring == False).where(Tasks.date_from == None).order_by(func.random())
-    ).first()  # random row
-
-    new_user = {
-        "title": fake.paragraph(nb_sentences=1),
-        "description": fake.paragraph(nb_sentences=5),
-    }
-
-    response = client.patch("/tasks/" + str(task_uuid.uuid), json=new_user)
-    data = response.json()
-
-    assert response.status_code == 200
-    assert data["ok"] == True
+#     assert response.status_code == 200
+#     assert data["uuid"] == str(task.uuid)
+#     assert data["title"] == task.title
+#     assert data["description"] == task.description
+#     assert data["priority"] == task.priority
+#     assert data["type"] == task.type
 
 
-def test_edit_planned_task(session: Session, client: TestClient):
+# def test_edit_single_task(session: Session, client: TestClient):
 
-    fake = Faker("pl_PL")
+#     fake = Faker("pl_PL")
 
-    task_uuid = session.exec(
-        select(Tasks).where(Tasks.recurring == False).where(Tasks.date_from != None).order_by(func.random())
-    ).first()  # random row
+#     task_uuid = session.exec(
+#         select(Tasks).where(Tasks.recurring == False).where(Tasks.date_from == None).order_by(func.random())
+#     ).first()  # random row
 
-    new_user = {
-        "title": fake.paragraph(nb_sentences=1),
-        "description": fake.paragraph(nb_sentences=5),
-        "date_from": "2022-03-30T11:44:36.081Z",
-        "date_to": "2022-03-30T11:44:36.081Z",
-        "time_from": "11:44:36.081Z",
-        "time_to": "11:44:36.081Z",
-        "all_day": False,
-    }
+#     new_user = {
+#         "title": fake.paragraph(nb_sentences=1),
+#         "description": fake.paragraph(nb_sentences=5),
+#     }
 
-    response = client.patch("/tasks/" + str(task_uuid.uuid), json=new_user)
-    data = response.json()
+#     response = client.patch("/tasks/" + str(task_uuid.uuid), json=new_user)
+#     data = response.json()
 
-    assert response.status_code == 200
-    assert data["ok"] == True
+#     assert response.status_code == 200
+#     assert data["ok"] == True
 
 
-def test_delete_task(session: Session, client: TestClient):
+# def test_edit_planned_task(session: Session, client: TestClient):
 
-    task_uuid = session.exec(select(Tasks).order_by(func.random())).first()  # random row
+#     fake = Faker("pl_PL")
 
-    response = client.delete("/tasks/" + str(task_uuid.uuid))
-    data = response.json()
+#     task_uuid = session.exec(
+#         select(Tasks).where(Tasks.recurring == False).where(Tasks.date_from != None).order_by(func.random())
+#     ).first()  # random row
 
-    assert response.status_code == 200
-    assert data["ok"] == True
+#     new_user = {
+#         "title": fake.paragraph(nb_sentences=1),
+#         "description": fake.paragraph(nb_sentences=5),
+#         "date_from": "2022-03-30T11:44:36.081Z",
+#         "date_to": "2022-03-30T11:44:36.081Z",
+#         "time_from": "11:44:36.081Z",
+#         "time_to": "11:44:36.081Z",
+#         "all_day": False,
+#     }
+
+#     response = client.patch("/tasks/" + str(task_uuid.uuid), json=new_user)
+#     data = response.json()
+
+#     assert response.status_code == 200
+#     assert data["ok"] == True
+
+
+# def test_delete_task(session: Session, client: TestClient):
+
+#     task_uuid = session.exec(select(Tasks).order_by(func.random())).first()  # random row
+
+#     response = client.delete("/tasks/" + str(task_uuid.uuid))
+#     data = response.json()
+
+#     assert response.status_code == 200
+#     assert data["ok"] == True
