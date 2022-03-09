@@ -171,7 +171,7 @@ class Tasks(SQLModel, table=True):
     duration: Optional[int]
     is_active: Optional[bool]
     priority: Optional[str]
-    type: Optional[str]
+    type: Optional[str]  # TODO: Remove?
     all_day: Optional[bool]
     recurring: bool
     deleted_at: Optional[datetime]
@@ -278,7 +278,6 @@ class TaskIndexResponse(SQLModel):
     duration: Optional[int]
     is_active: Optional[bool]
     priority: str
-    type: str
     assignee: Optional[UserIndexResponse]
     events: Optional[List[EventsBasicInfo]]
     created_at: datetime
@@ -301,8 +300,6 @@ class TaskSingleResponse(SQLModel):
     date_to: Optional[datetime]
     duration: Optional[int]
     is_active: Optional[bool]
-    priority: str
-    type: str
     assignee: Optional[UserIndexResponse]
     file: Optional[List[FileBasicInfo]]
     event: Optional[EventsBasicInfo]
