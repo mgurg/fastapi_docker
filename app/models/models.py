@@ -300,6 +300,7 @@ class TaskSingleResponse(SQLModel):
     description: str
     date_from: Optional[datetime]
     date_to: Optional[datetime]
+    all_day: Optional[bool]
     duration: Optional[int]
     is_active: Optional[bool]
     assignee: Optional[UserIndexResponse]
