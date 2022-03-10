@@ -130,6 +130,15 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
         raise HTTPException(status_code=404, detail="Task not found")
 
     task_data = task.dict(exclude_unset=True)
+    if task_data["assignee"] is not None:
+        db_assignee = session.exec(
+            select(Users).where(Users.uuid == task_data["assignee"]).where(Users.deleted_at == None)
+        ).one_or_none()
+        if not db_assignee:
+            raise HTTPException(status_code=404, detail="Assignee not found")
+
+        task_data["assignee_id"] = db_assignee.id
+        del task_data["assignee"]
 
     for key, value in task_data.items():
         setattr(db_task, key, value)
