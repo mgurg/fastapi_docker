@@ -222,7 +222,7 @@ class TaskIndexResponse(SQLModel):
     duration: Optional[int]
     is_active: Optional[bool]
     priority: str
-    type: str
+    mode: str
     tasks_fk: Optional[UserIndexResponse] # nazwa taka jak relacji, nie musi być to taka sama nazwa jak nazwa w BD 
 ```
 
@@ -357,7 +357,7 @@ CREATE TABLE tasks (
     all_day bool NOT NULL DEFAULT 1;
     is_active boolean,
     priority varchar(32),
-    type varchar(128),  
+    mode varchar(128),  
     deleted_at timestamptz,
     created_at timestamptz,
     updated_at timestamptz

@@ -171,7 +171,7 @@ class Tasks(SQLModel, table=True):
     duration: Optional[int]
     is_active: Optional[bool]
     priority: Optional[str]
-    type: Optional[str]
+    mode: Optional[str]
     all_day: Optional[bool]
     recurring: bool
     deleted_at: Optional[datetime]
@@ -298,6 +298,7 @@ class TaskSingleResponse(SQLModel):
     # assignee_id: Optional[int]
     title: str
     description: str
+    mode: Optional[str]
     date_from: Optional[datetime]
     date_to: Optional[datetime]
     all_day: Optional[bool]
