@@ -171,7 +171,7 @@ class Tasks(SQLModel, table=True):
     duration: Optional[int]
     is_active: Optional[bool]
     priority: Optional[str]
-    type: Optional[str]  # TODO: Remove?
+    type: Optional[str]
     all_day: Optional[bool]
     recurring: bool
     deleted_at: Optional[datetime]
@@ -314,7 +314,7 @@ class TaskAddIn(SQLModel):
     description: str
     assignee: Optional[uuid.UUID]
     priority: Optional[str]
-    type: Optional[str]  # single / planned / reccuring
+    mode: Optional[str]  # single / planned / reccuring
     date_from: Optional[datetime]
     date_to: Optional[datetime]
     all_day: Optional[bool]
@@ -337,7 +337,7 @@ class TaskEditIn(SQLModel):
     description: Optional[str]
     assignee: Optional[uuid.UUID]
     priority: Optional[str]
-    type: Optional[str]
+    mode: Optional[str]
     date_from: Optional[datetime]
     date_to: Optional[datetime]
     all_day: Optional[bool]

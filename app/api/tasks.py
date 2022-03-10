@@ -109,7 +109,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         is_active=True,
         all_day=res.all_day,
         recurring=res.recurring,
-        type=res.type,
+        mode=res.mode,
         created_at=datetime.utcnow(),
         events=events,
     )
