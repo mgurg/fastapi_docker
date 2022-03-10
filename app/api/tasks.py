@@ -140,6 +140,46 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
         task_data["assignee_id"] = db_assignee.id
         del task_data["assignee"]
 
+    events = []
+    if task_data["mode"] == "cyclic":
+        if db_task.events is not None:
+            for event in db_task.events:
+                db_event = session.exec(select(Events).where(Events.id == event.id)).one()
+                db_task.events.remove(event)
+                session.delete(db_event)
+                session.commit()
+
+        new_event = Events(
+            uuid=get_uuid(),
+            client_id=2,
+            recurring=task_data["recurring"],
+            interval=task_data["interval"],
+            freq=task_data["freq"],
+            at_mo=task_data["at_Mo"],
+            at_tu=task_data["at_Tu"],
+            at_we=task_data["at_We"],
+            at_th=task_data["at_Th"],
+            at_fr=task_data["at_Fr"],
+            at_sa=task_data["at_Sa"],
+            at_su=task_data["at_Su"],
+            date_from=datetime.utcnow(),
+            date_to=datetime.utcnow() + timedelta(days=3),
+            occurrence_number=10,
+            all_day=False,
+        )
+        task_data["events"] = [new_event]
+
+        del task_data["recurring"]
+        del task_data["interval"]
+        del task_data["freq"]
+        del task_data["at_Mo"]
+        del task_data["at_Tu"]
+        del task_data["at_We"]
+        del task_data["at_Th"]
+        del task_data["at_Fr"]
+        del task_data["at_Sa"]
+        del task_data["at_Su"]
+
     for key, value in task_data.items():
         setattr(db_task, key, value)
 
