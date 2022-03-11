@@ -2,6 +2,7 @@ import io
 import logging
 import mimetypes
 import uuid
+from typing import Optional
 
 import boto3
 import magic
@@ -79,17 +80,26 @@ async def get_buckets_list():
     return files
 
 
-@s3_router.delete("/bucket/{bucket_name}")
-async def remove_bucket(bucket_name: str):
+# @s3_router.delete("/dlete_bucket/{bucket_name}")
+# async def remove_bucket(bucket_name: str):
 
-    for s3_object in s3_resource.Bucket(bucket_name).objects.all():
-        s3_object.delete()
-    # Deleting objects versions if S3 versioning enabled
-    for s3_object_ver in s3_resource.Bucket(bucket_name).object_versions.all():
-        s3_object_ver.delete()
+#     for s3_object in s3_resource.Bucket(bucket_name).objects.all():
+#         s3_object.delete()
+#     # Deleting objects versions if S3 versioning enabled
+#     for s3_object_ver in s3_resource.Bucket(bucket_name).object_versions.all():
+#         s3_object_ver.delete()
 
-    response = s3_client.delete_bucket(Bucket=bucket_name)
-    return response
+#     response = s3_client.delete_bucket(Bucket=bucket_name)
+#     return response
+
+
+@s3_router.delete("/delete_file/")
+async def remove_bucket(objectName: str):
+
+    a = s3_resource.Object(settings.s3_bucket_name, objectName).delete()
+    print(a)
+
+    return {"msg": "ok"}
 
 
 @s3_router.get("/get_s3_obj/")
@@ -116,21 +126,25 @@ async def get_s3(s3_obj: str):
 
 @s3_router.post("/upload/{objectName}")
 @logger.catch()
-async def upload_aws_s3(objectName: str, file: UploadFile = File(...)):
+async def upload_aws_s3(file: Optional[UploadFile] = None):
+    if not file:
+        return {"message": "No file sent"}
 
     # https://www.youtube.com/watch?v=JKlOlDFwsao
     # https://github.com/search?q=upload_fileobj+fastapi&type=code
 
-    s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(
-        Fileobj=file.file,
-        Key=f"folder/{objectName}",
-        # ExtraArgs={
-        #     "ContentType": "image/png",
-        #     "ACL": "public-read",
-        # },
-    )
+    # s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(
+    #     Fileobj=file.file,
+    #     Key=f"folder/{objectName}",
+    # ExtraArgs={
+    #     "ContentType": "image/png",
+    #     "ACL": "public-read",
+    # },
+    # )
 
-    return {"region": settings.s3_region, "files": "files", "filename": f"folder/{file.filename}"}
+    s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
+
+    return {"mime": file.content_type, "filename": f"{file.filename}"}
 
 
 @s3_router.get("/upload_signed_url")
