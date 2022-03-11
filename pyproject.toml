@@ -18,13 +18,13 @@ psycopg2-binary = "^2.9.3"
 sqlmodel = "^0.0.6"
 alembic = "^1.7.5"
 pydantic = {extras = ["email"], version = "^1.9.0"}
-loguru = "^0.5.3"
+loguru = "^0.6"
 passlib = {extras = ["argon2"], version = "^1.7.4"}
 disposable-email-domains = "^0.0.72"
-Faker = "^11.3.0"
+Faker = "^13"
 python-stdnum = "^1.17"
 user-agents = "^2.2.0"
-pendulum = "^2.1.2"
+pendulum = "^2"
 pydantic-factories = "^1.2.6"
 
 [tool.poetry.dev-dependencies]

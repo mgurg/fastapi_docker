@@ -60,6 +60,24 @@ async def get_buckets_list():
     return s3_buckets
 
 
+@s3_router.get("/list_files")
+@logger.catch()
+async def get_buckets_list():
+    # https://realpython.com/python-boto3-aws-s3/#object-traversal
+
+    bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
+
+    files = []
+
+    for obj in bucket.objects.all():
+        files.append({"name": obj.key})
+        print(obj.key)
+        # subsrc = obj.Object()
+        # print(obj.key, obj.storage_class, obj.last_modified, subsrc.version_id, subsrc.metadata)
+
+    return files
+
+
 @s3_router.delete("/bucket/{bucket_name}")
 async def remove_bucket(bucket_name: str):
 
