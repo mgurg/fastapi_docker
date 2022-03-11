@@ -26,6 +26,7 @@ python-stdnum = "^1.17"
 user-agents = "^2.2.0"
 pendulum = "^2"
 pydantic-factories = "^1.2.6"
+python-magic = "^0.4.25"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"

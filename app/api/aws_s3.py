@@ -4,6 +4,7 @@ import mimetypes
 import uuid
 
 import boto3
+import magic
 from fastapi import APIRouter, File, UploadFile
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -92,7 +93,7 @@ async def remove_bucket(bucket_name: str):
 
 
 @s3_router.get("/get_s3_obj/")
-async def get_s3(s3_obj: str, bucket_name: str):
+async def get_s3(s3_obj: str):
     """
     Retreives an s3 jpg image and streams it back.
     ### Request Body
@@ -104,10 +105,13 @@ async def get_s3(s3_obj: str, bucket_name: str):
     """
     f = io.BytesIO()
     s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(s3_obj, f)
+
     f.seek(0)
-    return StreamingResponse(
-        f, media_type="image/jpg", headers={"Content-Disposition": f'inline; filename="{s3_obj}"'}
-    )
+    mime_type = magic.from_buffer(f.read(2048), mime=True)
+
+    f.seek(0)
+    header = {"Content-Disposition": f'inline; filename="{s3_obj}"'}
+    return StreamingResponse(f, media_type=mime_type, headers=header)
 
 
 @s3_router.post("/upload/{objectName}")

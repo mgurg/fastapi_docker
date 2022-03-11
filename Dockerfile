@@ -1,6 +1,8 @@
 # pull official base image
 FROM python:3.10.2-slim-bullseye
 
+RUN apt-get update && apt-get install -y libmagic1
+
 RUN useradd -r -s /bin/bash alex
 
 # set environment variables
