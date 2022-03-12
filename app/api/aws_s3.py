@@ -124,7 +124,7 @@ async def get_s3(s3_obj: str):
     return StreamingResponse(f, media_type=mime_type, headers=header)
 
 
-@s3_router.post("/upload/{objectName}")
+@s3_router.post("/upload/")
 @logger.catch()
 async def upload_aws_s3(file: Optional[UploadFile] = None):
     if not file:
