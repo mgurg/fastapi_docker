@@ -1,17 +1,18 @@
 import io
-import logging
-import mimetypes
-import uuid
 from typing import Optional
 
 import boto3
 import magic
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from loguru import logger
-from pydantic import BaseModel, Field
+from sqlalchemy import func
+from sqlmodel import Session, select
 from starlette.responses import StreamingResponse
 
 from app.config import get_settings
+from app.db import get_session
+from app.models.models import Files
+from app.service.helpers import get_uuid
 
 settings = get_settings()
 s3_router = APIRouter()
@@ -94,10 +95,14 @@ async def get_buckets_list():
 
 
 @s3_router.delete("/delete_file/")
-async def remove_bucket(objectName: str):
+async def remove_bucket(*, session: Session = Depends(get_session), objectName: str):
 
     a = s3_resource.Object(settings.s3_bucket_name, objectName).delete()
     print(a)
+
+    db_task = session.exec(select(Files).where(Files.file_name == objectName)).one_or_none()
+    session.delete(db_task)
+    session.commit()
 
     return {"msg": "ok"}
 
@@ -126,7 +131,9 @@ async def get_s3(s3_obj: str):
 
 @s3_router.post("/upload/")
 @logger.catch()
-async def upload_aws_s3(file: Optional[UploadFile] = None):
+async def upload_aws_s3(
+    *, session: Session = Depends(get_session), request: Request, file: Optional[UploadFile] = None
+):
     if not file:
         return {"message": "No file sent"}
 
@@ -142,9 +149,30 @@ async def upload_aws_s3(file: Optional[UploadFile] = None):
     # },
     # )
 
+    quota = session.exec(select([func.sum(Files.size)]).where(Files.client_id == 2)).one()
+    print("quota", quota)
+
+    # if quota > 300000:
+    #     raise HTTPException(status_code=413, detail="Quota exceeded")
+
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
 
-    return {"mime": file.content_type, "filename": f"{file.filename}"}
+    new_file = Files(
+        uuid=get_uuid(),
+        client_id=2,
+        owner_id=2,
+        file_name=file.filename,
+        file_id=1,
+        extension="jpg",
+        mimetype=file.content_type,
+        size=request.headers["content-length"],
+    )
+
+    session.add(new_file)
+    session.commit()
+    session.refresh(new_file)
+
+    return {"mime": file.content_type, "filename": f"{file.filename}", "uuid": new_file.uuid}
 
 
 @s3_router.get("/upload_signed_url")
