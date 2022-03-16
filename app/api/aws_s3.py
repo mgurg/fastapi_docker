@@ -65,17 +65,12 @@ async def get_buckets_list():
 
 @s3_router.get("/list_files")
 @logger.catch()
-async def get_buckets_list(
-    *,
-    session: Session = Depends(get_session),
-):
-
-    db_task = session.exec(select(Files).where(Files.client_id == 2)).all()
+async def get_buckets_list(*, session: Session = Depends(get_session)):
 
     # https://realpython.com/python-boto3-aws-s3/#object-traversal
     # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
 
-    # files = []
+    files = []
 
     # for obj in bucket.objects.all():
     #     files.append({"name": obj.key})
