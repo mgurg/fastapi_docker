@@ -76,11 +76,11 @@ def create_application() -> FastAPI:
         tags=["EVENT"],
     )
 
-    app.include_router(
-        s3_router,
-        prefix="/s3",
-        tags=["AWS_S3"],
-    )
+    # app.include_router(
+    #     s3_router,
+    #     prefix="/s3",
+    #     tags=["AWS_S3"],
+    # )
 
     return app
 
