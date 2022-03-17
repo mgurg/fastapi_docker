@@ -1,4 +1,6 @@
 import io
+import pathlib
+from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID
 
@@ -67,9 +69,10 @@ async def file_add(*, session: Session = Depends(get_session), request: Request,
         owner_id=2,
         file_name=file.filename,
         file_id=1,
-        extension="jpg",
+        extension=pathlib.Path(file.filename).suffix,
         mimetype=file.content_type,
         size=request.headers["content-length"],
+        created_at=datetime.utcnow(),
     )
 
     session.add(new_file)
@@ -96,6 +99,8 @@ async def remove_bucket(*, session: Session = Depends(get_session), uuid: UUID):
     session.delete(db_file)
     session.commit()
 
+    # https://fastapi-utils.davidmontague.xyz/user-guide/repeated-tasks/
+    # TODO: delete every day empty files
     return {"ok": True}
 
 

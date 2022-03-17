@@ -181,7 +181,7 @@ class Tasks(SQLModel, table=True):
     assignee_id: Optional[int] = Field(default=None, foreign_key="users.id")
     assignee: Optional[Users] = Relationship(back_populates="usr_FK")
 
-    # file: List["Files"] = Relationship(back_populates="task", link_model=TaskFileLink)
+    file: List["Files"] = Relationship(back_populates="task", link_model=TaskFileLink)
 
     events: List["Events"] = Relationship(back_populates="tasks", link_model=TaskEventLink)
 
@@ -239,7 +239,7 @@ class Files(SQLModel, table=True):
     created_at: datetime
     updated_at: Optional[datetime]
 
-    # task: List[Tasks] = Relationship(back_populates="file", link_model=TaskFileLink)
+    task: List[Tasks] = Relationship(back_populates="file", link_model=TaskFileLink)
 
 
 class TaskBasicInfo(SQLModel):
@@ -285,6 +285,7 @@ class TaskIndexResponse(SQLModel):
 
 
 class FileBasicInfo(SQLModel):
+    uuid: uuid.UUID
     file_name: str
     extension: str
     mimetype: str
@@ -330,6 +331,7 @@ class TaskAddIn(SQLModel):
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
     color: str = "green"
+    files: Optional[List[uuid.UUID]]
 
 
 class TaskEditIn(SQLModel):
@@ -353,6 +355,7 @@ class TaskEditIn(SQLModel):
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
     color: Optional[str]
+    files: Optional[List[uuid.UUID]]
 
 
 class TaskCreateFactory(ModelFactory):

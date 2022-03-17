@@ -13,6 +13,7 @@ from app.config import get_settings
 from app.db import get_session
 from app.models.models import (
     Events,
+    Files,
     StandardResponse,
     TaskAddIn,
     TaskEditIn,
@@ -59,6 +60,15 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         if not db_assignee:
             raise HTTPException(status_code=404, detail="Assignee not found")
         assignee = db_assignee.id
+
+    files = []
+    if res.files is not None:
+        for file in res.files:
+            db_file = session.exec(
+                select(Files).where(Files.uuid == file).where(Files.deleted_at == None)
+            ).one_or_none()
+            if db_file:
+                files.append(db_file)
 
     events = []
     req_fields = [res.at_Mo, res.at_Tu, res.at_We, res.at_Th, res.at_Fr, res.at_Sa, res.at_Su, res.freq]
@@ -112,6 +122,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         mode=res.mode,
         created_at=datetime.utcnow(),
         events=events,
+        file=files,
     )
 
     session.add(new_task)
@@ -204,6 +215,13 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
         db_event = session.exec(select(Events).where(Events.id == event.id)).one()
         db_task.events.remove(event)
         session.delete(db_event)
+        session.commit()
+
+    # Delete Files
+    for file in db_task.file:
+        db_file = session.exec(select(Files).where(Files.id == file.id)).one()
+        db_task.file.remove(file)
+        session.delete(db_file)
         session.commit()
 
     session.delete(db_task)
