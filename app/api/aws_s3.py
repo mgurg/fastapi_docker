@@ -2,7 +2,8 @@ import io
 from typing import Optional
 
 import boto3
-import magic
+
+# import magic
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from loguru import logger
 from sqlalchemy import func
@@ -121,12 +122,12 @@ async def get_s3(s3_obj: str):
     f = io.BytesIO()
     s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(s3_obj, f)
 
-    f.seek(0)
-    mime_type = magic.from_buffer(f.read(2048), mime=True)
+    # f.seek(0)
+    # mime_type = magic.from_buffer(f.read(2048), mime=True)
 
     f.seek(0)
     header = {"Content-Disposition": f'inline; filename="{s3_obj}"'}
-    return StreamingResponse(f, media_type=mime_type, headers=header)
+    return StreamingResponse(f, headers=header)  # media_type=mime_type,
 
 
 @s3_router.post("/upload/")

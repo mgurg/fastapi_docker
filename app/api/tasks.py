@@ -141,7 +141,22 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
         raise HTTPException(status_code=404, detail="Task not found")
 
     task_data = task.dict(exclude_unset=True)
-    if task_data["assignee"] is not None:
+
+    files = []
+    if ("files" in task_data) and (task_data["files"] is not None):
+        for file in db_task.file:
+            db_task.file.remove(file)
+        for file in task_data["files"]:
+            db_file = session.exec(
+                select(Files).where(Files.uuid == file).where(Files.deleted_at == None)
+            ).one_or_none()
+            if db_file:
+                files.append(db_file)
+
+        task_data["file"] = files
+        del task_data["files"]
+
+    if ("assignee" in task_data) and (task_data["assignee"] is not None):
         db_assignee = session.exec(
             select(Users).where(Users.uuid == task_data["assignee"]).where(Users.deleted_at == None)
         ).one_or_none()
@@ -152,7 +167,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
         del task_data["assignee"]
 
     events = []
-    if task_data["mode"] == "cyclic":
+    if ("mode" in task_data) and (task_data["mode"] == "cyclic"):
         if db_task.events is not None:
             for event in db_task.events:
                 db_event = session.exec(select(Events).where(Events.id == event.id)).one()

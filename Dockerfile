@@ -2,7 +2,7 @@
 FROM python:3.10.2-slim-bullseye
 # FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
 
-RUN apt-get update && apt-get install -y libmagic1
+# RUN apt-get update && apt-get install -y libmagic1
 
 RUN useradd -r -s /bin/bash alex
 
