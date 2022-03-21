@@ -57,6 +57,8 @@ class LoginHistory(SQLModel, table=True):
 
 class Users(SQLModel, table=True):
     __tablename__ = "users"
+    # __table_args__ = {"schema": "public", "keep_existing": True}
+
     id: Optional[int] = Field(default=None, primary_key=True)
     client_id: int
     password: str
