@@ -15,6 +15,26 @@ class StandardResponse(SQLModel):  # OK
     ok: bool
 
 
+class TasksLog(SQLModel, table=True):
+    __tablename__ = "tasks_log"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    task_id: int
+    uuid: uuid.UUID
+    user_id: int
+    start_at: datetime
+    end_at: Optional[datetime]
+    duration: Optional[int]
+    from_value: str
+    to_value: str
+    action_type: str
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=False)
+
+
+class TasksLogIn(SQLModel):
+    to_value: Optional[str]
+    action_type: str
+
+
 class LoginHistory(SQLModel, table=True):
     __tablename__ = "login_history"
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -176,6 +196,7 @@ class Tasks(SQLModel, table=True):
     mode: Optional[str]
     all_day: Optional[bool]
     recurring: bool
+    status: Optional[str]
     deleted_at: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]

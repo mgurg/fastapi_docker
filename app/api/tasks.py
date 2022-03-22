@@ -20,6 +20,8 @@ from app.models.models import (
     TaskIndexResponse,
     Tasks,
     TaskSingleResponse,
+    TasksLog,
+    TasksLogIn,
     Users,
 )
 from app.service.helpers import get_uuid
@@ -249,5 +251,85 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
     # session.add(db_task)
     # session.commit()
     # session.refresh(db_task)
+
+    return {"ok": True}
+
+
+@task_router.post("/action/{uuid}", response_model=StandardResponse, name="task:Action")
+@logger.catch()
+async def task_action(*, session: Session = Depends(get_session), uuid, task: TasksLogIn):
+    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    res = TasksLogIn.from_orm(task)
+
+    db_task_open_log = session.exec(
+        select(TasksLog)
+        .where(TasksLog.task_id == db_task.id)
+        .where(TasksLog.end_at == None)
+        .order_by(TasksLog.id.desc())
+    ).first()
+
+    if not db_task_open_log:
+        db_task_any_log = session.exec(
+            select(TasksLog).where(TasksLog.task_id == db_task.id).order_by(TasksLog.id.desc())
+        ).first()
+        if not db_task_any_log:
+            first_task_log = TasksLog(
+                task_id=db_task.id,
+                uuid=get_uuid(),
+                user_id=1,
+                start_at=datetime.utcnow(),
+                end_at=None,
+                duration=0,
+                action_type="task_progress",
+            )
+
+            session.add(first_task_log)
+            session.commit()
+            session.refresh(first_task_log)
+
+            # Zgłoszone / Otwarte / Odrzucone / Realizacja / Wstrzymane / Zamknięte / Anulowane
+            db_task.status = "in_progress"
+            session.add(db_task)
+            session.commit()
+            session.refresh(db_task)
+        else:
+            new_task_log = TasksLog(
+                task_id=db_task.id,
+                uuid=get_uuid(),
+                user_id=1,
+                start_at=datetime.utcnow(),
+                end_at=None,
+                duration=0,
+                action_type="task_progress",
+            )
+
+            session.add(new_task_log)
+            session.commit()
+            session.refresh(new_task_log)
+
+            db_task.status = "in_progress"
+            session.add(db_task)
+            session.commit()
+            session.refresh(db_task)
+
+    else:
+        duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
+
+        db_task_open_log.end_at = datetime.utcnow()
+        db_task_open_log.duration = duration
+        session.add(db_task_open_log)
+        session.commit()
+        session.refresh(db_task_open_log)
+
+        db_task.status = "done"
+        db_task.duration += duration
+        session.add(db_task)
+        session.commit()
+        session.refresh(db_task)
+
+        print("INFO: ", db_task_open_log.action_type, db_task_open_log.to_value)
 
     return {"ok": True}
