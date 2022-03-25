@@ -293,6 +293,7 @@ class FileUrlResponse(SQLModel):
 class TaskIndexResponse(SQLModel):
     uuid: uuid.UUID
     color: str
+    status: Optional[str]
     # author_id: int
     # assignee_id: Optional[int]
     title: str
