@@ -267,6 +267,7 @@ async def task_action(*, session: Session = Depends(get_session), uuid, task: Ta
     db_task_open_log = session.exec(
         select(TasksLog)
         .where(TasksLog.task_id == db_task.id)
+<<<<<<< HEAD
         .where(TasksLog.end_at == None)
         .order_by(TasksLog.id.desc())
     ).first()
@@ -311,10 +312,104 @@ async def task_action(*, session: Session = Depends(get_session), uuid, task: Ta
             session.refresh(new_task_log)
 
             db_task.status = "in_progress"
+=======
+        .where(TasksLog.action_type == "task")
+        .order_by(TasksLog.id.desc())
+    ).first()
+
+    if (not db_task_open_log) and (res.action_type == "accepted" or res.action_type == "rejected"):
+        first_task_log = TasksLog(
+            task_id=db_task.id,
+            uuid=get_uuid(),
+            user_id=1,
+            start_at=db_task.created_at,
+            end_at=datetime.utcnow(),
+            from_value="new",
+            to_value=res.action_type,
+            duration=pendulum.now().diff(pendulum.instance(db_task.created_at)).in_minutes(),
+            action_type="task",
+        )
+
+        session.add(first_task_log)
+        session.commit()
+        session.refresh(first_task_log)
+
+        db_task.status = res.action_type
+        session.add(db_task)
+        session.commit()
+        session.refresh(db_task)
+
+    if (db_task_open_log) and (db_task_open_log.to_value == "accepted") and (db_task_open_log.end_at != None):
+        first_task_log = TasksLog(
+            task_id=db_task.id,
+            uuid=get_uuid(),
+            user_id=1,
+            start_at=datetime.utcnow(),
+            from_value="start",
+            duration=0,
+            action_type="task",
+        )
+
+        session.add(first_task_log)
+        session.commit()
+        session.refresh(first_task_log)
+
+        db_task.status = "in_progress"
+        session.add(db_task)
+        session.commit()
+        session.refresh(db_task)
+
+    if (db_task_open_log) and (db_task_open_log.end_at == None):
+        if (db_task_open_log.from_value == "start") and (res.action_type == "stop"):
+            duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
+
+            db_task_open_log.end_at = datetime.utcnow()
+            db_task_open_log.duration = duration
+            db_task_open_log.to_value = res.action_type
+            session.add(db_task_open_log)
+            session.commit()
+            session.refresh(db_task_open_log)
+
+            db_task.status = "done"
+            db_task.duration += duration
             session.add(db_task)
             session.commit()
             session.refresh(db_task)
 
+        if (db_task_open_log.from_value == "start") and (res.action_type == "pause"):
+            duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
+
+            db_task_open_log.end_at = datetime.utcnow()
+            db_task_open_log.duration = duration
+            db_task_open_log.to_value = res.action_type
+            session.add(db_task_open_log)
+            session.commit()
+            session.refresh(db_task_open_log)
+
+            db_task.status = "paused"
+            db_task.duration += duration
+            session.add(db_task)
+            session.commit()
+            session.refresh(db_task)
+
+        if (db_task_open_log.from_value == "pause") and (res.action_type == "start"):
+            duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
+
+            db_task_open_log.end_at = datetime.utcnow()
+            db_task_open_log.duration = duration
+            db_task_open_log.to_value = res.action_type
+            session.add(db_task_open_log)
+            session.commit()
+            session.refresh(db_task_open_log)
+
+            db_task.status = "in_progress"
+            db_task.duration += duration
+>>>>>>> 28029457ef197ddeaf31019e6838f1d40e155a73
+            session.add(db_task)
+            session.commit()
+            session.refresh(db_task)
+
+<<<<<<< HEAD
     else:
         duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
 
@@ -331,5 +426,83 @@ async def task_action(*, session: Session = Depends(get_session), uuid, task: Ta
         session.refresh(db_task)
 
         print("INFO: ", db_task_open_log.action_type, db_task_open_log.to_value)
+=======
+        if (db_task_open_log.from_value == "pause") and (res.action_type == "stop"):
+            duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
+
+            db_task_open_log.end_at = datetime.utcnow()
+            db_task_open_log.duration = duration
+            db_task_open_log.to_value = res.action_type
+            session.add(db_task_open_log)
+            session.commit()
+            session.refresh(db_task_open_log)
+
+            db_task.status = "done"
+            db_task.duration += duration
+            session.add(db_task)
+            session.commit()
+            session.refresh(db_task)
+
+    # if not db_task_open_log:
+    #     db_task_any_log = session.exec(
+    #         select(TasksLog).where(TasksLog.task_id == db_task.id).order_by(TasksLog.id.desc())
+    #     ).first()
+    #     if not db_task_any_log:
+    #         first_task_log = TasksLog(
+    #             task_id=db_task.id,
+    #             uuid=get_uuid(),
+    #             user_id=1,
+    #             start_at=datetime.utcnow(),
+    #             end_at=None,
+    #             duration=0,
+    #             action_type="task_progress",
+    #         )
+
+    #         session.add(first_task_log)
+    #         session.commit()
+    #         session.refresh(first_task_log)
+
+    #         # Zgłoszone / Otwarte / Odrzucone / Realizacja / Wstrzymane / Zamknięte / Anulowane
+    #         db_task.status = "in_progress"
+    #         session.add(db_task)
+    #         session.commit()
+    #         session.refresh(db_task)
+    #     else:
+    #         new_task_log = TasksLog(
+    #             task_id=db_task.id,
+    #             uuid=get_uuid(),
+    #             user_id=1,
+    #             start_at=datetime.utcnow(),
+    #             end_at=None,
+    #             duration=0,
+    #             action_type="task_progress",
+    #         )
+
+    #         session.add(new_task_log)
+    #         session.commit()
+    #         session.refresh(new_task_log)
+
+    #         db_task.status = "in_progress"
+    #         session.add(db_task)
+    #         session.commit()
+    #         session.refresh(db_task)
+
+    # else:
+    #     duration = pendulum.now().diff(pendulum.instance(db_task_open_log.start_at)).in_minutes()
+
+    #     db_task_open_log.end_at = datetime.utcnow()
+    #     db_task_open_log.duration = duration
+    #     session.add(db_task_open_log)
+    #     session.commit()
+    #     session.refresh(db_task_open_log)
+
+    #     db_task.status = "done"
+    #     db_task.duration += duration
+    #     session.add(db_task)
+    #     session.commit()
+    #     session.refresh(db_task)
+
+    #     print("INFO: ", db_task_open_log.action_type, db_task_open_log.to_value)
+>>>>>>> 28029457ef197ddeaf31019e6838f1d40e155a73
 
     return {"ok": True}
