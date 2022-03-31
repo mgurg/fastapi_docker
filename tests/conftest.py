@@ -9,6 +9,7 @@ from starlette.testclient import TestClient
 from app.config import get_settings
 from app.db import get_session
 from app.main import create_application
+from app.service.bearer_auth import has_token
 
 # def get_settings_override():
 #     return Settings(testing=1, database_url=os.environ.get("DATABASE_TEST_URL"))
@@ -37,8 +38,14 @@ def client_fixture(session: Session):
     def get_session_override():
         return session
 
+    def get_auth_override():
+        return {"user": 1, "account": 2}
+
     app = create_application()
+
     app.dependency_overrides[get_session] = get_session_override
+    app.dependency_overrides[has_token] = get_auth_override
+
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()

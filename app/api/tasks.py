@@ -24,6 +24,7 @@ from app.models.models import (
     TasksLogIn,
     Users,
 )
+from app.service.bearer_auth import has_token
 from app.service.helpers import get_uuid
 from app.service.password import Password
 
@@ -36,15 +37,28 @@ async def user_get_all(
     session: Session = Depends(get_session),
     offset: int = 0,
     limit: int = Query(default=20, lte=100),
+    auth=Depends(has_token)
 ):
-    tasks = session.exec(select(Tasks).where(Tasks.deleted_at == None).offset(offset).limit(limit)).all()
+    tasks = session.exec(
+        select(Tasks)
+        .where(Tasks.client_id == auth["account"])
+        .where(Tasks.deleted_at == None)
+        .offset(offset)
+        .limit(limit)
+    ).all()
 
     return tasks
 
 
 @task_router.get("/{uuid}", response_model=TaskSingleResponse, name="Get task")
-async def user_get_all(*, session: Session = Depends(get_session), uuid):
-    task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
+async def user_get_all(*, session: Session = Depends(get_session), uuid, auth=Depends(has_token)):
+    print(auth)
+    task = session.exec(
+        select(Tasks)
+        .where(Tasks.client_id == auth["account"])
+        .where(Tasks.uuid == uuid)
+        .where(Tasks.deleted_at == None)
+    ).one_or_none()
     return task
 
 

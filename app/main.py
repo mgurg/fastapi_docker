@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 import uvicorn
-from fastapi import FastAPI, WebSocket
+from fastapi import Depends, FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from starlette.websockets import WebSocket, WebSocketDisconnect
@@ -16,6 +16,7 @@ from app.api.register import register_router
 from app.api.tasks import task_router
 from app.api.user import user_router
 from app.config import get_settings
+from app.service.bearer_auth import has_token
 from app.utils import get_secret
 
 logger.add(
@@ -61,6 +62,7 @@ def create_application() -> FastAPI:
     app.include_router(
         task_router,
         prefix="/tasks",
+        dependencies=[Depends(has_token)],
         tags=["TASK"],
     )
 

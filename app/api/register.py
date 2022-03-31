@@ -177,7 +177,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
             token_valid_to = datetime.now() + timedelta(days=30)
 
         update_package = {
-            "auth_token": token,
+            "auth_token": 123,  # token,
             "auth_token_valid_to": token_valid_to,
             "updated_at": datetime.utcnow(),
         }
