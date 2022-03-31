@@ -42,7 +42,7 @@ async def user_get_all(
     tasks = session.exec(
         select(Tasks)
         .where(Tasks.client_id == auth["account"])
-        .where(Tasks.deleted_at == None)
+        .where(Tasks.deleted_at.is_(None))
         .offset(offset)
         .limit(limit)
     ).all()
@@ -57,7 +57,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, auth=De
         select(Tasks)
         .where(Tasks.client_id == auth["account"])
         .where(Tasks.uuid == uuid)
-        .where(Tasks.deleted_at == None)
+        .where(Tasks.deleted_at.is_(None))
     ).one_or_none()
     return task
 
@@ -71,7 +71,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     assignee = None
     if res.assignee is not None:
         db_assignee = session.exec(
-            select(Users).where(Users.uuid == res.assignee).where(Users.deleted_at == None)
+            select(Users).where(Users.uuid == res.assignee).where(Users.deleted_at.is_(None))
         ).one_or_none()
         if not db_assignee:
             raise HTTPException(status_code=404, detail="Assignee not found")
@@ -81,7 +81,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     if res.files is not None:
         for file in res.files:
             db_file = session.exec(
-                select(Files).where(Files.uuid == file).where(Files.deleted_at == None)
+                select(Files).where(Files.uuid == file).where(Files.deleted_at.is_(None))
             ).one_or_none()
             if db_file:
                 files.append(db_file)
@@ -152,7 +152,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
 @logger.catch()
 async def user_get_all(*, session: Session = Depends(get_session), uuid, task: TaskEditIn):
 
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
+    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -164,7 +164,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
             db_task.file.remove(file)
         for file in task_data["files"]:
             db_file = session.exec(
-                select(Files).where(Files.uuid == file).where(Files.deleted_at == None)
+                select(Files).where(Files.uuid == file).where(Files.deleted_at.is_(None))
             ).one_or_none()
             if db_file:
                 files.append(db_file)
@@ -174,7 +174,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
 
     if ("assignee" in task_data) and (task_data["assignee"] is not None):
         db_assignee = session.exec(
-            select(Users).where(Users.uuid == task_data["assignee"]).where(Users.deleted_at == None)
+            select(Users).where(Users.uuid == task_data["assignee"]).where(Users.deleted_at.is_(None))
         ).one_or_none()
         if not db_assignee:
             raise HTTPException(status_code=404, detail="Assignee not found")
@@ -235,7 +235,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
 @task_router.delete("/{uuid}", response_model=StandardResponse, name="task:Tasks")
 async def user_get_all(*, session: Session = Depends(get_session), uuid):
 
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
+    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -272,7 +272,7 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
 @task_router.post("/action/{uuid}", response_model=StandardResponse, name="task:Action")
 @logger.catch()
 async def task_action(*, session: Session = Depends(get_session), uuid, task: TasksLogIn):
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at == None)).one_or_none()
+    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 

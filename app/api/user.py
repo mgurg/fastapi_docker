@@ -43,7 +43,7 @@ async def user_get_all(*, session: Session = Depends(get_session)):
         select(Users)
         .where(Users.client_id == 2)
         .where(Users.is_active == True)
-        .where(Users.deleted_at == None)
+        .where(Users.deleted_at.is_(None))
         # .execution_options(schema_translate_map={None: "tenant_1"})
         # https://github.com/flowfelis/test-fast-api/blob/cb40311e08de10e3a4cf83881af6f36d11fdc4d9/app/main.py
     ).all()
@@ -58,6 +58,6 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
         .where(Users.client_id == 2)
         .where(Users.uuid == uuid)
         .where(Users.is_active == True)
-        .where(Users.deleted_at == None)
+        .where(Users.deleted_at.is_(None))
     ).first()
     return users

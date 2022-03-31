@@ -29,7 +29,7 @@ async def file_get_all(*, session: Session = Depends(get_session)):
     # if quota > 300000:
     #     raise HTTPException(status_code=413, detail="Quota exceeded")
 
-    files = session.exec(select(Files).where(Files.client_id == 2).where(Files.deleted_at == None)).all()
+    files = session.exec(select(Files).where(Files.client_id == 2).where(Files.deleted_at.is_(None))).all()
 
     return files
 
@@ -38,7 +38,7 @@ async def file_get_all(*, session: Session = Depends(get_session)):
 async def file_get_all(*, session: Session = Depends(get_session), uuid: UUID):
 
     file = session.exec(
-        select(Files).where(Files.client_id == 2).where(Files.uuid == uuid).where(Files.deleted_at == None)
+        select(Files).where(Files.client_id == 2).where(Files.uuid == uuid).where(Files.deleted_at.is_(None))
     ).one_or_none()
 
     if not file:
@@ -88,7 +88,7 @@ async def file_add(*, session: Session = Depends(get_session), request: Request,
 async def remove_bucket(*, session: Session = Depends(get_session), uuid: UUID):
 
     db_file = session.exec(
-        select(Files).where(Files.client_id == 2).where(Files.uuid == uuid).where(Files.deleted_at == None)
+        select(Files).where(Files.client_id == 2).where(Files.uuid == uuid).where(Files.deleted_at.is_(None))
     ).one_or_none()
 
     if not db_file:
@@ -108,7 +108,7 @@ async def remove_bucket(*, session: Session = Depends(get_session), uuid: UUID):
 async def file_download(*, session: Session = Depends(get_session), uuid: UUID):
 
     file = session.exec(
-        select(Files).where(Files.client_id == 2).where(Files.uuid == uuid).where(Files.deleted_at == None)
+        select(Files).where(Files.client_id == 2).where(Files.uuid == uuid).where(Files.deleted_at.is_(None))
     ).one_or_none()
 
     if not file:
