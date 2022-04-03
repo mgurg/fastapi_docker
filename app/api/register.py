@@ -234,7 +234,8 @@ async def auth_remind(*, session: Session = Depends(get_session), user_email: Em
         select(Users).where(Users.email == user_email).where(Users.is_active == True).where(Users.deleted_at.is_(None))
     ).one_or_none()
     if db_user is None:
-        raise HTTPException(status_code=404, detail="Invalid email")
+        return {"ok": True}
+        # raise HTTPException(status_code=404, detail="Invalid email")
 
     update_package = {
         "service_token": secrets.token_hex(32),
