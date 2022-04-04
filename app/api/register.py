@@ -121,12 +121,16 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    token = 123
+
     update_package = {
         "first_name": res.first_name,
         "last_name": res.last_name,
         "is_active": True,
         "service_token": None,
         "service_token_valid_to": None,
+        "auth_token": token,  # token,
+        "auth_token_valid_to": datetime.now() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
 
@@ -146,7 +150,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     session.commit()
     session.refresh(db_user)
 
-    return {"ok": True}
+    return {"ok": True, "token": token}
 
 
 @register_router.post("/login", response_model=UserLoginOut)
