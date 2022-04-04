@@ -100,7 +100,7 @@ async def auth_activate(*, session: Session = Depends(get_session), token):
     return db_user
 
 
-@register_router.post("/first_run", response_model=StandardResponse)
+@register_router.post("/first_run")
 async def auth_first_run(*, session: Session = Depends(get_session), user: UserFirstRunIn):
     """Activate user based on service token"""
 
