@@ -49,37 +49,6 @@ def test_post_register_wrong_password(client: TestClient):
     assert data["detail"] == "Password and password confirmation not match"
 
 
-def test_post_register_activate(session: Session, client: TestClient):
-
-    fake = Faker("pl_PL")
-
-    for i in range(5):
-        email = fake.email()
-        token = fake.hexify("^" * 32)
-
-        new_user = Users(
-            client_id=fake.random_digit(),
-            email=email,
-            service_token=token,
-            service_token_valid_to=datetime.now() + timedelta(days=1),
-            password=argon2.hash(fake.password()),
-            user_role_id=2,
-            created_at=datetime.utcnow(),
-            is_active=False,
-            tz=fake.timezone(),
-            lang=fake.language_code(),
-            uuid=get_uuid(),
-        )
-        session.add(new_user)
-        session.commit()
-
-    response = client.get("auth/activate/" + token)
-    data = response.json()
-
-    assert response.status_code == 200
-    assert data["email"] == email
-
-
 def test_post_register_first_run(session: Session, client: TestClient):
     fake = Faker("pl_PL")
 

@@ -58,7 +58,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     new_user = Users(
         client_id=client_id + 2,
         email=res.email.strip(),
-        service_token=secrets.token_hex(32),
+        service_token=secrets.token_hex(64),
         service_token_valid_to=datetime.now() + timedelta(days=1),
         password=pass_hash,
         user_role_id=2,
@@ -83,23 +83,6 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     return {"ok": True}
 
 
-@register_router.get("/activate/{token}", response_model=UserActivateOut)
-async def auth_activate(*, session: Session = Depends(get_session), token):
-    """Return email of unactivated user"""
-
-    db_user = session.exec(
-        select(Users)
-        .where(Users.service_token == token)
-        .where(Users.is_active == False)
-        .where(Users.service_token_valid_to > datetime.utcnow())
-        .where(Users.deleted_at.is_(None))
-    ).one_or_none()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return db_user
-
-
 @register_router.post("/first_run")
 async def auth_first_run(*, session: Session = Depends(get_session), user: UserFirstRunIn):
     """Activate user based on service token"""
@@ -120,7 +103,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    token = 123
+    token = secrets.token_hex(64)
 
     update_package = {
         "first_name": res.first_name,
@@ -128,7 +111,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
         "is_active": True,
         "service_token": None,
         "service_token_valid_to": None,
-        "auth_token": token,  # token,
+        "auth_token": token,
         "auth_token_valid_to": datetime.now() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
@@ -180,7 +163,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
             token_valid_to = datetime.now() + timedelta(days=30)
 
         update_package = {
-            "auth_token": secrets.token_hex(32),  # token,
+            "auth_token": secrets.token_hex(64),  # token,
             "auth_token_valid_to": token_valid_to,
             "updated_at": datetime.utcnow(),
         }
@@ -241,7 +224,7 @@ async def auth_remind(*, session: Session = Depends(get_session), user_email: Em
         # raise HTTPException(status_code=404, detail="Invalid email")
 
     update_package = {
-        "service_token": secrets.token_hex(32),
+        "service_token": secrets.token_hex(64),
         "service_token_valid_to": datetime.now() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
