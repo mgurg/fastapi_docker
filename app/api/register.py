@@ -224,7 +224,7 @@ async def auth_remind(*, session: Session = Depends(get_session), user_email: Em
         # raise HTTPException(status_code=404, detail="Invalid email")
 
     update_package = {
-        "service_token": secrets.token_hex(64),
+        "service_token": secrets.token_hex(32),
         "service_token_valid_to": datetime.now() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
