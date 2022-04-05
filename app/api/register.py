@@ -58,7 +58,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     new_user = Users(
         client_id=client_id + 2,
         email=res.email.strip(),
-        service_token=secrets.token_hex(64),
+        service_token=secrets.token_hex(32),
         service_token_valid_to=datetime.now() + timedelta(days=1),
         password=pass_hash,
         user_role_id=2,
