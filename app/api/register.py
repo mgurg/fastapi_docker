@@ -109,7 +109,6 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     if not nip.is_valid(res.nip):  # 123-456-32-18
         raise HTTPException(status_code=404, detail="Invalid NIP number")
 
-    print(res.token)
     db_user = session.exec(
         select(Users)
         .where(Users.service_token == res.token)
@@ -181,7 +180,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
             token_valid_to = datetime.now() + timedelta(days=30)
 
         update_package = {
-            "auth_token": 123,  # token,
+            "auth_token": secrets.token_hex(32),  # token,
             "auth_token_valid_to": token_valid_to,
             "updated_at": datetime.utcnow(),
         }
