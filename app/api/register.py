@@ -1,7 +1,7 @@
 import secrets
+import uu
 from datetime import datetime, timedelta
 
-import requests
 from disposable_email_domains import blocklist
 from fastapi import APIRouter, Depends, HTTPException, Request
 from passlib.hash import argon2
@@ -13,6 +13,7 @@ from user_agents import parse
 
 from app.db import get_session
 from app.models.models import (
+    Accounts,
     LoginHistory,
     StandardResponse,
     UserActivateOut,
@@ -59,7 +60,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
         client_id=client_id + 2,
         email=res.email.strip(),
         service_token=secrets.token_hex(32),
-        service_token_valid_to=datetime.now() + timedelta(days=1),
+        service_token_valid_to=datetime.utcnow() + timedelta(days=1),
         password=pass_hash,
         user_role_id=2,
         created_at=datetime.utcnow(),
@@ -112,7 +113,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
         "service_token": None,
         "service_token_valid_to": None,
         "auth_token": token,
-        "auth_token_valid_to": datetime.now() + timedelta(days=1),
+        "auth_token_valid_to": datetime.utcnow() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
 
@@ -131,6 +132,12 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
+
+    account = Accounts(uuid=get_uuid(), client_id=db_user.client_id)
+
+    session.add(account)
+    session.commit()
+    session.refresh(account)
 
     return {"ok": True, "token": token}
 
@@ -158,9 +165,9 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         else:
             raise HTTPException(status_code=401, detail="Incorrect username or password")
 
-        token_valid_to = datetime.now() + timedelta(days=1)
+        token_valid_to = datetime.utcnow() + timedelta(days=1)
         if res.permanent is True:
-            token_valid_to = datetime.now() + timedelta(days=30)
+            token_valid_to = datetime.utcnow() + timedelta(days=30)
 
         update_package = {
             "auth_token": secrets.token_hex(64),  # token,
@@ -225,7 +232,7 @@ async def auth_remind(*, session: Session = Depends(get_session), user_email: Em
 
     update_package = {
         "service_token": secrets.token_hex(32),
-        "service_token_valid_to": datetime.now() + timedelta(days=1),
+        "service_token_valid_to": datetime.utcnow() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
 

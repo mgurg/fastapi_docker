@@ -75,6 +75,13 @@ class LoginHistory(SQLModel, table=True):
 #     updated_a: Optional[str]
 
 
+class Accounts(SQLModel, table=True):
+    __tablename__ = "accounts"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    client_id: int
+
+
 class Users(SQLModel, table=True):
     __tablename__ = "users"
     # __table_args__ = {"schema": "public", "keep_existing": True}
@@ -107,10 +114,21 @@ class UserCreateIn(SQLModel):  # OK
     email: EmailStr
     password: Optional[str]
     password_confirmation: Optional[str]
+    phone: Optional[str]
     first_name: str
     last_name: str
     user_role_uuid: Optional[uuid.UUID]
     # details: Optional[UsersDetailsCreate]
+
+
+class UserCreateIn(SQLModel):  # OK
+    email: Optional[EmailStr]
+    password: Optional[str]
+    password_confirmation: Optional[str]
+    phone: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    user_role_uuid: Optional[uuid.UUID]
 
 
 class UserRegisterIn(SQLModel):  # OK

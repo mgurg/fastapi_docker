@@ -1,5 +1,6 @@
 from datetime import datetime, time, timedelta
 from typing import List
+from uuid import UUID
 
 import pendulum
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -50,13 +51,13 @@ async def user_get_all(
     return tasks
 
 
-@task_router.get("/{uuid}", response_model=TaskSingleResponse, name="Get task")
-async def user_get_all(*, session: Session = Depends(get_session), uuid, auth=Depends(has_token)):
+@task_router.get("/{task_uuid}", response_model=TaskSingleResponse, name="Get task")
+async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UUID, auth=Depends(has_token)):
     print(auth)
     task = session.exec(
         select(Tasks)
         .where(Tasks.client_id == auth["account"])
-        .where(Tasks.uuid == uuid)
+        .where(Tasks.uuid == task_uuid)
         .where(Tasks.deleted_at.is_(None))
     ).one_or_none()
     return task
@@ -148,11 +149,13 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     return {"ok": True}
 
 
-@task_router.patch("/{uuid}", response_model=StandardResponse, name="task:Tasks")
+@task_router.patch("/{task_uuid}", response_model=StandardResponse, name="task:Tasks")
 @logger.catch()
-async def user_get_all(*, session: Session = Depends(get_session), uuid, task: TaskEditIn):
+async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UUID, task: TaskEditIn):
 
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
+    db_task = session.exec(
+        select(Tasks).where(Tasks.uuid == task_uuid).where(Tasks.deleted_at.is_(None))
+    ).one_or_none()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -232,10 +235,13 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid, task: T
     return {"ok": True}
 
 
-@task_router.delete("/{uuid}", response_model=StandardResponse, name="task:Tasks")
-async def user_get_all(*, session: Session = Depends(get_session), uuid):
+@task_router.delete("/{task_uuid}", response_model=StandardResponse, name="task:Tasks")
+async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UUID):
 
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
+    db_task = session.exec(
+        select(Tasks).where(Tasks.uuid == task_uuid).where(Tasks.deleted_at.is_(None))
+    ).one_or_none()
+
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -269,10 +275,10 @@ async def user_get_all(*, session: Session = Depends(get_session), uuid):
     return {"ok": True}
 
 
-@task_router.post("/action/{uuid}", response_model=StandardResponse, name="task:Action")
+@task_router.post("/action/{task_uuid}", response_model=StandardResponse, name="task:Action")
 @logger.catch()
-async def task_action(*, session: Session = Depends(get_session), uuid, task: TasksLogIn):
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
+async def task_action(*, session: Session = Depends(get_session), task_uuid: UUID, task: TasksLogIn):
+    db_task = session.exec(select(Tasks).where(Tasks.uuid == task_uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 

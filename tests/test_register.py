@@ -60,7 +60,7 @@ def test_post_register_first_run(session: Session, client: TestClient):
             client_id=fake.random_digit(),
             email=email,
             service_token=token,
-            service_token_valid_to=datetime.now() + timedelta(days=1),
+            service_token_valid_to=datetime.utcnow() + timedelta(days=1),
             password=argon2.hash(fake.password()),
             user_role_id=2,
             created_at=datetime.utcnow(),

@@ -23,11 +23,11 @@ def test_list_users(session: Session, client: TestClient):
             first_name=fake.first_name(),
             last_name=fake.last_name(),
             service_token=token,
-            service_token_valid_to=datetime.now() + timedelta(days=1),
+            service_token_valid_to=datetime.utcnow() + timedelta(days=1),
             password=argon2.hash(fake.password()),
             user_role_id=2,
             created_at=datetime.utcnow(),
-            is_active=False,
+            is_active=True,
             tz=fake.timezone(),
             lang=fake.language_code(),
             uuid=get_uuid(),
@@ -35,7 +35,7 @@ def test_list_users(session: Session, client: TestClient):
         session.add(new_user)
         session.commit()
 
-    response = client.get("user/index")
+    response = client.get("user/")
     data = response.json()
     assert response.status_code == 200
 
@@ -50,7 +50,7 @@ def test_get_user(session: Session, client: TestClient):
             first_name=fake.first_name(),
             last_name=fake.last_name(),
             service_token=fake.hexify("^" * 32),
-            service_token_valid_to=datetime.now() + timedelta(days=1),
+            service_token_valid_to=datetime.utcnow() + timedelta(days=1),
             password=argon2.hash(fake.password()),
             user_role_id=2,
             created_at=datetime.utcnow(),

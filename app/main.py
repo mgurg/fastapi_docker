@@ -56,6 +56,7 @@ def create_application() -> FastAPI:
     app.include_router(
         user_router,
         prefix="/user",
+        dependencies=[Depends(has_token)],
         tags=["USER"],
     )
 
