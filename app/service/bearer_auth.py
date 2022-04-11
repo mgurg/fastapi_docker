@@ -22,8 +22,8 @@ async def has_token(*, session: Session = Depends(get_session), credentials: HTT
 
     db_user_data = session.exec(select(Users.id, Users.client_id).where(Users.auth_token == token)).one_or_none()
 
-    user_id, client_id = db_user_data
     if db_user_data is not None:
+        user_id, client_id = db_user_data
         return {"user": user_id, "account": client_id}
     else:
         raise HTTPException(status_code=401, detail="Incorrect auth token")
