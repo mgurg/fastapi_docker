@@ -139,7 +139,14 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     # session.commit()
     # session.refresh(account)
 
-    return {"ok": True, "token": token}
+    return {
+        "ok": True,
+        "first_name": db_user.first_name,
+        "last_name": db_user.last_name,
+        "lang": db_user.lang,
+        "tz": db_user.tz,
+        "token": token,
+    }
 
 
 @register_router.post("/login", response_model=UserLoginOut)
