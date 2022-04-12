@@ -133,11 +133,11 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     session.commit()
     session.refresh(db_user)
 
-    account = Accounts(uuid=get_uuid(), client_id=db_user.client_id)
+    # account = Accounts(uuid=get_uuid(), client_id=db_user.client_id)
 
-    session.add(account)
-    session.commit()
-    session.refresh(account)
+    # session.add(account)
+    # session.commit()
+    # session.refresh(account)
 
     return {"ok": True, "token": token}
 
