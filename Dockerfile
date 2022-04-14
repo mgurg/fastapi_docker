@@ -52,9 +52,9 @@ COPY ./requirements.txt /requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 
 #USER alex
+COPY --chown=alex:alex ./migrations /src/migrations
+COPY --chown=alex:alex ./alembic.ini /src/alembic.ini
 COPY --chown=alex:alex ./app /src/app
-
-
 
 
 WORKDIR /src

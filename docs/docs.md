@@ -174,6 +174,16 @@ pg_dump --dbname=postgresql://username:password@127.0.0.1:5432/mydatabase
 
 
 
+### Alembic
+
+Utowrzenie poczatkowej migracji z bazy danych
+
+```
+alembic revision --autogenerate -m "Initial"
+```
+
+
+
 ---
 
 
