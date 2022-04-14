@@ -2,6 +2,7 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
@@ -13,9 +14,16 @@ from app.models.models import *  # New (be sure to import all models you need mi
 config = context.config
 
 section = config.config_ini_section
+# print(os.path.abspath(os.getcwd()))
+load_dotenv("./app/.env")
 config.set_section_option(section, "DB_USER", os.environ.get("DB_USERNAME"))
 config.set_section_option(section, "DB_PASS", os.environ.get("DB_PASSWORD"))
-config.set_section_option(section, "DB_HOST", os.environ.get("DB_HOST"))
+
+if os.environ.get("APP_ENV") == "local":
+    config.set_section_option(section, "DB_HOST", "localhost")
+else:
+    config.set_section_option(section, "DB_HOST", os.environ.get("DB_HOST"))
+
 config.set_section_option(section, "DB_DATABASE", os.environ.get("DB_DATABASE"))
 
 # Interpret the config file for Python logging.
