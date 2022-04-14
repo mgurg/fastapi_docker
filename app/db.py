@@ -12,6 +12,7 @@ password = settings.db_password
 
 database = f"postgresql+psycopg2://{user}:{password}@{host}:5432/{database}"
 engine = create_engine(database, echo=False, pool_pre_ping=True, pool_recycle=280)
+print(database)
 
 
 def get_session():
