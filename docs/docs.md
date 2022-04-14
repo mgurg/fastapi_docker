@@ -180,6 +180,7 @@ Utowrzenie poczatkowej migracji z bazy danych
 
 ```
 alembic revision --autogenerate -m "Initial"
+alembic upgrade head
 ```
 
 
