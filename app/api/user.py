@@ -127,3 +127,22 @@ async def user_edit(
     session.refresh(db_user)
 
     return {"ok": True}
+
+
+@user_router.delete("/{user_uuid}", response_model=StandardResponse, name="task:Tasks")
+async def user_get_all(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
+
+    db_task = session.exec(
+        select(Users)
+        .where(Users.client_id == auth["account"])
+        .where(Users.uuid == user_uuid)
+        .where(Users.deleted_at.is_(None))
+    ).one_or_none()
+
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    session.delete(db_task)
+    session.commit()
+
+    return {"ok": True}
