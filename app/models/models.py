@@ -122,12 +122,12 @@ class UserCreateIn(SQLModel):  # OK
 
 
 class UserCreateIn(SQLModel):  # OK
-    email: Optional[EmailStr]
-    password: Optional[str]
-    password_confirmation: Optional[str]
-    phone: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
+    email: Optional[EmailStr]
+    phone: Optional[str]
+    password: Optional[str]
+    password_confirmation: Optional[str]
     user_role_uuid: Optional[uuid.UUID]
 
 
@@ -176,6 +176,8 @@ class UserSetPassIn(SQLModel):  # OK
 class UserIndexResponse(SQLModel):
     first_name: str
     last_name: str
+    email: str
+    phone: Optional[str]
     uuid: uuid.UUID
 
 

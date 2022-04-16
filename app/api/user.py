@@ -48,13 +48,16 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
 
     res = UserCreateIn.from_orm(user)
 
-    password = Password(res.password)
-    is_password_ok = password.compare(res.password_confirmation)
+    if res.password is not None:
+        password = Password(res.password)
+        is_password_ok = password.compare(res.password_confirmation)
 
-    if is_password_ok is True:
-        pass_hash = argon2.hash(res.password)
+        if is_password_ok is True:
+            pass_hash = argon2.hash(res.password)
+        else:
+            raise HTTPException(status_code=400, detail=is_password_ok)
     else:
-        raise HTTPException(status_code=400, detail=is_password_ok)
+        pass_hash = argon2.hash("string")
 
     new_user = Users(
         client_id=auth["account"],
