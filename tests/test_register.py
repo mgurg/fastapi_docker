@@ -57,7 +57,7 @@ def test_post_register_first_run(session: Session, client: TestClient):
         token = fake.hexify("^" * 32)
 
         new_user = Users(
-            client_id=fake.random_digit(),
+            account_id=fake.random_digit(),
             email=email,
             service_token=token,
             service_token_valid_to=datetime.utcnow() + timedelta(days=1),
@@ -92,7 +92,7 @@ def test_post_login(session: Session, client: TestClient):
         lang = fake.language_code()
 
         new_user = Users(
-            client_id=fake.random_digit(),
+            account_id=fake.random_digit(),
             email=email,
             first_name=first_name,
             last_name=last_name,
@@ -135,7 +135,7 @@ def test_post_verify(session: Session, client: TestClient):
         auth_token = fake.hexify("^" * 32)
 
         new_user = Users(
-            client_id=fake.random_digit(),
+            account_id=fake.random_digit(),
             email=email,
             first_name=first_name,
             last_name=last_name,

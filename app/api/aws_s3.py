@@ -150,7 +150,7 @@ async def upload_aws_s3(
     # },
     # )
 
-    quota = session.exec(select([func.sum(Files.size)]).where(Files.client_id == 2)).one()
+    quota = session.exec(select([func.sum(Files.size)]).where(Files.account_id == 2)).one()
     print("quota", quota)
 
     # if quota > 300000:
@@ -160,7 +160,7 @@ async def upload_aws_s3(
 
     new_file = Files(
         uuid=get_uuid(),
-        client_id=2,
+        account_id=2,
         owner_id=2,
         file_name=file.filename,
         file_id=1,

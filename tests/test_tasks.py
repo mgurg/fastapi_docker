@@ -20,7 +20,7 @@ def test_add_single_task(session: Session, client: TestClient):
         uuid = get_uuid()
 
         new_user = Users(
-            client_id=2,
+            account_id=2,
             email=email,
             first_name=fake.first_name(),
             last_name=fake.last_name(),
@@ -67,7 +67,7 @@ def test_add_planned_task(session: Session, client: TestClient):
         uuid = get_uuid()
 
         new_user = Users(
-            client_id=2,
+            account_id=2,
             email=email,
             first_name=fake.first_name(),
             last_name=fake.last_name(),
@@ -119,7 +119,7 @@ def test_add_recurring_task(session: Session, client: TestClient):
         uuid = get_uuid()
 
         new_user = Users(
-            client_id=2,
+            account_id=2,
             email=email,
             first_name=fake.first_name(),
             last_name=fake.last_name(),

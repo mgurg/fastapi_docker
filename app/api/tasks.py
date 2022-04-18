@@ -42,7 +42,7 @@ async def user_get_all(
 ):
     tasks = session.exec(
         select(Tasks)
-        .where(Tasks.client_id == auth["account"])
+        .where(Tasks.account_id == auth["account"])
         .where(Tasks.deleted_at.is_(None))
         .offset(offset)
         .limit(limit)
@@ -56,7 +56,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UU
     print(auth)
     task = session.exec(
         select(Tasks)
-        .where(Tasks.client_id == auth["account"])
+        .where(Tasks.account_id == auth["account"])
         .where(Tasks.uuid == task_uuid)
         .where(Tasks.deleted_at.is_(None))
     ).one_or_none()
@@ -93,7 +93,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
     if (all(v is not None for v in req_fields)) & (res.recurring == True):
         new_event = Events(
             uuid=get_uuid(),
-            client_id=2,
+            account_id=2,
             recurring=True,
             interval=1,
             freq=res.freq,
@@ -121,7 +121,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
 
     new_task = Tasks(
         uuid=get_uuid(),
-        client_id=2,
+        account_id=2,
         author_id=1,
         assignee_id=assignee,
         title=res.title,
@@ -196,7 +196,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UU
 
         new_event = Events(
             uuid=get_uuid(),
-            client_id=2,
+            account_id=2,
             recurring=task_data["recurring"],
             interval=task_data["interval"],
             freq=task_data["freq"],
@@ -278,7 +278,9 @@ async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UU
 @task_router.post("/action/{task_uuid}", response_model=StandardResponse, name="task:Action")
 @logger.catch()
 async def task_action(*, session: Session = Depends(get_session), task_uuid: UUID, task: TasksLogIn):
-    db_task = session.exec(select(Tasks).where(Tasks.uuid == task_uuid).where(Tasks.deleted_at.is_(None))).one_or_none()
+    db_task = session.exec(
+        select(Tasks).where(Tasks.uuid == task_uuid).where(Tasks.deleted_at.is_(None))
+    ).one_or_none()
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
 

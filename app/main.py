@@ -107,15 +107,15 @@ class Notifier:
     async def push(self, msg: str):
         await self.generator.asend(msg)
 
-    async def connect(self, websocket: WebSocket, client_id: int):
-        # if client_id != 123:
+    async def connect(self, websocket: WebSocket, account_id: int):
+        # if account_id != 123:
         #     await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
 
         await websocket.accept()
         self.connections.append(websocket)
-        self.active_users[client_id] = websocket
+        self.active_users[account_id] = websocket
 
-    def remove(self, websocket: WebSocket, client_id: int):
+    def remove(self, websocket: WebSocket, account_id: int):
         try:
             self.connections.remove(websocket)
             del self.active_users
@@ -152,16 +152,16 @@ async def shutdown_event():
     logger.info("⏳ Shutting down...")
 
 
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+@app.websocket("/ws/{account_id}")
+async def websocket_endpoint(websocket: WebSocket, account_id: int):
     # ws://0.0.0.0:5000/ws/1
-    await notifier.connect(websocket, client_id)
+    await notifier.connect(websocket, account_id)
     try:
         while True:
             data = await websocket.receive_text()
             await websocket.send_text(f"Message text was: {data}")
     except WebSocketDisconnect:
-        notifier.remove(websocket, client_id)
+        notifier.remove(websocket, account_id)
 
 
 @app.get("/push/{message}")

@@ -18,7 +18,7 @@ def test_list_users(session: Session, client: TestClient):
         token = fake.hexify("^" * 32)
 
         new_user = Users(
-            client_id=fake.random_digit(),
+            account_id=fake.random_digit(),
             email=email,
             first_name=fake.first_name(),
             last_name=fake.last_name(),
@@ -45,7 +45,7 @@ def test_get_user(session: Session, client: TestClient):
 
     for i in range(5):
         new_user = Users(
-            client_id=2,
+            account_id=2,
             email=fake.email(),
             first_name=fake.first_name(),
             last_name=fake.last_name(),
@@ -63,7 +63,7 @@ def test_get_user(session: Session, client: TestClient):
         session.commit()
 
     user_uuid = session.exec(
-        select(Users).where(Users.is_active == True).where(Users.client_id == 2).order_by(func.random())
+        select(Users).where(Users.is_active == True).where(Users.account_id == 2).order_by(func.random())
     ).first()
 
     response = client.get("user/" + str(user_uuid.uuid))

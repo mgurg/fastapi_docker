@@ -79,7 +79,7 @@ class Accounts(SQLModel, table=True):
     __tablename__ = "accounts"
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
-    client_id: int
+    account_id: int
 
 
 class Users(SQLModel, table=True):
@@ -87,7 +87,7 @@ class Users(SQLModel, table=True):
     # __table_args__ = {"schema": "public", "keep_existing": True}
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    client_id: int
+    account_id: int
     password: str
     email: Optional[EmailStr] = Field(sa_column_kwargs={"unique": True})
     phone: Optional[str] = Field(sa_column_kwargs={"unique": True})
@@ -201,7 +201,7 @@ class Tasks(SQLModel, table=True):
     __tablename__ = "tasks"
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
-    client_id: int
+    account_id: int
     author_id: Optional[int]
     title: str
     description: str
@@ -245,7 +245,7 @@ class Events(SQLModel, table=True):
     __tablename__ = "events"
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
-    client_id: int
+    account_id: int
     recurring: bool
     freq: str
     interval: int
@@ -272,7 +272,7 @@ class Events(SQLModel, table=True):
 class Files(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
-    client_id: int
+    account_id: int
     owner_id: int
     file_name: str
     extension: str
@@ -406,7 +406,7 @@ class TaskEditIn(SQLModel):
 class TaskCreateFactory(ModelFactory):
     __model__ = Tasks
     uuid = get_uuid()
-    client_id = 2
+    account_id = 2
     author_id: 2
     title = Use(Faker().name)
     description = Use(Faker().name)

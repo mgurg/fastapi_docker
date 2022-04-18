@@ -16,7 +16,7 @@
 #     for i in range(5):
 #         new_file = Files(
 #             uuid=get_uuid(),  # TODO 00000000-0000-0000-0000-000000000000
-#             client_id=2,
+#             account_id=2,
 #             owner_id=1,
 #             file_name=fake.word(),
 #             extension=fake.file_extension(),
@@ -39,7 +39,7 @@
 #     for i in range(5):
 #         new_file = Files(
 #             uuid=get_uuid(),  # TODO 00000000-0000-0000-0000-000000000000
-#             client_id=2,
+#             account_id=2,
 #             owner_id=1,
 #             file_name=fake.word(),
 #             extension=fake.file_extension(),

@@ -21,7 +21,7 @@ user_router = APIRouter()
 async def user_get_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
     users = session.exec(
         select(Users)
-        .where(Users.client_id == auth["account"])
+        .where(Users.account_id == auth["account"])
         .where(Users.is_active == True)
         .where(Users.deleted_at.is_(None))
         # .execution_options(schema_translate_map={None: "tenant_1"})
@@ -35,7 +35,7 @@ async def user_get_all(*, session: Session = Depends(get_session), auth=Depends(
 async def user_get_one(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
     users = session.exec(
         select(Users)
-        .where(Users.client_id == auth["account"])
+        .where(Users.account_id == auth["account"])
         .where(Users.uuid == user_uuid)
         .where(Users.is_active == True)
         .where(Users.deleted_at.is_(None))
@@ -60,7 +60,7 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
         pass_hash = argon2.hash("string")
 
     new_user = Users(
-        client_id=auth["account"],
+        account_id=auth["account"],
         email=res.email,
         password=pass_hash,
         first_name=res.first_name,
@@ -96,7 +96,7 @@ async def user_edit(
 
     db_user = session.exec(
         select(Users)
-        .where(Users.client_id == auth["account"])
+        .where(Users.account_id == auth["account"])
         .where(Users.uuid == user_uuid)
         .where(Users.deleted_at == None)
     ).one_or_none()
@@ -129,18 +129,18 @@ async def user_edit(
     return {"ok": True}
 
 
-@user_router.delete("/{user_uuid}", response_model=StandardResponse, name="task:Tasks")
+@user_router.delete("/{user_uuid}", response_model=StandardResponse, name="user:Delete")
 async def user_get_all(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
 
     db_task = session.exec(
         select(Users)
-        .where(Users.client_id == auth["account"])
+        .where(Users.account_id == auth["account"])
         .where(Users.uuid == user_uuid)
         .where(Users.deleted_at.is_(None))
     ).one_or_none()
 
     if not db_task:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
     session.delete(db_task)
     session.commit()

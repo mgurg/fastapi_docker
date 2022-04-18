@@ -51,13 +51,13 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     else:
         raise HTTPException(status_code=400, detail=is_password_ok)
 
-    client_id = session.exec(select([func.max(Users.client_id)])).one()
-    if client_id is None:
-        client_id = 0
+    account_id = session.exec(select([func.max(Users.account_id)])).one()
+    if account_id is None:
+        account_id = 0
 
     # TODO: TOS field
     new_user = Users(
-        client_id=client_id + 2,
+        account_id=account_id + 2,
         email=res.email.strip(),
         service_token=secrets.token_hex(32),
         service_token_valid_to=datetime.utcnow() + timedelta(days=1),
@@ -133,7 +133,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     session.commit()
     session.refresh(db_user)
 
-    # account = Accounts(uuid=get_uuid(), client_id=db_user.client_id)
+    # account = Accounts(uuid=get_uuid(), account_id=db_user.account_id)
 
     # session.add(account)
     # session.commit()
