@@ -181,6 +181,12 @@ class UserIndexResponse(SQLModel):
     uuid: uuid.UUID
 
 
+class TaskIdeaLink(SQLModel, table=True):
+    __tablename__ = "ideas_files_link"
+    idea_id: Optional[int] = Field(default=None, foreign_key="ideas.id", primary_key=True)
+    file_id: Optional[int] = Field(default=None, foreign_key="files.id", primary_key=True)
+
+
 class TaskFileLink(SQLModel, table=True):
     __tablename__ = "task_files_link"
     task_id: Optional[int] = Field(default=None, foreign_key="tasks.id", primary_key=True)
@@ -195,6 +201,22 @@ class TaskEventLink(SQLModel, table=True):
 
 class EventsBasicInfo(SQLModel):
     uuid: Optional[uuid.UUID]
+
+
+class Ideas(SQLModel, table=True):
+    __tablename__ = "ideas"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    account_id: int
+    author_id: Optional[int]
+    color: str
+    title: str
+    description: str
+    deleted_at: Optional[datetime]
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    pictures: Optional[List["Files"]] = Relationship(back_populates="idea", link_model=TaskIdeaLink)
 
 
 class Tasks(SQLModel, table=True):
@@ -283,6 +305,7 @@ class Files(SQLModel, table=True):
     updated_at: Optional[datetime]
 
     task: List[Tasks] = Relationship(back_populates="file", link_model=TaskFileLink)
+    idea: List[Ideas] = Relationship(back_populates="pictures", link_model=TaskIdeaLink)
 
 
 class TaskBasicInfo(SQLModel):
@@ -326,6 +349,21 @@ class TaskIndexResponse(SQLModel):
     assignee: Optional[UserIndexResponse]
     events: Optional[List[EventsBasicInfo]]
     created_at: datetime
+
+
+class IdeaIndexResponse(SQLModel):
+    uuid: uuid.UUID
+    color: str
+    title: str
+    description: str
+    created_at: datetime
+
+
+class IdeaAddIn(SQLModel):
+    title: str
+    description: str
+    color: str = "green"
+    files: Optional[List[uuid.UUID]]
 
 
 class FileBasicInfo(SQLModel):

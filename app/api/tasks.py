@@ -53,13 +53,15 @@ async def user_get_all(
 
 @task_router.get("/{task_uuid}", response_model=TaskSingleResponse, name="Get task")
 async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UUID, auth=Depends(has_token)):
-    print(auth)
     task = session.exec(
         select(Tasks)
         .where(Tasks.account_id == auth["account"])
         .where(Tasks.uuid == task_uuid)
         .where(Tasks.deleted_at.is_(None))
     ).one_or_none()
+
+    if not task:
+        raise HTTPException(status_code=404, detail="Idea not found")
     return task
 
 
