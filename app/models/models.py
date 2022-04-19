@@ -351,12 +351,21 @@ class TaskIndexResponse(SQLModel):
     created_at: datetime
 
 
+class FileBasicInfo(SQLModel):
+    uuid: uuid.UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+
+
 class IdeaIndexResponse(SQLModel):
     uuid: uuid.UUID
     color: str
     title: str
     description: str
     created_at: datetime
+    files: Optional[List[FileBasicInfo]]
 
 
 class IdeaAddIn(SQLModel):
@@ -364,14 +373,6 @@ class IdeaAddIn(SQLModel):
     description: str
     color: str = "green"
     files: Optional[List[uuid.UUID]]
-
-
-class FileBasicInfo(SQLModel):
-    uuid: uuid.UUID
-    file_name: str
-    extension: str
-    mimetype: str
-    size: int
 
 
 class TaskSingleResponse(SQLModel):

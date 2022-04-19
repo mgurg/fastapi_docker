@@ -473,6 +473,9 @@ rfc3986==1.5.0; python_version >= "3.8" \
 s3transfer==0.5.2; python_version >= "3.6" \
     --hash=sha256:7a6f4c4d1fdb9a2b640244008e142cbc2cd3ae34b386584ef044dd0f27101971 \
     --hash=sha256:95c58c194ce657a5f4fb0b9e60a84968c808888aed628cd98ab8771fe1db98ed
+sentry-sdk==1.5.10 \
+    --hash=sha256:0a9eb20a84f4c17c08c57488d59fdad18669db71ebecb28fb0721423a33535f9 \
+    --hash=sha256:972c8fe9318a415b5cf35f687f568321472ef94b36806407c370ce9c88a67f2e
 six==1.16.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.3.0" and python_version >= "3.6" \
     --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926
