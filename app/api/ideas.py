@@ -14,6 +14,8 @@ from app.models.models import (
     IdeaAddIn,
     IdeaIndexResponse,
     Ideas,
+    IdeasVotes,
+    IdeasVotesIn,
     StandardResponse,
 )
 from app.service.bearer_auth import has_token
@@ -49,8 +51,35 @@ async def ideas_get_one(*, session: Session = Depends(get_session), idea_uuid: U
     return idea
 
 
+@idea_router.get("/vote_last/{idea_uuid}", name="ideas:Item")
+async def ideas_get_last_vote(*, session: Session = Depends(get_session), idea_uuid: UUID, auth=Depends(has_token)):
+
+    db_idea = session.exec(
+        select(Ideas)
+        .where(Ideas.account_id == auth["account"])
+        .where(Ideas.uuid == idea_uuid)
+        .where(Ideas.deleted_at.is_(None))
+    ).one_or_none()
+
+    if not db_idea:
+        raise HTTPException(status_code=404, detail="Idea not found")
+
+    db_last_vote = session.exec(
+        select(IdeasVotes)
+        .where(IdeasVotes.idea_id == db_idea.id)
+        .where(IdeasVotes.account_id == auth["account"])
+        .where(IdeasVotes.user_id == auth["user"])
+        .order_by(IdeasVotes.id.desc())
+    ).first()
+
+    if not db_last_vote:
+        return {"vote": None}
+
+    return {"vote": db_last_vote.vote}
+
+
 @idea_router.post("/", response_model=StandardResponse, name="idea:Add")
-async def user_get_all(*, session: Session = Depends(get_session), idea: IdeaAddIn, auth=Depends(has_token)):
+async def user_add_one(*, session: Session = Depends(get_session), idea: IdeaAddIn, auth=Depends(has_token)):
 
     res = IdeaAddIn.from_orm(idea)
 
@@ -81,8 +110,64 @@ async def user_get_all(*, session: Session = Depends(get_session), idea: IdeaAdd
     return {"ok": True}
 
 
+@idea_router.post("/vote", response_model=StandardResponse, name="idea:Add")
+async def idea_add_vote_one(*, session: Session = Depends(get_session), vote: IdeasVotesIn, auth=Depends(has_token)):
+    res = IdeasVotesIn.from_orm(vote)
+
+    db_idea = session.exec(
+        select(Ideas)
+        .where(Ideas.account_id == auth["account"])
+        .where(Ideas.uuid == res.idea_uuid)
+        .where(Ideas.deleted_at.is_(None))
+    ).one_or_none()
+
+    if not db_idea:
+        raise HTTPException(status_code=404, detail="Idea not found")
+
+    db_last_vote = session.exec(
+        select(IdeasVotes)
+        .where(IdeasVotes.idea_id == db_idea.id)
+        .where(IdeasVotes.account_id == auth["account"])
+        .where(IdeasVotes.user_id == auth["user"])
+        .order_by(IdeasVotes.id.desc())
+    ).one_or_none()
+
+    if db_last_vote.vote == res.vote:
+        raise HTTPException(status_code=404, detail="Duplicated vote")
+
+    if res.vote == "up":
+        db_idea.upvotes += 1
+    elif res.vote == "down":
+        db_idea.downvotes += 1
+    else:
+        raise HTTPException(status_code=404, detail="Invalid vote type")
+
+    new_vote = IdeasVotes(
+        uuid=get_uuid(),
+        account_id=auth["account"],
+        idea_id=db_idea.id,
+        user_id=auth["user"],
+        vote=res.vote,
+        created_at=datetime.utcnow(),
+    )
+
+    session.add(new_vote)
+    session.commit()
+    session.refresh(new_vote)
+
+    if res.vote == "up":
+        db_idea.upvotes += 1
+    if res.vote == "down":
+        db_idea.upvotes -= 1
+
+    session.add(db_idea)
+    session.commit()
+    session.refresh(db_idea)
+    return {"ok": True}
+
+
 @idea_router.delete("/{idea_uuid}", response_model=StandardResponse, name="idea:Delete")
-async def user_delete_one(*, session: Session = Depends(get_session), idea_uuid: UUID, auth=Depends(has_token)):
+async def idea_delete_one(*, session: Session = Depends(get_session), idea_uuid: UUID, auth=Depends(has_token)):
 
     db_idea = session.exec(
         select(Ideas).where(Ideas.account_id == auth["account"]).where(Ideas.uuid == idea_uuid)

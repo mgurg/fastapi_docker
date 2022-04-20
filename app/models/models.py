@@ -212,11 +212,30 @@ class Ideas(SQLModel, table=True):
     color: str
     title: str
     description: str
+    upvotes: Optional[int]
+    downvotes: Optional[int]
+    # status: Optional[str]
     deleted_at: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]
 
     pictures: Optional[List["Files"]] = Relationship(back_populates="idea", link_model=TaskIdeaLink)
+
+
+class IdeasVotes(SQLModel, table=True):
+    __tablename__ = "ideas_votes"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    account_id: int
+    idea_id: int
+    user_id: int
+    vote: str
+    created_at: datetime
+
+
+class IdeasVotesIn(SQLModel):
+    idea_uuid: uuid.UUID
+    vote: str
 
 
 class Tasks(SQLModel, table=True):
@@ -364,6 +383,8 @@ class IdeaIndexResponse(SQLModel):
     color: str
     title: str
     description: str
+    upvotes: Optional[int]
+    downvotes: Optional[int]
     created_at: datetime
     pictures: Optional[List[FileBasicInfo]]
 
