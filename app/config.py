@@ -14,11 +14,14 @@ log = logging.getLogger("uvicorn")
 class Settings(BaseSettings):
 
     environment: str = os.getenv("WORKING_ENVIRONMENT")
+
     s3_region: str = os.getenv("AWS_DEFAULT_REGION")
     s3_access_key: str = os.getenv("AWS_S3_ACCESS_KEY_ID")
     s3_secret_access_key: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
     s3_bucket_name: str = os.getenv("AWS_S3_BUCKET")
     s3_bucket_region: str = os.getenv("AWS_S3_DEFAULT_REGION")
+
+    sentry_dsn: str = os.getenv("SENTRY_DSN")
 
     # if environment != "test":
     #     secrets = get_secret()

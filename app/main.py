@@ -1,12 +1,17 @@
 # fastapi_docker/app/main.py
+import os
 import traceback
 from datetime import datetime
+from distutils.command.config import config
 from typing import Dict, List, Optional
 
+import sentry_sdk
 import uvicorn
 from fastapi import Depends, FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from app.api.aws_s3 import s3_router
@@ -20,14 +25,11 @@ from app.config import get_settings
 from app.service.bearer_auth import has_token
 from app.utils import get_secret
 
-logger.add(
-    "./app/logs/logs.log", format="{time} - {level} - {message} ", level="DEBUG", backtrace=False, diagnose=True
-)
-
-# logger.add("logs/main.log", rotation="2 weeks",
-#            backtrace=False, diagnose=True)
+logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
 settings = get_settings()
+
+sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
 
@@ -97,7 +99,7 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-
+app.add_middleware(SentryAsgiMiddleware)
 
 # https://github.com/tiangolo/fastapi/issues/258
 # https://github.com/cthwaite/fastapi-websocket-broadcast/blob/master/app.py
@@ -182,6 +184,11 @@ def read_root():
     # TODO: Health heck for DB & Storage
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
+
+
+@app.get("/error")
+def read_root():
+    return {"Hello": 1 / 0}
 
 
 @app.get("/items/{item_id}")

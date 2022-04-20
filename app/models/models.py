@@ -365,7 +365,7 @@ class IdeaIndexResponse(SQLModel):
     title: str
     description: str
     created_at: datetime
-    files: Optional[List[FileBasicInfo]]
+    pictures: Optional[List[FileBasicInfo]]
 
 
 class IdeaAddIn(SQLModel):

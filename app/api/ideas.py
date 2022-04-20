@@ -25,6 +25,7 @@ idea_router = APIRouter()
 
 @idea_router.get("/", response_model=List[IdeaIndexResponse], name="ideas:List")
 async def ideas_get_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
+
     ideas = session.exec(
         select(Ideas).where(Ideas.account_id == auth["account"]).where(Ideas.deleted_at.is_(None))
     ).all()
@@ -34,6 +35,7 @@ async def ideas_get_all(*, session: Session = Depends(get_session), auth=Depends
 
 @idea_router.get("/{idea_uuid}", response_model=IdeaIndexResponse, name="ideas:Item")
 async def ideas_get_one(*, session: Session = Depends(get_session), idea_uuid: UUID, auth=Depends(has_token)):
+
     idea = session.exec(
         select(Ideas)
         .where(Ideas.account_id == auth["account"])
