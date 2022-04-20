@@ -68,7 +68,7 @@ async def user_get_all(*, session: Session = Depends(get_session), idea: IdeaAdd
         color=res.color,
         title=res.title,
         description=res.description,
-        files=files,
+        pictures=files,
         created_at=datetime.utcnow(),
     )
 
