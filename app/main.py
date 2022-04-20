@@ -1,18 +1,15 @@
 # fastapi_docker/app/main.py
-import os
 import traceback
 from datetime import datetime
-from distutils.command.config import config
 from typing import Dict, List, Optional
 
 import sentry_sdk
 import uvicorn
-from fastapi import Depends, FastAPI, WebSocket
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from app.api.aws_s3 import s3_router
 from app.api.events import event_router
@@ -101,77 +98,17 @@ def create_application() -> FastAPI:
 app = create_application()
 app.add_middleware(SentryAsgiMiddleware)
 
-# https://github.com/tiangolo/fastapi/issues/258
-# https://github.com/cthwaite/fastapi-websocket-broadcast/blob/master/app.py
-class Notifier:
-    def __init__(self):
-        self.connections: List[WebSocket] = []
-        self.active_users: Dict = {}
-        self.generator = self.get_notification_generator()
-
-    async def get_notification_generator(self):
-        while True:
-            message = yield
-            await self._notify(message)
-
-    async def push(self, msg: str):
-        await self.generator.asend(msg)
-
-    async def connect(self, websocket: WebSocket, account_id: int):
-        # if account_id != 123:
-        #     await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-
-        await websocket.accept()
-        self.connections.append(websocket)
-        self.active_users[account_id] = websocket
-
-    def remove(self, websocket: WebSocket, account_id: int):
-        try:
-            self.connections.remove(websocket)
-            del self.active_users
-        except KeyError as ex:
-            print("No such key: '%s'" % ex.message)
-
-    async def _notify(self, message: str):
-        print(self.active_users)
-        for connection in self.connections:
-            await connection.send_text(message)
-        # living_connections = []
-        # while len(self.connections) > 0:
-        #     # Looping like this is necessary in case a disconnection is handled
-        #     # during await websocket.send_text(message)
-        #     websocket = self.connections.pop()
-        #     await websocket.send_text(message)
-        #     living_connections.append(websocket)
-        # self.connections = living_connections
-
-
-notifier = Notifier()
-
 
 @app.on_event("startup")
 async def startup():
     logger.debug("That's it, beautiful and simple logging!")
     logger.info("🚀 Starting up and initializing app...")
     # Prime the push notification generator
-    await notifier.generator.asend(None)
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("⏳ Shutting down...")
-
-
-@app.websocket("/ws/{account_id}")
-async def websocket_endpoint(websocket: WebSocket, account_id: int):
-    # ws://0.0.0.0:5000/ws/1
-    await notifier.connect(websocket, account_id)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            await websocket.send_text(f"Message text was: {data}")
-    except WebSocketDisconnect:
-        notifier.remove(websocket, account_id)
 
 
 @app.get("/push/{message}")
@@ -184,11 +121,6 @@ def read_root():
     # TODO: Health heck for DB & Storage
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
-
-
-@app.get("/error")
-def read_root():
-    return {"Hello": 1 / 0}
 
 
 @app.get("/items/{item_id}")
