@@ -103,17 +103,11 @@ app.add_middleware(SentryAsgiMiddleware)
 async def startup():
     logger.debug("That's it, beautiful and simple logging!")
     logger.info("🚀 Starting up and initializing app...")
-    # Prime the push notification generator
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("⏳ Shutting down...")
-
-
-@app.get("/push/{message}")
-async def push_to_connected_websockets(message: str):
-    await notifier.push(f"! Push notification: {message} !")
 
 
 @app.get("/")
