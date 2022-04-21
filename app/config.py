@@ -13,7 +13,7 @@ log = logging.getLogger("uvicorn")
 
 class Settings(BaseSettings):
 
-    environment: str = os.getenv("WORKING_ENVIRONMENT")
+    environment: str = os.getenv("APP_ENV")
 
     s3_region: str = os.getenv("AWS_DEFAULT_REGION")
     s3_access_key: str = os.getenv("AWS_S3_ACCESS_KEY_ID")

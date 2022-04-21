@@ -96,12 +96,16 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-app.add_middleware(SentryAsgiMiddleware)
+
+if settings.environment != "local":
+    app.add_middleware(SentryAsgiMiddleware)
 
 
 @app.on_event("startup")
 async def startup():
+
     logger.debug("That's it, beautiful and simple logging!")
+    logger.info("APP ENVIRONMENT: ", settings.environment)
     logger.info("🚀 Starting up and initializing app...")
 
 
