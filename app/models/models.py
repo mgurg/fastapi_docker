@@ -214,7 +214,7 @@ class Ideas(SQLModel, table=True):
     description: str
     upvotes: Optional[int]
     downvotes: Optional[int]
-    # status: Optional[str]
+    status: Optional[str]
     deleted_at: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]
@@ -385,6 +385,7 @@ class IdeaIndexResponse(SQLModel):
     description: str
     upvotes: Optional[int]
     downvotes: Optional[int]
+    status: Optional[str]
     created_at: datetime
     pictures: Optional[List[FileBasicInfo]]
 
@@ -393,6 +394,15 @@ class IdeaAddIn(SQLModel):
     title: str
     description: str
     color: str = "green"
+    files: Optional[List[uuid.UUID]]
+
+
+class IdeaEditIn(SQLModel):
+    title: Optional[str]
+    description: Optional[str]
+    color: Optional[str]
+    status: Optional[str]
+    vote: Optional[str]
     files: Optional[List[uuid.UUID]]
 
 

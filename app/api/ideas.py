@@ -12,6 +12,7 @@ from app.db import get_session
 from app.models.models import (
     Files,
     IdeaAddIn,
+    IdeaEditIn,
     IdeaIndexResponse,
     Ideas,
     IdeasVotes,
@@ -166,6 +167,40 @@ async def idea_add_vote_one(*, session: Session = Depends(get_session), vote: Id
     return {"ok": True}
 
 
+@idea_router.patch("/{idea_uuid}", response_model=StandardResponse, name="task:Tasks")
+async def user_get_all(*, session: Session = Depends(get_session), idea_uuid: UUID, task: IdeaEditIn):
+
+    db_idea = session.exec(select(Ideas).where(Ideas.uuid == idea_uuid)).one_or_none()
+    if not db_idea:
+        raise HTTPException(status_code=404, detail="Idea not found")
+
+    idea_data = task.dict(exclude_unset=True)
+    del idea_data["vote"]
+
+    # files = []
+    # if ("files" in idea_data) and (idea_data["files"] is not None):
+    #     for file in db_idea.file:
+    #         db_idea.file.remove(file)
+    #     for file in idea_data["files"]:
+    #         db_file = session.exec(
+    #             select(Files).where(Files.uuid == file).where(Files.deleted_at.is_(None))
+    #         ).one_or_none()
+    #         if db_file:
+    #             files.append(db_file)
+
+    #     idea_data["file"] = files
+    #     del idea_data["files"]
+
+    for key, value in idea_data.items():
+        setattr(db_idea, key, value)
+
+    session.add(db_idea)
+    session.commit()
+    session.refresh(db_idea)
+
+    return {"ok": True}
+
+
 @idea_router.delete("/{idea_uuid}", response_model=StandardResponse, name="idea:Delete")
 async def idea_delete_one(*, session: Session = Depends(get_session), idea_uuid: UUID, auth=Depends(has_token)):
 
@@ -176,7 +211,7 @@ async def idea_delete_one(*, session: Session = Depends(get_session), idea_uuid:
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")
 
-    # db_task.events.remove()
+    # db_idea.events.remove()
 
     # Delete Files
     for pictures in db_idea.pictures:
@@ -190,10 +225,10 @@ async def idea_delete_one(*, session: Session = Depends(get_session), idea_uuid:
 
     # update_package = {"deleted_at": datetime.utcnow()}  # soft delete
     # for key, value in update_package.items():
-    #     setattr(db_task, key, value)
+    #     setattr(db_idea, key, value)
 
-    # session.add(db_task)
+    # session.add(db_idea)
     # session.commit()
-    # session.refresh(db_task)
+    # session.refresh(db_idea)
 
     return {"ok": True}
