@@ -130,7 +130,7 @@ async def idea_add_vote_one(*, session: Session = Depends(get_session), vote: Id
         .where(IdeasVotes.account_id == auth["account"])
         .where(IdeasVotes.user_id == auth["user"])
         .order_by(IdeasVotes.id.desc())
-    ).one_or_none()
+    ).first()
 
     if (db_last_vote is not None) and (db_last_vote.vote == res.vote):
         raise HTTPException(status_code=404, detail="Duplicated vote")
