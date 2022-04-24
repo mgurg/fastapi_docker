@@ -117,13 +117,12 @@ async def remove_bucket(*, session: Session = Depends(get_session), uuid: UUID, 
 
 
 @file_router.get("/download/{uuid}", name="file:Download")
-async def file_download(*, session: Session = Depends(get_session), uuid: UUID, auth=Depends(has_token)):
+async def file_download(*, session: Session = Depends(get_session), uuid: UUID):
 
     file = session.exec(
         select(Files)
-        .where(Files.account_id == auth["account"])
-        .where(Files.uuid == uuid)
-        .where(Files.deleted_at.is_(None))
+        # .where(Files.account_id == auth["account"])
+        .where(Files.uuid == uuid).where(Files.deleted_at.is_(None))
     ).one_or_none()
 
     if not file:
