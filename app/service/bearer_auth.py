@@ -1,3 +1,4 @@
+import base64
 from typing import List
 
 from fastapi import Depends, HTTPException
@@ -6,7 +7,7 @@ from sqlmodel import Session, select
 
 from app.config import get_settings
 from app.db import get_session
-from app.models.models import Users
+from app.models.models import Accounts, Users
 
 settings = get_settings()
 security = HTTPBearer()
@@ -26,6 +27,19 @@ async def has_token(*, session: Session = Depends(get_session), credentials: HTT
         user_id, account_id = db_user_data
         return {"user": user_id, "account": account_id}
     else:
+        try:
+            base64_message = token
+            base64_bytes = base64_message.encode("ascii")
+            message_bytes = base64.b64decode(base64_bytes)
+            message = message_bytes.decode("ascii")
+
+            company, date = message.split(".")  # TODO date check
+
+            db_account = session.exec(select(Accounts).where(Accounts.company_id == company)).one_or_none()
+            return {"user": 0, "account": db_account.account_id}
+        except:
+            print("error")
+
         raise HTTPException(status_code=401, detail="Incorrect auth token")
 
 

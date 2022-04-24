@@ -80,6 +80,15 @@ class Accounts(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: uuid.UUID
     account_id: int
+    company: str
+    registered_at: Optional[datetime]
+    paid_period_from: Optional[datetime]
+    current_period_ends: Optional[datetime]
+    plan: Optional[str]
+    nip: Optional[str]
+    address: Optional[str]
+    company_id: Optional[str]
+    ideas_id: Optional[str]
 
 
 class Users(SQLModel, table=True):

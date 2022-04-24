@@ -1,3 +1,5 @@
+import base64
+import re
 from datetime import datetime, time, timedelta
 from typing import List
 from uuid import UUID
@@ -10,6 +12,7 @@ from sqlmodel import Session, select
 from app.config import get_settings
 from app.db import get_session
 from app.models.models import (
+    Accounts,
     Files,
     IdeaAddIn,
     IdeaEditIn,
@@ -103,6 +106,32 @@ async def ideas_get_last_vote(*, session: Session = Depends(get_session), idea_u
     return {"vote": db_last_vote.vote}
 
 
+@idea_router.post("/new_idea/{idea_id}", name="idea:Add")
+async def idea_add_anonymous_one(*, session: Session = Depends(get_session), idea_id: str):
+
+    pattern = re.compile("[a-z2-9]{2,3}\+[a-z2-9]{2,3}")
+    if pattern.match(idea_id):
+
+        company, board = idea_id.split("+")
+
+        db_account = session.exec(select(Accounts).where(Accounts.company_id == company)).one_or_none()
+        if not db_account:
+            raise HTTPException(status_code=404, detail="Account not found")
+
+        message = company + "." + (datetime.utcnow() + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
+        message_bytes = message.encode("ascii")
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode("ascii")
+
+        return {"token": base64_message}
+
+    # %!#+23456789:=?@ABCDEFGHJKLMNPRS
+    # TUVWXYZabcdefghijkmnopqrstuvwxyz
+
+    # abcdefghijkmnopqrstuvwxyz23456789
+    # ABCDEFGHJKLMNPRSTUVWXYZ23456789
+
+
 @idea_router.post("/", response_model=StandardResponse, name="idea:Add")
 async def user_add_one(*, session: Session = Depends(get_session), idea: IdeaAddIn, auth=Depends(has_token)):
 
@@ -192,7 +221,9 @@ async def idea_add_vote_one(*, session: Session = Depends(get_session), vote: Id
 
 
 @idea_router.patch("/{idea_uuid}", response_model=StandardResponse, name="task:Tasks")
-async def user_get_all(*, session: Session = Depends(get_session), idea_uuid: UUID, task: IdeaEditIn):
+async def user_get_all(
+    *, session: Session = Depends(get_session), idea_uuid: UUID, task: IdeaEditIn, auth=Depends(has_token)
+):
 
     db_idea = session.exec(select(Ideas).where(Ideas.uuid == idea_uuid)).one_or_none()
     if not db_idea:

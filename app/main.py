@@ -63,7 +63,7 @@ def create_application() -> FastAPI:
     app.include_router(
         idea_router,
         prefix="/ideas",
-        dependencies=[Depends(has_token)],
+        # dependencies=[Depends(has_token)],
         tags=["IDEA"],
     )
 
