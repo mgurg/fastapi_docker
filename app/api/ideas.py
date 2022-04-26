@@ -109,7 +109,7 @@ async def ideas_get_last_vote(*, session: Session = Depends(get_session), idea_u
 @idea_router.post("/new_idea/{idea_id}", name="idea:Add")
 async def idea_add_anonymous_one(*, session: Session = Depends(get_session), idea_id: str):
 
-    pattern = re.compile("[a-z2-9]{2,3}\+[a-z2-9]{2,3}")
+    pattern = re.compile("^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
     if pattern.match(idea_id):
 
         company, board = idea_id.split("+")
@@ -124,7 +124,8 @@ async def idea_add_anonymous_one(*, session: Session = Depends(get_session), ide
         base64_message = base64_bytes.decode("ascii")
 
         return {"token": base64_message}
-
+    else:
+        raise HTTPException(status_code=404, detail="Incorrect id")
     # %!#+23456789:=?@ABCDEFGHJKLMNPRS
     # TUVWXYZabcdefghijkmnopqrstuvwxyz
 
