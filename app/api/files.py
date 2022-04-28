@@ -23,7 +23,7 @@ file_router = APIRouter()
 
 
 @file_router.get("/index", response_model=List[FileResponse], name="user:Profile")
-async def file_get_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
+async def file_get_info_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
 
     # quota = session.exec(select([func.sum(Files.size)]).where(Files.account_id == 2)).one()
     # print("quota", quota)
@@ -37,8 +37,8 @@ async def file_get_all(*, session: Session = Depends(get_session), auth=Depends(
     return files
 
 
-@file_router.get("/{uuid}", response_model=FileUrlResponse, name="user:Profile")
-async def file_get_all(*, session: Session = Depends(get_session), uuid: UUID, auth=Depends(has_token)):
+@file_router.get("/{uuid}", response_model=FileUrlResponse, name="file:GetInfoFromDB")
+async def file_get_info_single(*, session: Session = Depends(get_session), uuid: UUID, auth=Depends(has_token)):
 
     file = session.exec(
         select(Files)
@@ -56,7 +56,7 @@ async def file_get_all(*, session: Session = Depends(get_session), uuid: UUID, a
     return file
 
 
-@file_router.post("/", response_model=FileResponse, name="user:Profile")
+@file_router.post("/", response_model=FileResponse, name="file:Upload")
 async def file_add(
     *,
     session: Session = Depends(get_session),
@@ -73,7 +73,10 @@ async def file_add(
     # if quota > 500000:
     #     raise HTTPException(status_code=413, detail="Quota exceeded")
 
-    s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
+    s3_folder_path = str(auth["account"]) + "/" + file.filename
+    s3_flat_path = file.filename
+
+    s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
 
     new_file = Files(
         uuid=get_uuid(),
@@ -106,7 +109,10 @@ async def remove_bucket(*, session: Session = Depends(get_session), uuid: UUID, 
     if not db_file:
         raise HTTPException(status_code=400, detail="File not found")
 
-    s3_resource.Object(settings.s3_bucket_name, db_file.file_name).delete()
+    s3_folder_path = str(db_file.account_id) + "/" + db_file.file_name
+    s3_flat_path = db_file.file_name
+
+    s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()
 
     session.delete(db_file)
     session.commit()
@@ -119,18 +125,21 @@ async def remove_bucket(*, session: Session = Depends(get_session), uuid: UUID, 
 @file_router.get("/download/{uuid}", name="file:Download")
 async def file_download(*, session: Session = Depends(get_session), uuid: UUID):
 
-    file = session.exec(
+    db_file = session.exec(
         select(Files)
         # .where(Files.account_id == auth["account"])
         .where(Files.uuid == uuid).where(Files.deleted_at.is_(None))
     ).one_or_none()
 
-    if not file:
+    if not db_file:
         raise HTTPException(status_code=404, detail="File not found")
 
+    s3_folder_path = str(db_file.account_id) + "/" + db_file.file_name
+    s3_flat_path = db_file.file_name
+
     f = io.BytesIO()
-    s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(file.file_name, f)
+    s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(s3_folder_path, f)
 
     f.seek(0)
-    header = {"Content-Disposition": f'inline; filename="{file.file_name}"'}
-    return StreamingResponse(f, media_type=file.mimetype, headers=header)
+    header = {"Content-Disposition": f'inline; filename="{db_file.file_name}"'}
+    return StreamingResponse(f, media_type=db_file.mimetype, headers=header)

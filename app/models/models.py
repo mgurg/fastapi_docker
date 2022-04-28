@@ -356,7 +356,7 @@ class FileUrlResponse(SQLModel):
     extension: str
     mimetype: str
     size: int
-    url: HttpUrl
+    # url: HttpUrl
 
     # task: List[TaskBasicInfo]
 
