@@ -212,11 +212,6 @@ async def idea_add_vote_one(*, session: Session = Depends(get_session), vote: Id
     session.commit()
     session.refresh(new_vote)
 
-    if res.vote == "up":
-        db_idea.upvotes += 1
-    if res.vote == "down":
-        db_idea.upvotes -= 1
-
     session.add(db_idea)
     session.commit()
     session.refresh(db_idea)
