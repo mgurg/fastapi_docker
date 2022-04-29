@@ -91,6 +91,50 @@ class Accounts(SQLModel, table=True):
     ideas_id: Optional[str]
 
 
+class RolePermissionLink(SQLModel, table=True):
+    __tablename__ = "roles_permissions_link"
+    role_id: Optional[int] = Field(default=None, foreign_key="roles.id", primary_key=True)
+    permission_id: Optional[int] = Field(default=None, foreign_key="permissions.id", primary_key=True)
+
+
+class Roles(SQLModel, table=True):
+    __tablename__ = "roles"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    account_id: int
+    role_name: str
+    role_description: str
+    hidden: bool
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
+    deleted_at: Optional[datetime]
+
+    permission: List["Permissions"] = Relationship(back_populates="role", link_model=RolePermissionLink)  # hasMany
+    users_FK: List["Users"] = Relationship(back_populates="role_FK")  # hasOne
+
+
+class Permissions(SQLModel, table=True):
+    __tablename__ = "permissions"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: uuid.UUID
+    name: str
+    title: str
+    description: str
+    role: List[Roles] = Relationship(back_populates="permission", link_model=RolePermissionLink)
+
+
+class PermissionsMini(SQLModel):
+    name: str
+
+
+class RolesWithPermissionsReturn(SQLModel):  # OK
+    role_name: Optional[str]
+    role_description: Optional[str]
+    # desc: str
+    # uuid: uuid.UUID
+    permission: List[PermissionsMini]
+
+
 class Users(SQLModel, table=True):
     __tablename__ = "users"
     # __table_args__ = {"schema": "public", "keep_existing": True}
@@ -107,7 +151,7 @@ class Users(SQLModel, table=True):
     is_active: bool
     service_token: Optional[str]
     service_token_valid_to: Optional[datetime]
-    # user_role_id: int = Field(default=None, foreign_key="roles.id")
+    user_role_id: int = Field(default=None, foreign_key="roles.id")
     # user_info_id: Optional[int] = Field(default=None, foreign_key="users_info.id")
     tz: str
     lang: str
@@ -117,6 +161,7 @@ class Users(SQLModel, table=True):
     uuid: uuid.UUID
 
     usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
+    role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
 
 
 class UserCreateIn(SQLModel):  # OK
@@ -188,6 +233,7 @@ class UserIndexResponse(SQLModel):
     email: str
     phone: Optional[str]
     uuid: uuid.UUID
+    role_FK: RolesWithPermissionsReturn
 
 
 class TaskIdeaLink(SQLModel, table=True):

@@ -123,7 +123,7 @@ async def idea_add_anonymous_one(*, session: Session = Depends(get_session), ide
         base64_bytes = base64.b64encode(message_bytes)
         base64_message = base64_bytes.decode("ascii")
 
-        return {"token": base64_message}
+        return {"token": base64_message, "mode": "anonymous"}
     else:
         raise HTTPException(status_code=404, detail="Incorrect id")
     # %!#+23456789:=?@ABCDEFGHJKLMNPRS
