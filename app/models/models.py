@@ -129,7 +129,7 @@ class PermissionsMini(SQLModel):
 
 class RolesWithPermissionsReturn(SQLModel):  # OK
     role_name: Optional[str]
-    role_description: Optional[str]
+    # role_description: Optional[str]
     # desc: str
     # uuid: uuid.UUID
     permission: List[PermissionsMini]
@@ -218,7 +218,7 @@ class UserLoginOut(SQLModel):  # OK
     tz: str
     lang: str
     uuid: uuid.UUID
-    # role_FK: RolesWithPermissionsReturn
+    role_FK: RolesWithPermissionsReturn
 
 
 class UserSetPassIn(SQLModel):  # OK
@@ -233,7 +233,7 @@ class UserIndexResponse(SQLModel):
     email: str
     phone: Optional[str]
     uuid: uuid.UUID
-    role_FK: RolesWithPermissionsReturn
+    # role_FK: RolesWithPermissionsReturn
 
 
 class TaskIdeaLink(SQLModel, table=True):

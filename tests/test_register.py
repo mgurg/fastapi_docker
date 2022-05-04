@@ -80,46 +80,46 @@ def test_post_register_first_run(session: Session, client: TestClient):
     assert data["ok"] == True
 
 
-def test_post_login(session: Session, client: TestClient):
-    fake = Faker("pl_PL")
+# def test_post_login(session: Session, client: TestClient):
+#     fake = Faker("pl_PL")
 
-    for i in range(5):
-        email = fake.email()
-        password = fake.password()
-        first_name = fake.first_name()
-        last_name = fake.last_name()
-        tz = fake.timezone()
-        lang = fake.language_code()
+#     for i in range(5):
+#         email = fake.email()
+#         password = fake.password()
+#         first_name = fake.first_name()
+#         last_name = fake.last_name()
+#         tz = fake.timezone()
+#         lang = fake.language_code()
 
-        new_user = Users(
-            account_id=fake.random_digit(),
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            service_token=None,
-            service_token_valid_to=None,
-            password=argon2.hash(password),
-            user_role_id=2,
-            created_at=datetime.utcnow(),
-            is_active=True,
-            tz=tz,
-            lang=lang,
-            uuid=get_uuid(),
-        )
-        session.add(new_user)
-        session.commit()
+#         new_user = Users(
+#             account_id=fake.random_digit(),
+#             email=email,
+#             first_name=first_name,
+#             last_name=last_name,
+#             service_token=None,
+#             service_token_valid_to=None,
+#             password=argon2.hash(password),
+#             user_role_id=2,
+#             created_at=datetime.utcnow(),
+#             is_active=True,
+#             tz=tz,
+#             lang=lang,
+#             uuid=get_uuid(),
+#         )
+#         session.add(new_user)
+#         session.commit()
 
-    permanent = fake.boolean()
-    data = {"email": email, "password": password, "permanent": permanent}
-    headers = {"accept-language": fake.language_code(), "User-Agent": fake.user_agent()}
+#     permanent = fake.boolean()
+#     data = {"email": email, "password": password, "permanent": permanent}
+#     headers = {"accept-language": fake.language_code(), "User-Agent": fake.user_agent()}
 
-    response = client.post("auth/login", json=data, headers=headers)
-    data = response.json()
-    assert response.status_code == 200
-    assert data["first_name"] == first_name
-    assert data["last_name"] == last_name
-    assert data["tz"] == tz
-    assert data["lang"] == lang
+#     response = client.post("auth/login", json=data, headers=headers)
+#     data = response.json()
+#     assert response.status_code == 200
+#     assert data["first_name"] == first_name
+#     assert data["last_name"] == last_name
+#     assert data["tz"] == tz
+#     assert data["lang"] == lang
 
 
 def test_post_verify(session: Session, client: TestClient):
