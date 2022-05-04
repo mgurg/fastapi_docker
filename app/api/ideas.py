@@ -5,6 +5,7 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi_pagination import Page, Params, paginate
 from passlib.hash import argon2
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -29,14 +30,15 @@ from app.service.password import Password
 idea_router = APIRouter()
 
 
-@idea_router.get("/", response_model=List[IdeaIndexResponse], name="ideas:List")
+@idea_router.get("/", response_model=Page[IdeaIndexResponse], name="ideas:List")
 async def ideas_get_all(
     *,
     session: Session = Depends(get_session),
-    offset: int = 0,
-    limit: int = Query(default=100, lte=100),
+    # offset: int = 0,
+    # limit: int = Query(default=100, lte=100),
     status: str = None,
     hasImg: bool = None,
+    params: Params = Depends(),
     auth=Depends(has_token)
 ):
 
@@ -56,11 +58,11 @@ async def ideas_get_all(
         .where(Ideas.account_id == auth["account"])
         .where(Ideas.deleted_at.is_(None))
         .filter(*all_filters)
-        .offset(offset)
-        .limit(limit)
+        # .offset(offset)
+        # .limit(limit)
     ).all()
 
-    return ideas
+    return paginate(ideas, params)
 
 
 @idea_router.get("/{idea_uuid}", response_model=IdeaIndexResponse, name="ideas:Item")
