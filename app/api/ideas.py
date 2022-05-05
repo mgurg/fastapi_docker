@@ -9,7 +9,6 @@ from fastapi_pagination import Page, Params, paginate
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from app.config import get_settings
 from app.db import get_session
 from app.models.models import (
     Accounts,
@@ -49,7 +48,7 @@ async def ideas_get_all(
         all_filters.append(Ideas.pictures.any())
         # all_filters.append(Ideas.pictures.any(Files.size > 279824))
 
-    print(all_filters)
+    # print(all_filters)
 
     ideas = session.exec(
         select(Ideas)

@@ -66,7 +66,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
         service_token=confirmation_token,
         service_token_valid_to=datetime.utcnow() + timedelta(days=1),
         password=pass_hash,
-        user_role_id=2,
+        user_role_id=1,  # 1 - SU_ADMIN / 2 - USER / 3 - VIEWER
         created_at=datetime.utcnow(),
         is_active=False,
         tz=res.tz,
