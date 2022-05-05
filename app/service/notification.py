@@ -42,7 +42,7 @@ class EmailNotification:
         #  'files[0][content]' : base64.b64encode(file_get_contents("grafika.png")),
         # }
 
-        # response = request("POST", self.url, headers=headers, data=payload, files=files)
+        response = request("POST", self.url, headers=headers, data=payload, files=files)
 
         # print(response.text)
         # pprint(payload)
