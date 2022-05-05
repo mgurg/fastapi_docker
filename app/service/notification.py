@@ -47,4 +47,4 @@ class EmailNotification:
         # print(response.text)
         # pprint(payload)
 
-        return payload
+        return response.text

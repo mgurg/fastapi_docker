@@ -59,10 +59,11 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
         account_id = 0
 
     # TODO: TOS field
+    confirmation_token = secrets.token_hex(32)
     new_user = Users(
         account_id=account_id + 2,
         email=res.email.strip(),
-        service_token=secrets.token_hex(32),
+        service_token=confirmation_token,
         service_token_valid_to=datetime.utcnow() + timedelta(days=1),
         password=pass_hash,
         user_role_id=2,
@@ -76,13 +77,18 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     session.commit()
     session.refresh(new_user)
 
-    # postmark = PostmarkClient(server_token=settings.api_postmark)
-    # postmark.emails.send(
-    #     From='sender@example.com',
-    #     To='recipient@example.com',
-    #     Subject='Postmark test',
-    #     HtmlBody='HTML body goes here'
-    # )
+    # Notification
+    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
+    receiver = settings.email_dev  # res.email.strip()
+    template_data = {  # Template: fb45d7d0
+        "name": "Jan",
+        "product_name": "Intio",
+        "login_url": "https://remontmaszyn.pl/login",
+        "username": receiver,
+        "sender_name": "Michał",
+        "action_url": "https://remontmaszyn.pl/activate/" + confirmation_token,
+    }
+    email.send(settings.email_sender, receiver, "Greetings from AWS!", "fb45d7d0", template_data)
 
     return {"ok": True}
 
@@ -213,20 +219,6 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         # session.commit()
         # session.refresh(login_history)
         raise HTTPException(status_code=404, detail="User not found")
-
-    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
-
-    receiver = settings.email_dev
-
-    template_data = {  # Template: fb45d7d0
-        "name": "Jan",
-        "product_name": "Intio",
-        "login_url": "https://remontmaszyn.pl/login",
-        "username": receiver,
-        "sender_name": "Michał",
-        "action_url": "https://remontmaszyn.pl/asdf234",
-    }
-    return email.send(settings.email_sender, receiver, "Greetings from AWS!", "fb45d7d0", template_data)
 
     return db_user
 
