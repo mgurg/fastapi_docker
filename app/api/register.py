@@ -152,7 +152,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     }
 
 
-@register_router.post("/login", response_model=UserLoginOut)
+@register_router.post("/login")  # , response_model=UserLoginOut
 async def auth_login(*, session: Session = Depends(get_session), users: UserLoginIn, req: Request):
     ip_info = "NO_INFO"  # get_ip_info(ip_addr)
     ua_string = req.headers["User-Agent"]
