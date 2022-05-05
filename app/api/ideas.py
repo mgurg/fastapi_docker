@@ -6,7 +6,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_pagination import Page, Params, paginate
-from passlib.hash import argon2
 from sqlalchemy import func
 from sqlmodel import Session, select
 
@@ -25,7 +24,6 @@ from app.models.models import (
 )
 from app.service.bearer_auth import has_token
 from app.service.helpers import get_uuid
-from app.service.password import Password
 
 idea_router = APIRouter()
 

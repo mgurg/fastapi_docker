@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     db_user: str = os.getenv("DB_USERNAME")
     db_password: str = os.getenv("DB_PASSWORD")
 
+    email_labs_app_key: str = os.getenv("EMAIL_LABS_APP_KEY")
+    email_labs_secret_key: str = os.getenv("EMAIL_LABS_APP_KEY")
+    email_sender: str = os.getenv("EMAIL_LABS_SENDER")
+    email_dev: str = os.getenv("EMAIL_DEV")
+
     class Config:
         env_prefix = ""
         env_file_encoding = "utf-8"

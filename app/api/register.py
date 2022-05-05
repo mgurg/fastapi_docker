@@ -11,6 +11,7 @@ from sqlmodel import Session, select
 from stdnum.pl import nip
 from user_agents import parse
 
+from app.config import get_settings
 from app.db import get_session
 from app.models.models import (
     Accounts,
@@ -25,9 +26,11 @@ from app.models.models import (
     UserSetPassIn,
 )
 from app.service.helpers import get_uuid
+from app.service.notification import EmailNotification
 from app.service.password import Password
 
 register_router = APIRouter()
+settings = get_settings()
 
 
 @register_router.post("/add", response_model=StandardResponse)
@@ -210,6 +213,20 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         # session.commit()
         # session.refresh(login_history)
         raise HTTPException(status_code=404, detail="User not found")
+
+    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key)
+
+    receiver = settings.email_dev
+
+    template_data = {  # Template: fb45d7d0
+        "name": "Jan",
+        "product_name": "Intio",
+        "login_url": "https://remontmaszyn.pl/login",
+        "username": receiver,
+        "sender_name": "Michał",
+        "action_url": "https://remontmaszyn.pl/asdf234",
+    }
+    email.send(settings.email_sender, receiver, "Greetings from AWS!", "fb45d7d0", template_data)
 
     return db_user
 
