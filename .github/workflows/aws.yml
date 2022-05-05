@@ -71,6 +71,7 @@ jobs:
             --build-arg EMAIL_LABS_APP_KEY="${{ secrets.EMAIL_LABS_APP_KEY }}" \
             --build-arg EMAIL_LABS_SECRET_KEY="${{ secrets.EMAIL_LABS_SECRET_KEY }}" \
             --build-arg EMAIL_LABS_SENDER="${{ secrets.EMAIL_LABS_SENDER }}" \
+            --build-arg EMAIL_LABS_SMTP="${{ secrets.EMAIL_LABS_SMTP }}" \
             --build-arg EMAIL_DEV="${{ secrets.EMAIL_DEV }}" \
             --build-arg SENTRY_DSN="${{ secrets.SENTRY_DSN }}" \
             --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
