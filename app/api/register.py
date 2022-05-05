@@ -226,7 +226,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         "sender_name": "Michał",
         "action_url": "https://remontmaszyn.pl/asdf234",
     }
-    email.send(settings.email_sender, receiver, "Greetings from AWS!", "fb45d7d0", template_data)
+    return email.send(settings.email_sender, receiver, "Greetings from AWS!", "fb45d7d0", template_data)
 
     return db_user
 
