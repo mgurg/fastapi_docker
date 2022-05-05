@@ -40,6 +40,7 @@ class Settings(BaseSettings):
 
     email_labs_app_key: str = os.getenv("EMAIL_LABS_APP_KEY")
     email_labs_secret_key: str = os.getenv("EMAIL_LABS_APP_KEY")
+    email_smtp: str = os.getenv("EMAIL_LABS_SMTP")
     email_sender: str = os.getenv("EMAIL_LABS_SENDER")
     email_dev: str = os.getenv("EMAIL_DEV")
 

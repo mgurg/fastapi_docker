@@ -5,9 +5,10 @@ from requests import request
 
 
 class EmailNotification:
-    def __init__(self, app_key: str, secret_key: str):
+    def __init__(self, app_key: str, secret_key: str, smtp: str):
         self.auth_header = base64.b64encode(f"{app_key}:{secret_key}".encode())
         self.url = "https://api.emaillabs.net.pl/api/sendmail_templates"
+        self.smtp = smtp
 
     def send(self, sender: str, receiver: str, subject: str, template: str, vars: dict):
 
@@ -19,7 +20,7 @@ class EmailNotification:
         headers = {"Authorization": f"Basic {self.auth_header.decode()}"}
         template_data = {
             "from": sender,
-            "smtp_account": "1.mgur.smtp",
+            "smtp_account": self.smtp,
             "subject": subject,
             "template_id": template,
         }

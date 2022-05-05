@@ -214,7 +214,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         # session.refresh(login_history)
         raise HTTPException(status_code=404, detail="User not found")
 
-    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key)
+    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
 
     receiver = settings.email_dev
 
