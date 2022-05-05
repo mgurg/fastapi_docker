@@ -15,6 +15,17 @@ class StandardResponse(SQLModel):  # OK
     ok: bool
 
 
+class Settings(SQLModel, table=True):
+    __tablename__ = "settings"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int
+    entity: str
+    value: str
+    value_type: str
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=False)
+    updated_at: Optional[datetime]
+
+
 class TasksLog(SQLModel, table=True):
     __tablename__ = "tasks_log"
     id: Optional[int] = Field(default=None, primary_key=True)

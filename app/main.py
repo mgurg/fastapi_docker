@@ -16,6 +16,8 @@ from app.api.events import event_router
 from app.api.files import file_router
 from app.api.ideas import idea_router
 from app.api.register import register_router
+from app.api.settings import setting_router
+from app.api.stats import stats_router
 from app.api.tasks import task_router
 from app.api.user import user_router
 from app.config import get_settings
@@ -65,6 +67,19 @@ def create_application() -> FastAPI:
         prefix="/ideas",
         # dependencies=[Depends(has_token)],
         tags=["IDEA"],
+    )
+    app.include_router(
+        setting_router,
+        prefix="/settings",
+        # dependencies=[Depends(has_token)],
+        tags=["SETTING"],
+    )
+
+    app.include_router(
+        stats_router,
+        prefix="/stats",
+        # dependencies=[Depends(has_token)],
+        tags=["STATS"],
     )
 
     app.include_router(
