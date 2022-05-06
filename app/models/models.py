@@ -26,6 +26,12 @@ class Settings(SQLModel, table=True):
     updated_at: Optional[datetime]
 
 
+class SettingAddIn(SQLModel):
+    entity: str
+    value: str
+    value_type: str
+
+
 class TasksLog(SQLModel, table=True):
     __tablename__ = "tasks_log"
     id: Optional[int] = Field(default=None, primary_key=True)
