@@ -22,6 +22,7 @@ from app.api.tasks import task_router
 from app.api.user import user_router
 from app.config import get_settings
 from app.service.bearer_auth import has_token
+from app.service.health_check import run_healthcheck
 from app.utils import get_secret
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
@@ -131,9 +132,18 @@ async def shutdown_event():
 
 @app.get("/")
 def read_root():
-    # TODO: Health heck for DB & Storage
-    # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
+
+
+@app.get("/health")
+async def health_check():
+    # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
+    try:
+        response = await run_healthcheck()
+    except Exception as err:
+        logger.exception(err)
+        raise err
+    return response
 
 
 @app.get("/items/{item_id}")
