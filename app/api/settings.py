@@ -38,6 +38,8 @@ async def setting_get_all(*, session: Session = Depends(get_session), setting_na
 @setting_router.post("/", response_model=StandardResponse, name="settings:Add")
 async def setting_add(*, session: Session = Depends(get_session), setting: SettingAddIn, auth=Depends(has_token)):
 
+    allowed_settings = ["mode"]
+
     res = SettingAddIn.from_orm(setting)
 
     new_setting = Settings(
