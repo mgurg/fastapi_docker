@@ -14,7 +14,18 @@ from app.service.bearer_auth import has_token
 stats_router = APIRouter()
 
 
-@stats_router.get("/", name="stats:List")
+@stats_router.get("/status", name="stats:Ideas.status")
 async def ideas_get_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
 
-    return {"stats": "ok"}
+    ideas_status = session.exec(
+        select(Ideas.status, func.count(Ideas.status))
+        .where(Ideas.account_id == auth["account"])
+        .group_by(Ideas.status)
+    ).all()
+
+    ideas_status = dict(ideas_status)
+
+    for status in ["accepted", "rejected", "todo", "null"]:
+        ideas_status.setdefault(status, 0)
+
+    return ideas_status
