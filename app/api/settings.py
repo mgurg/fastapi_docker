@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from app.db import get_session
-from app.models.models import SettingAddIn, Settings, StandardResponse
+from app.models.models import Accounts, SettingAddIn, Settings, StandardResponse
 from app.service.bearer_auth import has_token
 
 setting_router = APIRouter()
@@ -40,23 +40,15 @@ async def setting_get_all(
     return res
 
 
-# @setting_router.get("/{setting_name}", name="settings:List")  # response_model=SettingAddIn,
-# async def setting_get_all(*, session: Session = Depends(get_session), setting_name: str, auth=Depends(has_token)):
+@setting_router.get("/board/", name="settings:BoardUrl")  # response_model=SettingAddIn,
+async def setting_get_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
 
-#     db_setting = session.exec(
-#         select(Settings).where(Settings.account_id == auth["account"]).where(Settings.entity == setting_name)
-#     ).one_or_none()
+    db_board = session.exec(select(Accounts.company_id).where(Accounts.account_id == auth["account"])).one_or_none()
 
-#     if not db_setting:
-#         raise HTTPException(status_code=404, detail="Setting not found")
+    if not db_board:
+        raise HTTPException(status_code=404, detail="Board not found")
 
-#     res = {}
-#     # for elt in db_setting:
-#     # res.setdefault(elt.entity, []).append(elt.value) //
-#     res[db_setting.entity] = db_setting.value
-#     # print(res)
-
-#     return res
+    return db_board
 
 
 @setting_router.post("/", response_model=StandardResponse, name="settings:Add")
