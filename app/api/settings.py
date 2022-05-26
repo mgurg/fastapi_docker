@@ -60,39 +60,42 @@ async def setting_get_all(
 
 
 @setting_router.post("/", response_model=StandardResponse, name="settings:Add")
-async def setting_add(*, session: Session = Depends(get_session), setting: SettingAddIn, auth=Depends(has_token)):
+async def setting_add(
+    *, session: Session = Depends(get_session), settings: List[SettingAddIn], auth=Depends(has_token)
+):
 
     allowed_settings = ["idea_registration_mode", "issue_registration_email"]
 
-    res = SettingAddIn.from_orm(setting)
+    for setting in settings:
+        res = SettingAddIn.from_orm(setting)
 
-    if res.entity not in allowed_settings:
-        raise HTTPException(status_code=404, detail="Setting not allowed")
+        if res.entity not in allowed_settings:
+            raise HTTPException(status_code=404, detail=f"Setting {res.entity} - {res.value} is not allowed")
 
-    db_setting = session.exec(
-        select(Settings).where(Settings.account_id == auth["account"]).where(Settings.entity == res.entity)
-    ).first()
+        db_setting = session.exec(
+            select(Settings).where(Settings.account_id == auth["account"]).where(Settings.entity == res.entity)
+        ).first()
 
-    if not db_setting:
-        new_setting = Settings(
-            account_id=auth["account"],
-            entity=res.entity,
-            value=res.value,
-            value_type=res.value_type,
-            created_at=datetime.utcnow(),
-        )
+        if not db_setting:
+            new_setting = Settings(
+                account_id=auth["account"],
+                entity=res.entity,
+                value=res.value,
+                value_type=res.value_type,
+                created_at=datetime.utcnow(),
+            )
 
-        session.add(new_setting)
-        session.commit()
-        session.refresh(new_setting)
-    else:
-        setting_data = setting.dict(exclude_unset=True)
-        setting_data["updated_at"] = datetime.utcnow()
-        for key, value in setting_data.items():
-            setattr(db_setting, key, value)
+            session.add(new_setting)
+            session.commit()
+            session.refresh(new_setting)
+        else:
+            setting_data = setting.dict(exclude_unset=True)
+            setting_data["updated_at"] = datetime.utcnow()
+            for key, value in setting_data.items():
+                setattr(db_setting, key, value)
 
-        session.add(db_setting)
-        session.commit()
-        session.refresh(db_setting)
+            session.add(db_setting)
+            session.commit()
+            session.refresh(db_setting)
 
     return {"ok": True}
