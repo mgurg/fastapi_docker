@@ -19,6 +19,7 @@ from app.models.models import (
     Ideas,
     IdeasVotes,
     IdeasVotesIn,
+    Settings,
     StandardResponse,
 )
 from app.service.bearer_auth import has_token
@@ -114,6 +115,7 @@ async def idea_add_anonymous_one(*, session: Session = Depends(get_session), ide
         company, board = idea_id.split("+")
 
         db_account = session.exec(select(Accounts).where(Accounts.company_id == company)).one_or_none()
+
         if not db_account:
             raise HTTPException(status_code=404, detail="Account not found")
 
@@ -122,7 +124,19 @@ async def idea_add_anonymous_one(*, session: Session = Depends(get_session), ide
         base64_bytes = base64.b64encode(message_bytes)
         base64_message = base64_bytes.decode("ascii")
 
-        return {"token": base64_message, "mode": "anonymous"}
+        db_setting_mode = session.exec(
+            select(Settings)
+            .where(Settings.account_id == db_account.account_id)
+            .where(Settings.entity == "idea_registration_mode")
+        ).one_or_none()
+
+        db_setting_mail = session.exec(
+            select(Settings)
+            .where(Settings.account_id == db_account.account_id)
+            .where(Settings.entity == "issue_registration_email")
+        ).one_or_none()
+
+        return {"token": base64_message, "mode": db_setting_mode.value, "email": db_setting_mail.value}
     else:
         raise HTTPException(status_code=404, detail="Incorrect id")
     # %!#+23456789:=?@ABCDEFGHJKLMNPRS
