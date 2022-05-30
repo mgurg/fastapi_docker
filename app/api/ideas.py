@@ -52,7 +52,7 @@ async def ideas_get_all(
         # all_filters.append(Ideas.pictures.any(Files.size > 279824))
 
     if search is not None:
-        all_filters.append(func.concat(Ideas.title, " ", Ideas.description).like(f"%{search}%"))
+        all_filters.append(func.concat(Ideas.title, " ", Ideas.description).ilike(f"%{search}%"))
     # print(all_filters)
 
     ideas = session.exec(
@@ -83,8 +83,10 @@ async def ideas_get_one(*, session: Session = Depends(get_session), idea_uuid: U
     return idea
 
 
-@idea_router.get("/user/{user_uuid}", response_model=List[IdeaIndexResponse], name="ideas:UserItems")
-async def ideas_get_one(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
+@idea_router.get("/user/{user_uuid}", response_model=Page[IdeaIndexResponse], name="ideas:UserItems")
+async def ideas_get_one(
+    *, session: Session = Depends(get_session), user_uuid: UUID, params: Params = Depends(), auth=Depends(has_token)
+):
 
     db_user = session.exec(
         select(Users)
@@ -103,7 +105,7 @@ async def ideas_get_one(*, session: Session = Depends(get_session), user_uuid: U
         .where(Ideas.deleted_at.is_(None))
     ).all()
 
-    return ideas
+    return paginate(ideas, params)
 
 
 @idea_router.get("/vote_last/{idea_uuid}", name="ideas:Item")

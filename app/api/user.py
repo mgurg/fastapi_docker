@@ -31,7 +31,7 @@ async def user_get_all(
     all_filters = []
 
     if search is not None:
-        all_filters.append(func.concat(Users.first_name, " ", Users.last_name).like(f"%{search}%"))
+        all_filters.append(func.concat(Users.first_name, " ", Users.last_name).ilike(f"%{search}%"))
 
     users = session.exec(
         select(Users)
