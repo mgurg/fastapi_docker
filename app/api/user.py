@@ -3,8 +3,9 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_pagination import Page, Params, paginate
 from passlib.hash import argon2
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlmodel import Session, select
 
 from app.config import get_settings
@@ -17,18 +18,31 @@ from app.service.password import Password
 user_router = APIRouter()
 
 
-@user_router.get("/", response_model=List[UserIndexResponse], name="user:Profile")
-async def user_get_all(*, session: Session = Depends(get_session), auth=Depends(has_token)):
+@user_router.get("/", response_model=Page[UserIndexResponse], name="user:Profile")
+async def user_get_all(
+    *,
+    session: Session = Depends(get_session),
+    search: str = None,
+    order: str = "asc",
+    params: Params = Depends(),
+    auth=Depends(has_token),
+):
+
+    all_filters = []
+
+    if search is not None:
+        all_filters.append(func.concat(Users.first_name, " ", Users.last_name).like(f"%{search}%"))
+
     users = session.exec(
         select(Users)
         .where(Users.account_id == auth["account"])
         .where(Users.is_active == True)
         .where(Users.deleted_at.is_(None))
-        # .execution_options(schema_translate_map={None: "tenant_1"})
-        # https://github.com/flowfelis/test-fast-api/blob/cb40311e08de10e3a4cf83881af6f36d11fdc4d9/app/main.py
+        .filter(*all_filters)
+        .order_by(text(f"last_name {order}"))
     ).all()
 
-    return users
+    return paginate(users, params)
 
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse, name="user:Profile")

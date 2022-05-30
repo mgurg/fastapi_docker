@@ -21,6 +21,7 @@ from app.models.models import (
     IdeasVotesIn,
     Settings,
     StandardResponse,
+    Users,
 )
 from app.service.bearer_auth import has_token
 from app.service.helpers import get_uuid
@@ -34,10 +35,11 @@ async def ideas_get_all(
     session: Session = Depends(get_session),
     # offset: int = 0,
     # limit: int = Query(default=100, lte=100),
+    search: str = None,
     status: str = None,
     hasImg: bool = None,
     params: Params = Depends(),
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
 
     all_filters = []
@@ -49,6 +51,8 @@ async def ideas_get_all(
         all_filters.append(Ideas.pictures.any())
         # all_filters.append(Ideas.pictures.any(Files.size > 279824))
 
+    if search is not None:
+        all_filters.append(func.concat(Ideas.title, " ", Ideas.description).like(f"%{search}%"))
     # print(all_filters)
 
     ideas = session.exec(
@@ -77,6 +81,29 @@ async def ideas_get_one(*, session: Session = Depends(get_session), idea_uuid: U
         raise HTTPException(status_code=404, detail="Idea not found")
 
     return idea
+
+
+@idea_router.get("/user/{user_uuid}", response_model=List[IdeaIndexResponse], name="ideas:UserItems")
+async def ideas_get_one(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
+
+    db_user = session.exec(
+        select(Users)
+        .where(Users.account_id == auth["account"])
+        .where(Users.uuid == user_uuid)
+        .where(Users.deleted_at.is_(None))
+    ).one_or_none()
+
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    ideas = session.exec(
+        select(Ideas)
+        .where(Ideas.account_id == auth["account"])
+        .where(Ideas.author_id == db_user.id)
+        .where(Ideas.deleted_at.is_(None))
+    ).all()
+
+    return ideas
 
 
 @idea_router.get("/vote_last/{idea_uuid}", name="ideas:Item")
