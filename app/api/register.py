@@ -1,3 +1,4 @@
+import random
 import secrets
 import uu
 from datetime import datetime, timedelta
@@ -54,14 +55,10 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     else:
         raise HTTPException(status_code=400, detail=is_password_ok)
 
-    account_id = session.exec(select([func.max(Users.account_id)])).one()
-    if account_id is None:
-        account_id = 0
-
     # TODO: TOS field
     confirmation_token = secrets.token_hex(32)
     new_user = Users(
-        account_id=account_id + 2,
+        account_id=0,  # account_id + 2,
         email=res.email.strip(),
         service_token=confirmation_token,
         service_token_valid_to=datetime.utcnow() + timedelta(days=1),
@@ -115,9 +112,39 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
 
     token = secrets.token_hex(64)
 
+    db_account = session.exec(select(Accounts).where(Accounts.nip == res.nip)).one_or_none()
+
+    if not db_account:
+        chars = "abcdefghijkmnopqrstuvwxyz23456789"
+        company_ids = session.exec(select(Accounts.company_id)).all()
+        proposed_id = "".join(random.choice(chars) for x in range(3))
+
+        while proposed_id in company_ids:
+            proposed_id = "".join(random.choice(chars) for x in range(3))
+
+        # ----------------
+
+        account_id = session.exec(select([func.max(Users.account_id)])).one()
+        if account_id is None:
+            account_id = 0
+
+            company_ids = session.exec(select(Accounts.company_id)).all()
+
+            new_account = Accounts(
+                uuid=get_uuid(),
+                registered_at=datetime.utcnow(),
+                nip=res.nip,
+                company_id=proposed_id,
+                account_id=account_id + 2,
+            )
+            session.add(new_account)
+            session.commit()
+            session.refresh(new_account)
+
     update_package = {
         "first_name": res.first_name,
         "last_name": res.last_name,
+        "account_id": account_id + 2,
         "is_active": True,
         "service_token": None,
         "service_token_valid_to": None,
@@ -154,6 +181,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
         "last_name": db_user.last_name,
         "lang": db_user.lang,
         "tz": db_user.tz,
+        "uuid": db_user.uuid,
         "token": token,
     }
 
