@@ -141,11 +141,13 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
 
         new_account = Accounts(
             uuid=get_uuid(),
+            company=f"Company_{account_id}",
             registered_at=datetime.utcnow(),
             nip=res.nip,
             company_id=proposed_id,
-            account_id=account_id + 2,
+            account_id=account_id,
         )
+
         session.add(new_account)
         session.commit()
         session.refresh(new_account)
