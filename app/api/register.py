@@ -81,14 +81,21 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
         "name": "Jan",
         "product_name": "Intio",
-        "login_url": "https://remontmaszyn.pl/login",
+        "login_url": "https://beta.remontmaszyn.pl/login",
         "username": receiver,
         "sender_name": "Michał",
-        "action_url": "https://remontmaszyn.pl/activate/" + confirmation_token,
+        "action_url": "https://beta.remontmaszyn.pl/activate/" + confirmation_token,
     }
     email.send(settings.email_sender, receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
 
     return {"ok": True}
+
+
+@register_router.get("/items/")
+def read_item(*, session: Session = Depends(get_session)):
+    a = session.exec(select([func.max(Users.account_id)])).one()
+    print(a)
+    return {"mode": settings.environment}
 
 
 @register_router.post("/first_run")
@@ -128,19 +135,23 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
         account_id = session.exec(select([func.max(Users.account_id)])).one()
         if account_id is None:
             account_id = 0
+        account_id += 2
 
-            company_ids = session.exec(select(Accounts.company_id)).all()
+        # company_ids = session.exec(select(Accounts.company_id)).all()
 
-            new_account = Accounts(
-                uuid=get_uuid(),
-                registered_at=datetime.utcnow(),
-                nip=res.nip,
-                company_id=proposed_id,
-                account_id=account_id + 2,
-            )
-            session.add(new_account)
-            session.commit()
-            session.refresh(new_account)
+        new_account = Accounts(
+            uuid=get_uuid(),
+            registered_at=datetime.utcnow(),
+            nip=res.nip,
+            company_id=proposed_id,
+            account_id=account_id + 2,
+        )
+        session.add(new_account)
+        session.commit()
+        session.refresh(new_account)
+
+    else:
+        account_id = db_account.account_id
 
     update_package = {
         "first_name": res.first_name,
