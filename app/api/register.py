@@ -76,8 +76,9 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
 
     # Notification
     email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
-    receiver = settings.email_dev  # res.email.strip()
-    template_data = {  # Template: fb45d7d0
+    receiver = res.email.strip()
+
+    template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
         "name": "Jan",
         "product_name": "Intio",
         "login_url": "https://remontmaszyn.pl/login",
@@ -85,7 +86,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
         "sender_name": "Michał",
         "action_url": "https://remontmaszyn.pl/activate/" + confirmation_token,
     }
-    email.send(settings.email_sender, receiver, "Greetings from AWS!", "fb45d7d0", template_data)
+    email.send(settings.email_sender, receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
 
     return {"ok": True}
 

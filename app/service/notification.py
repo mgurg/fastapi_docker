@@ -3,6 +3,10 @@ from pprint import pprint
 
 from requests import request
 
+from app.config import get_settings
+
+settings = get_settings()
+
 
 class EmailNotification:
     def __init__(self, app_key: str, secret_key: str, smtp: str):
@@ -11,6 +15,9 @@ class EmailNotification:
         self.smtp = smtp
 
     def send(self, sender: str, receiver: str, subject: str, template: str, vars: dict):
+
+        if settings.environment != "production":
+            receiver = settings.email_dev
 
         receiver_data = {f"to[{receiver}]": ""}
 
