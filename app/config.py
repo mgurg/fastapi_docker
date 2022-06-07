@@ -6,8 +6,6 @@ from functools import lru_cache
 
 from pydantic import BaseSettings
 
-# from app.utils import get_secret
-
 log = logging.getLogger("uvicorn")
 
 

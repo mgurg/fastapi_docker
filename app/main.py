@@ -23,7 +23,6 @@ from app.api.user import user_router
 from app.config import get_settings
 from app.service.bearer_auth import has_token
 from app.service.health_check import run_healthcheck
-from app.utils import get_secret
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
@@ -132,7 +131,7 @@ async def shutdown_event():
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World", "time": datetime.utcnow(), "S": "srt"}
+    return {"Hello": "World", "time": datetime.utcnow()}
 
 
 @app.get("/health")
@@ -146,22 +145,9 @@ async def health_check():
     return response
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    try:
-        logger.debug("Get")
-        # client = boto3.client("secretsmanager", region_name="eu-central-1")
-
-        # response = client.get_secret_value(SecretId="amzn-db-credentials")
-        # database_secrets = json.loads(response["SecretString"])
-        secret = get_secret()
-        logger.debug("secret")
-        # logger.debug(f'{secret["port"]}')
-    except Exception as ex:
-        logger.error(f"### Secrets failed: {ex}")
-        logger.error(traceback.format_exc())
-
-    return {"item_id_no": item_id, "q": q}
+@app.get("/items/")
+def read_item():
+    return {"mode": settings.environment}
 
 
 if __name__ == "__main__":
