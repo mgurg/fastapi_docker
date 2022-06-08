@@ -135,6 +135,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
         if account_id is None:
             account_id = 0
         account_id += 2
+        user_role_id = 1  # SUPER_ADMIN / USER / VIEWER
 
         # company_ids = session.exec(select(Accounts.company_id)).all()
 
@@ -153,12 +154,14 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
 
     else:
         account_id = db_account.account_id
+        user_role_id = 2  # SUPER_ADMIN / USER / VIEWER
 
     update_package = {
         "first_name": res.first_name,
         "last_name": res.last_name,
         "account_id": account_id,
         "is_active": True,
+        "user_role_id": user_role_id,
         "service_token": None,
         "service_token_valid_to": None,
         "auth_token": token,
