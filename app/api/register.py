@@ -157,7 +157,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     update_package = {
         "first_name": res.first_name,
         "last_name": res.last_name,
-        "account_id": account_id + 2,
+        "account_id": account_id,
         "is_active": True,
         "service_token": None,
         "service_token_valid_to": None,
