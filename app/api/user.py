@@ -93,12 +93,6 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
     session.refresh(new_user)
 
     # postmark = PostmarkClient(server_token=settings.api_postmark)
-    # postmark.emails.send(
-    #     From='sender@example.com',
-    #     To='recipient@example.com',
-    #     Subject='Postmark test',
-    #     HtmlBody='HTML body goes here'
-    # )
 
     return {"ok": True}
 

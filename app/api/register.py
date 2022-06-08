@@ -79,7 +79,6 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
     receiver = res.email.strip()
 
     template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
-        "name": "Jan",
         "product_name": "Intio",
         "login_url": "https://beta.remontmaszyn.pl/login",
         "username": receiver,
@@ -280,16 +279,18 @@ async def auth_verify(*, session: Session = Depends(get_session), token: str):
 
 
 @register_router.get("/remind-password/{user_email}", response_model=StandardResponse)
-async def auth_remind(*, session: Session = Depends(get_session), user_email: EmailStr):
+async def auth_remind(*, session: Session = Depends(get_session), user_email: EmailStr, req: Request):
     db_user = session.exec(
         select(Users).where(Users.email == user_email).where(Users.is_active == True).where(Users.deleted_at.is_(None))
     ).one_or_none()
+
     if db_user is None:
         return {"ok": True}
         # raise HTTPException(status_code=404, detail="Invalid email")
 
+    token = secrets.token_hex(32)
     update_package = {
-        "service_token": secrets.token_hex(32),
+        "service_token": token,
         "service_token_valid_to": datetime.utcnow() + timedelta(days=1),
         "updated_at": datetime.utcnow(),
     }
@@ -300,13 +301,21 @@ async def auth_remind(*, session: Session = Depends(get_session), user_email: Em
     session.commit()
     session.refresh(db_user)
 
-    # postmark = PostmarkClient(server_token=settings.api_postmark)
-    # postmark.emails.send(
-    #     From='sender@example.com',
-    #     To='recipient@example.com',
-    #     Subject='Postmark test',
-    #     HtmlBody='HTML body goes here'
-    # )
+    # Notification
+    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
+
+    ua_string = req.headers["User-Agent"]
+    user_agent = parse(ua_string)
+
+    template_data = {  # Template: f91f8ad6 	ResetPassword_PL
+        "product_name": "Intio",
+        "name": db_user.first_name,
+        "action_url": "https://beta.remontmaszyn.pl/set_password/" + token,
+        "operating_system": user_agent.os.family,
+        "browser_name": user_agent.browser.family,
+    }
+
+    email.send(settings.email_sender, user_email, "[Intio] Resetowanie hasła!", "f91f8ad6", template_data)
 
     return {"ok": True}
 
