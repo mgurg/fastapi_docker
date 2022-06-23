@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_pagination import Page, Params, paginate
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlmodel import Session, select
 
 from app.db import get_session
@@ -35,6 +35,8 @@ async def ideas_get_all(
     session: Session = Depends(get_session),
     # offset: int = 0,
     # limit: int = Query(default=100, lte=100),
+    sortOrder: str = "ASC",
+    sortColumn: str = "title",
     search: str = None,
     status: str = None,
     hasImg: bool = None,
@@ -60,6 +62,7 @@ async def ideas_get_all(
         .where(Ideas.account_id == auth["account"])
         .where(Ideas.deleted_at.is_(None))
         .filter(*all_filters)
+        .order_by(text(f"{sortColumn} {sortOrder}"))
         # .offset(offset)
         # .limit(limit)
     ).all()

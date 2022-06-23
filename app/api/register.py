@@ -191,6 +191,9 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     # session.commit()
     # session.refresh(account)
 
+    if user_role_id != 1:  # IF NOT ADMIN
+        token = "abc"
+
     return {
         "ok": True,
         "first_name": db_user.first_name,
