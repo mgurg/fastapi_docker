@@ -46,6 +46,8 @@ async def ideas_get_all(
 
     all_filters = []
 
+    sortTable = {"title": "title", "age": "created_at", "counter": "upvotes"}
+
     if status is not None:
         all_filters.append(Ideas.status == status)
 
@@ -62,7 +64,7 @@ async def ideas_get_all(
         .where(Ideas.account_id == auth["account"])
         .where(Ideas.deleted_at.is_(None))
         .filter(*all_filters)
-        .order_by(text(f"{sortColumn} {sortOrder}"))
+        .order_by(text(f"{sortTable[sortColumn]} {sortOrder}"))
         # .offset(offset)
         # .limit(limit)
     ).all()
