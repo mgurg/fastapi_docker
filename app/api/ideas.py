@@ -35,7 +35,7 @@ async def ideas_get_all(
     session: Session = Depends(get_session),
     # offset: int = 0,
     # limit: int = Query(default=100, lte=100),
-    sortOrder: str = "ASC",
+    sortOrder: str = "asc",
     sortColumn: str = "title",
     search: str = None,
     status: str = None,
