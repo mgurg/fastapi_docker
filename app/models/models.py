@@ -250,6 +250,7 @@ class UserIndexResponse(SQLModel):
     email: str
     phone: Optional[str]
     uuid: uuid.UUID
+    is_active: bool
     # role_FK: RolesWithPermissionsReturn
 
 
