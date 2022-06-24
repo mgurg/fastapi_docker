@@ -46,6 +46,12 @@ docker exec -it 64a05bfedffb sh
 
 ```
 
+### Status
+ - pending
+ - rejected
+ - new
+ - accepted
+ - cancelled
 
 
 ### Events

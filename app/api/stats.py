@@ -25,7 +25,7 @@ async def ideas_get_all(*, session: Session = Depends(get_session), auth=Depends
 
     ideas_status = dict(ideas_status)
 
-    for status in ["accepted", "rejected", "todo", "null"]:
+    for status in ["pending", "accepted", "rejected", "todo"]:
         ideas_status.setdefault(status, 0)
 
     return ideas_status
