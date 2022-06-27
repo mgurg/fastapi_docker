@@ -166,6 +166,7 @@ class Users(SQLModel, table=True):
     auth_token: Optional[str]
     auth_token_valid_to: Optional[datetime]
     is_active: bool
+    is_verified: bool
     service_token: Optional[str]
     service_token_valid_to: Optional[datetime]
     user_role_id: int = Field(default=None, foreign_key="roles.id")
@@ -199,6 +200,7 @@ class UserCreateIn(SQLModel):  # OK
     phone: Optional[str]
     password: Optional[str]
     password_confirmation: Optional[str]
+    is_verified: Optional[bool]
     user_role_uuid: Optional[uuid.UUID]
 
 
@@ -251,6 +253,7 @@ class UserIndexResponse(SQLModel):
     phone: Optional[str]
     uuid: uuid.UUID
     is_active: bool
+    is_verified: bool
     # role_FK: RolesWithPermissionsReturn
 
 

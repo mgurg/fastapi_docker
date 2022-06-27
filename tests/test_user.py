@@ -28,6 +28,7 @@ def test_list_users(session: Session, client: TestClient):
             user_role_id=2,
             created_at=datetime.utcnow(),
             is_active=True,
+            is_verified=True,
             tz=fake.timezone(),
             lang=fake.language_code(),
             uuid=get_uuid(),

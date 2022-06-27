@@ -66,6 +66,7 @@ async def auth_register(*, session: Session = Depends(get_session), users: UserR
         user_role_id=1,  # 1 - SU_ADMIN / 2 - USER / 3 - VIEWER
         created_at=datetime.utcnow(),
         is_active=False,
+        is_verified=False,
         tz=res.tz,
         lang=res.lang,
         uuid=get_uuid(),  # str(uuid.uuid4()),
@@ -120,6 +121,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     token = secrets.token_hex(64)
 
     db_account = session.exec(select(Accounts).where(Accounts.nip == res.nip)).one_or_none()
+    is_verified = False
 
     if not db_account:
         chars = "abcdefghijkmnopqrstuvwxyz23456789"
@@ -136,6 +138,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
             account_id = 0
         account_id += 2
         user_role_id = 1  # SUPER_ADMIN / USER / VIEWER
+        is_verified = True
 
         # company_ids = session.exec(select(Accounts.company_id)).all()
 
@@ -161,6 +164,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
         "last_name": res.last_name,
         "account_id": account_id,
         "is_active": True,
+        "is_verified": is_verified,
         "user_role_id": user_role_id,
         "service_token": None,
         "service_token_valid_to": None,

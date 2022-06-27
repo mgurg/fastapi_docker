@@ -84,6 +84,7 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
         user_role_id=2,
         created_at=datetime.utcnow(),
         is_active=True,
+        is_verified=True,
         tz="Europe/Warsaw",
         lang="pl",
         uuid=get_uuid(),  # str(uuid.uuid4()),
