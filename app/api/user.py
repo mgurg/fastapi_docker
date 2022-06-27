@@ -128,6 +128,7 @@ async def user_edit(
         del user_data["password"]
         del user_data["password_confirmation"]
 
+    user_data["updated_at"] = datetime.utcnow()
     for key, value in user_data.items():
         setattr(db_user, key, value)
 
