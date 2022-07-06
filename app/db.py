@@ -1,6 +1,11 @@
-from sqlmodel import Session, create_engine
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
+
+metadata = MetaData()
+Base = declarative_base(metadata=metadata)
 
 settings = get_settings()
 
@@ -15,7 +20,7 @@ engine = create_engine(database, echo=False, pool_pre_ping=True, pool_recycle=28
 
 
 def get_session():
-    with Session(engine) as session:
+    with Session(engine, future=True) as session:
         yield session
 
 
