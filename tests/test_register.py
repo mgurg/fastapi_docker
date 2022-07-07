@@ -68,7 +68,7 @@ def test_post_register_first_run(session: Session, client: TestClient):
             is_verified=False,
             tz=fake.timezone(),
             lang=fake.language_code(),
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
         )
         session.add(new_user)
         session.commit()
@@ -105,7 +105,7 @@ def test_post_register_first_run(session: Session, client: TestClient):
 #             is_active=True,
 #             tz=tz,
 #             lang=lang,
-#             uuid=get_uuid(),
+#             uuid=str(uuid.uuid4()),
 #         )
 #         session.add(new_user)
 #         session.commit()
@@ -151,7 +151,7 @@ def test_post_verify(session: Session, client: TestClient):
             is_verified=True,
             tz=tz,
             lang=lang,
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
         )
         session.add(new_user)
         session.commit()

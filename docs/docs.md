@@ -1,4 +1,20 @@
 # fastapi_docker
+
+## Naming
+
+Tables: plural
+
+    Multiple users are listed in the users table.
+
+Models: singular
+
+    A singular user can be selected from the users table.
+
+Controllers: plural
+
+    http://myapp.com/users would list multiple users.
+
+
 ## Configuration
 
 

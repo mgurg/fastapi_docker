@@ -94,7 +94,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
 
     if (all(v is not None for v in req_fields)) & (res.recurring == True):
         new_event = Events(
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
             account_id=2,
             recurring=True,
             interval=1,
@@ -122,7 +122,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task: TaskAdd
         time_to = pendulum.instance(res.date_to).format("HH:mm:ssZ")
 
     new_task = Tasks(
-        uuid=get_uuid(),
+        uuid=str(uuid.uuid4()),
         account_id=2,
         author_id=1,
         assignee_id=assignee,
@@ -197,7 +197,7 @@ async def user_get_all(*, session: Session = Depends(get_session), task_uuid: UU
                 session.commit()
 
         new_event = Events(
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
             account_id=2,
             recurring=task_data["recurring"],
             interval=task_data["interval"],
@@ -298,7 +298,7 @@ async def task_action(*, session: Session = Depends(get_session), task_uuid: UUI
     if (not db_task_open_log) and (res.action_type == "accepted" or res.action_type == "rejected"):
         first_task_log = TasksLog(
             task_id=db_task.id,
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
             user_id=1,
             start_at=db_task.created_at,
             end_at=datetime.utcnow(),
@@ -322,7 +322,7 @@ async def task_action(*, session: Session = Depends(get_session), task_uuid: UUI
     if (db_task_open_log) and (db_task_open_log.to_value == "accepted" or db_task_open_log.to_value == "pause"):
         first_task_log = TasksLog(
             task_id=db_task.id,
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
             user_id=1,
             start_at=datetime.utcnow(),
             from_value="start",

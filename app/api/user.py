@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta
 from typing import List
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
@@ -87,7 +87,7 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
         is_verified=True,
         tz="Europe/Warsaw",
         lang="pl",
-        uuid=get_uuid(),  # str(uuid.uuid4()),
+        uuid=str(uuid4()),  # str(uuid.uuid4()),
     )
     session.add(new_user)
     session.commit()

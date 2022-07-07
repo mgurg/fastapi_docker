@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_session
-from app.model.model import Settings
+from app.model.model import Setting
 
 # from app.models.models import Accounts, SettingAddIn, StandardResponse
 from app.schema.schema import SettingBase
@@ -38,15 +38,13 @@ async def setting_get_all(
 
         db_setting = (
             session.execute(
-                select(Settings)
-                .where(Settings.account_id == auth["account"])
-                .where(Settings.entity.in_(setting_names))
+                select(Setting).where(Setting.account_id == auth["account"]).where(Setting.entity.in_(setting_names))
             )
             .scalars()
             .all()
         )
     else:
-        db_setting = session.execute(select(Settings).where(Settings.account_id == auth["account"])).scalars().all()
+        db_setting = session.execute(select(Setting).where(Setting.account_id == auth["account"])).scalars().all()
 
     if not db_setting:
         raise HTTPException(status_code=404, detail="Settings not found")

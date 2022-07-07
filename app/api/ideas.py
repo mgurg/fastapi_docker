@@ -195,7 +195,7 @@ async def user_add_one(*, session: Session = Depends(get_session), idea: IdeaAdd
                 files.append(db_file)
 
     new_idea = Ideas(
-        uuid=get_uuid(),
+        uuid=str(uuid.uuid4()),
         account_id=auth["account"],
         author_id=auth["user"],
         upvotes=0,
@@ -248,7 +248,7 @@ async def idea_add_vote_one(*, session: Session = Depends(get_session), vote: Id
         raise HTTPException(status_code=404, detail="Invalid vote type")
 
     new_vote = IdeasVotes(
-        uuid=get_uuid(),
+        uuid=str(uuid.uuid4()),
         account_id=auth["account"],
         idea_id=db_idea.id,
         user_id=auth["user"],

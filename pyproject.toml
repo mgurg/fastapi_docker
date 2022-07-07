@@ -28,6 +28,8 @@ pendulum = "^2"
 pydantic-factories = "^1.2.6"
 sentry-sdk = "^1.5.10"
 fastapi-pagination = {extras = ["sqlmodel"], version = "^0.9.3"}
+langcodes = "^3.3.0"
+pytz = "^2022.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"

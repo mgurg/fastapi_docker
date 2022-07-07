@@ -160,7 +160,7 @@ async def upload_aws_s3(
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
 
     new_file = Files(
-        uuid=get_uuid(),
+        uuid=str(uuid.uuid4()),
         account_id=2,
         owner_id=2,
         file_name=file.filename,

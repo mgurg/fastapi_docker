@@ -4,7 +4,48 @@ from datetime import datetime, time
 from pydantic import BaseModel, EmailStr
 
 
-class Users(BaseModel):
+class StandardResponse(BaseModel):  # OK
+    ok: bool
+
+
+class Account(BaseModel):
+    __tablename__ = "accounts"
+    id: int | None
+    uuid: uuid.UUID
+    account_id: int
+    company: str
+    nip: str | None
+    address: str | None
+    company_id: str | None
+    ideas_id: str | None
+
+    class Config:
+        orm_mode = True
+
+
+class UserRegisterIn(BaseModel):  # OK
+    email: EmailStr
+    password: str
+    password_confirmation: str
+    tos: bool
+    tz: str | None = "Europe/Warsaw"
+    lang: str | None = "pl"
+
+    class Config:
+        orm_mode = True
+
+
+class UserFirstRunIn(BaseModel):  # OK
+    first_name: str
+    last_name: str
+    nip: str
+    token: str
+
+    class Config:
+        orm_mode = True
+
+
+class User(BaseModel):
     __tablename__ = "users"
     id: int
     account_id: int
@@ -30,6 +71,27 @@ class Users(BaseModel):
 
     # usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
     # role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
+    class Config:
+        orm_mode = True
+
+
+class UserLoginIn(BaseModel):  # OK
+    email: EmailStr
+    password: str | None
+    permanent: bool
+
+    class Config:
+        orm_mode = True
+
+
+class UserLoginOut(BaseModel):  # OK
+    auth_token: str
+    first_name: str
+    last_name: str
+    tz: str
+    lang: str
+    uuid: uuid.UUID
+    # role_FK: RolesWithPermissionsReturn
 
 
 class SettingBase(BaseModel):

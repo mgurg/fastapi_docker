@@ -31,7 +31,7 @@ def test_list_users(session: Session, client: TestClient):
             is_verified=True,
             tz=fake.timezone(),
             lang=fake.language_code(),
-            uuid=get_uuid(),
+            uuid=str(uuid.uuid4()),
         )
         session.add(new_user)
         session.commit()
@@ -58,7 +58,7 @@ def test_list_users(session: Session, client: TestClient):
 #             is_active=True,
 #             tz=fake.timezone(),
 #             lang=fake.language_code(),
-#             uuid=get_uuid(),
+#             uuid=str(uuid.uuid4()),
 #         )
 #         session.add(new_user)
 #         session.commit()

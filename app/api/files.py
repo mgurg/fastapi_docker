@@ -79,7 +79,7 @@ async def file_add(
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
 
     new_file = Files(
-        uuid=get_uuid(),
+        uuid=str(uuid.uuid4()),
         account_id=auth["account"],
         owner_id=auth["user"],
         file_name=file.filename,
