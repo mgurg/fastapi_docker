@@ -2,12 +2,15 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+
+# from sqlmodel import Session, SQLModel, create_engine
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session
 from sqlmodel.pool import StaticPool
 from starlette.testclient import TestClient
 
 from app.config import get_settings
-from app.db import get_session
+from app.db import Base, get_session
 from app.main import create_application
 from app.service.bearer_auth import has_token
 
@@ -28,7 +31,7 @@ from app.service.bearer_auth import has_token
 def session_fixture():
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     # engine = create_engine("sqlite:///testing.db", connect_args={"check_same_thread": False})
-    SQLModel.metadata.create_all(engine)
+    Base.metadata.create_all(bind=engine)
     with Session(engine) as session:
         yield session
 

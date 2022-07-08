@@ -102,8 +102,9 @@ class User(BaseModel):
     is_verified: bool
     service_token: str | None
     service_token_valid_to: datetime | None
+    tos: bool
     # user_role_id: int = Field(default=None, foreign_key="roles.id")
-    # user_info_id: Optional[int] = Field(default=None, foreign_key="users_info.id")
+    # user_info_id:int | None = Field(default=None, foreign_key="users_info.id")
     tz: str
     lang: str
     deleted_at: datetime | None
@@ -179,3 +180,80 @@ class SettingBase(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class FileBasicInfo(BaseModel):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+
+    class Config:
+        orm_mode = True
+
+
+class IdeaIndexResponse(BaseModel):
+    uuid: UUID
+    color: str
+    title: str
+    description: str
+    upvotes: int | None
+    downvotes: int | None
+    status: str | None
+    created_at: datetime
+    pictures: List[FileBasicInfo] | None
+
+    class Config:
+        orm_mode = True
+
+
+class IdeaAddIn(BaseModel):
+    title: str
+    description: str
+    color: str = "green"
+    files: List[UUID] | None
+
+    class Config:
+        orm_mode = True
+
+
+class IdeaEditIn(BaseModel):
+    title: str | None
+    description: str | None
+    color: str | None
+    status: str | None
+    vote: str | None
+    files: List[UUID] | None
+
+    class Config:
+        orm_mode = True
+
+
+class IdeasVotesIn(BaseModel):
+    idea_uuid: UUID
+    vote: str
+
+    class Config:
+        orm_mode = True
+
+
+class FileResponse(BaseModel):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+
+    # task: List[TaskBasicInfo]
+
+
+class FileUrlResponse(BaseModel):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+    # url: HttpUrl
+
+    # task: List[TaskBasicInfo]

@@ -8,7 +8,14 @@ from sqlalchemy import (
     Table,
     create_engine,
 )
-from sqlalchemy.dialects.postgresql import BOOLEAN, INTEGER, TIMESTAMP, UUID, VARCHAR
+from sqlalchemy.dialects.postgresql import (
+    BOOLEAN,
+    INTEGER,
+    TEXT,
+    TIMESTAMP,
+    UUID,
+    VARCHAR,
+)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import declarative_base, joinedload, relationship, sessionmaker
@@ -123,3 +130,75 @@ class Setting(Base):
     value_type = Column(VARCHAR(length=64), autoincrement=False, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+class IdeaVote(Base):
+    __tablename__ = "ideas_votes"
+    id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    account_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    idea_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    user_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    vote = Column(VARCHAR(length=16), autoincrement=False, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    # PrimaryKeyConstraint("id", name="ideas_votes_pkey"),
+
+
+role_permission_rel = Table(
+    "task_events_link",
+    Base.metadata,
+    Column("task_id", INTEGER(), autoincrement=False, nullable=False),
+    Column("event_id", INTEGER(), autoincrement=False, nullable=False),
+    # ForeignKeyConstraint(["event_id"], ["events.id"], name="task_events_link_fk_1"),
+    # ForeignKeyConstraint(["task_id"], ["tasks.id"], name="task_events_link_fk"),
+    # PrimaryKeyConstraint("task_id", "event_id", name="task_events_link_pkey"),
+)
+
+idea_file_rel = Table(
+    "ideas_files_link",
+    Base.metadata,
+    Column("idea_id", ForeignKey("ideas.id"), autoincrement=False, nullable=False, primary_key=True),
+    Column("file_id", ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
+    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
+    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
+)
+
+
+class Idea(Base):
+    __tablename__ = "ideas"
+    id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    account_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    author_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    upvotes = Column(INTEGER(), default=0, autoincrement=False, nullable=True)
+    downvotes = Column(INTEGER(), default=0, autoincrement=False, nullable=True)
+    title = Column(VARCHAR(length=256), autoincrement=False, nullable=True)
+    description = Column(TEXT(), autoincrement=False, nullable=True)
+    color = Column(VARCHAR(length=8), autoincrement=False, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    status = Column(VARCHAR(length=32), autoincrement=False, nullable=True)
+
+    pictures = relationship("File", secondary=idea_file_rel, back_populates="idea")
+    # PrimaryKeyConstraint("id", name="ideas_pkey"),
+    # UniqueConstraint("uuid", name="ideas_uuid_key"),
+
+
+class File(Base):
+    __tablename__ = "files"
+    id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    account_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    owner_id = Column(INTEGER(), autoincrement=False, nullable=True)
+    file_name = Column(VARCHAR(length=256), autoincrement=False, nullable=True)
+    extension = Column(VARCHAR(length=8), autoincrement=False, nullable=True)
+    mimetype = Column(VARCHAR(length=256), autoincrement=False, nullable=True)
+    size = Column(INTEGER(), autoincrement=False, nullable=True)
+    deleted_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    # PrimaryKeyConstraint("id", name="files_pkey"),
+
+    idea = relationship("Idea", secondary=idea_file_rel, back_populates="pictures")
