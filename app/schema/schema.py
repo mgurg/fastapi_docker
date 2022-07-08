@@ -66,6 +66,13 @@ class Role(BaseModel):
         orm_mode = True
 
 
+class RoleBasic(BaseModel):
+    role_name: str
+
+    class Config:
+        orm_mode = True
+
+
 class User(BaseModel):
     __tablename__ = "users"
     id: int
@@ -114,7 +121,10 @@ class UserLoginOut(BaseModel):  # OK
     tz: str
     lang: str
     uuid: uuid.UUID
-    # role_FK: RolesWithPermissionsReturn
+    role_FK: RoleBasic
+
+    class Config:
+        orm_mode = True
 
 
 class SettingBase(BaseModel):
