@@ -29,7 +29,7 @@ from app.model.model import Account, User
 #     UserLoginIn,
 #     UserLoginOut,
 #     UserRegisterIn,
-#     Users,
+#     User,
 #     UserSetPassIn,
 # )
 from app.schema.schema import (
@@ -38,6 +38,7 @@ from app.schema.schema import (
     UserLoginIn,
     UserLoginOut,
     UserRegisterIn,
+    UserSetPassIn,
 )
 from app.service.helpers import get_uuid
 from app.service.notification import EmailNotification
@@ -228,26 +229,26 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # if argon2.verify(res.password, db_user.password):
-        #     token = secrets.token_hex(64)
-        # else:
-        #     raise HTTPException(status_code=401, detail="Incorrect username or password")
+        if argon2.verify(res.password, db_user.password):
+            token = secrets.token_hex(64)
+        else:
+            raise HTTPException(status_code=401, detail="Incorrect username or password")
 
-        # token_valid_to = datetime.utcnow() + timedelta(days=1)
-        # if res.permanent is True:
-        #     token_valid_to = datetime.utcnow() + timedelta(days=30)
+        token_valid_to = datetime.utcnow() + timedelta(days=1)
+        if res.permanent is True:
+            token_valid_to = datetime.utcnow() + timedelta(days=30)
 
-        # update_package = {
-        #     "auth_token": secrets.token_hex(64),  # token,
-        #     "auth_token_valid_to": token_valid_to,
-        #     "updated_at": datetime.utcnow(),
-        # }
+        update_package = {
+            "auth_token": secrets.token_hex(64),  # token,
+            "auth_token_valid_to": token_valid_to,
+            "updated_at": datetime.utcnow(),
+        }
 
-        # for key, value in update_package.items():
-        #     setattr(db_user, key, value)
-        # session.add(db_user)
-        # session.commit()
-        # session.refresh(db_user)
+        for key, value in update_package.items():
+            setattr(db_user, key, value)
+        session.add(db_user)
+        session.commit()
+        session.refresh(db_user)
 
         # login_history = LoginHistory(
         #     user_id=db_user.id,
@@ -276,96 +277,96 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
     return db_user
 
 
-# @register_router.get("/verify/{token}", response_model=StandardResponse)
-# async def auth_verify(*, session: Session = Depends(get_session), token: str):
-#     user_db = session.exec(
-#         select(Users)
-#         .where(Users.auth_token == token)
-#         .where(Users.is_active == True)
-#         .where(Users.auth_token_valid_to > datetime.utcnow())
-#         .where(Users.deleted_at.is_(None))
-#     ).one_or_none()
-#     if user_db is None:
-#         raise HTTPException(status_code=404, detail="Invalid token")
-#     return {"ok": True}
+@register_router.get("/verify/{token}", response_model=StandardResponse)
+async def auth_verify(*, session: Session = Depends(get_session), token: str):
+    user_db = session.execute(
+        select(User)
+        .where(User.auth_token == token)
+        .where(User.is_active == True)
+        .where(User.auth_token_valid_to > datetime.utcnow())
+        .where(User.deleted_at.is_(None))
+    ).scalar_one_or_none()
+    if user_db is None:
+        raise HTTPException(status_code=404, detail="Invalid token")
+    return {"ok": True}
 
 
-# @register_router.get("/remind-password/{user_email}", response_model=StandardResponse)
-# async def auth_remind(*, session: Session = Depends(get_session), user_email: EmailStr, req: Request):
-#     db_user = session.exec(
-#         select(Users).where(Users.email == user_email).where(Users.is_active == True).where(Users.deleted_at.is_(None))
-#     ).one_or_none()
+@register_router.get("/remind-password/{user_email}", response_model=StandardResponse)
+async def auth_remind(*, session: Session = Depends(get_session), user_email: EmailStr, req: Request):
+    db_user = session.execute(
+        select(User).where(User.email == user_email).where(User.is_active == True).where(User.deleted_at.is_(None))
+    ).scalar_one_or_none()
 
-#     if db_user is None:
-#         return {"ok": True}
-#         # raise HTTPException(status_code=404, detail="Invalid email")
+    if db_user is None:
+        return {"ok": True}
+        # raise HTTPException(status_code=404, detail="Invalid email")
 
-#     token = secrets.token_hex(32)
-#     update_package = {
-#         "service_token": token,
-#         "service_token_valid_to": datetime.utcnow() + timedelta(days=1),
-#         "updated_at": datetime.utcnow(),
-#     }
+    token = secrets.token_hex(32)
+    update_package = {
+        "service_token": token,
+        "service_token_valid_to": datetime.utcnow() + timedelta(days=1),
+        "updated_at": datetime.utcnow(),
+    }
 
-#     for key, value in update_package.items():
-#         setattr(db_user, key, value)
-#     session.add(db_user)
-#     session.commit()
-#     session.refresh(db_user)
+    for key, value in update_package.items():
+        setattr(db_user, key, value)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
 
-#     # Notification
-#     email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
+    # Notification
+    email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
 
-#     ua_string = req.headers["User-Agent"]
-#     user_agent = parse(ua_string)
+    ua_string = req.headers["User-Agent"]
+    user_agent = parse(ua_string)
 
-#     template_data = {  # Template: f91f8ad6 	ResetPassword_PL
-#         "product_name": "Intio",
-#         "name": db_user.first_name,
-#         "action_url": "https://beta.remontmaszyn.pl/set_password/" + token,
-#         "operating_system": user_agent.os.family,
-#         "browser_name": user_agent.browser.family,
-#     }
+    template_data = {  # Template: f91f8ad6 	ResetPassword_PL
+        "product_name": "Intio",
+        "name": db_user.first_name,
+        "action_url": "https://beta.remontmaszyn.pl/set_password/" + token,
+        "operating_system": user_agent.os.family,
+        "browser_name": user_agent.browser.family,
+    }
 
-#     email.send(settings.email_sender, user_email, "[Intio] Resetowanie hasła!", "f91f8ad6", template_data)
+    email.send(settings.email_sender, user_email, "[Intio] Resetowanie hasła!", "f91f8ad6", template_data)
 
-#     return {"ok": True}
+    return {"ok": True}
 
 
-# @register_router.post("/set-password/", response_model=StandardResponse)
-# async def auth_set_password(*, session: Session = Depends(get_session), user: UserSetPassIn):
-#     res = UserSetPassIn.from_orm(user)
+@register_router.post("/set-password/", response_model=StandardResponse)
+async def auth_set_password(*, session: Session = Depends(get_session), user: UserSetPassIn):
+    res = UserSetPassIn.from_orm(user)
 
-#     db_user = session.exec(
-#         select(Users)
-#         .where(Users.service_token == res.token)
-#         .where(Users.is_active == True)
-#         .where(Users.service_token_valid_to > datetime.utcnow())
-#         .where(Users.deleted_at.is_(None))
-#     ).one_or_none()
-#     if db_user is None:
-#         raise HTTPException(status_code=404, detail="Invalid email")
+    db_user = session.execute(
+        select(User)
+        .where(User.service_token == res.token)
+        .where(User.is_active == True)
+        .where(User.service_token_valid_to > datetime.utcnow())
+        .where(User.deleted_at.is_(None))
+    ).scalar_one_or_none()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="Invalid email")
 
-#     password = Password(res.password)
-#     is_password_ok = password.compare(res.password_confirmation)
+    password = Password(res.password)
+    is_password_ok = password.compare(res.password_confirmation)
 
-#     if is_password_ok is True:
-#         pass_hash = argon2.hash(res.password)
-#     else:
-#         raise HTTPException(status_code=400, detail=is_password_ok)
+    if is_password_ok is True:
+        pass_hash = argon2.hash(res.password)
+    else:
+        raise HTTPException(status_code=400, detail=is_password_ok)
 
-#     update_package = {
-#         "password": pass_hash,
-#         "auth_token": None,
-#         "service_token": None,
-#         "service_token_valid_to": None,
-#         "updated_at": datetime.utcnow(),
-#     }
+    update_package = {
+        "password": pass_hash,
+        "auth_token": None,
+        "service_token": None,
+        "service_token_valid_to": None,
+        "updated_at": datetime.utcnow(),
+    }
 
-#     for key, value in update_package.items():
-#         setattr(db_user, key, value)
-#     session.add(db_user)
-#     session.commit()
-#     session.refresh(db_user)
+    for key, value in update_package.items():
+        setattr(db_user, key, value)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
 
-#     return {"ok": True}
+    return {"ok": True}

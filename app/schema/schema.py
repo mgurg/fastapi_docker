@@ -73,6 +73,12 @@ class PermissionsMini(BaseModel):
         orm_mode = True
 
 
+class UserSetPassIn(BaseModel):  # OK
+    token: str
+    password: str
+    password_confirmation: str
+
+
 class RoleBasic(BaseModel):
     role_name: str
     permission: List[PermissionsMini]
