@@ -5,6 +5,7 @@ from sqlalchemy import (
     Integer,
     MetaData,
     String,
+    Table,
     create_engine,
 )
 from sqlalchemy.dialects.postgresql import BOOLEAN, INTEGER, TIMESTAMP, UUID, VARCHAR
@@ -36,6 +37,13 @@ class Account(Base):
 # ForeignKeyConstraint(["role_id"], ["roles.id"], name="roles_permissions_link_fk"),
 # PrimaryKeyConstraint("role_id", "permission_id", name="roles_permissions_link_pkey"),
 
+role_permission_rel = Table(
+    "roles_permissions_link",
+    Base.metadata,
+    Column("role_id", ForeignKey("roles.id"), autoincrement=False, nullable=False, primary_key=True),
+    Column("permission_id", ForeignKey("permissions.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -52,6 +60,8 @@ class Role(Base):
     # PrimaryKeyConstraint("id", name="roles_pkey"),
     # UniqueConstraint("uuid", name="roles_uuid_key"),
 
+    permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
+
 
 class Permission(Base):
     __tablename__ = "permissions"
@@ -66,6 +76,8 @@ class Permission(Base):
     updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # PrimaryKeyConstraint("id", name="permissions_pkey"),
     # UniqueConstraint("uuid", name="permissions_uuid_key"),
+
+    role = relationship("Role", secondary=role_permission_rel, back_populates="permission")
 
 
 class User(Base):

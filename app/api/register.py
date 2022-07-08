@@ -225,7 +225,6 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
             select(User).where(User.email == res.email).where(User.is_active == True).where(User.deleted_at.is_(None))
         ).scalar_one_or_none()
 
-        print("#########", db_user.role_FK)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -262,6 +261,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
         # )
 
     except Exception as err:
+        print(err)
         # login_history = LoginHistory(
         #     login_date=datetime.utcnow(),
         #     failed_login=res.email,
