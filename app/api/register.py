@@ -211,7 +211,7 @@ async def auth_first_run(*, session: Session = Depends(get_session), user: UserF
     }
 
 
-@register_router.post("/login", response_model=UserLoginOut)
+@register_router.post("/login")  # , response_model=UserLoginOut
 async def auth_login(*, session: Session = Depends(get_session), users: UserLoginIn, req: Request):
     # ip_info = "NO_INFO"  # get_ip_info(ip_addr)
     # ua_string = req.headers["User-Agent"]
@@ -225,7 +225,7 @@ async def auth_login(*, session: Session = Depends(get_session), users: UserLogi
             select(User).where(User.email == res.email).where(User.is_active == True).where(User.deleted_at.is_(None))
         ).scalar_one_or_none()
 
-        print("#########", db_user)
+        print("#########", db_user.role_FK)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 

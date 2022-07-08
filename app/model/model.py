@@ -48,6 +48,7 @@ class Role(Base):
     deleted_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    users_FK = relationship("User", back_populates="role_FK")
     # PrimaryKeyConstraint("id", name="roles_pkey"),
     # UniqueConstraint("uuid", name="roles_uuid_key"),
 
@@ -91,7 +92,10 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    role_FK = relationship("Role")
+    role_FK = relationship("Role", back_populates="users_FK")
+    # child_id = Column(Integer, ForeignKey("child.id"))
+    # child = relationship("Child", back_populates="parents")
+
     # ForeignKeyConstraint(["user_role_id"], ["roles.id"], name="role_FK"),
     # PrimaryKeyConstraint("id", name="users_pkey"),
     # UniqueConstraint("email", name="users_email_key"),

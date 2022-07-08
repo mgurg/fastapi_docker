@@ -1,5 +1,6 @@
 import uuid as uuid
 from datetime import datetime, time
+from typing import List
 
 from pydantic import BaseModel, EmailStr
 
@@ -45,6 +46,26 @@ class UserFirstRunIn(BaseModel):  # OK
         orm_mode = True
 
 
+class Role(BaseModel):
+    __tablename__ = "roles"
+    id: int | None
+    uuid: uuid.UUID
+    account_id: int
+    role_name: str
+    role_description: str
+    hidden: bool
+    created_at: datetime | None
+    updated_at: datetime | None
+    deleted_at: datetime | None
+
+    # permission: List["Permissions"] = Relationship(back_populates="role", link_model=RolePermissionLink)  # hasMany
+    # users_FK: List["Users"] = Relationship(back_populates="role_FK")  # hasOne
+    users_FK: List["User"]
+
+    class Config:
+        orm_mode = True
+
+
 class User(BaseModel):
     __tablename__ = "users"
     id: int
@@ -68,6 +89,8 @@ class User(BaseModel):
     created_at: datetime
     updated_at: datetime | None
     uuid: uuid.UUID
+
+    role_FK: Role
 
     # usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
     # role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
