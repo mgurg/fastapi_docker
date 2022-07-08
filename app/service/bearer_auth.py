@@ -1,17 +1,12 @@
 import base64
-from typing import List
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
-
-# from sqlmodel import Session, select
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db import get_session
-
-# from app.models.models import Accounts, Users
 from app.model.model import Account, User
 
 settings = get_settings()

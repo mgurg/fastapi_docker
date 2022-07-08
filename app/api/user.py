@@ -1,33 +1,17 @@
-from datetime import datetime, time, timedelta
-from typing import List
+from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
 from passlib.hash import argon2
-
-# from sqlmodel import Session, select
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
 from app.db import get_session
-from app.model.model import Account, User
-from app.schema.schema import (
-    StandardResponse,
-    UserCreateIn,
-    UserFirstRunIn,
-    UserIndexResponse,
-    UserLoginIn,
-    UserLoginOut,
-    UserRegisterIn,
-    UserSetPassIn,
-)
+from app.model.model import User
+from app.schema.schema import StandardResponse, UserCreateIn, UserIndexResponse
 from app.service.bearer_auth import has_token
 from app.service.password import Password
-
-# from app.models.models import StandardResponse, UserCreateIn, UserIndexResponse, User
-
 
 user_router = APIRouter()
 

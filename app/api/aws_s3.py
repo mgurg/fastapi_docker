@@ -1,14 +1,14 @@
 import io
 from typing import Optional
-from uuid import UUID, uuid4
-
-import boto3
+from uuid import uuid4
 
 # import magic
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from loguru import logger
-from sqlalchemy import func
-from sqlmodel import Session, select
+
+# from sqlmodel import Session, select
+from sqlalchemy import func, select, text
+from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.config import get_settings
@@ -18,21 +18,6 @@ from app.service.aws_s3 import s3_client, s3_resource
 
 settings = get_settings()
 s3_router = APIRouter()
-
-
-# s3_resource = boto3.resource(
-#     service_name="s3",
-#     region_name=settings.s3_region,
-#     aws_access_key_id=settings.s3_access_key,
-#     aws_secret_access_key=settings.s3_secret_access_key,
-# )
-
-# s3_client = boto3.client(
-#     "s3",
-#     region_name=settings.s3_region,
-#     aws_access_key_id=settings.s3_access_key,
-#     aws_secret_access_key=settings.s3_secret_access_key,
-# )
 
 
 @s3_router.post("/create_bucket")

@@ -5,8 +5,10 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
-from sqlalchemy import func
-from sqlmodel import Session, select
+
+# from sqlmodel import Session, select
+from sqlalchemy import func, select, text
+from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.config import get_settings

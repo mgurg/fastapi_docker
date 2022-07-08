@@ -1,13 +1,4 @@
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Identity,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    create_engine,
-)
+from sqlalchemy import Column, ForeignKey, Identity, Table
 from sqlalchemy.dialects.postgresql import (
     BOOLEAN,
     INTEGER,
@@ -16,9 +7,7 @@ from sqlalchemy.dialects.postgresql import (
     UUID,
     VARCHAR,
 )
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_base, joinedload, relationship, sessionmaker
+from sqlalchemy.orm import joinedload, relationship
 
 from app.db import Base
 

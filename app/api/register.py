@@ -2,7 +2,7 @@ import random
 import re
 import secrets
 from datetime import datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytz
 from disposable_email_domains import blocklist
@@ -12,26 +12,12 @@ from passlib.hash import argon2
 from pydantic import EmailStr
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-
-# from sqlmodel import Session, select
 from stdnum.pl import nip
 from user_agents import parse
 
 from app.config import get_settings
 from app.db import get_session
 from app.model.model import Account, User
-
-# from app.models.models import (
-#     Accounts,
-#     LoginHistory,
-#     UserActivateOut,
-#     UserFirstRunIn,
-#     UserLoginIn,
-#     UserLoginOut,
-#     UserRegisterIn,
-#     User,
-#     UserSetPassIn,
-# )
 from app.schema.schema import (
     StandardResponse,
     UserFirstRunIn,
@@ -40,7 +26,6 @@ from app.schema.schema import (
     UserRegisterIn,
     UserSetPassIn,
 )
-
 from app.service.notification import EmailNotification
 from app.service.password import Password
 
