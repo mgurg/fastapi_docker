@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta
 from typing import List
-from uuid import UUID, uuid4
+from uuid import UUID, uuid4, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
@@ -12,7 +12,7 @@ from app.config import get_settings
 from app.db import get_session
 from app.models.models import StandardResponse, UserCreateIn, UserIndexResponse, Users
 from app.service.bearer_auth import has_token
-from app.service.helpers import get_uuid
+
 from app.service.password import Password
 
 user_router = APIRouter()
@@ -87,7 +87,7 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
         is_verified=True,
         tz="Europe/Warsaw",
         lang="pl",
-        uuid=str(uuid4()),  # str(uuid.uuid4()),
+        uuid=str(uuid4()),  # str(uuid4()),
     )
     session.add(new_user)
     session.commit()

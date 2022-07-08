@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta
 from typing import List
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func

@@ -245,7 +245,7 @@ Listowanie wyników razem z relacjami
 
 ```python
 class TaskIndexResponse(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     # author_id: int
     assignee_id: Optional[int]
     title: str

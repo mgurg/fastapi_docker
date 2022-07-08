@@ -40,7 +40,7 @@ from app.schema.schema import (
     UserRegisterIn,
     UserSetPassIn,
 )
-from app.service.helpers import get_uuid
+
 from app.service.notification import EmailNotification
 from app.service.password import Password
 

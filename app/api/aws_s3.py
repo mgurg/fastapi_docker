@@ -14,7 +14,7 @@ from app.config import get_settings
 from app.db import get_session
 from app.models.models import Files
 from app.service.aws_s3 import s3_client, s3_resource
-from app.service.helpers import get_uuid
+
 
 settings = get_settings()
 s3_router = APIRouter()
@@ -160,7 +160,7 @@ async def upload_aws_s3(
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
 
     new_file = Files(
-        uuid=str(uuid.uuid4()),
+        uuid=str(uuid4()),
         account_id=2,
         owner_id=2,
         file_name=file.filename,

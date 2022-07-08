@@ -6,7 +6,6 @@ from passlib.hash import argon2
 from sqlmodel import Session
 
 from app.models.models import Users
-from app.service.helpers import get_uuid
 
 
 def test_post_register_ok(client: TestClient):
@@ -68,7 +67,7 @@ def test_post_register_first_run(session: Session, client: TestClient):
             is_verified=False,
             tz=fake.timezone(),
             lang=fake.language_code(),
-            uuid=str(uuid.uuid4()),
+            uuid=str(uuid4()),
         )
         session.add(new_user)
         session.commit()
@@ -105,7 +104,7 @@ def test_post_register_first_run(session: Session, client: TestClient):
 #             is_active=True,
 #             tz=tz,
 #             lang=lang,
-#             uuid=str(uuid.uuid4()),
+#             uuid=str(uuid4()),
 #         )
 #         session.add(new_user)
 #         session.commit()
@@ -151,7 +150,7 @@ def test_post_verify(session: Session, client: TestClient):
             is_verified=True,
             tz=tz,
             lang=lang,
-            uuid=str(uuid.uuid4()),
+            uuid=str(uuid4()),
         )
         session.add(new_user)
         session.commit()

@@ -7,7 +7,6 @@ from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.models.models import TaskCreateFactory, Tasks, Users
-from app.service.helpers import get_uuid
 
 
 def test_add_single_task(session: Session, client: TestClient):
@@ -17,7 +16,7 @@ def test_add_single_task(session: Session, client: TestClient):
     for i in range(5):
         email = fake.email()
         token = fake.hexify("^" * 32)
-        uuid = get_uuid()
+        uuid = str(uuid4())
 
         new_user = Users(
             account_id=2,
@@ -65,7 +64,7 @@ def test_add_planned_task(session: Session, client: TestClient):
     for i in range(5):
         email = fake.email()
         token = fake.hexify("^" * 32)
-        uuid = get_uuid()
+        uuid = str(uuid4())
 
         new_user = Users(
             account_id=2,
@@ -118,7 +117,7 @@ def test_add_recurring_task(session: Session, client: TestClient):
     for i in range(5):
         email = fake.email()
         token = fake.hexify("^" * 32)
-        uuid = get_uuid()
+        uuid = str(uuid4())
 
         new_user = Users(
             account_id=2,

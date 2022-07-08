@@ -7,7 +7,6 @@ from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.models.models import Users
-from app.service.helpers import get_uuid
 
 
 def test_list_users(session: Session, client: TestClient):
@@ -31,7 +30,7 @@ def test_list_users(session: Session, client: TestClient):
             is_verified=True,
             tz=fake.timezone(),
             lang=fake.language_code(),
-            uuid=str(uuid.uuid4()),
+            uuid=str(uuid4()),
         )
         session.add(new_user)
         session.commit()
@@ -58,7 +57,7 @@ def test_list_users(session: Session, client: TestClient):
 #             is_active=True,
 #             tz=fake.timezone(),
 #             lang=fake.language_code(),
-#             uuid=str(uuid.uuid4()),
+#             uuid=str(uuid4()),
 #         )
 #         session.add(new_user)
 #         session.commit()

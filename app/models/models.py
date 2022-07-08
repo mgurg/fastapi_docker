@@ -1,14 +1,12 @@
-import uuid as uuid
 from datetime import datetime, time
 from decimal import Decimal
 from typing import Any, List, Optional
+from uuid import UUID, uuid4
 
 from faker import Faker
 from pydantic import EmailStr, HttpUrl, Json
 from pydantic_factories import ModelFactory, Use
 from sqlmodel import Field, Relationship, SQLModel
-
-from app.service.helpers import get_uuid
 
 
 class StandardResponse(SQLModel):  # OK
@@ -36,7 +34,7 @@ class TasksLog(SQLModel, table=True):
     __tablename__ = "tasks_log"
     id: Optional[int] = Field(default=None, primary_key=True)
     task_id: int
-    uuid: uuid.UUID
+    uuid: UUID
     user_id: int
     start_at: datetime
     end_at: Optional[datetime]
@@ -95,7 +93,7 @@ class LoginHistory(SQLModel, table=True):
 class Accounts(SQLModel, table=True):
     __tablename__ = "accounts"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     company: str
     registered_at: Optional[datetime]
@@ -117,7 +115,7 @@ class RolePermissionLink(SQLModel, table=True):
 class Roles(SQLModel, table=True):
     __tablename__ = "roles"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     role_name: str
     role_description: str
@@ -133,7 +131,7 @@ class Roles(SQLModel, table=True):
 class Permissions(SQLModel, table=True):
     __tablename__ = "permissions"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     name: str
     title: str
     description: str
@@ -148,7 +146,7 @@ class RolesWithPermissionsReturn(SQLModel):  # OK
     role_name: Optional[str]
     # role_description: Optional[str]
     # desc: str
-    # uuid: uuid.UUID
+    # uuid: UUID
     permission: List[PermissionsMini]
 
 
@@ -176,7 +174,7 @@ class Users(SQLModel, table=True):
     deleted_at: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]
-    uuid: uuid.UUID
+    uuid: UUID
 
     usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
     role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
@@ -189,7 +187,7 @@ class UserCreateIn(SQLModel):  # OK
     phone: Optional[str]
     first_name: str
     last_name: str
-    user_role_uuid: Optional[uuid.UUID]
+    user_role_uuid: Optional[UUID]
     # details: Optional[UsersDetailsCreate]
 
 
@@ -201,7 +199,7 @@ class UserCreateIn(SQLModel):  # OK
     password: Optional[str]
     password_confirmation: Optional[str]
     is_verified: Optional[bool]
-    user_role_uuid: Optional[uuid.UUID]
+    user_role_uuid: Optional[UUID]
 
 
 class UserRegisterIn(SQLModel):  # OK
@@ -236,7 +234,7 @@ class UserLoginOut(SQLModel):  # OK
     last_name: str
     tz: str
     lang: str
-    uuid: uuid.UUID
+    uuid: UUID
     role_FK: RolesWithPermissionsReturn
 
 
@@ -251,7 +249,7 @@ class UserIndexResponse(SQLModel):
     last_name: str
     email: str
     phone: Optional[str]
-    uuid: uuid.UUID
+    uuid: UUID
     is_active: bool
     is_verified: bool
     # role_FK: RolesWithPermissionsReturn
@@ -276,13 +274,13 @@ class TaskEventLink(SQLModel, table=True):
 
 
 class EventsBasicInfo(SQLModel):
-    uuid: Optional[uuid.UUID]
+    uuid: Optional[UUID]
 
 
 class Ideas(SQLModel, table=True):
     __tablename__ = "ideas"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     author_id: Optional[int]
     color: str
@@ -301,7 +299,7 @@ class Ideas(SQLModel, table=True):
 class IdeasVotes(SQLModel, table=True):
     __tablename__ = "ideas_votes"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     idea_id: int
     user_id: int
@@ -310,14 +308,14 @@ class IdeasVotes(SQLModel, table=True):
 
 
 class IdeasVotesIn(SQLModel):
-    idea_uuid: uuid.UUID
+    idea_uuid: UUID
     vote: str
 
 
 class Tasks(SQLModel, table=True):
     __tablename__ = "tasks"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     author_id: Optional[int]
     title: str
@@ -361,7 +359,7 @@ class Tasks(SQLModel, table=True):
 class Events(SQLModel, table=True):
     __tablename__ = "events"
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     recurring: bool
     freq: str
@@ -388,7 +386,7 @@ class Events(SQLModel, table=True):
 
 class Files(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     owner_id: int
     file_name: str
@@ -408,7 +406,7 @@ class TaskBasicInfo(SQLModel):
 
 
 class FileResponse(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     file_name: str
     extension: str
     mimetype: str
@@ -418,7 +416,7 @@ class FileResponse(SQLModel):
 
 
 class FileUrlResponse(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     file_name: str
     extension: str
     mimetype: str
@@ -429,7 +427,7 @@ class FileUrlResponse(SQLModel):
 
 
 class TaskIndexResponse(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     color: str
     status: Optional[str]
     # author_id: int
@@ -447,7 +445,7 @@ class TaskIndexResponse(SQLModel):
 
 
 class FileBasicInfo(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     file_name: str
     extension: str
     mimetype: str
@@ -455,7 +453,7 @@ class FileBasicInfo(SQLModel):
 
 
 class IdeaIndexResponse(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     color: str
     title: str
     description: str
@@ -470,7 +468,7 @@ class IdeaAddIn(SQLModel):
     title: str
     description: str
     color: str = "green"
-    files: Optional[List[uuid.UUID]]
+    files: Optional[List[UUID]]
 
 
 class IdeaEditIn(SQLModel):
@@ -479,11 +477,11 @@ class IdeaEditIn(SQLModel):
     color: Optional[str]
     status: Optional[str]
     vote: Optional[str]
-    files: Optional[List[uuid.UUID]]
+    files: Optional[List[UUID]]
 
 
 class TaskSingleResponse(SQLModel):
-    uuid: uuid.UUID
+    uuid: UUID
     color: str
     status: Optional[str]
     # author_id: int
@@ -505,7 +503,7 @@ class TaskSingleResponse(SQLModel):
 class TaskAddIn(SQLModel):
     title: str
     description: str
-    assignee: Optional[uuid.UUID]
+    assignee: Optional[UUID]
     priority: Optional[str]
     mode: Optional[str]  # single / planned / reccuring
     date_from: Optional[datetime]
@@ -522,14 +520,14 @@ class TaskAddIn(SQLModel):
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
     color: str = "green"
-    files: Optional[List[uuid.UUID]]
+    files: Optional[List[UUID]]
 
 
 class TaskEditIn(SQLModel):
     # author_id: Optional[int]
     title: Optional[str]
     description: Optional[str]
-    assignee: Optional[uuid.UUID]
+    assignee: Optional[UUID]
     priority: Optional[str]
     mode: Optional[str]
     date_from: Optional[datetime]
@@ -546,12 +544,12 @@ class TaskEditIn(SQLModel):
     at_Sa: Optional[bool]
     at_Su: Optional[bool]
     color: Optional[str]
-    files: Optional[List[uuid.UUID]]
+    files: Optional[List[UUID]]
 
 
 class TaskCreateFactory(ModelFactory):
     __model__ = Tasks
-    uuid = get_uuid()
+    uuid = str(uuid4())
     account_id = 2
     author_id: 2
     title = Use(Faker().name)

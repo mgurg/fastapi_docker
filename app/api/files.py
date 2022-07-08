@@ -2,7 +2,7 @@ import io
 import pathlib
 from datetime import datetime, timedelta
 from typing import List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from fastapi.security import HTTPBearer
@@ -15,7 +15,7 @@ from app.db import get_session
 from app.models.models import FileResponse, Files, FileUrlResponse, StandardResponse
 from app.service.aws_s3 import s3_client, s3_resource
 from app.service.bearer_auth import has_token
-from app.service.helpers import get_uuid
+
 
 settings = get_settings()
 
@@ -79,7 +79,7 @@ async def file_add(
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
 
     new_file = Files(
-        uuid=str(uuid.uuid4()),
+        uuid=str(uuid4()),
         account_id=auth["account"],
         owner_id=auth["user"],
         file_name=file.filename,

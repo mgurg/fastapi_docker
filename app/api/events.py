@@ -4,7 +4,7 @@ import operator
 import pprint
 from datetime import datetime
 from typing import List
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pendulum
 from dateutil.rrule import DAILY, MONTHLY, WEEKLY, YEARLY, rrule, rrulestr

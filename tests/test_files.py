@@ -7,7 +7,7 @@
 # from sqlmodel import Session, select
 
 # from app.models.models import Files
-# from app.service.helpers import get_uuid
+#
 
 
 # def test_list_files(session: Session, client: TestClient):
@@ -15,7 +15,7 @@
 #     fake = Faker("pl_PL")
 #     for i in range(5):
 #         new_file = Files(
-#             uuid=str(uuid.uuid4()),  # TODO 00000000-0000-0000-0000-000000000000
+#             uuid=str(uuid4()),  # TODO 00000000-0000-0000-0000-000000000000
 #             account_id=2,
 #             owner_id=1,
 #             file_name=fake.word(),
@@ -38,7 +38,7 @@
 #     fake = Faker("pl_PL")
 #     for i in range(5):
 #         new_file = Files(
-#             uuid=str(uuid.uuid4()),  # TODO 00000000-0000-0000-0000-000000000000
+#             uuid=str(uuid4()),  # TODO 00000000-0000-0000-0000-000000000000
 #             account_id=2,
 #             owner_id=1,
 #             file_name=fake.word(),

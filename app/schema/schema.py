@@ -1,6 +1,6 @@
-import uuid as uuid
 from datetime import datetime, time
 from typing import List
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel, EmailStr
 
@@ -12,7 +12,7 @@ class StandardResponse(BaseModel):  # OK
 class Account(BaseModel):
     __tablename__ = "accounts"
     id: int | None
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     company: str
     nip: str | None
@@ -49,7 +49,7 @@ class UserFirstRunIn(BaseModel):  # OK
 class Role(BaseModel):
     __tablename__ = "roles"
     id: int | None
-    uuid: uuid.UUID
+    uuid: UUID
     account_id: int
     role_name: str
     role_description: str
@@ -109,7 +109,7 @@ class User(BaseModel):
     deleted_at: datetime | None
     created_at: datetime
     updated_at: datetime | None
-    uuid: uuid.UUID
+    uuid: UUID
 
     role_FK: Role
 
@@ -134,7 +134,7 @@ class UserLoginOut(BaseModel):  # OK
     last_name: str
     tz: str
     lang: str
-    uuid: uuid.UUID
+    uuid: UUID
     role_FK: RoleBasic
 
     class Config:
