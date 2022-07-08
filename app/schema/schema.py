@@ -141,6 +141,33 @@ class UserLoginOut(BaseModel):  # OK
         orm_mode = True
 
 
+class UserIndexResponse(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    phone: str | None
+    uuid: UUID
+    is_active: bool
+    is_verified: bool
+
+    class Config:
+        orm_mode = True
+
+
+class UserCreateIn(BaseModel):  # OK
+    first_name: str | None
+    last_name: str | None
+    email: EmailStr | None
+    phone: str | None
+    password: str | None
+    password_confirmation: str | None
+    is_verified: bool | None
+    user_role_uuid: UUID | None
+
+    class Config:
+        orm_mode = True
+
+
 class SettingBase(BaseModel):
     id: int
     account_id: int

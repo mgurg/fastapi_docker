@@ -19,7 +19,7 @@ from app.db import Base
 class Account(Base):
     __tablename__ = "accounts"
     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = Column(UUID(), autoincrement=False, nullable=True)
+    uuid = Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     company = Column(VARCHAR(length=256), autoincrement=False, nullable=True)
     registered_at = Column("registered_at", TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     nip = Column(VARCHAR(length=32), autoincrement=False, nullable=True)
@@ -48,7 +48,7 @@ role_permission_rel = Table(
 class Role(Base):
     __tablename__ = "roles"
     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = Column("uuid", UUID(), autoincrement=False, nullable=True)
+    uuid = Column("uuid", UUID(as_uuid=True), autoincrement=False, nullable=True)
     account_id = Column(INTEGER(), autoincrement=False, nullable=True)
     role_name = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
     role_description = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
@@ -66,7 +66,7 @@ class Role(Base):
 class Permission(Base):
     __tablename__ = "permissions"
     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = Column("uuid", UUID(), autoincrement=False, nullable=True)
+    uuid = Column("uuid", UUID(as_uuid=True), autoincrement=False, nullable=True)
     account_id = Column(INTEGER(), autoincrement=False, nullable=True)
     name = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
     title = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
@@ -83,7 +83,7 @@ class Permission(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = Column(UUID(), autoincrement=False, nullable=True)
+    uuid = Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     account_id = Column(INTEGER(), autoincrement=False, nullable=True)
     password = Column(VARCHAR(length=256), autoincrement=False, nullable=False)
     email = Column(VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)

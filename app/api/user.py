@@ -1,19 +1,33 @@
 from datetime import datetime, time, timedelta
 from typing import List
-from uuid import UUID, uuid4, uuid4
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
 from passlib.hash import argon2
-from sqlalchemy import func, text
-from sqlmodel import Session, select
+
+# from sqlmodel import Session, select
+from sqlalchemy import func, select, text
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db import get_session
-from app.models.models import StandardResponse, UserCreateIn, UserIndexResponse, Users
+from app.model.model import Account, User
+from app.schema.schema import (
+    StandardResponse,
+    UserCreateIn,
+    UserFirstRunIn,
+    UserIndexResponse,
+    UserLoginIn,
+    UserLoginOut,
+    UserRegisterIn,
+    UserSetPassIn,
+)
 from app.service.bearer_auth import has_token
-
 from app.service.password import Password
+
+# from app.models.models import StandardResponse, UserCreateIn, UserIndexResponse, User
+
 
 user_router = APIRouter()
 
@@ -31,30 +45,38 @@ async def user_get_all(
     all_filters = []
 
     if search is not None:
-        all_filters.append(func.concat(Users.first_name, " ", Users.last_name).ilike(f"%{search}%"))
+        all_filters.append(func.concat(User.first_name, " ", User.last_name).ilike(f"%{search}%"))
 
-    users = session.exec(
-        select(Users)
-        .where(Users.account_id == auth["account"])
-        .where(Users.is_active == True)
-        .where(Users.deleted_at.is_(None))
-        .filter(*all_filters)
-        .order_by(text(f"last_name {order}"))
-    ).all()
+    users = (
+        session.execute(
+            select(User)
+            .where(User.account_id == auth["account"])
+            .where(User.is_active == True)
+            .where(User.deleted_at.is_(None))
+            .filter(*all_filters)
+            .order_by(text(f"last_name {order}"))
+        )
+        .scalars()
+        .all()
+    )
 
     return paginate(users, params)
 
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse, name="user:Profile")
 async def user_get_one(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
-    users = session.exec(
-        select(Users)
-        .where(Users.account_id == auth["account"])
-        .where(Users.uuid == user_uuid)
-        .where(Users.is_active == True)
-        .where(Users.deleted_at.is_(None))
-    ).first()
-    return users
+    db_user = session.execute(
+        select(User)
+        .where(User.account_id == auth["account"])
+        .where(User.uuid == user_uuid)
+        .where(User.is_active == True)
+        .where(User.deleted_at.is_(None))
+    ).scalar_one_or_none()
+
+    if db_user is None:
+        raise HTTPException(status_code=400, detail="User not found")
+
+    return db_user
 
 
 @user_router.post("/", response_model=StandardResponse, name="user:Add")
@@ -73,7 +95,7 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
     else:
         pass_hash = argon2.hash("string")
 
-    new_user = Users(
+    new_user = User(
         account_id=auth["account"],
         email=res.email,
         password=pass_hash,
@@ -87,7 +109,7 @@ async def user_add(*, session: Session = Depends(get_session), user: UserCreateI
         is_verified=True,
         tz="Europe/Warsaw",
         lang="pl",
-        uuid=str(uuid4()),  # str(uuid4()),
+        uuid=str(uuid4()),
     )
     session.add(new_user)
     session.commit()
@@ -103,12 +125,12 @@ async def user_edit(
     *, session: Session = Depends(get_session), user_uuid: UUID, user: UserCreateIn, auth=Depends(has_token)
 ):
 
-    db_user = session.exec(
-        select(Users)
-        .where(Users.account_id == auth["account"])
-        .where(Users.uuid == user_uuid)
-        .where(Users.deleted_at == None)
-    ).one_or_none()
+    db_user = session.execute(
+        select(User)
+        .where(User.account_id == auth["account"])
+        .where(User.uuid == user_uuid)
+        .where(User.deleted_at == None)
+    ).scalar_one_or_none()
 
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -142,17 +164,17 @@ async def user_edit(
 @user_router.delete("/{user_uuid}", response_model=StandardResponse, name="user:Delete")
 async def user_get_all(*, session: Session = Depends(get_session), user_uuid: UUID, auth=Depends(has_token)):
 
-    db_task = session.exec(
-        select(Users)
-        .where(Users.account_id == auth["account"])
-        .where(Users.uuid == user_uuid)
-        .where(Users.deleted_at.is_(None))
-    ).one_or_none()
+    db_user = session.execute(
+        select(User)
+        .where(User.account_id == auth["account"])
+        .where(User.uuid == user_uuid)
+        .where(User.deleted_at.is_(None))
+    ).scalar_one_or_none()
 
-    if not db_task:
+    if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    session.delete(db_task)
+    session.delete(db_user)
     session.commit()
 
     return {"ok": True}

@@ -1,5 +1,6 @@
 import io
 from typing import Optional
+from uuid import UUID, uuid4
 
 import boto3
 
@@ -14,7 +15,6 @@ from app.config import get_settings
 from app.db import get_session
 from app.models.models import Files
 from app.service.aws_s3 import s3_client, s3_resource
-
 
 settings = get_settings()
 s3_router = APIRouter()
