@@ -15,6 +15,7 @@ from app.config import get_settings
 from app.db import get_db
 from app.models.models import Book
 from app.schemas.schemas import BookBase, StandardResponse
+from app.service.health_check import test_db
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
 settings = get_settings()
@@ -88,13 +89,16 @@ async def health_check():
     return {"status": "ok"}
 
 
+@app.get("/health_db")
+async def health_check_db():
+    return await test_db()
+
+
 @app.get("/create")
 def read_item(schema: str):
-    tenant_create(schema)
+    # tenant_create(schema)
     # alembic_upgrade_head(schema)
-    return {
-        "schema": schema,
-    }
+    return {"schema": schema}
 
 
 @app.get("/upgrade")
