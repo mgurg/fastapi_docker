@@ -97,7 +97,7 @@ async def health_check_db():
 @app.get("/create")
 def read_item(schema: str):
     tenant_create(schema)
-    alembic_upgrade_head(schema)
+    # alembic_upgrade_head(schema)
     return {"schema": schema}
 
 

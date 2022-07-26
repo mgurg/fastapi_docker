@@ -4,6 +4,7 @@ import traceback
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+from sentry_sdk import capture_exception
 
 from app.config import get_settings
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
@@ -42,6 +43,7 @@ def alembic_upgrade_head(tenant_name, revision="head"):
         # upgrade command
         command.upgrade(config, revision, sql=sql, tag=tag)
     except Exception as e:
+        capture_exception(e)
         print(e)
         print(traceback.format_exc())
 
@@ -52,4 +54,5 @@ def tenant_create(schema: str) -> None:
             db.execute(sa.schema.CreateSchema(schema))
             db.commit()
     except Exception as e:
+        capture_exception(e)
         print(e)
