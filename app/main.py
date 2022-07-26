@@ -68,7 +68,7 @@ if settings.ENVIRONMENT != "local":
 @app.on_event("startup")
 async def startup():
     logger.info("🚀 Starting up and initializing app...")
-    # alembic_upgrade_head("public", "d6ba8c13303e")
+    alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🚀 Starting up and initializing app... DONE")
 
 
@@ -96,8 +96,8 @@ async def health_check_db():
 
 @app.get("/create")
 def read_item(schema: str):
-    # tenant_create(schema)
-    # alembic_upgrade_head(schema)
+    tenant_create(schema)
+    alembic_upgrade_head(schema)
     return {"schema": schema}
 
 

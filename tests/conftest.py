@@ -59,7 +59,7 @@ def session_fixture():
     DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 
     engine = create_engine(
-        f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:{DEFAULT_DATABASE_PORT}/{DEFAULT_DATABASE_DB}",
+        f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5438/{DEFAULT_DATABASE_DB}",
         echo=True,
         pool_pre_ping=True,
         pool_recycle=280,
