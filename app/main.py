@@ -1,4 +1,5 @@
 import sentry_sdk
+import uvicorn
 from faker import Faker
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,17 +44,17 @@ def create_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(
-        auth_router,
-        prefix="/auth",
-        tags=["AUTH"],
-    )
+    # app.include_router(
+    #     auth_router,
+    #     prefix="/auth",
+    #     tags=["AUTH"],
+    # )
 
-    app.include_router(
-        user_router,
-        prefix="/users",
-        tags=["USER"],
-    )
+    # app.include_router(
+    #     user_router,
+    #     prefix="/users",
+    #     tags=["USER"],
+    # )
 
     return app
 
@@ -66,7 +67,7 @@ if settings.ENVIRONMENT != "local":
 @app.on_event("startup")
 async def startup():
     logger.info("🚀 Starting up and initializing app...")
-    alembic_upgrade_head("public", "d6ba8c13303e")
+    # alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🚀 Starting up and initializing app... DONE")
 
 
@@ -84,7 +85,7 @@ async def health_check():
     #     logger.exception(err)
     #     raise err
     # return response
-    pass
+    return {"status": "ok"}
 
 
 @app.get("/create")
@@ -103,47 +104,8 @@ def upgrade_head(schema: str):
     return {"ok": True}
 
 
-# Books CRUD
-
-
-@app.get("/books")  # , response_model=List[BookBase]
-# @logger.catch()
-def index_books(*, session: Session = Depends(get_db)):
-    db_book = session.execute(select(Book)).scalars().all()
-    # if db_book is None:
-    #     raise HTTPException(status_code=403, detail="Book not found")
-    return db_book
-
-
-@app.get("/books/{book_id}", response_model=BookBase)  #
-def show_book(*, session: Session = Depends(get_db), book_id: int):
-    db_book = session.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
-    if db_book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return db_book
-
-
-@app.post("/books", response_model=BookBase)  #
-def add_book(*, db: Session = Depends(get_db)):
-
-    faker = Faker()
-
-    new_book = Book(
-        title=faker.catch_phrase(),
-        author=faker.name(),
-    )
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
-
-    return new_book
-
-
-@app.delete("/books/{book_id}", response_model=StandardResponse)  #
-def delete_book(*, db: Session = Depends(get_db), book_id: int):
-
-    db_book = db.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
-    db.delete(db_book)
-    db.commit()
-
-    return {"ok": True}
+if __name__ == "__main__":
+    if settings.ENV == "production":
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+    else:
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
