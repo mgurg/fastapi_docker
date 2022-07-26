@@ -1,16 +1,23 @@
+import sentry_sdk
 from faker import Faker
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
 from app.api.users import user_router
+from app.config import get_settings
 from app.db import get_db
 from app.models.models import Book
 from app.schemas.schemas import BookBase, StandardResponse
 from app.service.tenants import alembic_upgrade_head, tenant_create
+
+settings = get_settings()
+sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
@@ -52,6 +59,8 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
+if settings.ENVIRONMENT != "local":
+    app.add_middleware(SentryAsgiMiddleware)
 
 
 @app.on_event("startup")
@@ -64,6 +73,18 @@ async def startup():
 @app.get("/")
 def read_root(request: Request):
     return {"Hello": "World"}
+
+
+@app.get("/health")
+async def health_check():
+    # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
+    # try:
+    #     response = await run_healthcheck()
+    # except Exception as err:
+    #     logger.exception(err)
+    #     raise err
+    # return response
+    pass
 
 
 @app.get("/create")
