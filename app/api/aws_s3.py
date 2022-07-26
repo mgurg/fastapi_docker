@@ -3,11 +3,11 @@ from typing import Optional
 from uuid import uuid4
 
 # import magic
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from loguru import logger
 
 # from sqlmodel import Session, select
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
@@ -172,7 +172,7 @@ def sign_s3_upload(objectName: str):
             ExpiresIn=3600,
             HttpMethod="PUT",
         )
-    except BaseException as error:
+    except BaseException:
         return None
 
     return url

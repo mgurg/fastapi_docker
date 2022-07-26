@@ -2,20 +2,18 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
+from app.db import Base, metadata
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, pool
-from sqlmodel import SQLModel
-
-# Model / Schema imports
-from app.models.models import *  # New (be sure to import all models you need migrated)
+from sqlalchemy import MetaData, engine_from_config, pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-section = config.config_ini_section
-# print(os.path.abspath(os.getcwd()))
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
 load_dotenv("./app/.env")
+section = config.config_ini_section
 config.set_section_option(section, "DB_USER", os.environ.get("DB_USERNAME"))
 config.set_section_option(section, "DB_PASS", os.environ.get("DB_PASSWORD"))
 
@@ -26,8 +24,7 @@ else:
 
 config.set_section_option(section, "DB_DATABASE", os.environ.get("DB_DATABASE"))
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
@@ -35,9 +32,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-
-# target_metadata = None
-target_metadata = SQLModel.metadata  # Updated
+target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -45,7 +40,7 @@ target_metadata = SQLModel.metadata  # Updated
 # ... etc.
 
 
-def run_migrations_offline():
+def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -69,7 +64,7 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def run_migrations_online():
+def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
@@ -81,12 +76,24 @@ def run_migrations_online():
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    current_tenant = context.get_x_argument(as_dictionary=True).get("tenant")
+    dry_run = context.get_x_argument(as_dictionary=True).get("dry_run")
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        connection.execute("set search_path to %s" % current_tenant)
+        connection.dialect.default_schema_name = current_tenant
 
-        with context.begin_transaction():
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table_schema=current_tenant,
+        )
+
+        with context.begin_transaction() as transaction:
             context.run_migrations()
+            if bool(dry_run) == True:
+                print("Dry-run succeeded; now rolling back transaction...")
+                transaction.rollback()
 
 
 if context.is_offline_mode():

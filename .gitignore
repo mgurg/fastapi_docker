@@ -1,6 +1,5 @@
-#MGU
-.vscode/
-.idea/
+.idea/*
+.vscode/*
 *.db
 .coverage
 docs/coverage/

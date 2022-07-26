@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.10.4-slim-bullseye
+FROM python:3.10.5-slim-bullseye
 # FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
 
 # RUN apt-get update && apt-get install -y libmagic1
@@ -69,14 +69,18 @@ ENV DB_DATABASE $DB_DATABASE
 COPY ./requirements.txt /requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+# EXPOSE 80
 
 #USER alex
 COPY --chown=alex:alex ./migrations /src/migrations
 COPY --chown=alex:alex ./alembic.ini /src/alembic.ini
 COPY --chown=alex:alex ./app /src/app
+COPY --chown=alex:alex ./tests/api_responses /src/tests/api_responses
 
 
 WORKDIR /src
+
+
 
 # EXPOSE 80
 

@@ -1,7 +1,6 @@
 import json
 import uuid as uuid
-from random import randint
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from requests import request
 
