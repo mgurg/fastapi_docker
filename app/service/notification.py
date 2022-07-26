@@ -15,7 +15,7 @@ class EmailNotification:
 
     def send(self, sender: str, receiver: str, subject: str, template: str, vars: dict):
 
-        if settings.environment != "production":
+        if settings.ENVIRONMENT != "PRD":
             receiver = settings.email_dev
 
         receiver_data = {f"to[{receiver}]": ""}

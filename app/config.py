@@ -12,6 +12,20 @@ class Settings(BaseSettings):
     PROJECT_DIR = Path(__file__).parent.parent
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = os.getenv("APP_ENV")
 
+    s3_region: str = os.getenv("AWS_DEFAULT_REGION")
+    s3_access_key: str = os.getenv("AWS_S3_ACCESS_KEY_ID")
+    s3_secret_access_key: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+    s3_bucket_name: str = os.getenv("AWS_S3_BUCKET")
+    s3_bucket_region: str = os.getenv("AWS_S3_DEFAULT_REGION")
+
+    sentry_dsn: str = os.getenv("SENTRY_DSN")
+
+    email_labs_app_key: str = os.getenv("EMAIL_LABS_APP_KEY")
+    email_labs_secret_key: str = os.getenv("EMAIL_LABS_APP_KEY")
+    email_smtp: str = os.getenv("EMAIL_LABS_SMTP")
+    email_sender: str = os.getenv("EMAIL_LABS_SENDER")
+    email_dev: str = os.getenv("EMAIL_DEV")
+
     # API
     REJESTR_IO_KEY: str = os.getenv("REJESTR_IO_KEY")
 
