@@ -1,38 +1,23 @@
 import io
 from typing import Optional
-
-import boto3
+from uuid import uuid4
 
 # import magic
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from loguru import logger
-from sqlalchemy import func
-from sqlmodel import Session, select
+
+# from sqlmodel import Session, select
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.config import get_settings
 from app.db import get_session
 from app.models.models import Files
 from app.service.aws_s3 import s3_client, s3_resource
-from app.service.helpers import get_uuid
 
 settings = get_settings()
 s3_router = APIRouter()
-
-
-# s3_resource = boto3.resource(
-#     service_name="s3",
-#     region_name=settings.s3_region,
-#     aws_access_key_id=settings.s3_access_key,
-#     aws_secret_access_key=settings.s3_secret_access_key,
-# )
-
-# s3_client = boto3.client(
-#     "s3",
-#     region_name=settings.s3_region,
-#     aws_access_key_id=settings.s3_access_key,
-#     aws_secret_access_key=settings.s3_secret_access_key,
-# )
 
 
 @s3_router.post("/create_bucket")
@@ -160,7 +145,7 @@ async def upload_aws_s3(
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
 
     new_file = Files(
-        uuid=get_uuid(),
+        uuid=str(uuid4()),
         account_id=2,
         owner_id=2,
         file_name=file.filename,
@@ -187,7 +172,7 @@ def sign_s3_upload(objectName: str):
             ExpiresIn=3600,
             HttpMethod="PUT",
         )
-    except BaseException as error:
+    except BaseException:
         return None
 
     return url

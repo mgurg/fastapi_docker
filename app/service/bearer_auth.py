@@ -1,13 +1,13 @@
 import base64
-from typing import List
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
-from sqlmodel import Session, select
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db import get_session
-from app.models.models import Accounts, Users
+from app.model.model import Account, User
 
 settings = get_settings()
 security = HTTPBearer()
@@ -21,7 +21,7 @@ async def has_token(*, session: Session = Depends(get_session), credentials: HTT
     if token is None:
         raise HTTPException(status_code=401, detail="Missing auth token")
 
-    db_user_data = session.exec(select(Users.id, Users.account_id).where(Users.auth_token == token)).one_or_none()
+    db_user_data = session.execute(select(User.id, User.account_id).where(User.auth_token == token)).one_or_none()
 
     if db_user_data is not None:
         user_id, account_id = db_user_data
@@ -35,7 +35,7 @@ async def has_token(*, session: Session = Depends(get_session), credentials: HTT
 
             company, date = message.split(".")  # TODO date check
 
-            db_account = session.exec(select(Accounts).where(Accounts.company_id == company)).one_or_none()
+            db_account = session.execute(select(Account).where(Account.company_id == company)).one_or_none()
             return {"user": 0, "account": db_account.account_id}
         except:
             print("error")

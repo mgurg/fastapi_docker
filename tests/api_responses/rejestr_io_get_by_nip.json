@@ -1,0 +1,63 @@
+{
+    "liczba_wszystkich_wynikow": 1,
+    "wyniki": [
+        {
+            "adres": {
+                "kod": "87-100",
+                "miejscowosc": "Toruń",
+                "nr_domu": "123B",
+                "panstwo": "Polska",
+                "poczta": "Toruń",
+                "teryt": {
+                    "gmina": "046301",
+                    "powiat": "0463",
+                    "wojewodztwo": "04"
+                },
+                "ulica": "Łódzka"
+            },
+            "glowna_osoba": {
+                "id": "2823589",
+                "imiona_i_nazwisko": "Daria Maria Garnicz Garnicka"
+            },
+            "id": 876518,
+            "krs_powiazania_liczby": {
+                "aktualne": 3,
+                "przeszle": 4
+            },
+            "krs_rejestry": {
+                "rejestr_przedsiebiorcow_data_wpisu": "2020-12-30"
+            },
+            "krs_wpisy": {
+                "najnowszy_data": "2022-06-23",
+                "najnowszy_numer": 5,
+                "pierwszy_data": "2020-12-30"
+            },
+            "metadane": {
+                "krs_odpis_synchronizacja_data_czas": "2022-06-23 10:10:14"
+            },
+            "nazwy": {
+                "pelna": "V2 SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+                "skrocona": "V2"
+            },
+            "numery": {
+                "krs": "0000876518",
+                "nip": "9562365881",
+                "regon": "387816523"
+            },
+            "stan": {
+                "czy_dofinansowana_przez_ue": false,
+                "czy_jest_na_gpw": false,
+                "czy_otrzymala_pomoc_publiczna": false,
+                "czy_pozytku_publicznego": false,
+                "czy_spolka_skarbu_panstwa": false,
+                "czy_wykreslona": false,
+                "forma_prawna": "SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+                "pkd_przewazajace_dzial": "Działalność usługowa w zakresie informacji",
+                "w_likwidacji": false,
+                "w_upadlosci": false,
+                "w_zawieszeniu": false
+            },
+            "typ": "organizacja"
+        }
+    ]
+}

@@ -1,6 +1,5 @@
 import json
 import uuid as uuid
-from random import randint
 from uuid import UUID
 
 from requests import request
@@ -37,13 +36,3 @@ def uuid_convert(o: uuid.uuid4) -> str:
     """Custom UUID converter for json.dumps(), because neither the UUID or the hex is a serializable object"""
     if isinstance(o, UUID):
         return o.hex
-
-
-def get_uuid() -> uuid.uuid4:
-    """Generate SQLModel safe UUID (without leading zero), https://github.com/tiangolo/sqlmodel/pull/26"""
-
-    val = uuid.uuid4()
-    while val.hex[0] == "0":
-        val = uuid.uuid4()
-
-    return val
