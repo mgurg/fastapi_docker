@@ -15,14 +15,15 @@ import pytest
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
-from app.config import Settings
-from app.db import get_db
-from app.main import app
-from app.service.tenants import alembic_upgrade_head, tenant_create
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+
+from app.config import Settings
+from app.db import get_db
+from app.main import app
+from app.service.tenants import alembic_upgrade_head, tenant_create
 
 # def get_settings_override():
 #     return Settings(testing=1, TEST_SQLALCHEMY_DATABASE_URI='os.environ.get("DATABASE_TEST_URL")')
@@ -54,11 +55,11 @@ def session_fixture():
     DEFAULT_DATABASE_USER = os.getenv("DB_USERNAME")
     DEFAULT_DATABASE_HOSTNAME: str = os.getenv("DB_HOST")
     DEFAULT_DATABASE_DB: str = os.getenv("DB_DATABASE")
-    DEFAULT_DATABASE_USER: str = os.getenv("DB_USERNAME")
+    DEFAULT_DATABASE_PORT: str = os.getenv("DB_PORT")
     DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 
     engine = create_engine(
-        f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5438/{DEFAULT_DATABASE_DB}",
+        f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:{DEFAULT_DATABASE_PORT}/{DEFAULT_DATABASE_DB}",
         echo=True,
         pool_pre_ping=True,
         pool_recycle=280,
