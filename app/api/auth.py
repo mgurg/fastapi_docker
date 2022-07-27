@@ -56,6 +56,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
 
     db_company = crud_auth.get_public_company_by_nip(shared_db, user.nip)
     user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+    is_verified = False
 
     if not db_company:
         company_data = get_company_details(user.nip)
@@ -65,6 +66,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         tenant_create(db_company.tenant_id)
         alembic_upgrade_head(db_company.tenant_id)
         user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+        is_verified = True
 
     update_db_user = {
         "tenant_id": db_company.tenant_id,
@@ -88,6 +90,8 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
             "auth_token": secrets.token_hex(32),
             "auth_token_valid_to": datetime.utcnow() + timedelta(days=1),
             "role_id": user_role_id,
+            "is_active": True,
+            "is_verified": is_verified,
             "tos": db_user.tos,
             "lang": db_user.lang,
             "tz": db_user.tz,
@@ -140,3 +144,11 @@ async def auth_login(*, db: Session = Depends(get_db), email: str, request: Requ
         raise HTTPException(status_code=404, detail="User not found")
     db_user.tenant_id = request.headers["host"]
     return db_user
+
+
+@auth_router.get("/verify/{token}", response_model=StandardResponse)
+async def auth_verify(*, db: Session = Depends(get_db), token: str):
+    user_db = crud_auth.get_tenant_user_by_auth_token(db, token)
+    if user_db is None:
+        raise HTTPException(status_code=403, detail="Invalid token")
+    return {"ok": True}

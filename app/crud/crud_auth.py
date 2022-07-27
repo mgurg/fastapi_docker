@@ -111,8 +111,8 @@ def create_tenant_user(db: Session, tenant_data) -> User:
             auth_token=tenant_data["auth_token"],
             auth_token_valid_to=tenant_data["auth_token_valid_to"],
             user_role_id=tenant_data["role_id"],
-            is_active=False,
-            is_verified=False,
+            is_active=tenant_data["is_active"],
+            is_verified=tenant_data["is_verified"],
             tos=tenant_data["tos"],
             tz=tenant_data["tz"],
             tenant_id=tenant_data["tenant_id"],
@@ -134,3 +134,12 @@ def get_tenant_user_by_email(db: Session, email: str):
     except Exception as e:
         print(e)
     return db_user
+
+
+def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
+    return db.execute(
+        select(User)
+        .where(User.auth_token == token)
+        .where(User.is_active == False)
+        .where(User.service_token_valid_to > datetime.utcnow())
+    ).scalar_one_or_none()
