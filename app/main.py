@@ -74,7 +74,7 @@ async def startup():
 
 @app.get("/")
 def read_root(request: Request):
-    return {"Hello": "World"}
+    return {"Hello": "World", "tenant": request.headers.get("tenant", "public")}
 
 
 @app.get("/health")

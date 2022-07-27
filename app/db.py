@@ -33,10 +33,12 @@ class TenantNotFoundError(Exception):
         super().__init__(self.message)
 
 
-def get_tenant(req: Request) -> PublicCompany:
+def get_tenant(request: Request) -> PublicCompany:
     try:
-        host_without_port = req.headers["host"].split(":", 1)[0]
-        print("Sending request to DB:", host_without_port)
+        # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
+
+        host_without_port = request.headers.get("tenant", "public")  # based on tenant header: abc
+
         with with_db(None) as db:
             tenant = db.execute(
                 select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
