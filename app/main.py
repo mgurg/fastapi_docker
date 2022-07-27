@@ -1,20 +1,14 @@
 import sentry_sdk
 import uvicorn
-from faker import Faker
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
 from app.api.users import user_router
 from app.config import get_settings
-from app.db import get_db
-from app.models.models import Book
-from app.schemas.schemas import BookBase, StandardResponse
 from app.service.health_check import test_db
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
