@@ -2,6 +2,7 @@ import secrets
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -124,15 +125,32 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
 
-        # db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if argon2.verify(user.password, db_user.password) is False:
+            raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+        token_valid_to = datetime.utcnow() + timedelta(days=1)
+        if user.permanent is True:
+            token_valid_to = datetime.utcnow() + timedelta(days=30)
+
+        update_package = {
+            "auth_token": secrets.token_hex(64),  # token,
+            "auth_token_valid_to": token_valid_to,
+            "updated_at": datetime.utcnow(),
+        }
+
+        db_user = crud_auth.update_tenant_user(db, db_user, update_package)
+
+        # Load with relations
         db_user = db.execute(
             select(User).where(User.email == user.email).options(selectinload("*"))
         ).scalar_one_or_none()
-        # _ = db_user.role_FK
-        # print(db_user.role_FK)
-        if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found")
         db_user.tenant_id = db_public_user.tenant_id
+
         return db_user
 
 
