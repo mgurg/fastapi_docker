@@ -22,28 +22,9 @@ DEFAULT_DATABASE_DB = settings.DEFAULT_DATABASE_DB
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True, pool_recycle=280)
 
-print(
-    SQLALCHEMY_DATABASE_URL,
-)
 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
-
-
-# def get_shared_metadata():
-#     meta = MetaData()
-#     for table in Base.metadata.tables.values():
-#         if table.schema != "tenant":
-#             table.tometadata(meta)
-#     return meta
-
-
-# def get_tenant_specific_metadata():
-#     meta = MetaData(schema="tenant")
-#     for table in Base.metadata.tables.values():
-#         if table.schema == "tenant":
-#             table.tometadata(meta)
-#     return meta
 
 
 class TenantNotFoundError(Exception):
