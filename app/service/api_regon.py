@@ -24,9 +24,21 @@ def get_company_details(nip="7342867148"):
     result = api.searchData(nip=nip)
     # pprint(result)
 
+    company_name: str = result[0]["Nazwa"]
+    mapping = [
+        ('"', ""),
+        ("SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ", "SP. Z O. O."),
+        ("SPÓŁKA KOMANDYTOWA", "SP. K."),
+        ("SPÓŁKA CYWILNA", "S.C."),
+        ("SPÓŁKA JAWNA", "SP. J."),
+        ("SPÓŁKA AKCYJNA", "SP. A."),
+    ]
+    for k, v in mapping:
+        company_name_short = company_name.replace(k, v)
+
     data = {}
-    data["name"] = result[0]["Nazwa"]
-    data["short_name"] = result[0]["Nazwa"]
+    data["name"] = company_name
+    data["short_name"] = company_name_short
     data["nip"] = result[0]["Nip"]
     data["country"] = "Polska"
     data["city"] = result[0]["Miejscowosc"]
