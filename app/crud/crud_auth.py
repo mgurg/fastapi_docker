@@ -142,14 +142,6 @@ def create_tenant_user(db: Session, tenant_data) -> User:
     return new_user
 
 
-def get_tenant_user_by_email(db: Session, email: str):
-    try:
-        db_user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
-    except Exception as e:
-        print(e)
-    return db_user
-
-
 def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
     return db.execute(
         select(User)

@@ -6,7 +6,7 @@ from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.crud import crud_auth
+from app.crud import crud_auth, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
@@ -33,7 +33,7 @@ async def auth_register(*, shared_db: Session = Depends(get_public_db), user: Us
 
     is_password_ok = Password(user.password).compare(user.password_confirmation)
 
-    if is_password_ok is False:
+    if is_password_ok is not True:
         raise HTTPException(status_code=400, detail=is_password_ok)
 
     if auth.is_timezone_correct is False:
@@ -125,7 +125,7 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
 
-        db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        db_user = crud_users.get_user_by_email(db, user.email)
 
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")

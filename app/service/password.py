@@ -1,5 +1,7 @@
 from typing import Union
 
+from passlib.hash import argon2
+
 
 class Password:
     def __init__(self, password: str):
@@ -30,3 +32,6 @@ class Password:
             return "Password and password confirmation not match"
 
         return True
+
+    def hash(self):
+        return argon2.hash(self.password)

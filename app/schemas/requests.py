@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -6,7 +8,7 @@ class BaseRequest(BaseModel):
     pass
 
 
-class UserRegisterIn(BaseRequest):  # OK
+class UserRegisterIn(BaseRequest):
     email: EmailStr
     password: str
     password_confirmation: str
@@ -15,14 +17,25 @@ class UserRegisterIn(BaseRequest):  # OK
     lang: str | None = "pl"
 
 
-class UserFirstRunIn(BaseRequest):  # OK
+class UserFirstRunIn(BaseRequest):
     first_name: str
     last_name: str
     nip: str = "1234563218"
     token: str
 
 
-class UserLoginIn(BaseRequest):  # OK
+class UserLoginIn(BaseRequest):
     email: EmailStr
     password: str
     permanent: bool
+
+
+class UserCreateIn(BaseRequest):
+    first_name: str | None
+    last_name: str | None
+    email: EmailStr | None
+    phone: str | None
+    password: str | None
+    password_confirmation: str | None
+    is_verified: bool | None
+    user_role_uuid: UUID | None
