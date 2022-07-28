@@ -14,7 +14,7 @@ from app.schemas.requests import UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import StandardResponse  # UserLoginOut
 from app.schemas.schemas import UserLoginOut
 from app.service import auth
-from app.service.api_rejestr_io import get_company_details
+from app.service.api_regon import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
