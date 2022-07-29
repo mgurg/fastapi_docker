@@ -39,17 +39,9 @@ def create_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(
-        auth_router,
-        prefix="/auth",
-        tags=["AUTH"],
-    )
+    app.include_router(auth_router, prefix="/auth", tags=["AUTH"], redirect_slashes=False)
 
-    app.include_router(
-        user_router,
-        prefix="/users",
-        tags=["USER"],
-    )
+    app.include_router(user_router, prefix="/users", tags=["USER"], redirect_slashes=False)
 
     return app
 
