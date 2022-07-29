@@ -13,8 +13,10 @@ from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
 from app.schemas.requests import UserRegisterIn
 from app.schemas.schemas import PubliCompanyAdd
+from app.utils.decorators import performance_check, timer
 
 
+@timer
 def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
     return db.execute(select(PublicUser).where(PublicUser.email == email)).scalar_one_or_none()
 
@@ -150,6 +152,6 @@ def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
             .where(User.is_active == True)
             .where(User.auth_token_valid_to > datetime.utcnow())
         ).scalar_one_or_none()
+        return db_tenant_user
     except Exception as e:
         print(e)
-    return db_tenant_user

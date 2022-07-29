@@ -20,13 +20,11 @@ def get_user_by_email(db: Session, email: EmailStr) -> User:
 
 
 def create_user(db: Session, data: dict) -> User:
-    try:
-        new_user = User(**data)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    except Exception as e:
-        print(e)
+    new_user = User(**data)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
     return new_user
 
 

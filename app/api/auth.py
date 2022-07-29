@@ -17,6 +17,7 @@ from app.service import auth
 from app.service.api_regon import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
+from app.utils.decorators import performance_check, timer
 
 auth_router = APIRouter()
 
@@ -114,7 +115,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
 
 
 @auth_router.post("/login", response_model=UserLoginOut)
-async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
+def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
     req.headers["User-Agent"]
     db_public_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
 
