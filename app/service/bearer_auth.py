@@ -1,5 +1,3 @@
-import base64
-
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from sqlalchemy import select

@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from RegonAPI import RegonAPI
 from RegonAPI.exceptions import ApiAuthenticationError
 
@@ -17,7 +15,7 @@ def get_company_details(nip="7342867148"):
     except ApiAuthenticationError as e:
         print("[-]", e)
         exit(0)
-    except Exception as e:
+    except Exception:
         raise
 
     # Search by NIP

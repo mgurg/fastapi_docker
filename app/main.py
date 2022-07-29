@@ -97,8 +97,14 @@ def read_item(schema: str):
 
 @app.get("/upgrade")
 def upgrade_head(schema: str):
-    # _has_table("a")
+    # `_has_table("a")`
     alembic_upgrade_head(schema)
+    return {"ok": True}
+
+
+@app.get("/upgrade/all")
+def upgrade_head_all(schema: str):
+
     return {"ok": True}
 
 

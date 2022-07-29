@@ -143,9 +143,13 @@ def create_tenant_user(db: Session, tenant_data) -> User:
 
 
 def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
-    return db.execute(
-        select(User)
-        .where(User.auth_token == token)
-        .where(User.is_active == False)
-        .where(User.service_token_valid_to > datetime.utcnow())
-    ).scalar_one_or_none()
+    try:
+        db_tenant_user = db.execute(
+            select(User)
+            .where(User.auth_token == token)
+            .where(User.is_active == True)
+            .where(User.auth_token_valid_to > datetime.utcnow())
+        ).scalar_one_or_none()
+    except Exception as e:
+        print(e)
+    return db_tenant_user

@@ -1,7 +1,5 @@
-from datetime import datetime
 from uuid import UUID
 
-from faker import Faker
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.orm import Session

@@ -11,6 +11,10 @@ Main differences: Alembic behavior. All tables are created using migrations. Eac
    - manual test `alembic -x dry_run=True -x tenant=a upgrade head`
    - Manual run: `alembic -x tenant=a upgrade head`
 
+### Load test
+```
+siege --concurrent=20 --reps=5 --header="tenant:v2_6c0ad5866ea249d78abd861625eca82a" http://url.com/
+```
 
 ### Alembic
 
