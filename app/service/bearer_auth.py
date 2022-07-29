@@ -11,7 +11,7 @@ settings = get_settings()
 security = HTTPBearer()
 
 
-async def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)):
+def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)):
     """
     Function that is used to validate the token in the case that it requires it
     """
@@ -42,7 +42,7 @@ async def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCred
     raise HTTPException(status_code=401, detail="Incorrect auth token")
 
 
-# async def has_permission(*, session: Session = Depends(get_session), user_id, permission):
+# def has_permission(*, session: Session = Depends(get_session), user_id, permission):
 #     fields = [Users.id, Users.user_role_id, Users.account_id]
 #     user_data = session.exec(
 #         select(*fields).where(Users.id == user_id).where(Users.is_active == 1).where(Users.deleted_at == None)

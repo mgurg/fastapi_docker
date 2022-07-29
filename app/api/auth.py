@@ -23,7 +23,7 @@ auth_router = APIRouter()
 
 
 @auth_router.post("/register", response_model=StandardResponse)
-async def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
+def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
 
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
@@ -46,7 +46,7 @@ async def auth_register(*, shared_db: Session = Depends(get_public_db), user: Us
 
 
 @auth_router.post("/first_run")
-async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
+def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
     """Activate user based on service token"""
 
     if auth.is_nip_correct(user.nip):  # 123-456-32-18 - CompanyID number
@@ -156,7 +156,7 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
 
 
 @auth_router.post("/login_tenant", response_model=UserLoginOut)
-async def auth_login(*, db: Session = Depends(get_db), email: str, request: Request):
+def auth_login(*, db: Session = Depends(get_db), email: str, request: Request):
 
     db_user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if db_user is None:
@@ -166,7 +166,7 @@ async def auth_login(*, db: Session = Depends(get_db), email: str, request: Requ
 
 
 @auth_router.get("/verify/{token}", response_model=StandardResponse)
-async def auth_verify(*, db: Session = Depends(get_db), token: str):
+def auth_verify(*, db: Session = Depends(get_db), token: str):
     user_db = crud_auth.get_tenant_user_by_auth_token(db, token)
     if user_db is None:
         raise HTTPException(status_code=403, detail="Invalid token")

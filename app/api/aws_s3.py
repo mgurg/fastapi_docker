@@ -21,7 +21,7 @@ s3_router = APIRouter()
 
 
 @s3_router.post("/create_bucket")
-async def post_create_bucket():
+def post_create_bucket():
     logger.info("👋 from S3 route")
     prefix = "mgu"
     bucket_name = prefix + "-" + "dc5b9aefbee54953824d9fc327df7faf"  # str(uuid.uuid4().hex)
@@ -38,7 +38,7 @@ async def post_create_bucket():
 
 @s3_router.get("/list_buckets")
 @logger.catch()
-async def get_buckets_list():
+def get_buckets_list():
     s3_buckets = []
     response = s3_client.list_buckets()
 
@@ -52,7 +52,7 @@ async def get_buckets_list():
 
 @s3_router.get("/list_files")
 @logger.catch()
-async def get_buckets_list(*, session: Session = Depends(get_session)):
+def get_buckets_list(*, session: Session = Depends(get_session)):
 
     # https://realpython.com/python-boto3-aws-s3/#object-traversal
     # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
@@ -69,7 +69,7 @@ async def get_buckets_list(*, session: Session = Depends(get_session)):
 
 
 # @s3_router.delete("/dlete_bucket/{bucket_name}")
-# async def remove_bucket(bucket_name: str):
+# def remove_bucket(bucket_name: str):
 
 #     for s3_object in s3_resource.Bucket(bucket_name).objects.all():
 #         s3_object.delete()
@@ -82,7 +82,7 @@ async def get_buckets_list(*, session: Session = Depends(get_session)):
 
 
 @s3_router.delete("/delete_file/")
-async def remove_bucket(*, session: Session = Depends(get_session), objectName: str):
+def remove_bucket(*, session: Session = Depends(get_session), objectName: str):
 
     a = s3_resource.Object(settings.s3_bucket_name, objectName).delete()
     print(a)
@@ -95,7 +95,7 @@ async def remove_bucket(*, session: Session = Depends(get_session), objectName: 
 
 
 @s3_router.get("/get_s3_obj/")
-async def get_s3(s3_obj: str):
+def get_s3(s3_obj: str):
     """
     Retreives an s3 jpg image and streams it back.
     ### Request Body
@@ -118,9 +118,7 @@ async def get_s3(s3_obj: str):
 
 @s3_router.post("/upload/")
 @logger.catch()
-async def upload_aws_s3(
-    *, session: Session = Depends(get_session), request: Request, file: Optional[UploadFile] = None
-):
+def upload_aws_s3(*, session: Session = Depends(get_session), request: Request, file: Optional[UploadFile] = None):
     if not file:
         return {"message": "No file sent"}
 

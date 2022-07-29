@@ -22,7 +22,7 @@ def user_get_all(*, db: Session = Depends(get_db), params: Params = Depends(), a
 
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
-async def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
     user = crud_users.get_user_by_uuid(db, user_uuid)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -66,7 +66,7 @@ def read_user(*, db: Session = Depends(get_db), user: UserCreateIn, request: Req
 
 
 @user_router.patch("/{user_uuid}", response_model=StandardResponse)
-async def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreateIn, auth=Depends(has_token)):
+def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreateIn, auth=Depends(has_token)):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
     if not db_user:
@@ -91,7 +91,7 @@ async def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: Use
 
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-async def user_get_all(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def user_get_all(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
 
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 

@@ -7,7 +7,7 @@ from app.service.aws_s3 import s3_client
 settings = get_settings()
 
 
-async def test_db():
+def test_db():
     try:
         with engine.connect():
             return {"db": "healthy"}
@@ -16,7 +16,7 @@ async def test_db():
         raise err
 
 
-async def test_storage():
+def test_storage():
     try:
         response = s3_client.head_bucket(Bucket=settings.s3_bucket_name)
         # print("@@@@@@@@@@@@@", response)
@@ -27,7 +27,7 @@ async def test_storage():
     return {"storage": "healthy"}
 
 
-async def run_healthcheck() -> dict[str, str]:
-    await test_db()
-    await test_storage()
+def run_healthcheck() -> dict[str, str]:
+    test_db()
+    test_storage()
     return {"status": "ALIVE"}

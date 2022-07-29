@@ -51,7 +51,7 @@ if settings.ENVIRONMENT != "local":
 
 
 @app.on_event("startup")
-async def startup():
+def startup():
     logger.info("🚀 Starting up and initializing app...")
     alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🚀 Starting up and initializing app... DONE")
@@ -63,10 +63,10 @@ def read_root(request: Request):
 
 
 @app.get("/health")
-async def health_check():
+def health_check():
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     # try:
-    #     response = await run_healthcheck()
+    #     response = run_healthcheck()
     # except Exception as err:
     #     logger.exception(err)
     #     raise err
@@ -75,8 +75,8 @@ async def health_check():
 
 
 @app.get("/health_db")
-async def health_check_db():
-    return await test_db()
+def health_check_db():
+    return test_db()
 
 
 @app.get("/create")
