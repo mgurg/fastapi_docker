@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from RegonAPI import RegonAPI
 from RegonAPI.exceptions import ApiAuthenticationError
 
@@ -20,9 +22,10 @@ def get_company_details(nip="7342867148"):
 
     # Search by NIP
     result = api.searchData(nip=nip)
-    # pprint(result)
 
-    company_name: str = result[0]["Nazwa"]
+    pprint(result)
+
+    company_name: str = result[0].get("Nazwa", "noGusNameData")
     mapping = [
         ('"', ""),
         ("SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ", "SP. Z O. O."),
@@ -37,9 +40,9 @@ def get_company_details(nip="7342867148"):
     data = {}
     data["name"] = company_name
     data["short_name"] = company_name_short
-    data["nip"] = result[0]["Nip"]
+    data["nip"] = result[0].get("Nip")
     data["country"] = "Polska"
-    data["city"] = result[0]["Miejscowosc"]
+    data["city"] = result[0].get("Miejscowosc", "noGusCityData")
 
     # print(data)
 

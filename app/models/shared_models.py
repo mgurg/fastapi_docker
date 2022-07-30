@@ -36,7 +36,7 @@ class PublicUser(Base):
     is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_verified = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tos = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
-    tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    tenant_id = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     tz = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True)
     lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)

@@ -122,3 +122,9 @@ class User(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     role_FK = relationship("Role", back_populates="users_FK")
+
+
+class File(Base):
+    __tablename__ = "files"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)

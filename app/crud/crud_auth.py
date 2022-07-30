@@ -13,6 +13,7 @@ from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
 from app.schemas.requests import UserRegisterIn
 from app.schemas.schemas import PubliCompanyAdd
+from app.service.tenants import generate_tenant_id
 from app.utils.decorators import performance_check, timer
 
 
@@ -68,7 +69,6 @@ def create_public_user(db: Session, user: UserRegisterIn) -> PublicUser:
 def create_public_company(db: Session, company: PubliCompanyAdd) -> PublicCompany:
 
     uuid = str(uuid4())
-    tenanat_id = unidecode(company["short_name"]).lower() + "_" + uuid.replace("-", "")
 
     new_company = PublicCompany(
         uuid=uuid,
@@ -77,7 +77,7 @@ def create_public_company(db: Session, company: PubliCompanyAdd) -> PublicCompan
         nip=company["nip"],
         country=company["country"],
         city=company["city"],
-        tenant_id=tenanat_id,
+        tenant_id=generate_tenant_id(company["short_name"], uuid),
         qr_id=generate_qr_id(db, company["nip"]),
         created_at=datetime.utcnow(),
     )

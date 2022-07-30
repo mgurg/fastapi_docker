@@ -24,7 +24,7 @@ s3_router = APIRouter()
 def post_create_bucket():
     logger.info("👋 from S3 route")
     prefix = "mgu"
-    bucket_name = prefix + "-" + "dc5b9aefbee54953824d9fc327df7faf"  # str(uuid.uuid4().hex)
+    bucket_name = "".join([prefix, "-", "dc5b9aefbee54953824d9fc327df7faf"])  # str(uuid.uuid4().hex)
     # mgu-dc5b9aefbee54953824d9fc327df7faf
     location = {"LocationConstraint": settings.s3_region}
 

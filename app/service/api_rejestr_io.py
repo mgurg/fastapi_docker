@@ -9,7 +9,7 @@ settings = get_settings()
 
 def get_company_details(nip):
     nip = re.sub("[^0-9]", "", nip)
-    url = "https://rejestr.io/api/v2/org?nip=" + nip
+    url = "".join(["https://rejestr.io/api/v2/org?nip=", nip])
     headers = {"Authorization": settings.REJESTR_IO_KEY}
 
     path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")

@@ -1,17 +1,22 @@
 import argparse
+import re
 import traceback
+from uuid import UUID
 
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
 from sentry_sdk import capture_exception
+from unidecode import unidecode
 
 from app.config import get_settings
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
+from app.utils.decorators import performance_check, timer
 
 settings = get_settings()
 
 
+@performance_check
 def alembic_upgrade_head(tenant_name, revision="head"):
     # set the paths values
     try:
@@ -22,7 +27,7 @@ def alembic_upgrade_head(tenant_name, revision="head"):
         config.cmd_opts = argparse.Namespace()  # arguments stub
 
         # If it is required to pass -x parameters to alembic
-        x_arg = "tenant=" + tenant_name  # "dry_run=" + "True"
+        x_arg = "".join(["tenant=", tenant_name])  # "dry_run=" + "True"
         if not hasattr(config.cmd_opts, "x"):
             if x_arg is not None:
                 setattr(config.cmd_opts, "x", [])
@@ -48,6 +53,7 @@ def alembic_upgrade_head(tenant_name, revision="head"):
         print(traceback.format_exc())
 
 
+@performance_check
 def tenant_create(schema: str) -> None:
     try:
         with with_db("public") as db:
@@ -56,3 +62,11 @@ def tenant_create(schema: str) -> None:
     except Exception as e:
         capture_exception(e)
         print(e)
+
+
+def generate_tenant_id(name: str, uuid: UUID) -> str:
+
+    company = re.sub("[^A-Za-z0-9 _]", "", unidecode(name))
+    uuid = uuid.replace("-", "")
+
+    return "".join([company[:28], "_", uuid]).lower().replace(" ", "_")

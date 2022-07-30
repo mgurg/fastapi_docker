@@ -59,7 +59,7 @@ def startup():
     logger.info("🚀 Starting up and initializing app... DONE")
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def read_root(request: Request):
     return {"Hello": "World", "tenant": request.headers.get("tenant", "public")}
 
