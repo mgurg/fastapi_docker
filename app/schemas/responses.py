@@ -38,3 +38,11 @@ class UserIndexResponse(BaseResponse):
     uuid: UUID
     is_active: bool
     is_verified: bool
+
+
+class FileResponse(BaseResponse):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int

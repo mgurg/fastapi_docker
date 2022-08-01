@@ -7,14 +7,13 @@ from langcodes import standardize_tag
 from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from unidecode import unidecode
 
 from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
 from app.schemas.requests import UserRegisterIn
 from app.schemas.schemas import PubliCompanyAdd
 from app.service.tenants import generate_tenant_id
-from app.utils.decorators import performance_check, timer
+from app.utils.decorators import timer
 
 
 @timer

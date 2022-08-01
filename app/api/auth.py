@@ -17,7 +17,6 @@ from app.service import auth
 from app.service.api_regon import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
-from app.utils.decorators import performance_check, timer
 
 auth_router = APIRouter()
 

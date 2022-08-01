@@ -128,3 +128,12 @@ class File(Base):
     __tablename__ = "files"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    owner_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    file_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    file_description = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    extension = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True)
+    mimetype = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    size = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)

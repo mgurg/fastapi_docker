@@ -11,7 +11,7 @@ from unidecode import unidecode
 
 from app.config import get_settings
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
-from app.utils.decorators import performance_check, timer
+from app.utils.decorators import performance_check
 
 settings = get_settings()
 

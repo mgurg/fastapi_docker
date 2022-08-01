@@ -2,9 +2,6 @@ import functools
 import time
 import tracemalloc
 from functools import wraps
-from typing import Any, Callable, Dict, List
-
-from fastapi import Response, status
 
 
 def trycatch(func):
