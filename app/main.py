@@ -88,6 +88,15 @@ def read_item(schema: str):
     return {"schema": schema}
 
 
+@app.get("/check_revision")
+def check_revision(schema: str):
+    # with with_db(schema) as db:
+    #     context = MigrationContext.configure(db.connection())
+    #     script = alembic.script.ScriptDirectory.from_config(alembic_config)
+    #     if context.get_current_revision() != script.get_current_head():
+    return {"ok": True}
+
+
 @app.get("/upgrade")
 def upgrade_head(schema: str):
     # `_has_table("a")`
