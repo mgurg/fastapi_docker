@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from langcodes import standardize_tag
 from passlib.hash import argon2
-from sqlalchemy import select
+from sqlalchemy import distinct, select
 from sqlalchemy.orm import Session
 
 from app.models.models import User
@@ -32,6 +32,10 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
 
 def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
     return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
+
+
+def get_schemas_from_public_company(db: Session):
+    return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
 
 
 def generate_qr_id(db: Session, nip: str):

@@ -1,16 +1,18 @@
 import sentry_sdk
-import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
 from app.api.files import file_router
 from app.api.ideas import idea_router
 from app.api.users import user_router
 from app.config import get_settings
+from app.crud import crud_auth
+from app.db import get_public_db
 from app.service.health_check import test_db
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
@@ -107,13 +109,18 @@ def upgrade_head(schema: str):
 
 
 @app.get("/upgrade/all")
-def upgrade_head_all(schema: str):
+def upgrade_head_all(*, shared_db: Session = Depends(get_public_db)):
+    schemas = crud_auth.get_schemas_from_public_company(shared_db)
+
+    for schema in schemas:
+        alembic_upgrade_head(schema)
+        print(schema)
 
     return {"ok": True}
 
 
-if __name__ == "__main__":
-    if settings.ENV == "production":
-        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-    else:
-        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+# if __name__ == "__main__":
+#     if settings.ENV == "production":
+#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+#     else:
+#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)

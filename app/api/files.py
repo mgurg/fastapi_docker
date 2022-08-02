@@ -22,7 +22,7 @@ settings = get_settings()
 file_router = APIRouter()
 
 
-@file_router.get("/", response_model=List[FileResponse])  #  response_model=List[FileResponse], name="user:Profile"
+@file_router.get("/", response_model=List[FileResponse])
 def file_get_info_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
     # quota = session.exec(select([func.sum(Files.size)]).where(Files.account_id == 2)).one()

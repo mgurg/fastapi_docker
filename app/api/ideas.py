@@ -80,6 +80,6 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "created_at": datetime.utcnow(),
     }
 
-    new_idea = crud_ideas.create_idea(db, idea_data)
+    crud_ideas.create_idea(db, idea_data)
 
     return {"ok": True}

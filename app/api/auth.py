@@ -155,7 +155,7 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
 
 
 @auth_router.post("/login_tenant", response_model=UserLoginOut)
-def auth_login(*, db: Session = Depends(get_db), email: str, request: Request):
+def auth_login_tenant(*, db: Session = Depends(get_db), email: str, request: Request):
 
     db_user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if db_user is None:

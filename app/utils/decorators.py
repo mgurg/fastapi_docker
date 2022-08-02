@@ -2,6 +2,7 @@ import functools
 import time
 import tracemalloc
 from functools import wraps
+from time import perf_counter, strftime
 
 
 def trycatch(func):
@@ -40,10 +41,6 @@ def performance_check(func):
         return res
 
     return wrapper
-
-
-import functools
-from time import perf_counter, strftime
 
 
 def timer(func):
