@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
@@ -12,3 +14,7 @@ def get_ideas(db: Session, filters: list, sortColumn: str, sortOrder: str) -> Id
         .scalars()
         .all()
     )
+
+
+def get_idea_by_uuid(db: Session, uuid: UUID) -> Idea:
+    return db.execute(select(Idea).where(Idea.uuid == uuid).where(Idea.deleted_at.is_(None))).scalar_one_or_none()

@@ -124,6 +124,35 @@ class User(Base):
     role_FK = relationship("Role", back_populates="users_FK")
 
 
+idea_file_rel = sa.Table(
+    "ideas_files_link",
+    Base.metadata,
+    sa.Column("idea_id", sa.ForeignKey("ideas.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
+    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
+    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
+)
+
+
+class Idea(Base):
+    __tablename__ = "ideas"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    upvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
+    downvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
+    title = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
+    color = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True)
+    status = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    pictures = relationship("File", secondary=idea_file_rel, back_populates="idea")
+
+
 class File(Base):
     __tablename__ = "files"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
@@ -137,3 +166,5 @@ class File(Base):
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    idea = relationship("Idea", secondary=idea_file_rel, back_populates="pictures")

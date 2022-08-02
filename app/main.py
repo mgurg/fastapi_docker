@@ -8,6 +8,7 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 from app.api.auth import auth_router
 from app.api.files import file_router
+from app.api.ideas import idea_router
 from app.api.users import user_router
 from app.config import get_settings
 from app.service.health_check import test_db
@@ -42,6 +43,7 @@ def create_application() -> FastAPI:
 
     app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
     app.include_router(user_router, prefix="/users", tags=["USER"])
+    app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
     app.include_router(file_router, prefix="/files", tags=["FILE"])
 
     return app

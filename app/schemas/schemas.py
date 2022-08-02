@@ -116,3 +116,29 @@ class UserLoginOut(BaseModel):  # OK
 
     class Config:
         orm_mode = True
+
+
+class FileBasicInfo(BaseModel):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+
+    class Config:
+        orm_mode = True
+
+
+class IdeaIndexResponse(BaseModel):
+    uuid: UUID
+    color: str
+    title: str
+    description: str
+    upvotes: int | None
+    downvotes: int | None
+    status: str | None
+    created_at: datetime
+    pictures: List[FileBasicInfo] | None
+
+    class Config:
+        orm_mode = True
