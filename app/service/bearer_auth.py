@@ -38,8 +38,8 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
 
             # db_account = session.execute(select(Account).where(Account.company_id == company)).one_or_none()
             return {"user": 0}
-        except:
-            print("error")
+        except Exception as e:
+            print("error" + e)
 
     raise HTTPException(status_code=401, detail="Incorrect auth token")
 

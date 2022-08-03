@@ -104,7 +104,7 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
 @idea_router.post("/new_idea/{idea_id}", name="idea:Add")
 async def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db), idea_id: str):
 
-    pattern = re.compile("^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
+    pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
     if pattern.match(idea_id):
 
         company, board = idea_id.split("+")
@@ -114,9 +114,7 @@ async def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db),
         if not db_company:
             raise HTTPException(status_code=404, detail="Company not found")
 
-        message = (
-            db_company.tenant_id + "." + (datetime.utcnow() + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
-        )
+        message = db_company.tenant_id + "." + (datetime.utcnow() + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
         message_bytes = message.encode("ascii")
         base64_bytes = base64.b64encode(message_bytes)
         base64_message = base64_bytes.decode("ascii")
@@ -143,7 +141,7 @@ async def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db),
 
 @idea_router.post("/vote", response_model=StandardResponse, name="idea:Add")
 async def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth=Depends(has_token)):
-    res = IdeasVotesIn.from_orm(vote)
+    IdeasVotesIn.from_orm(vote)
 
     db_idea = crud_ideas.get_idea_by_uuid(db, vote.idea_uuid)
 

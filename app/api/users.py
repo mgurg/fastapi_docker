@@ -91,7 +91,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-def user_get_all(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
 
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
