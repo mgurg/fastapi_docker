@@ -11,12 +11,12 @@ from unidecode import unidecode
 
 from app.config import get_settings
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
-from app.utils.decorators import performance_check
+from app.utils.decorators import timer
 
 settings = get_settings()
 
 
-@performance_check
+@timer
 def alembic_upgrade_head(tenant_name, revision="head"):
     # set the paths values
     try:
@@ -53,7 +53,7 @@ def alembic_upgrade_head(tenant_name, revision="head"):
         print(traceback.format_exc())
 
 
-@performance_check
+@timer
 def tenant_create(schema: str) -> None:
     try:
         with with_db("public") as db:

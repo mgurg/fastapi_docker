@@ -50,7 +50,9 @@ def timer(func):
         value = func(*args, **kwargs)
         toc = perf_counter()
         elapsed_time = toc - tic
-        print(f"{func.__name__!r} finished at {strftime('%l:%M%p %Z on %b %d, %Y') } in {elapsed_time:0.4f} seconds")
+        print(
+            f"\n{func.__name__!r} finished at {strftime('%l:%M%p %Z on %b %d, %Y') } in {elapsed_time:0.4f} seconds\n"
+        )
         return value
 
     return wrapper_timer

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import sentry_sdk
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +16,7 @@ from app.config import get_settings
 from app.crud import crud_auth
 from app.db import get_public_db
 from app.service.health_check import test_db
+from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
 settings = get_settings()
@@ -21,8 +24,6 @@ sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
-
-# -------------------------------------------------------
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
 
@@ -61,6 +62,28 @@ def startup():
     logger.info("🚀 Starting up and initializing app...")
     alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🚀 Starting up and initializing app... DONE")
+    # job = scheduler.add_job(myfunc, "interval", minutes=1)
+    # scheduler.start()
+    # jobs = scheduler.get_jobs()
+    # print(jobs)
+    logger.info("🚀 Starting up and initializing app... JOB")
+    # job.remove()
+
+
+def myfunc(text: str):
+    logger.info("🚀 JOB" + text)
+    print("JOB" + text)
+
+
+start_scheduler(app)
+job = scheduler.add_job(myfunc, args=["SDF"])
+# scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    # scheduler.shutdown()
+    pass
 
 
 @app.get("/", include_in_schema=False)
@@ -113,7 +136,8 @@ def upgrade_head_all(*, shared_db: Session = Depends(get_public_db)):
     schemas = crud_auth.get_schemas_from_public_company(shared_db)
 
     for schema in schemas:
-        alembic_upgrade_head(schema)
+        scheduler.add_job(alembic_upgrade_head, args=[schema], id="auh_" + str(uuid4()))
+        # alembic_upgrade_head(schema)
         print(schema)
 
     return {"ok": True}
