@@ -47,3 +47,8 @@ class IdeaAddIn(BaseRequest):
     description: str
     color: str = "green"
     files: List[UUID] | None
+
+
+class IdeasVotesIn(BaseRequest):
+    idea_uuid: UUID
+    vote: str

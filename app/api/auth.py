@@ -71,11 +71,6 @@ def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFir
 
     update_db_user = {
         "tenant_id": db_company.tenant_id,
-        # "is_active": True,
-        # "is_verified": is_verified,
-        # "user_role_id": user_role_id,
-        # "service_token": None,
-        # "service_token_valid_to": None,
         "updated_at": datetime.utcnow(),
     }
 

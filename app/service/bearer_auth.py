@@ -1,3 +1,5 @@
+import base64
+
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from sqlalchemy import select
@@ -25,19 +27,19 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     if db_user_data is not None:
         # user_id, account_id = db_user_data
         return {"user_id": db_user_data.id}
-        # else:
-        #     try:
-        #         base64_message = token
-        #         base64_bytes = base64_message.encode("ascii")
-        #         message_bytes = base64.b64decode(base64_bytes)
-        #         message = message_bytes.decode("ascii")
+    else:
+        try:
+            base64_message = token
+            base64_bytes = base64_message.encode("ascii")
+            message_bytes = base64.b64decode(base64_bytes)
+            message = message_bytes.decode("ascii")
 
-        #         company, date = message.split(".")  # TODO date check
+            tenant_id, date = message.split(".")  # TODO: tenant_id & date check
 
-        #         # db_account = session.execute(select(Account).where(Account.company_id == company)).one_or_none()
-        #         return {"user": 0, "account": "db_account.account_id"}
-        #     except:
-        #         print("error")
+            # db_account = session.execute(select(Account).where(Account.company_id == company)).one_or_none()
+            return {"user": 0}
+        except:
+            print("error")
 
     raise HTTPException(status_code=401, detail="Incorrect auth token")
 

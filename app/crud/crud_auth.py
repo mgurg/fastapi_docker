@@ -34,6 +34,10 @@ def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
     return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
 
 
+def get_public_company_by_qr_id(db: Session, qr_id: str) -> PublicCompany | None:
+    return db.execute(select(PublicCompany).where(PublicCompany.qr_id == qr_id)).scalar_one_or_none()
+
+
 def get_schemas_from_public_company(db: Session):
     return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
 
