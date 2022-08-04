@@ -63,9 +63,9 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 # DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 # URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
-load_dotenv("./app/.env")
+load_dotenv("/home/runner/work/fastapi_docker/fastapi_docker/app/.env")
 logger.debug(Path(__file__).parent.parent)
-capture_message(Path(__file__).parent.parent)
+print("RAWPATH: " + str(Path(__file__).parent.parent))
 settings = Settings(
     DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
     DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
@@ -112,7 +112,7 @@ def my_fixture():
 @pytest.fixture(name="session")
 def session_fixture():
 
-    engine = create_engine(URL, echo=True, pool_pre_ping=True, pool_recycle=280)
+    engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
     schema_translate_map = dict(tenant="a")
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as session:
