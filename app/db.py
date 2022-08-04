@@ -1,11 +1,8 @@
-import os
 from contextlib import contextmanager
 from typing import Optional
 
 import sqlalchemy as sa
-from dotenv import load_dotenv
 from fastapi import Depends, Request
-from pydantic import PostgresDsn
 from sqlalchemy import create_engine, select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -41,7 +38,7 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
-# print(SQLALCHEMY_DATABASE_URL)
+print(SQLALCHEMY_DATABASE_URL)
 
 
 class TenantNotFoundError(Exception):
