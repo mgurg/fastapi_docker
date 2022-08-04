@@ -19,6 +19,7 @@ from alembic.config import Config
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from loguru import logger
+from sentry_sdk import capture_message
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -64,6 +65,7 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 
 load_dotenv("./app/.env")
 logger.debug(Path(__file__).parent.parent)
+capture_message(Path(__file__).parent.parent)
 settings = Settings(
     DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
     DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
