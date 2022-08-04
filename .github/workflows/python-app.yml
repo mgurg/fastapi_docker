@@ -13,7 +13,13 @@ jobs:
   test:
 
     runs-on: ubuntu-20.04
-
+    env:
+      DB_USERNAME : ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD : ${{ secrets.DB_PASSWORD }}
+      DB_HOST : ${{ secrets.DB_HOST }}
+      DB_PORT : ${{ secrets.DB_PORT }}
+      DB_DATABASE : ${{ secrets.DB_DATABASE }}
+    
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.10
@@ -36,5 +42,8 @@ jobs:
         # calling via python will also add the current directory to sys.path
         if [ -d tests ] || [ -d test ]; then python -m pytest -s; fi
       env:
-        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_USERNAME : ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD : ${{ secrets.DB_PASSWORD }}
+        DB_HOST : ${{ secrets.DB_HOST }}
+        DB_PORT : ${{ secrets.DB_PORT }}
         DB_DATABASE : ${{ secrets.DB_DATABASE }}
