@@ -64,7 +64,7 @@ def get_settings_override():
 
 load_dotenv("./app/.env")
 settings = Settings(
-    DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
+    DEFAULT_DATABASE_HOSTNAME="localhost",  # os.getenv("DB_HOST"),
     DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
     DEFAULT_DATABASE_DB=os.getenv("DB_DATABASE"),
     DEFAULT_DATABASE_USER=os.getenv("DB_USERNAME"),
