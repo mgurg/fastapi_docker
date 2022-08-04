@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -58,7 +58,7 @@ def read_user(*, db: Session = Depends(get_db), user: UserCreateIn, request: Req
     user_data["tos"] = True
     user_data["tz"] = "Europe/Warsaw"
     user_data["lang"] = "pl"
-    user_data["created_at"] = datetime.utcnow()
+    user_data["created_at"] = datetime.now(timezone.utc)
 
     crud_users.create_user(db, user_data)
 
@@ -82,7 +82,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
             raise HTTPException(status_code=400, detail=is_password_ok)
 
         user_data["password"] = password.hash()
-        user_data["updated_at"] = datetime.utcnow()
+        user_data["updated_at"] = datetime.now(timezone.utc)
         user_data.pop("password_confirmation", None)
 
     crud_users.update_user(db, db_user, user_data)

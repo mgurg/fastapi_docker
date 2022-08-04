@@ -1,5 +1,5 @@
 import io
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 from uuid import UUID, uuid4
@@ -89,7 +89,7 @@ def file_add(
         "extension": Path(file.filename).suffix,
         "mimetype": file.content_type,
         "size": request.headers["content-length"],
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
     }
 
     new_file = crud_files.create_file(db, file_data)

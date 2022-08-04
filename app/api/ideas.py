@@ -1,6 +1,6 @@
 import base64
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -93,7 +93,7 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "downvotes": 0,
         "status": "pending",
         "pictures": files,
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
     }
 
     crud_ideas.create_idea(db, idea_data)
@@ -114,7 +114,11 @@ async def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db),
         if not db_company:
             raise HTTPException(status_code=404, detail="Company not found")
 
-        message = db_company.tenant_id + "." + (datetime.utcnow() + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
+        message = (
+            db_company.tenant_id
+            + "."
+            + (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
+        )
         message_bytes = message.encode("ascii")
         base64_bytes = base64.b64encode(message_bytes)
         base64_message = base64_bytes.decode("ascii")
@@ -177,7 +181,7 @@ async def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, aut
     db.delete(db_idea)
     db.commit()
 
-    # update_package = {"deleted_at": datetime.utcnow()}  # soft delete
+    # update_package = {"deleted_at": datetime.now(timezone.utc)}  # soft delete
     # for key, value in update_package.items():
     #     setattr(db_idea, key, value)
 

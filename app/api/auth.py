@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from passlib.hash import argon2
@@ -71,7 +71,7 @@ def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFir
 
     update_db_user = {
         "tenant_id": db_company.tenant_id,
-        "updated_at": datetime.utcnow(),
+        "updated_at": datetime.now(timezone.utc),
     }
 
     crud_auth.update_public_user(shared_db, db_user, update_db_user)
@@ -84,7 +84,7 @@ def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFir
             "email": db_user.email,
             "password": db_user.password,
             "auth_token": secrets.token_hex(32),
-            "auth_token_valid_to": datetime.utcnow() + timedelta(days=1),
+            "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
             "role_id": user_role_id,
             "is_active": True,
             "is_verified": is_verified,
@@ -128,14 +128,14 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
         if argon2.verify(user.password, db_user.password) is False:
             raise HTTPException(status_code=401, detail="Incorrect username or password")
 
-        token_valid_to = datetime.utcnow() + timedelta(days=1)
+        token_valid_to = datetime.now(timezone.utc) + timedelta(days=1)
         if user.permanent is True:
-            token_valid_to = datetime.utcnow() + timedelta(days=30)
+            token_valid_to = datetime.now(timezone.utc) + timedelta(days=30)
 
         update_package = {
             "auth_token": secrets.token_hex(64),  # token,
             "auth_token_valid_to": token_valid_to,
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         db_user = crud_auth.update_tenant_user(db, db_user, update_package)

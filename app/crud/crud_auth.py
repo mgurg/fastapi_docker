@@ -1,6 +1,6 @@
 import random
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from langcodes import standardize_tag
@@ -26,7 +26,7 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
         select(PublicUser)
         .where(PublicUser.service_token == token)
         .where(PublicUser.is_active == False)
-        .where(PublicUser.service_token_valid_to > datetime.utcnow())
+        .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
     ).scalar_one_or_none()
 
 
@@ -57,13 +57,13 @@ def create_public_user(db: Session, user: UserRegisterIn) -> PublicUser:
         email=user.email.strip(),
         password=argon2.hash(user.password),
         service_token=secrets.token_hex(32),
-        service_token_valid_to=datetime.utcnow() + timedelta(days=1),
+        service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
         is_active=False,
         is_verified=False,
         tos=user.tos,
         tz=user.tz,
         lang=standardize_tag(user.lang),
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
     )
 
     db.add(new_user)
@@ -86,7 +86,7 @@ def create_public_company(db: Session, company: PubliCompanyAdd) -> PublicCompan
         city=company["city"],
         tenant_id=generate_tenant_id(company["short_name"], uuid),
         qr_id=generate_qr_id(db, company["nip"]),
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
     )
 
     db.add(new_company)
@@ -130,7 +130,7 @@ def create_tenant_user(db: Session, tenant_data) -> User:
             email=tenant_data["email"],
             password=tenant_data["password"],
             # service_token=secrets.token_hex(32),
-            # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
+            # service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
             auth_token=tenant_data["auth_token"],
             auth_token_valid_to=tenant_data["auth_token_valid_to"],
             user_role_id=tenant_data["role_id"],
@@ -140,7 +140,7 @@ def create_tenant_user(db: Session, tenant_data) -> User:
             tz=tenant_data["tz"],
             tenant_id=tenant_data["tenant_id"],
             lang=standardize_tag(tenant_data["lang"]),
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
 
         db.add(new_user)
@@ -157,7 +157,7 @@ def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
             select(User)
             .where(User.auth_token == token)
             .where(User.is_active == True)
-            .where(User.auth_token_valid_to > datetime.utcnow())
+            .where(User.auth_token_valid_to > datetime.now(timezone.utc))
         ).scalar_one_or_none()
         return db_tenant_user
     except Exception as e:
