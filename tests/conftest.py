@@ -63,7 +63,7 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 # DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 # URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
-load_dotenv(Path(__file__).parent.parent / "fastapi_docker" / "app" / ".env")
+# load_dotenv(Path(__file__).parent.parent / "fastapi_docker" / "app" / ".env")
 logger.debug(Path(__file__).parent.parent)
 settings = Settings(
     DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
@@ -84,11 +84,12 @@ URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD
 @pytest.fixture(scope="module", autouse=True)
 def my_fixture():
     # app.dependency_overrides[get_settings] = get_settings_override
-
+    logger.info("\n\n DB: " + os.getenv("DB_DATABASE"))
     os.environ["TESTING"] = "1"
     # URL = Settings.TEST_SQLALCHEMY_DATABASE_URI
     logger.info(Path(__file__).parent.parent)
     p = Path(__file__).parent.parent / "fastapi_docker" / "app" / ".env"
+
     if p.is_file():
         logger.info("\n ENV found \n")
     logger.info("INITIALIZATION " + URL)
