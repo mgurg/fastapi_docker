@@ -34,4 +34,4 @@ jobs:
     - name: Test with pytest
       run: |
         # calling via python will also add the current directory to sys.path
-        if [ -d tests ] || [ -d test ]; then python -m pytest; fi
+        if [ -d tests ] || [ -d test ]; then python -m pytest -s; fi

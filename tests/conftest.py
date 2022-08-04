@@ -63,9 +63,8 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 # DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 # URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
-load_dotenv("/home/runner/work/fastapi_docker/fastapi_docker/app/.env")
+load_dotenv(Path(__file__).parent.parent / "app" / ".env")
 logger.debug(Path(__file__).parent.parent)
-print("RAWPATH: " + str(Path(__file__).parent.parent))
 settings = Settings(
     DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
     DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
@@ -88,6 +87,10 @@ def my_fixture():
 
     os.environ["TESTING"] = "1"
     # URL = Settings.TEST_SQLALCHEMY_DATABASE_URI
+    logger.info(Path(__file__).parent.parent)
+    p = Path(__file__).parent.parent / "app" / ".env"
+    if p.is_file():
+        logger.info("\n ENV found \n")
     logger.info("INITIALIZATION " + URL)
     alembic_upgrade_head("a", "head", URL)
     yield
