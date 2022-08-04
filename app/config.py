@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     DEFAULT_DATABASE_USER: str = os.getenv("DB_USERNAME")
     DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 
-    DEFAULT_SQLALCHEMY_DATABASE_URI: str = ""
+    DEFAULT_SQLALCHEMY_DATABASE_URI: str = os.getenv("DEFAULT_SQLALCHEMY_DATABASE_URI")
 
     # POSTGRESQL TEST DATABASE
     TEST_DATABASE_HOSTNAME: str = "postgres"
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     TEST_DATABASE_PORT: str = "5432"
     TEST_DATABASE_DB: str = "postgres"
     # TEST_SQLALCHEMY_DATABASE_URI: str = ""
-    TEST_SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_TEST_URL")
+    TEST_SQLALCHEMY_DATABASE_URI: str = os.getenv("TEST_SQLALCHEMY_DATABASE_URI")
 
     class Config:
         env_prefix = ""

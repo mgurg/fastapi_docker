@@ -5,6 +5,7 @@ from typing import Optional
 import sqlalchemy as sa
 from dotenv import load_dotenv
 from fastapi import Depends, Request
+from pydantic import PostgresDsn
 from sqlalchemy import create_engine, select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -19,18 +20,23 @@ DEFAULT_DATABASE_PASSWORD = settings.DEFAULT_DATABASE_PASSWORD
 DEFAULT_DATABASE_HOSTNAME = settings.DEFAULT_DATABASE_HOSTNAME
 DEFAULT_DATABASE_PORT = settings.DEFAULT_DATABASE_PORT
 DEFAULT_DATABASE_DB = settings.DEFAULT_DATABASE_DB
+# SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 
-load_dotenv("./app/.env")
-DEFAULT_DATABASE_HOSTNAME: str = os.getenv("DB_HOST")
-DEFAULT_DATABASE_PORT: str = os.getenv("DB_PORT")
-DEFAULT_DATABASE_DB: str = os.getenv("DB_DATABASE")
-DEFAULT_DATABASE_USER: str = os.getenv("DB_USERNAME")
-DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
+
+# SQLALCHEMY_DATABASE_URL = PostgresDsn.build(
+#     scheme="postgresql",
+#     user=settings.DEFAULT_DATABASE_USER,
+#     password=settings.DEFAULT_DATABASE_PASSWORD,
+#     host=settings.DEFAULT_DATABASE_HOSTNAME,
+#     port=5432,
+#     path=settings.DEFAULT_DATABASE_DB,
+# )
 
 # SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
 
+# print(SQLALCHEMY_DATABASE_URL)
 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)

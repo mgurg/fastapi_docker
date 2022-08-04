@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import sentry_sdk
+import uvicorn
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -143,8 +144,8 @@ def upgrade_head_all(*, shared_db: Session = Depends(get_public_db)):
     return {"ok": True}
 
 
-# if __name__ == "__main__":
-#     if settings.ENV == "production":
-#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-#     else:
-#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+if __name__ == "__main__":
+    if settings.ENV == "production":
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+    else:
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
