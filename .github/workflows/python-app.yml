@@ -35,3 +35,6 @@ jobs:
       run: |
         # calling via python will also add the current directory to sys.path
         if [ -d tests ] || [ -d test ]; then python -m pytest -s; fi
+      env:
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_DATABASE : ${{ secrets.DB_DATABASE }}
