@@ -3,6 +3,7 @@
 import argparse
 import os
 import warnings
+from pathlib import Path
 
 # from starlette.testclient import TestClient
 import alembic
@@ -27,18 +28,17 @@ from app.main import app
 from app.service.bearer_auth import has_token
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
-
-def get_settings_override():
-    load_dotenv("./app/.env")
-    settings = Settings(
-        DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
-        DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
-        DEFAULT_DATABASE_DB=os.getenv("DB_DATABASE"),
-        DEFAULT_DATABASE_USER=os.getenv("DB_USERNAME"),
-        DEFAULT_DATABASE_PASSWORD=os.getenv("DB_PASSWORD"),
-    )
-    return settings
-    # return Settings(testing=1, TEST_SQLALCHEMY_DATABASE_URI='os.environ.get("TEST_SQLALCHEMY_DATABASE_URI")')
+# def get_settings_override():
+#     load_dotenv("./app/.env")
+#     settings = Settings(
+#         DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
+#         DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
+#         DEFAULT_DATABASE_DB=os.getenv("DB_DATABASE"),
+#         DEFAULT_DATABASE_USER=os.getenv("DB_USERNAME"),
+#         DEFAULT_DATABASE_PASSWORD=os.getenv("DB_PASSWORD"),
+#     )
+#     return settings
+# return Settings(testing=1, TEST_SQLALCHEMY_DATABASE_URI='os.environ.get("TEST_SQLALCHEMY_DATABASE_URI")')
 
 
 # logger.info(Settings.TEST_SQLALCHEMY_DATABASE_URI)
@@ -62,9 +62,10 @@ def get_settings_override():
 # DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 # URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
-load_dotenv("/src/app/.env")
+load_dotenv("./app/.env")
+logger.debug(Path(__file__).parent.parent)
 settings = Settings(
-    DEFAULT_DATABASE_HOSTNAME="localhost",  # os.getenv("DB_HOST"),
+    DEFAULT_DATABASE_HOSTNAME=os.getenv("DB_HOST"),
     DEFAULT_DATABASE_PORT=os.getenv("DB_PORT"),
     DEFAULT_DATABASE_DB=os.getenv("DB_DATABASE"),
     DEFAULT_DATABASE_USER=os.getenv("DB_USERNAME"),
