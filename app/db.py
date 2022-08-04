@@ -26,6 +26,8 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
+# print(SQLALCHEMY_DATABASE_URL)
+
 
 class TenantNotFoundError(Exception):
     def __init__(self, id):

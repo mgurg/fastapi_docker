@@ -17,13 +17,16 @@ settings = get_settings()
 
 
 @timer
-def alembic_upgrade_head(tenant_name, revision="head"):
+def alembic_upgrade_head(tenant_name, revision="head", url=None):
     # set the paths values
+
+    if url is None:
+        url = SQLALCHEMY_DATABASE_URL
     try:
         # create Alembic config and feed it with paths
         config = Config(str(settings.PROJECT_DIR / "alembic.ini"))
         config.set_main_option("script_location", str(settings.PROJECT_DIR / "migrations"))  # replace("%", "%%")
-        config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+        config.set_main_option("sqlalchemy.url", url)
         config.cmd_opts = argparse.Namespace()  # arguments stub
 
         # If it is required to pass -x parameters to alembic

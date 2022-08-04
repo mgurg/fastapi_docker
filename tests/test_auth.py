@@ -12,6 +12,6 @@ def test_register(session: Session, client: TestClient):
     #     "tz": "Europe/Warsaw",
     #     "lang": "pl",
     # }
-    # response = client.post("/auth/register", json=data, headers={"host": "public"})
+    # response = client.post("/auth/register", json=data, headers={"tenant": "public"})
     # data = response.json()
     # assert response.status_code == 200
