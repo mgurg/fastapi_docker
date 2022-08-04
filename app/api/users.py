@@ -90,15 +90,15 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
     return {"ok": True}
 
 
-# @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-# def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+@user_router.delete("/{user_uuid}", response_model=StandardResponse)
+def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
 
-#     db_user = crud_users.get_user_by_uuid(db, user_uuid)
+    db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
-#     if not db_user:
-#         raise HTTPException(status_code=404, detail="User not found")
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-#     db.delete(db_user)
-#     db.commit()
+    db.delete(db_user)
+    db.commit()
 
-#     return {"ok": True}
+    return {"ok": True}

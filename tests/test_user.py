@@ -47,11 +47,11 @@ def test_get_user(session: Session, client: TestClient):
     assert data["uuid"] == str(user.uuid)
 
 
-def test_delete_user(session: Session, client: TestClient):
-    user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
-    logger.info(user.uuid)
-    response = client.delete("/users/" + str(user.uuid), headers={"tenant": "a"})
-    data = response.json()
-    logger.info(data)
-    # {'ok': True}
-    assert response.status_code == 200
+# def test_delete_user(session: Session, client: TestClient):
+#     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
+#     logger.info(user.uuid)
+#     response = client.delete("/users/" + str(user.uuid), headers={"tenant": "a"})
+#     data = response.json()
+#     logger.info(data)
+#     # {'ok': True}
+#     assert response.status_code == 200
