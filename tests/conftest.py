@@ -67,9 +67,8 @@ URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD
 @pytest.fixture(scope="module", autouse=True)
 def my_fixture():
     # app.dependency_overrides[get_settings] = get_settings_override
-    logger.info("\n\n DB: " + os.getenv("DB_DATABASE"))
     os.environ["TESTING"] = "1"
-    logger.info("INITIALIZATION " + URL)
+    logger.info("INITIALIZATION ")
     alembic_upgrade_head("a", "head", URL)
     yield
     logger.critical("TEAR DOWN")
