@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import Optional
 
 import sqlalchemy as sa
+from dotenv import load_dotenv
 from fastapi import Depends, Request
 from sqlalchemy import create_engine, select
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,6 +20,7 @@ DEFAULT_DATABASE_HOSTNAME = settings.DEFAULT_DATABASE_HOSTNAME
 DEFAULT_DATABASE_PORT = settings.DEFAULT_DATABASE_PORT
 DEFAULT_DATABASE_DB = settings.DEFAULT_DATABASE_DB
 
+load_dotenv("./app/.env")
 DEFAULT_DATABASE_HOSTNAME: str = os.getenv("DB_HOST")
 DEFAULT_DATABASE_PORT: str = os.getenv("DB_PORT")
 DEFAULT_DATABASE_DB: str = os.getenv("DB_DATABASE")

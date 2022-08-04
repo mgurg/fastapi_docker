@@ -40,7 +40,7 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 #     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
-load_dotenv("/src/app/.env")
+load_dotenv("./app/.env")
 os.environ["ENVIRONMENT"] = "PYTEST"
 
 DEFAULT_DATABASE_HOSTNAME: str = os.getenv("DB_HOST")
