@@ -37,7 +37,7 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
             tenant_id, date = message.split(".")  # TODO: tenant_id & date check
 
             # db_account = session.execute(select(Account).where(Account.company_id == company)).one_or_none()
-            return {"user": 0}
+            return {"user_id": 0}
         except Exception as e:
             print("error" + e)
 
