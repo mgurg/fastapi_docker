@@ -5,6 +5,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
@@ -109,11 +110,12 @@ def remove_bucket(*, db: Session = Depends(get_db), request: Request, file_uuid:
     if not db_file:
         raise HTTPException(status_code=404, detail="File not found")
 
-    s3_folder_path = "".join([str(request.headers.get("tenant", "None")), "/", file_uuid, "_", db_file.file_name])
+    s3_folder_path = "".join([str(request.headers.get("tenant", "None")), "/", str(file_uuid), "_", db_file.file_name])
 
     try:
         s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()
     except Exception as e:
+        capture_exception(e)
         print(e)
 
     db.delete(db_file)
