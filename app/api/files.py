@@ -14,7 +14,7 @@ from app.db import get_db
 from app.schemas.responses import FileResponse, StandardResponse
 
 # from app.models.models import FileResponse, Files, FileUrlResponse, StandardResponse
-from app.service.aws_s3 import s3_resource
+from app.service.aws_s3 import generate_presigned_url, s3_resource
 from app.service.bearer_auth import has_token
 
 settings = get_settings()
@@ -138,3 +138,10 @@ def file_download(*, db: Session = Depends(get_db), request: Request, file_uuid:
         print(e)
 
     return StreamingResponse(f, media_type=db_file.mimetype, headers=header)
+
+
+@file_router.get("/download/", name="file:Download")
+def file_download(tenant, file):
+
+    url = generate_presigned_url(tenant, file)
+    return url

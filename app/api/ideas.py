@@ -3,8 +3,9 @@ import re
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
+from sentry_sdk import capture_exception
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -14,6 +15,7 @@ from app.models.models import Idea
 from app.schemas.requests import IdeaAddIn, IdeasVotesIn
 from app.schemas.responses import StandardResponse
 from app.schemas.schemas import IdeaIndexResponse
+from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
 idea_router = APIRouter()
@@ -50,11 +52,20 @@ def ideas_get_all(
 
 
 @idea_router.get("/{idea_uuid}", response_model=IdeaIndexResponse, name="ideas:Item")
-def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, auth=Depends(has_token)):
+def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, request: Request, auth=Depends(has_token)):
 
     idea = crud_ideas.get_idea_by_uuid(db, idea_uuid)
     if not idea:
         raise HTTPException(status_code=404, detail="Idea not found")
+
+    try:
+        for picture in idea.pictures:
+            picture.url = generate_presigned_url(
+                request.headers.get("tenant", "public"),
+                "_".join([str(picture.uuid), picture.file_name]),
+            )
+    except Exception as e:
+        capture_exception(e)
 
     return idea
 

@@ -177,7 +177,7 @@ def sign_s3_upload(objectName: str):
 
 
 @s3_router.get("/download_signed_url")
-def sign_s3_download(file: str):
+def sign_s3_download(tenant: str, file: str) -> str:
 
     url = s3_client.generate_presigned_url(
         ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": f"folder/{file}"}, ExpiresIn=3600

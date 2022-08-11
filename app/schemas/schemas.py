@@ -124,6 +124,7 @@ class FileBasicInfo(BaseModel):
     extension: str
     mimetype: str
     size: int
+    url: str | None
 
     class Config:
         orm_mode = True
