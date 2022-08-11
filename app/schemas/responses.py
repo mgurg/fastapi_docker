@@ -46,3 +46,4 @@ class FileResponse(BaseResponse):
     extension: str
     mimetype: str
     size: int
+    url: str | None

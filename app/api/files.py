@@ -93,6 +93,11 @@ def file_add(
     }
 
     new_file = crud_files.create_file(db, file_data)
+
+    new_file.url = generate_presigned_url(
+        request.headers.get("tenant", "public"),
+        "_".join([str(file_uuid), file.filename]),
+    )
     return new_file
 
 
