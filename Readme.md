@@ -12,9 +12,37 @@ Main differences: Alembic behavior. All tables are created using migrations. Eac
    - Manual run: `alembic -x tenant=a upgrade head`
 
 ### Load test
-```
+```bash
 siege --concurrent=20 --reps=5 --header="tenant:v2_6c0ad5866ea249d78abd861625eca82a" http://url.com/
 ```
+
+```bash
+ab -k -c 100 -n 5000 -H "tenant:polski_koncern_naftowy_orlen_fc26bff5f7b540d9b8d6bc68382e97a0" -H "Authorization:Bearer 24cd13a1bbf07d0cab6dcfd93ca9a1e04a339c880db21eeeeae108d6b0555cf5460ff0fa4818a41b5f125ec00e924b61c6d64f2de18c95114962120f581e7960" -v 1 https://api.url.pl/users/
+```
+
+
+
+Wyniki:
+
+`Uvicorn, Debug`
+
+```
+	"transactions":			         200,
+	"availability":			      100.00,
+	"elapsed_time":			        1.87,
+	"data_transferred":		        0.00,
+	"response_time":		        0.17,
+	"transaction_rate":		      106.95,
+	"throughput":			        0.00,
+	"concurrency":			       17.71,
+	"successful_transactions":	         100,
+	"failed_transactions":		           0,
+	"longest_transaction":		        0.37,
+	"shortest_transaction":		        0.06
+
+```
+
+
 
 ### Alembic
 
