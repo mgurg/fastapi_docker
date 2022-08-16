@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from functools import lru_cache
 from typing import Optional
 
 import sqlalchemy as sa
@@ -47,6 +48,7 @@ class TenantNotFoundError(Exception):
         super().__init__(self.message)
 
 
+@lru_cache()
 def get_tenant(request: Request) -> PublicCompany:
     try:
         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
