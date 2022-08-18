@@ -13,6 +13,11 @@ class StandardResponse(BaseResponse):
     ok: bool
 
 
+class PublicCompanyCounterResponse(BaseResponse):
+    accounts: int
+    limit: int
+
+
 class RoleBasic(BaseModel):
     role_name: str
 

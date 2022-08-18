@@ -9,19 +9,30 @@ class BaseRequest(BaseModel):
     pass
 
 
+class CompanyInfoRegisterIn(BaseRequest):
+    country: str | None = "pl"
+    company_national_id: str | None = "9542752600"
+
+
 class UserRegisterIn(BaseRequest):
+    first_name: str
+    last_name: str
     email: EmailStr
     password: str
     password_confirmation: str
+    country: str | None = "pl"
+    company_national_id: str | None = "9542752600"
+    company_name: str
+    company_street: str
+    company_city: str
+    company_postcode: str
+    company_info_changed: bool
     tos: bool
     tz: str | None = "Europe/Warsaw"
     lang: str | None = "pl"
 
 
 class UserFirstRunIn(BaseRequest):
-    first_name: str
-    last_name: str
-    nip: str = "1234563218"
     token: str
 
 

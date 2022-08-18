@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from pydantic import EmailStr
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.models import User
@@ -17,6 +17,10 @@ def get_user_by_uuid(db: Session, uuid: UUID) -> User:
 
 def get_user_by_email(db: Session, email: EmailStr) -> User:
     return db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+
+
+def get_user_count(db: Session) -> int:
+    return db.execute(select([func.count(User.id)])).scalar_one_or_none()
 
 
 def create_user(db: Session, data: dict) -> User:

@@ -1,24 +1,56 @@
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from langcodes import standardize_tag
 from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
+from unidecode import unidecode
 
 from app.crud import crud_auth, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import UserFirstRunIn, UserLoginIn, UserRegisterIn
-from app.schemas.responses import StandardResponse  # UserLoginOut
+from app.schemas.requests import (
+    CompanyInfoRegisterIn,
+    UserFirstRunIn,
+    UserLoginIn,
+    UserRegisterIn,
+)
+from app.schemas.responses import (  # UserLoginOut
+    PublicCompanyCounterResponse,
+    StandardResponse,
+)
 from app.schemas.schemas import UserLoginOut
 from app.service import auth
-from app.service.api_regon import get_company_details
+from app.service.company_details import CompanyDetails
 from app.service.password import Password
+from app.service.scheduler import scheduler
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
 auth_router = APIRouter()
+
+
+@auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
+def auth_account_limit(*, shared_db: Session = Depends(get_public_db)):
+
+    db_companies_no = crud_auth.get_public_company_count(shared_db)
+    limit = 10
+
+    return {"accounts": db_companies_no, "limit": limit}
+
+
+def myfunc(text: str):
+    print("JOB_AUTH" + text)
+
+
+@auth_router.post("/company_info")
+def auth_company_info(company: CompanyInfoRegisterIn):
+    company = CompanyDetails(country=company.country, id=company.company_national_id)
+    return company.get_company_details()  # VIES -> GUS -> Rejestr.io
 
 
 @auth_router.post("/register", response_model=StandardResponse)
@@ -39,7 +71,68 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
     if auth.is_timezone_correct is False:
         raise HTTPException(status_code=400, detail="Invalid timezone")
 
+    db_company = crud_auth.get_public_company_by_nip(shared_db, user.company_national_id)
+
+    if not db_company:
+        uuid = str(uuid4())
+        company = re.sub("[^A-Za-z0-9 _]", "", unidecode(user.company_name))
+        tenant_id = "".join([company[:28], "_", uuid.replace("-", "")]).lower().replace(" ", "_")
+
+        company_data = {
+            "uuid": uuid,
+            "name": user.company_name,
+            "short_name": user.company_name,
+            "nip": user.company_national_id,
+            "country": "pl",
+            "city": user.company_city,
+            "tenant_id": tenant_id,
+            "qr_id": crud_auth.generate_qr_id(shared_db),
+            "created_at": datetime.now(timezone.utc),
+        }
+
+        db_company = crud_auth.create_public_company(shared_db, company_data)
+
+    else:
+        tenant_id = db_company.tenant_id
+
+    service_token = secrets.token_hex(32)
+
+    user = {
+        "uuid": str(uuid4()),
+        "email": user.email.strip(),
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "password": argon2.hash(user.password),
+        "service_token": service_token,
+        "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+        "is_active": False,
+        "is_verified": False,
+        "tos": user.tos,
+        "tenant_id": tenant_id,
+        "tz": user.tz,
+        "lang": standardize_tag(user.lang),
+        "created_at": datetime.now(timezone.utc),
+    }
     crud_auth.create_public_user(shared_db, user)
+
+    scheduler.add_job(tenant_create, args=[db_company.tenant_id])
+    scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
+
+    # tenant_create(db_company.tenant_id)
+    # alembic_upgrade_head(db_company.tenant_id)
+
+    # Notification {"mode": settings.environment}
+    # email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)
+    # receiver = res.email.strip()
+
+    # template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
+    #     "product_name": "Intio",
+    #     "login_url": "https://beta.remontmaszyn.pl/login",
+    #     "username": receiver,
+    #     "sender_name": "Michał",
+    #     "action_url": "https://beta.remontmaszyn.pl/activate/" + confirmation_token,
+    # }
+    # email.send(settings.email_sender, receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
 
     return {"ok": True}
 
@@ -48,53 +141,38 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
 def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
     """Activate user based on service token"""
 
-    if auth.is_nip_correct(user.nip):  # 123-456-32-18 - CompanyID number
-        raise HTTPException(status_code=400, detail="Invalid NIP number")
-
-    db_user: PublicUser = crud_auth.get_public_user_by_service_token(shared_db, user.token)
-    if not db_user:
+    db_public_user: PublicUser = crud_auth.get_public_user_by_service_token(shared_db, user.token)
+    if not db_public_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    db_company = crud_auth.get_public_company_by_nip(shared_db, user.nip)
-    user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
-    is_verified = False
-
-    if not db_company:
-        company_data = get_company_details(user.nip)
-
-        db_company = crud_auth.create_public_company(shared_db, company_data)
-
-        tenant_create(db_company.tenant_id)
-        alembic_upgrade_head(db_company.tenant_id)
-        user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
-        is_verified = True
-
-    update_db_user = {
-        "tenant_id": db_company.tenant_id,
-        "updated_at": datetime.now(timezone.utc),
-    }
-
-    crud_auth.update_public_user(shared_db, db_user, update_db_user)
-    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
+    connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
 
-        tenant_data = {
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": db_user.email,
-            "password": db_user.password,
+        db_user_cnt = crud_users.get_user_count(db)
+        user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+        is_verified = False
+
+        if db_user_cnt == 0:
+            user_role_id = 1
+            is_verified = True
+
+        user_data = {
+            "first_name": db_public_user.first_name,
+            "last_name": db_public_user.last_name,
+            "email": db_public_user.email,
+            "password": db_public_user.password,
             "auth_token": secrets.token_hex(32),
             "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
             "role_id": user_role_id,
             "is_active": True,
             "is_verified": is_verified,
-            "tos": db_user.tos,
-            "lang": db_user.lang,
-            "tz": db_user.tz,
-            "tenant_id": db_company.tenant_id,
+            "tos": db_public_user.tos,
+            "lang": db_public_user.lang,
+            "tz": db_public_user.tz,
+            "tenant_id": db_public_user.tenant_id,
         }
 
-        db_tennat_user = crud_auth.create_tenant_user(db, tenant_data)
+        db_tennat_user = crud_auth.create_tenant_user(db, user_data)
 
     return {
         "ok": True,

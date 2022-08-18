@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import sentry_sdk
 import uvicorn
-from easy_profile import SessionProfiler, StreamReporter
+from easy_profile import SessionProfiler
 from easy_profile.reporters import StreamReporter
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,24 +56,21 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-if settings.ENVIRONMENT != "local":
+if settings.ENVIRONMENT == "PRD":
     app.add_middleware(SentryAsgiMiddleware)
 
+if settings.ENVIRONMENT != "PRD":
 
-@app.middleware("http")
-async def add_sql_tap(request: Request, call_next):
+    @app.middleware("http")
+    async def add_sql_tap(request: Request, call_next):
+        profiler = SessionProfiler()
+        profiler.begin()
 
-    profiler = SessionProfiler()
-
-    profiler.begin()
-
-    response = await call_next(request)
-    profiler.commit()
-
-    reporter = StreamReporter().report(f"{request.method} {request.url}", profiler.stats)
-    print(reporter)
-
-    return response
+        response = await call_next(request)
+        profiler.commit()
+        reporter = StreamReporter().report(f"{request.method} {request.url}", profiler.stats)
+        print(reporter)
+        return response
 
 
 @app.on_event("startup")

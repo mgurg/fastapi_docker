@@ -1,18 +1,13 @@
 import random
-import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from langcodes import standardize_tag
-from passlib.hash import argon2
-from sqlalchemy import distinct, select
+from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
 from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
-from app.schemas.requests import UserRegisterIn
-from app.schemas.schemas import PubliCompanyAdd
-from app.service.tenants import generate_tenant_id
 from app.utils.decorators import timer
 
 
@@ -30,6 +25,10 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
     ).scalar_one_or_none()
 
 
+def get_public_company_count(db: Session) -> int:
+    return db.execute(select([func.count(PublicCompany.id)])).scalar_one_or_none()
+
+
 def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
     return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
 
@@ -42,7 +41,7 @@ def get_schemas_from_public_company(db: Session):
     return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
 
 
-def generate_qr_id(db: Session, nip: str):
+def generate_qr_id(db: Session):
     allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
     company_ids = db.execute(select(PublicCompany.qr_id)).scalars().all()
     proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
@@ -51,47 +50,56 @@ def generate_qr_id(db: Session, nip: str):
     return proposed_id
 
 
-def create_public_user(db: Session, user: UserRegisterIn) -> PublicUser:
-    new_user = PublicUser(
-        uuid=str(uuid4()),
-        email=user.email.strip(),
-        password=argon2.hash(user.password),
-        service_token=secrets.token_hex(32),
-        service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
-        is_active=False,
-        is_verified=False,
-        tos=user.tos,
-        tz=user.tz,
-        lang=standardize_tag(user.lang),
-        created_at=datetime.now(timezone.utc),
-    )
-
+def create_public_user(db: Session, public_user: dict) -> PublicUser:
+    new_user = PublicUser(**public_user)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    # new_user = PublicUser(
+    #     uuid=str(uuid4()),
+    #     email=user.email.strip(),
+    #     password=argon2.hash(user.password),
+    #     service_token=secrets.token_hex(32),
+    #     service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
+    #     is_active=False,
+    #     is_verified=False,
+    #     tos=user.tos,
+    #     tz=user.tz,
+    #     lang=standardize_tag(user.lang),
+    #     created_at=datetime.now(timezone.utc),
+    # )
+
+    # db.add(new_user)
+    # db.commit()
+    # db.refresh(new_user)
 
     return new_user
 
 
-def create_public_company(db: Session, company: PubliCompanyAdd) -> PublicCompany:
+def create_public_company(db: Session, company: dict) -> PublicCompany:
 
-    uuid = str(uuid4())
-
-    new_company = PublicCompany(
-        uuid=uuid,
-        name=company["name"],
-        short_name=company["short_name"],
-        nip=company["nip"],
-        country=company["country"],
-        city=company["city"],
-        tenant_id=generate_tenant_id(company["short_name"], uuid),
-        qr_id=generate_qr_id(db, company["nip"]),
-        created_at=datetime.now(timezone.utc),
-    )
-
+    new_company = PublicCompany(**company)
     db.add(new_company)
     db.commit()
     db.refresh(new_company)
+
+    # uuid = str(uuid4())
+
+    # new_company = PublicCompany(
+    #     uuid=uuid,
+    #     name=company["name"],
+    #     short_name=company["short_name"],
+    #     nip=company["nip"],
+    #     country=company["country"],
+    #     city=company["city"],
+    #     tenant_id=generate_tenant_id(company["short_name"], uuid),
+    #     qr_id=generate_qr_id(db, company["nip"]),
+    #     created_at=datetime.now(timezone.utc),
+    # )
+
+    # db.add(new_company)
+    # db.commit()
+    # db.refresh(new_company)
 
     return new_company
 

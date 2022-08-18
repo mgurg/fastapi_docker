@@ -55,6 +55,8 @@ def alembic_upgrade_head(tenant_name, revision="head", url=None):
         print(e)
         print(traceback.format_exc())
 
+    print("alembic_upgrade_head")
+
 
 @timer
 def tenant_create(schema: str) -> None:
@@ -65,6 +67,7 @@ def tenant_create(schema: str) -> None:
     except Exception as e:
         capture_exception(e)
         print(e)
+    print("tenant_create")
 
 
 def generate_tenant_id(name: str, uuid: UUID) -> str:
