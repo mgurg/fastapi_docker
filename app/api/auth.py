@@ -49,8 +49,11 @@ def myfunc(text: str):
 
 @auth_router.post("/company_info")
 def auth_company_info(company: CompanyInfoRegisterIn):
-    company = CompanyDetails(country=company.country, id=company.company_national_id)
-    return company.get_company_details()  # VIES -> GUS -> Rejestr.io
+    company = CompanyDetails(country=company.country, id=company.company_tax_id)
+    company_details = company.get_company_details()  # VIES -> GUS -> Rejestr.io
+    if company_details is None:
+        raise HTTPException(status_code=400, detail="Information not found")
+    return company_details
 
 
 @auth_router.post("/register", response_model=StandardResponse)
@@ -71,7 +74,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
     if auth.is_timezone_correct is False:
         raise HTTPException(status_code=400, detail="Invalid timezone")
 
-    db_company = crud_auth.get_public_company_by_nip(shared_db, user.company_national_id)
+    db_company = crud_auth.get_public_company_by_nip(shared_db, user.company_tax_id)
 
     if not db_company:
         uuid = str(uuid4())
@@ -82,7 +85,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
             "uuid": uuid,
             "name": user.company_name,
             "short_name": user.company_name,
-            "nip": user.company_national_id,
+            "nip": user.company_tax_id,
             "country": "pl",
             "city": user.company_city,
             "tenant_id": tenant_id,

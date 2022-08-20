@@ -22,7 +22,12 @@ class CompanyDetails:
         self.vat_eu = "".join([self.country, self.id.upper()])
 
     def get_company_details(self):
-        return self.vies()
+        try:
+            data = self.vies()
+        except Exception as e:
+            print(e)
+            return None
+        return data
 
     def vies(self):
         try:
@@ -31,17 +36,24 @@ class CompanyDetails:
 
         except api.ViesValidationError as e:
             print(e)
+            return None
         except api.ViesHTTPError as e:
             print(e)
+            return None
         except api.ViesError as e:
             print(e)
+            return None
 
-        name = {
-            "name": capwords(result["traderName"], sep=None),
-            "short_name": self.get_company_short_name(company_name=result["traderName"]),
-        }
+        try:
+            name = {
+                "name": capwords(result["traderName"], sep=None),
+                "short_name": self.get_company_short_name(company_name=result["traderName"]),
+            }
 
-        addres = self.get_vies_parsed_address(address=result["traderAddress"])
+            addres = self.get_vies_parsed_address(address=result["traderAddress"])
+        except Exception as e:
+            print(e)
+            return None
         return name | addres
 
     def gus(self):

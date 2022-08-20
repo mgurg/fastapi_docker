@@ -11,7 +11,7 @@ class BaseRequest(BaseModel):
 
 class CompanyInfoRegisterIn(BaseRequest):
     country: str | None = "pl"
-    company_national_id: str | None = "9542752600"
+    company_tax_id: str | None = "9542752600"
 
 
 class UserRegisterIn(BaseRequest):
@@ -21,7 +21,7 @@ class UserRegisterIn(BaseRequest):
     password: str
     password_confirmation: str
     country: str | None = "pl"
-    company_national_id: str | None = "9542752600"
+    company_tax_id: str | None = "9542752600"
     company_name: str
     company_street: str
     company_city: str
