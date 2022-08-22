@@ -8,9 +8,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sentry_sdk.integrations.starlette import StarletteIntegration
 from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
@@ -25,9 +23,7 @@ from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
 settings = get_settings()
-sentry_sdk.init(
-    dsn=settings.sentry_dsn, integrations=[StarletteIntegration(), FastApiIntegration(), SqlalchemyIntegration()]
-)
+sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
