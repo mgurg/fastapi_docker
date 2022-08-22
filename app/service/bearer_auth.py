@@ -17,6 +17,8 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     """
     Function that is used to validate the token in the case that it requires it
     """
+    if db is None:
+        raise HTTPException(status_code=500, detail="General Error")
 
     token = credentials.credentials
     if token is None:

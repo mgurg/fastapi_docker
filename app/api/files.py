@@ -25,6 +25,8 @@ file_router = APIRouter()
 
 @file_router.get("/", response_model=List[FileResponse])
 def file_get_info_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+    if db is None:
+        raise HTTPException(status_code=500, detail="General Error")
 
     # quota = session.exec(select([func.sum(Files.size)]).where(Files.account_id == 2)).one()
     # print("quota", quota)

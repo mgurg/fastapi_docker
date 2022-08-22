@@ -1,6 +1,5 @@
 from contextlib import contextmanager
 from functools import lru_cache
-from typing import Optional
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
@@ -52,8 +51,10 @@ class TenantNotFoundError(Exception):
 def get_tenant(request: Request) -> PublicCompany:
     try:
         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
+        host_without_port = request.headers.get("tenant")  # based on tenant header: abc
 
-        host_without_port = request.headers.get("tenant", "public")  # based on tenant header: abc
+        if host_without_port is None:
+            return None
 
         with with_db(None) as db:
             tenant = db.execute(
@@ -61,14 +62,17 @@ def get_tenant(request: Request) -> PublicCompany:
             ).scalar_one_or_none()
 
         if tenant is None:
-            raise TenantNotFoundError(host_without_port)
+            # raise TenantNotFoundError(host_without_port)
+            return None
     except Exception as e:
         print(e)
     return tenant
 
 
 def get_db(tenant: PublicCompany = Depends(get_tenant)):
-    # print("tenant.schema", tenant.schema)
+    if tenant is None:
+        yield None
+
     with with_db(tenant.tenant_id) as db:
         yield db
 
@@ -80,7 +84,7 @@ def get_public_db():
 
 
 @contextmanager
-def with_db(tenant_schema: Optional[str]):
+def with_db(tenant_schema: str | None):
     if tenant_schema:
         schema_translate_map = dict(tenant=tenant_schema)
     else:
@@ -90,5 +94,7 @@ def with_db(tenant_schema: Optional[str]):
     try:
         db = Session(autocommit=False, autoflush=False, bind=connectable)
         yield db
+    except Exception:
+        print("ERRRR")
     finally:
         db.close()
