@@ -23,6 +23,7 @@ from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
 settings = get_settings()
+# TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
 sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
@@ -104,7 +105,11 @@ def shutdown_event():
 
 @app.get("/", include_in_schema=False)
 def read_root(request: Request):
-    return {"Hello": "World", "tenant": request.headers.get("tenant", "public")}
+    return {
+        "Hello": "World",
+        "tenant": request.headers.get("tenant", "public"),
+        "env": settings.ENVIRONMENT,
+    }
 
 
 @app.get("/health")
