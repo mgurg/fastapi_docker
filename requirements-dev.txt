@@ -9,8 +9,8 @@ attrs==22.1.0; python_version >= "3.7"
 autoflake==1.4
 beautifulsoup4==4.7.1
 black==22.6.0; python_full_version >= "3.6.2"
-boto3==1.24.56; python_version >= "3.7"
-botocore==1.27.56; python_version >= "3.7"
+boto3==1.24.57; python_version >= "3.7"
+botocore==1.27.57; python_version >= "3.7"
 cached-property==1.5.2; python_version >= "2.7"
 certifi==2022.6.15; python_version >= "3.7" and python_version < "4"
 cffi==1.15.1; python_version >= "3.6"
@@ -25,7 +25,7 @@ dnspython==2.2.1; python_version >= "3.6" and python_version < "4.0" and (python
 email-validator==1.2.1; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
 faker==13.16.0; python_version >= "3.6"
 fastapi-pagination==0.9.3; python_version >= "3.7" and python_version < "4.0"
-fastapi==0.79.1; python_full_version >= "3.6.1"
+fastapi==0.80.0; python_full_version >= "3.6.1"
 flake8==4.0.1; python_version >= "3.6"
 greenlet==1.1.2; python_version >= "3" and python_full_version < "3.0.0" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0") and (python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.7") and (python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.7" and python_version < "4.0" and python_full_version >= "3.6.0") or python_version >= "3" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0") and python_full_version >= "3.5.0" and (python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.7") and (python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.7" and python_version < "4.0" and python_full_version >= "3.6.0")
 gunicorn==20.1.0; python_version >= "3.5"
@@ -90,9 +90,9 @@ typer==0.6.1; python_version >= "3.6"
 typing-extensions==4.3.0; python_version >= "3.7" and python_version < "4.0" and python_full_version >= "3.6.1"
 tzdata==2022.2; python_version >= "3.6" and python_full_version < "3.0.0" and platform_system == "Windows" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.6" and platform_system == "Windows"
 tzlocal==4.2; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version < "4" and python_version >= "3.6"
-ua-parser==0.15.0
+ua-parser==0.16.0
 unidecode==1.3.4; python_version >= "3.5"
-urllib3==1.26.11; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7"
+urllib3==1.26.12; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7"
 user-agents==2.2.0
 uvicorn==0.18.2; python_version >= "3.7"
 win32-setctime==1.1.0; sys_platform == "win32" and python_version >= "3.5"
