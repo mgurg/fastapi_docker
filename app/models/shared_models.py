@@ -29,6 +29,8 @@ class PublicUser(Base):
     __tablename__ = "public_users"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    first_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    last_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     password = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     service_token = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True, unique=True)
