@@ -60,19 +60,17 @@ app = create_application()
 if settings.ENVIRONMENT == "PRD":
     app.add_middleware(SentryAsgiMiddleware)
 
+if settings.ENVIRONMENT != "PRD":
 
-@app.middleware("http")
-async def add_sql_tap(request: Request, call_next):
-    if settings.ENVIRONMENT == "PRD":
+    @app.middleware("http")
+    async def add_sql_tap(request: Request, call_next):
+        profiler = SessionProfiler()
+        profiler.begin()
         response = await call_next(request)
-
-    profiler = SessionProfiler()
-    profiler.begin()
-    response = await call_next(request)
-    profiler.commit()
-    reporter = StreamReporter().report(f"{request.method} {request.url}", profiler.stats)
-    print(reporter)
-    return response
+        profiler.commit()
+        reporter = StreamReporter().report(f"{request.method} {request.url}", profiler.stats)
+        print(reporter)
+        return response
 
 
 @app.on_event("startup")
