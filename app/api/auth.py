@@ -22,6 +22,7 @@ from app.schemas.requests import (
     UserRegisterIn,
 )
 from app.schemas.responses import (  # UserLoginOut
+    ActivationResponse,
     PublicCompanyCounterResponse,
     StandardResponse,
 )
@@ -146,7 +147,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
     return {"ok": True}
 
 
-@auth_router.post("/first_run")
+@auth_router.post("/first_run", response_model=ActivationResponse)
 def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
     """Activate user based on service token"""
 

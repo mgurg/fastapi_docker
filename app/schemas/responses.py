@@ -13,6 +13,17 @@ class StandardResponse(BaseResponse):
     ok: bool
 
 
+class ActivationResponse(BaseResponse):
+    ok: bool
+    first_name: str
+    last_name: str
+    lang: str
+    tz: str
+    uuid: str
+    tenanat_id: str
+    token: str
+
+
 class PublicCompanyCounterResponse(BaseResponse):
     accounts: int
     limit: int
