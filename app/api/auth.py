@@ -6,6 +6,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
 from passlib.hash import argon2
+from sentry_sdk import capture_exception
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
@@ -49,8 +50,13 @@ def myfunc(text: str):
 
 @auth_router.post("/company_info")
 def auth_company_info(company: CompanyInfoRegisterIn):
-    company = CompanyDetails(country=company.country, id=company.company_tax_id)
-    company_details = company.get_company_details()  # VIES -> GUS -> Rejestr.io
+    try:
+        company = CompanyDetails(country=company.country, id=company.company_tax_id)
+        company_details = company.get_company_details()  # VIES -> GUS -> Rejestr.io
+    except Exception as e:
+        print(e)
+        capture_exception(e)
+
     if company_details is None:
         raise HTTPException(status_code=400, detail="Information not found")
     return company_details
