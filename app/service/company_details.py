@@ -76,7 +76,11 @@ class CompanyDetails:
 
         # Search by NIP
         result = api.searchData(nip=self.tax_id)
-        company_name: str = result[0].get("Nazwa", "noGusNameData")
+        company_name: str = result[0].get("Nazwa")
+
+        if company_name is None:
+            return None
+
         mapping = [
             ('"', ""),
             ("SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ", "SP. Z O. O."),

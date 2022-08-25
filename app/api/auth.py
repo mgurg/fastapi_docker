@@ -213,6 +213,12 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
+        if db_user.is_active is False:
+            raise HTTPException(status_code=403, detail="User not activated")
+
+        if db_user.is_verified is False:
+            raise HTTPException(status_code=403, detail="User not verified yet")
+
         if argon2.verify(user.password, db_user.password) is False:
             raise HTTPException(status_code=401, detail="Incorrect username or password")
 
