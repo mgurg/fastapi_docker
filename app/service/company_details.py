@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from string import capwords
 
+import requests
 from pyVies import api
 from RegonAPI import RegonAPI
 from RegonAPI.exceptions import ApiAuthenticationError
@@ -16,14 +17,20 @@ settings = get_settings()
 
 
 class CompanyDetails:
-    def __init__(self, country: str, id: str):
+    def __init__(self, country: str, tax_id: str):
         self.country = country.upper()
-        self.id = re.sub("[^A-Za-z0-9]", "", id)
-        self.vat_eu = "".join([self.country, self.id.upper()])
+        self.tax_id = re.sub("[^A-Za-z0-9]", "", tax_id)
+        self.vat_eu = "".join([self.country, self.tax_id.upper()])
 
     def get_company_details(self):
         try:
             data = self.vies()
+            if data == None:
+                data = self.gus()
+            if data == None:
+                data = self.gus()
+            if data == None:
+                data = self.rejestr_io()
         except Exception as e:
             print(e)
             return None
@@ -68,7 +75,7 @@ class CompanyDetails:
             raise
 
         # Search by NIP
-        result = api.searchData(nip=self.id)
+        result = api.searchData(nip=self.tax_id)
         company_name: str = result[0].get("Nazwa", "noGusNameData")
         mapping = [
             ('"', ""),
@@ -98,12 +105,13 @@ class CompanyDetails:
 
     def rejestr_io(self):
         headers = {"Authorization": settings.REJESTR_IO_KEY}
-        # r = requests.get(url, headers=headers)
+        url = "https://rejestr.io/api/v2/org?nip=" + self.tax_id
+        r = requests.get(url, headers=headers)
         # print(response.text)
         # if r.status_code != 200:
         #     print("error")
 
-        # request_json = r.json()
+        request_json = r.json()
         # print("")
         # print(request_json)
 

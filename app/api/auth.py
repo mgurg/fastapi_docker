@@ -52,7 +52,7 @@ def myfunc(text: str):
 @auth_router.post("/company_info")
 def auth_company_info(company: CompanyInfoRegisterIn):
     try:
-        company = CompanyDetails(country=company.country, id=company.company_tax_id)
+        company = CompanyDetails(country=company.country, tax_id=company.company_tax_id)
         company_details = company.get_company_details()  # VIES -> GUS -> Rejestr.io
     except Exception as e:
         print(e)
