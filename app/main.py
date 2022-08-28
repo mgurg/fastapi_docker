@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 import sentry_sdk
-import uvicorn
 from easy_profile import SessionProfiler
 from easy_profile.reporters import StreamReporter
 from fastapi import Depends, FastAPI, Request
@@ -12,8 +11,10 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
+from app.api.cc import cc_router
 from app.api.files import file_router
 from app.api.ideas import idea_router
+from app.api.settings import setting_router
 from app.api.users import user_router
 from app.config import get_settings
 from app.crud import crud_auth
@@ -52,7 +53,8 @@ def create_application() -> FastAPI:
     app.include_router(user_router, prefix="/users", tags=["USER"])
     app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
     app.include_router(file_router, prefix="/files", tags=["FILE"])
-
+    app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
+    app.include_router(cc_router, prefix="/cc", tags=["C&C"])
     return app
 
 
@@ -163,8 +165,8 @@ def upgrade_head_all(*, shared_db: Session = Depends(get_public_db)):
     return {"ok": True}
 
 
-if __name__ == "__main__":
-    if settings.ENV == "production":
-        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-    else:
-        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+# if __name__ == "__main__":
+#     if settings.ENV == "production":
+#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+#     else:
+#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)

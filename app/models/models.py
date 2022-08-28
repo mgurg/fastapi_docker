@@ -168,3 +168,13 @@ class File(Base):
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     idea = relationship("Idea", secondary=idea_file_rel, back_populates="pictures")
+
+
+class Setting(Base):
+    __tablename__ = "settings"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    entity = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    value = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)

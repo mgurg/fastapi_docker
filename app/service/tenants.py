@@ -6,6 +6,7 @@ from uuid import UUID
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+from loguru import logger
 from sentry_sdk import capture_exception
 from unidecode import unidecode
 
@@ -18,6 +19,8 @@ settings = get_settings()
 
 @timer
 def alembic_upgrade_head(tenant_name, revision="head", url=None):
+    logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
+    print("Schema upgrade START for" + tenant_name + " to version: " + revision)
     # set the paths values
 
     if url is None:
@@ -55,11 +58,13 @@ def alembic_upgrade_head(tenant_name, revision="head", url=None):
         print(e)
         print(traceback.format_exc())
 
-    print("alembic_upgrade_head")
+    logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
+    print("Schema upgrade DONE for: " + tenant_name + " to version: " + revision)
 
 
 @timer
 def tenant_create(schema: str) -> None:
+    logger.info("START create schema: " + schema)
     try:
         with with_db("public") as db:
             db.execute(sa.schema.CreateSchema(schema))
@@ -67,7 +72,7 @@ def tenant_create(schema: str) -> None:
     except Exception as e:
         capture_exception(e)
         print(e)
-    print("tenant_create")
+    logger.info("Done create schema: " + schema)
 
 
 def generate_tenant_id(name: str, uuid: UUID) -> str:

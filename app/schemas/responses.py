@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -63,3 +64,13 @@ class FileResponse(BaseResponse):
     mimetype: str
     size: int
     url: str | None
+
+
+class SettingBase(BaseResponse):
+    id: int
+    account_id: int
+    entity: str
+    value: str
+    value_type: str
+    created_at: datetime | None
+    updated_at: datetime | None
