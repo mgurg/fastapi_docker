@@ -17,16 +17,6 @@ class PubliCompanyAdd(BaseModel):  # OK
     city: str
 
 
-class BookBase(BaseModel):
-    __tablename__ = "books"
-    id: int | None
-    title: str | None
-    author: str | None
-
-    class Config:
-        orm_mode = True
-
-
 class RoleBase(BaseModel):
     __tablename__ = "roles"
     id: int | None

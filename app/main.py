@@ -146,25 +146,6 @@ def check_revision(schema: str):
     return {"ok": True}
 
 
-@app.get("/upgrade")
-def upgrade_head(schema: str):
-    # `_has_table("a")`
-    alembic_upgrade_head(schema)
-    return {"ok": True}
-
-
-@app.get("/upgrade/all")
-def upgrade_head_all(*, shared_db: Session = Depends(get_public_db)):
-    schemas = crud_auth.get_schemas_from_public_company(shared_db)
-
-    for schema in schemas:
-        scheduler.add_job(alembic_upgrade_head, args=[schema], id="auh_" + str(uuid4()))
-        # alembic_upgrade_head(schema)
-        print(schema)
-
-    return {"ok": True}
-
-
 # if __name__ == "__main__":
 #     if settings.ENV == "production":
 #         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)

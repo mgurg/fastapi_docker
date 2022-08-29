@@ -60,15 +60,6 @@ from app.db import Base
 
 # ===============
 
-
-class Book(Base):
-    __tablename__ = "books"
-
-    id = sa.Column(sa.Integer, primary_key=True, nullable=False)
-    title = sa.Column(sa.String(256), nullable=False, index=True, unique=True)
-    author = sa.Column(sa.String(256), nullable=False, unique=True)
-
-
 role_permission_rel = sa.Table(
     "roles_permissions_link",
     Base.metadata,

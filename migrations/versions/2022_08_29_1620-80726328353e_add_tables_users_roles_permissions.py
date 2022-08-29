@@ -1,8 +1,8 @@
-"""Add Tables Users, Roles, Permissions
+"""Add Tables Users Roles Permissions
 
-Revision ID: e3aad4a7daff
-Revises: 43de4e824162
-Create Date: 2022-07-20 14:19:33.700542
+Revision ID: 80726328353e
+Revises: d6ba8c13303e
+Create Date: 2022-08-29 16:20:28.084722
 
 """
 import sqlalchemy as sa
@@ -10,8 +10,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "e3aad4a7daff"
-down_revision = "43de4e824162"
+revision = "80726328353e"
+down_revision = "d6ba8c13303e"
 branch_labels = None
 depends_on = None
 

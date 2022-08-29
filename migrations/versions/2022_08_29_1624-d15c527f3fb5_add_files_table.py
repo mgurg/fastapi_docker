@@ -1,17 +1,18 @@
-"""Add files table
+"""Add Files Table
 
-Revision ID: 58133d5cf4ca
-Revises: 9efdd94249a5
-Create Date: 2022-07-29 16:19:35.212098
+Revision ID: d15c527f3fb5
+Revises: 338496320c4d
+Create Date: 2022-08-29 16:24:18.140607
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
-revision = "58133d5cf4ca"
-down_revision = "9efdd94249a5"
+revision = "d15c527f3fb5"
+down_revision = "338496320c4d"
 branch_labels = None
 depends_on = None
 

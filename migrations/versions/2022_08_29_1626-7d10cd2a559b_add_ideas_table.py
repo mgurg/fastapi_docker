@@ -1,17 +1,18 @@
-"""Add ideas tabele
+"""Add Ideas Table
 
-Revision ID: 424fea3727b6
-Revises: 58133d5cf4ca
-Create Date: 2022-08-01 18:40:13.269442
+Revision ID: 7d10cd2a559b
+Revises: d15c527f3fb5
+Create Date: 2022-08-29 16:26:24.401371
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
-revision = "424fea3727b6"
-down_revision = "58133d5cf4ca"
+revision = "7d10cd2a559b"
+down_revision = "d15c527f3fb5"
 branch_labels = None
 depends_on = None
 
