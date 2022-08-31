@@ -16,8 +16,16 @@ user_router = APIRouter()
 
 
 @user_router.get("/", response_model=Page[UserIndexResponse])
-def user_get_all(*, db: Session = Depends(get_db), params: Params = Depends(), auth=Depends(has_token)):
-    db_users = crud_users.get_users(db)
+def user_get_all(
+    *,
+    db: Session = Depends(get_db),
+    params: Params = Depends(),
+    search: str = None,
+    order: str = "asc",
+    auth=Depends(has_token)
+):
+
+    db_users = crud_users.get_users(db, search, order)
     return paginate(db_users, params)
 
 

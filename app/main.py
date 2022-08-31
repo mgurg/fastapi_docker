@@ -1,14 +1,11 @@
-from uuid import uuid4
-
 import sentry_sdk
 from easy_profile import SessionProfiler
 from easy_profile.reporters import StreamReporter
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
 from app.api.cc import cc_router
@@ -17,8 +14,6 @@ from app.api.ideas import idea_router
 from app.api.settings import setting_router
 from app.api.users import user_router
 from app.config import get_settings
-from app.crud import crud_auth
-from app.db import get_public_db
 from app.service.health_check import test_db
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head, tenant_create

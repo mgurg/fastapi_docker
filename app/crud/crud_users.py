@@ -1,14 +1,19 @@
 from uuid import UUID
 
 from pydantic import EmailStr
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import User
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> User:
-    return db.execute(select(User).offset(skip).limit(limit)).scalars().all()
+def get_users(db: Session, search: str, order: str) -> User:
+    all_filters = []
+
+    if search is not None:
+        all_filters.append(func.concat(User.first_name, " ", User.last_name).ilike(f"%{search}%"))
+
+    return db.execute(select(User).filter(*all_filters).order_by(text(f"last_name {order}"))).scalars().all()
 
 
 def get_user_by_uuid(db: Session, uuid: UUID) -> User:

@@ -201,3 +201,16 @@ async def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, aut
     # session.refresh(db_idea)
 
     return {"ok": True}
+
+
+@idea_router.get("/stats")
+def ideas_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+
+    ideas_status = crud_ideas.get_ideas_summary(db)
+
+    ideas_status = dict(ideas_status)
+
+    for status in ["pending", "accepted", "rejected", "todo"]:
+        ideas_status.setdefault(status, 0)
+
+    return ideas_status

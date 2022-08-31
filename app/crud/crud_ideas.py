@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Idea
@@ -14,6 +14,10 @@ def get_ideas(db: Session, filters: list, sortColumn: str, sortOrder: str) -> Id
         .scalars()
         .all()
     )
+
+
+def get_ideas_summary(db: Session) -> Idea:
+    return db.execute(select(Idea.status, func.count(Idea.status)).group_by(Idea.status)).scalars().all()
 
 
 def get_idea_by_uuid(db: Session, uuid: UUID) -> Idea:
