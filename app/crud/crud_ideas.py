@@ -16,8 +16,8 @@ def get_ideas(db: Session, filters: list, sortColumn: str, sortOrder: str) -> Id
     )
 
 
-def get_ideas_summary(db: Session) -> Idea:
-    return db.execute(select(Idea.status, func.count(Idea.status)).group_by(Idea.status)).scalars().all()
+def get_ideas_summary(db: Session):
+    return db.execute(select(Idea.status, func.count(Idea.status)).group_by(Idea.status)).all()
 
 
 def get_idea_by_uuid(db: Session, uuid: UUID) -> Idea:

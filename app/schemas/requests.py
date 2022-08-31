@@ -63,3 +63,12 @@ class IdeaAddIn(BaseRequest):
 class IdeasVotesIn(BaseRequest):
     idea_uuid: UUID
     vote: str
+
+
+class IdeaEditIn(BaseRequest):
+    title: str | None
+    description: str | None
+    color: str | None
+    status: str | None
+    vote: str | None
+    files: List[UUID] | None

@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session
 from app.crud import crud_auth, crud_files, crud_ideas, crud_users
 from app.db import get_db, get_public_db
 from app.models.models import Idea
-from app.schemas.requests import IdeaAddIn, IdeasVotesIn
-from app.schemas.responses import StandardResponse
+from app.schemas.requests import IdeaAddIn, IdeaEditIn, IdeasVotesIn
+from app.schemas.responses import IdeaSummaryResponse, StandardResponse
 from app.schemas.schemas import IdeaIndexResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
@@ -53,7 +53,6 @@ def ideas_get_all(
 
 @idea_router.get("/{idea_uuid}", response_model=IdeaIndexResponse, name="ideas:Item")
 def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, request: Request, auth=Depends(has_token)):
-
     idea = crud_ideas.get_idea_by_uuid(db, idea_uuid)
     if not idea:
         raise HTTPException(status_code=404, detail="Idea not found")
@@ -71,7 +70,7 @@ def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, request: Re
 
 
 @idea_router.get("/user/{user_uuid}", response_model=Page[IdeaIndexResponse])
-async def ideas_get_by_user(
+def ideas_get_by_user(
     *, db: Session = Depends(get_db), user_uuid: UUID, params: Params = Depends(), auth=Depends(has_token)
 ):
 
@@ -113,7 +112,7 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
 
 
 @idea_router.post("/new_idea/{idea_id}", name="idea:Add")
-async def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db), idea_id: str):
+def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db), idea_id: str):
 
     pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
     if pattern.match(idea_id):
@@ -155,7 +154,7 @@ async def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db),
 
 
 @idea_router.post("/vote", response_model=StandardResponse, name="idea:Add")
-async def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth=Depends(has_token)):
+def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth=Depends(has_token)):
     IdeasVotesIn.from_orm(vote)
 
     db_idea = crud_ideas.get_idea_by_uuid(db, vote.idea_uuid)
@@ -175,8 +174,36 @@ async def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn
     return {"ok": True}
 
 
+@idea_router.patch("/{idea_uuid}", response_model=StandardResponse)
+def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditIn, auth=Depends(has_token)):
+
+    db_idea = crud_ideas.get_idea_by_uuid(db, idea_uuid)
+    if not db_idea:
+        raise HTTPException(status_code=404, detail="Idea not found")
+
+    idea_data = idea.dict(exclude_unset=True)
+    if "vote" in idea_data:
+        del idea_data["vote"]
+
+    files = []
+    if ("files" in idea_data) and (idea_data["files"] is not None):
+        for file in db_idea.file:
+            db_idea.file.remove(file)
+        for file in idea_data["files"]:
+            db_file = crud_files.get_file_by_uuid(db, file)
+            if db_file:
+                files.append(db_file)
+
+        idea_data["file"] = files
+        del idea_data["files"]
+
+    crud_ideas.update_idea(db, db_idea, idea_data)
+
+    return {"ok": True}
+
+
 @idea_router.delete("/{idea_uuid}", response_model=StandardResponse, name="idea:Delete")
-async def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, auth=Depends(has_token)):
+def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, auth=Depends(has_token)):
 
     db_idea = crud_ideas.get_idea_by_uuid(db, idea_uuid)
     if not db_idea:
@@ -203,12 +230,14 @@ async def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, aut
     return {"ok": True}
 
 
-@idea_router.get("/stats")
+@idea_router.get("/stats", response_model=IdeaSummaryResponse)
 def ideas_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
-    ideas_status = crud_ideas.get_ideas_summary(db)
+    ideas_summary = crud_ideas.get_ideas_summary(db)
+    if not ideas_summary:
+        return {"accepted": 0, "pending": 0, "rejected": 0, "todo": 0}
 
-    ideas_status = dict(ideas_status)
+    ideas_status = dict(ideas_summary)
 
     for status in ["pending", "accepted", "rejected", "todo"]:
         ideas_status.setdefault(status, 0)
