@@ -177,9 +177,9 @@ def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth
 
     vote_data = vote.dict(exclude_unset=True)
     if vote_data["vote"] == "up":
-        idea_data = {"upvotes": db_idea.upvotes + 1}
+        idea_data = {"upvotes": int(db_idea.upvotes) + 1}
     elif vote_data["vote"] == "down":
-        idea_data = {"downvotes": db_idea.downvotes + 1}
+        idea_data = {"downvotes": int(db_idea.downvotes) + 1}
     else:
         raise HTTPException(status_code=404, detail="Invalid vote type")
 
