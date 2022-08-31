@@ -21,6 +21,21 @@ from app.service.bearer_auth import has_token
 idea_router = APIRouter()
 
 
+@idea_router.get("/stats", response_model=IdeaSummaryResponse)
+def ideas_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+
+    ideas_summary = crud_ideas.get_ideas_summary(db)
+    if not ideas_summary:
+        return {"accepted": 0, "pending": 0, "rejected": 0, "todo": 0}
+
+    ideas_status = dict(ideas_summary)
+
+    for status in ["pending", "accepted", "rejected", "todo"]:
+        ideas_status.setdefault(status, 0)
+
+    return ideas_status
+
+
 @idea_router.get("/", response_model=Page[IdeaIndexResponse])  # , response_model=Page[IdeaIndexResponse]
 def ideas_get_all(
     *,
@@ -155,16 +170,15 @@ def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db), idea_
 
 @idea_router.post("/vote", response_model=StandardResponse, name="idea:Add")
 def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth=Depends(has_token)):
-    IdeasVotesIn.from_orm(vote)
 
     db_idea = crud_ideas.get_idea_by_uuid(db, vote.idea_uuid)
-
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")
 
-    if vote.vote == "up":
+    vote_data = vote.dict(exclude_unset=True)
+    if vote_data["vote"] == "up":
         idea_data = {"upvotes": db_idea.upvotes + 1}
-    elif vote.vote == "down":
+    elif vote_data["vote"] == "down":
         idea_data = {"downvotes": db_idea.downvotes + 1}
     else:
         raise HTTPException(status_code=404, detail="Invalid vote type")
@@ -228,18 +242,3 @@ def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, auth=Depe
     # session.refresh(db_idea)
 
     return {"ok": True}
-
-
-@idea_router.get("/stats", response_model=IdeaSummaryResponse)
-def ideas_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
-    ideas_summary = crud_ideas.get_ideas_summary(db)
-    if not ideas_summary:
-        return {"accepted": 0, "pending": 0, "rejected": 0, "todo": 0}
-
-    ideas_status = dict(ideas_summary)
-
-    for status in ["pending", "accepted", "rejected", "todo"]:
-        ideas_status.setdefault(status, 0)
-
-    return ideas_status
