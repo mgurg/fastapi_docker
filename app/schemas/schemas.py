@@ -133,3 +133,19 @@ class IdeaIndexResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class SettingBase(BaseModel):
+    __tablename__ = "users"
+    id: int
+    name: str
+    value: str
+    value_type: str
+    prev_value: str
+    descripton: str
+    updated_by: datetime
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True

@@ -164,8 +164,11 @@ class File(Base):
 class Setting(Base):
     __tablename__ = "settings"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
-    entity = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
-    value = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
+    value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    prev_value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    descripton = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    updated_by = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
