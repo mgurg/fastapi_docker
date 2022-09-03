@@ -1,6 +1,4 @@
 import sentry_sdk
-from easy_profile import SessionProfiler
-from easy_profile.reporters import StreamReporter
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
