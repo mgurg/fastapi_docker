@@ -331,7 +331,7 @@ python-dateutil = ">=2.4"
 
 [[package]]
 name = "fastapi"
-version = "0.81.0"
+version = "0.82.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 category = "main"
 optional = false
@@ -1260,7 +1260,7 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e6ec1d922dfad4c1d615324405aaae2aab96b3104f32a8f66c9d29934920e59e"
+content-hash = "08a9fbb05bc1545ea7440ef03ede22c13f3befade70eb1aaf095c59eac445855"
 
 [metadata.files]
 alembic = []
