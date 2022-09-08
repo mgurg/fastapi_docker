@@ -38,7 +38,7 @@ def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends
 
 
 @user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth=Depends(has_token)
-def read_user(*, db: Session = Depends(get_db), user: UserCreateIn, request: Request, auth=Depends(has_token)):
+def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Request, auth=Depends(has_token)):
 
     db_user = crud_users.get_user_by_email(db, user.email)
     if db_user is not None:
