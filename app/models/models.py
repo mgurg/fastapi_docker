@@ -71,8 +71,12 @@ role_permission_rel = sa.Table(
 class Role(Base):
     __tablename__ = "roles"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    role_title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    is_custom = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
@@ -84,6 +88,7 @@ class Permission(Base):
     name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    group = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
 
     # PrimaryKeyConstraint("id", name="permissions_pkey"),
     # UniqueConstraint("uuid", name="permissions_uuid_key"),

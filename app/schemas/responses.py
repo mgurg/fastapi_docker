@@ -81,3 +81,11 @@ class IdeaSummaryResponse(BaseResponse):
     pending: int
     rejected: int
     todo: int
+
+
+class RoleSummaryResponse(BaseResponse):
+    uuid: UUID
+    role_title: str
+    role_description: str
+    is_custom: bool
+    count: int

@@ -9,6 +9,7 @@ from app.api.auth import auth_router
 from app.api.cc import cc_router
 from app.api.files import file_router
 from app.api.ideas import idea_router
+from app.api.permissions import permission_router
 from app.api.settings import setting_router
 from app.api.users import user_router
 from app.config import get_settings
@@ -44,6 +45,7 @@ def create_application() -> FastAPI:
 
     app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
     app.include_router(user_router, prefix="/users", tags=["USER"])
+    app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
     app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
     app.include_router(file_router, prefix="/files", tags=["FILE"])
     app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])

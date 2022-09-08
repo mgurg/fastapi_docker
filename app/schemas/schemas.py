@@ -44,9 +44,30 @@ class PermissionsMini(BaseModel):
         orm_mode = True
 
 
+class PermissionsFull(BaseModel):
+    name: str
+    title: str
+    description: str
+    group: str
+
+    class Config:
+        orm_mode = True
+
+
 class RoleBasic(BaseModel):
     role_name: str
     permission: List[PermissionsMini]
+
+    class Config:
+        orm_mode = True
+
+
+class RolePermissionFull(BaseModel):
+    role_name: str
+    role_description: str
+    role_title: str
+    is_custom: bool
+    permission: List[PermissionsFull]
 
     class Config:
         orm_mode = True
