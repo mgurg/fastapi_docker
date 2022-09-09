@@ -38,3 +38,14 @@ def create_role_with_permissions(db: Session, data: dict) -> Role:
     db.refresh(new_role)
 
     return new_role
+
+
+def update_role(db: Session, db_role: Role, update_data: dict) -> Role:
+    for key, value in update_data.items():
+        setattr(db_role, key, value)
+
+    db.add(db_role)
+    db.commit()
+    db.refresh(db_role)
+
+    return db_role

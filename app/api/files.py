@@ -150,7 +150,7 @@ def file_download(*, db: Session = Depends(get_db), request: Request, file_uuid:
 
 
 @file_router.get("/download/", name="file:Download")
-def file_download(tenant, file):
+def file_download_presigned(tenant, file):
 
     url = generate_presigned_url(tenant, file)
     return url

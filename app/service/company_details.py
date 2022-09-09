@@ -25,11 +25,11 @@ class CompanyDetails:
     def get_company_details(self):
         try:
             data = self.vies()
-            if data == None:
+            if data is None:
                 data = self.gus()
-            if data == None:
+            if data is None:
                 data = self.gus()
-            if data == None:
+            if data is None:
                 data = self.rejestr_io()
         except Exception as e:
             print(e)

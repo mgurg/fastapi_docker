@@ -78,3 +78,9 @@ class RoleAddIn(BaseRequest):
     title: str
     description: str
     permissions: List[UUID]
+
+
+class RoleEditIn(BaseRequest):
+    title: str | None
+    description: str | None
+    permissions: List[UUID] | None
