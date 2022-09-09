@@ -15,9 +15,26 @@ def get_roles(db: Session):
     ).all()
 
 
-def get_roles_by_uuid(db: Session, uuid: UUID):
+def get_role_by_uuid(db: Session, uuid: UUID) -> Role:
     return db.execute(select(Role).where(Role.uuid == uuid).options(selectinload("*"))).scalar_one_or_none()
 
 
+def get_permission_by_uuid(db: Session, uuid: UUID) -> Permission:
+    return db.execute(select(Permission).where(Permission.uuid == uuid)).scalar_one_or_none()
+
+
+def get_role_by_name(db: Session, name: str) -> Role:
+    return db.execute(select(Role).where(Role.role_title == name)).scalar_one_or_none()
+
+
 def get_permissions(db: Session):
-    return db.execute(select(Permission)).scalars().all()
+    return db.execute(select(Permission).order_by(Permission.group)).scalars().all()
+
+
+def create_role_with_permissions(db: Session, data: dict) -> Role:
+    new_role = Role(**data)
+    db.add(new_role)
+    db.commit()
+    db.refresh(new_role)
+
+    return new_role

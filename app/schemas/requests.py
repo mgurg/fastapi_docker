@@ -72,3 +72,9 @@ class IdeaEditIn(BaseRequest):
     status: str | None
     vote: str | None
     files: List[UUID] | None
+
+
+class RoleAddIn(BaseRequest):
+    title: str
+    description: str
+    permissions: List[UUID]

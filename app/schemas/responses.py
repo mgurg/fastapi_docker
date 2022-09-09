@@ -89,3 +89,11 @@ class RoleSummaryResponse(BaseResponse):
     role_description: str
     is_custom: bool
     count: int
+
+
+class PermissionResponse(BaseResponse):
+    uuid: UUID
+    group: str
+    title: str
+    name: str
+    description: str
