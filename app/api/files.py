@@ -1,10 +1,10 @@
 import io
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
@@ -62,7 +62,8 @@ def file_add(
     *,
     db: Session = Depends(get_db),
     request: Request,
-    file: Optional[UploadFile] = None,
+    file: UploadFile | None = None,
+    uuid: UUID | None = Form(None),
     auth=Depends(has_token),
 ):
 
@@ -74,7 +75,11 @@ def file_add(
     if quota > 500000:
         raise HTTPException(status_code=413, detail="Quota exceeded")
 
-    file_uuid = str(uuid4())
+    if not uuid:
+        file_uuid = str(uuid4())
+    else:
+        file_uuid = uuid
+
     try:
 
         s3_folder_path = "".join([str(request.headers.get("tenant", "None")), "/", file_uuid, "_", file.filename])
