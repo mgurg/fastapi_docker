@@ -1,4 +1,7 @@
+from uuid import uuid4
+
 import sentry_sdk
+from faker import Faker
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -123,6 +126,31 @@ def health_check():
 @app.get("/health_db")
 def health_check_db():
     return test_db()
+
+
+@app.get("/fake_users")
+def get_fake_users():
+    faker = Faker()
+
+    users = []
+    for i in range(10):
+        first_name = faker.first_name()
+        last_name = faker.last_name()
+        users.append({"uuid": str(uuid4()), "label": f"{first_name} {last_name}"})
+
+    return users
+
+
+@app.get("/fake_groups")
+def get_fake_groups():
+    faker = Faker()
+
+    groups = []
+    for i in range(10):
+        company_name = faker.job()
+        groups.append({"uuid": str(uuid4()), "label": company_name})
+
+    return groups
 
 
 @app.get("/create")
