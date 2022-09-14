@@ -133,7 +133,7 @@ def get_fake_users():
     faker = Faker()
 
     users = []
-    for i in range(10):
+    for i in range(100):
         first_name = faker.first_name()
         last_name = faker.last_name()
         users.append({"uuid": str(uuid4()), "label": f"{first_name} {last_name}"})
@@ -146,7 +146,7 @@ def get_fake_groups():
     faker = Faker()
 
     groups = []
-    for i in range(10):
+    for i in range(20):
         company_name = faker.job()
         groups.append({"uuid": str(uuid4()), "label": company_name})
 
