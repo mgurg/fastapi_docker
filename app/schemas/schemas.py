@@ -45,6 +45,7 @@ class PermissionsMini(BaseModel):
 
 
 class PermissionsFull(BaseModel):
+    uuid: UUID
     name: str
     title: str
     description: str

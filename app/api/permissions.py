@@ -32,6 +32,8 @@ def permissions_get_all(*, db: Session = Depends(get_db), auth=Depends(has_token
 @permission_router.get("/{role_uuid}", response_model=RolePermissionFull)  # , response_model=Page[UserIndexResponse]
 def role_get_one(*, db: Session = Depends(get_db), role_uuid: UUID, auth=Depends(has_token)):
     db_roles = crud_permission.get_role_by_uuid(db, role_uuid)
+    if not db_roles:
+        raise HTTPException(status_code=400, detail="Role already exists!")
     return db_roles
 
 
