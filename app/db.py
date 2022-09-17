@@ -95,6 +95,6 @@ def with_db(tenant_schema: str | None):
         db = Session(autocommit=False, autoflush=False, bind=connectable)
         yield db
     except Exception:
-        print("ERRRR")
+        print("ERRRR: " + tenant_schema)
     finally:
         db.close()

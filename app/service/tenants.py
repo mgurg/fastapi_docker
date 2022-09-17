@@ -18,7 +18,7 @@ settings = get_settings()
 
 
 @timer
-def alembic_upgrade_head(tenant_name, revision="head", url=None):
+def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
     logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
     print("Schema upgrade START for" + tenant_name + " to version: " + revision)
     # set the paths values
