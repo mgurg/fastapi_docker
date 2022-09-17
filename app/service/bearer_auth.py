@@ -19,11 +19,17 @@ def is_base64(sb: str | bytes) -> bool:
         if isinstance(sb, str):
             # If there's any unicode here, an exception will be thrown and the function will return false
             sb_bytes = bytes(sb, "ascii")
+            print("str")
         elif isinstance(sb, bytes):
             sb_bytes = sb
+            print("bytes")
         else:
             raise ValueError("Argument must be string or bytes")
-        return base64.b64encode(base64.b64decode(sb_bytes)) == sb_bytes
+
+        if len(sb_bytes.strip()) % 4 == 0:
+            return base64.b64encode(base64.b64decode(sb_bytes).decode("utf-8")) == sb_bytes
+        else:
+            return False
     except Exception:
         return False
 
