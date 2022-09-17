@@ -19,10 +19,8 @@ def is_base64(sb: str | bytes) -> bool:
         if isinstance(sb, str):
             # If there's any unicode here, an exception will be thrown and the function will return false
             sb_bytes = bytes(sb, "ascii")
-            print("str")
         elif isinstance(sb, bytes):
             sb_bytes = sb
-            print("bytes")
         else:
             raise ValueError("Argument must be string or bytes")
 
@@ -39,7 +37,7 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     Function that is used to validate the token in the case that it requires it
     """
     if db is None:
-        raise HTTPException(status_code=500, detail="General Error")
+        raise HTTPException(status_code=401, detail="General DB Error")
 
     token = credentials.credentials
     if token is None:

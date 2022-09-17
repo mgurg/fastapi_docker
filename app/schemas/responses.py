@@ -30,11 +30,10 @@ class PublicCompanyCounterResponse(BaseResponse):
     limit: int
 
 
-class RoleBasic(BaseModel):
+class RoleBasic(BaseResponse):
+    uuid: UUID
     role_name: str
-
-    class Config:
-        orm_mode = True
+    role_title: str
 
 
 class UserLoginOut(BaseResponse):  # OK
@@ -55,6 +54,7 @@ class UserIndexResponse(BaseResponse):
     uuid: UUID
     is_active: bool
     is_verified: bool
+    role_FK: RoleBasic
 
 
 class FileResponse(BaseResponse):
