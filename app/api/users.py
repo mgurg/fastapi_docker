@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
-from app.crud import crud_permission, crud_users
-from app.db import get_db
+from app.crud import crud_auth, crud_permission, crud_users
+from app.db import engine, get_db, get_public_db
 from app.schemas.requests import UserCreateIn
 from app.schemas.responses import StandardResponse, UserIndexResponse
 from app.service.bearer_auth import has_token
@@ -60,6 +60,10 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     if db_role is None:
         raise HTTPException(status_code=400, detail="Invalid Role")
 
+    tenant_id = request.headers.get("tenant", None)
+    if tenant_id is None:
+        raise HTTPException(status_code=400, detail="Invalid Tenant")
+
     user_data = {
         "uuid": str(uuid4()),
         "email": user.email,
@@ -74,11 +78,29 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
         "tos": True,
         "tz": "Europe/Warsaw",
         "lang": "pl",
-        "tenant_id": request.headers.get("tenant", None),
+        "tenant_id": tenant_id,
         "created_at": datetime.now(timezone.utc),
     }
 
     crud_users.create_user(db, user_data)
+
+    schema_translate_map = dict(tenant="public")
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable) as db:
+        public_user_data = {
+            "uuid": str(uuid4()),
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "is_active": True,
+            "is_verified": True,
+            "tos": True,
+            "tenant_id": tenant_id,
+            "tz": "Europe/Warsaw",
+            "lang": "pl",
+            "created_at": datetime.now(timezone.utc),
+        }
+        crud_auth.create_public_user(db, public_user_data)
 
     return {"ok": True}
 
