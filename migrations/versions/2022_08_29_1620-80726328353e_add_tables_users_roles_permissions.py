@@ -34,6 +34,7 @@ def upgrade() -> None:
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("email", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
+        sa.Column("phone", sa.VARCHAR(length=16), autoincrement=False, nullable=True),
         sa.Column("password", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("tos", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("first_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
@@ -54,6 +55,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_role_id"], ["roles.id"], name="role_fk"),
         sa.PrimaryKeyConstraint("id", name="users_pkey"),
         sa.UniqueConstraint("email", name="users_email_key"),
+        sa.UniqueConstraint("phone", name="users_phone_key"),
         schema=None,
     )
     op.create_table(

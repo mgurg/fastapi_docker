@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
-from app.crud import crud_users
+from app.crud import crud_permission, crud_users
 from app.db import get_db
 from app.schemas.requests import UserCreateIn
 from app.schemas.responses import StandardResponse, UserIndexResponse
@@ -53,20 +53,30 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     if is_password_ok is not True:
         raise HTTPException(status_code=400, detail=is_password_ok)
 
-    user_data = user.dict(exclude_unset=True)
-    user_data.pop("password_confirmation", None)
+    # user_data = user.dict(exclude_unset=True)
+    # user_data.pop("password_confirmation", None)
 
-    user_data["uuid"] = str(uuid4())
-    user_data["password"] = password.hash()
-    user_data["tos"] = True
-    user_data["is_active"] = True
-    user_data["is_verified"] = True
-    user_data["user_role_id"] = 1
-    user_data["tenant_id"] = request.headers.get("tenant", "public")
-    user_data["tos"] = True
-    user_data["tz"] = "Europe/Warsaw"
-    user_data["lang"] = "pl"
-    user_data["created_at"] = datetime.now(timezone.utc)
+    db_role = crud_permission.get_role_by_uuid(user.user_role_uuid)
+    if db_role is None:
+        raise HTTPException(status_code=400, detail="Invalid Role")
+
+    user_data = {
+        "uuid": str(uuid4()),
+        "email": user.email,
+        "phone": user.phone,
+        "password": password.hash(),
+        "tos": True,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "user_role_id": db_role.id,
+        "is_active": True,
+        "is_verified": True,
+        "tos": True,
+        "tz": "Europe/Warsaw",
+        "lang": "pl",
+        "tenant_id": request.headers.get("tenant", None),
+        "created_at": datetime.now(timezone.utc),
+    }
 
     crud_users.create_user(db, user_data)
 
