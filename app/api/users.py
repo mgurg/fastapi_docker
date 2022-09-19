@@ -125,6 +125,13 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
         user_data["updated_at"] = datetime.now(timezone.utc)
         user_data.pop("password_confirmation", None)
 
+    if "user_role_uuid" in user_data.keys():
+        db_role = crud_permission.get_role_by_uuid(db, user.user_role_uuid)
+        if db_role is None:
+            raise HTTPException(status_code=400, detail="Invalid Role")
+        user_data["user_role_id"] = db_role.id
+        user_data.pop("user_role_uuid", None)
+
     crud_users.update_user(db, db_user, user_data)
 
     return {"ok": True}
