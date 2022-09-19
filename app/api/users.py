@@ -138,7 +138,18 @@ def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    email = db_user.email
+
     db.delete(db_user)
     db.commit()
+
+    schema_translate_map = dict(tenant="public")
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable) as db:
+        db_public_user = crud_auth.get_public_user_by_email(db, email)
+
+        if db_public_user:
+            db.delete(db_public_user)
+            db.commit()
 
     return {"ok": True}
