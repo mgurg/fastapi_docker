@@ -56,7 +56,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     # user_data = user.dict(exclude_unset=True)
     # user_data.pop("password_confirmation", None)
 
-    db_role = crud_permission.get_role_by_uuid(user.user_role_uuid)
+    db_role = crud_permission.get_role_by_uuid(db, user.user_role_uuid)
     if db_role is None:
         raise HTTPException(status_code=400, detail="Invalid Role")
 
