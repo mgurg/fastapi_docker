@@ -35,14 +35,38 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "USER_ADD",
-                "title": "Add user",
-                "description": "Add user permission",
+                "title": "Adding users",
+                "description": "User can create new user accounts",
+            },
+            {
+                "uuid": uuid4(),
+                "name": "USER_EDIT",
+                "title": "Modifying users",
+                "description": "User can edit other users accounts",
             },
             {
                 "uuid": uuid4(),
                 "name": "USER_DELETE",
-                "title": "Dlete user",
-                "description": "Delete user permission",
+                "title": "Removing users",
+                "description": "User can delete other users accounts",
+            },
+            {
+                "uuid": uuid4(),
+                "name": "SETTINGS_IDEAS",
+                "title": "Acces to Idea's Settings",
+                "description": "User can change Idea related settings",
+            },
+            {
+                "uuid": uuid4(),
+                "name": "SETTINGS_ROLES",
+                "title": "Acces to Role's Settings",
+                "description": "User can change Roles related settings",
+            },
+            {
+                "uuid": uuid4(),
+                "name": "SETTINGS_GROUPS",
+                "title": "Acces to Groups's Settings",
+                "description": "User can change Groups related settings",
             },
         ],
     )
@@ -63,7 +87,6 @@ def upgrade() -> None:
         [
             {
                 "uuid": uuid4(),
-                "name": "USER_ADD",
                 "is_custom": False,
                 "is_visible": True,
                 "role_name": "ADMIN_MASTER",
@@ -72,7 +95,6 @@ def upgrade() -> None:
             },
             {
                 "uuid": uuid4(),
-                "name": "USER_ADD",
                 "is_custom": False,
                 "is_visible": True,
                 "role_name": "ADMIN",
@@ -98,8 +120,32 @@ def upgrade() -> None:
                 "permission_id": 1,
             },
             {
+                "role_id": 1,
+                "permission_id": 2,
+            },
+            {
+                "role_id": 1,
+                "permission_id": 3,
+            },
+            {
+                "role_id": 1,
+                "permission_id": 4,
+            },
+            {
+                "role_id": 1,
+                "permission_id": 5,
+            },
+            {
+                "role_id": 1,
+                "permission_id": 6,
+            },
+            {
                 "role_id": 2,
                 "permission_id": 1,
+            },
+            {
+                "role_id": 2,
+                "permission_id": 2,
             },
         ],
     )
