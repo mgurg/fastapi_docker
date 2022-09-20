@@ -2,7 +2,10 @@
 FROM python:3.10.7-slim-bullseye
 # FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
 
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y \
+  curl \
+  && rm -rf /var/lib/apt/lists/*
+
 
 RUN useradd -r -s /bin/bash alex
 
