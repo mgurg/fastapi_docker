@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from app.db import Base
@@ -141,6 +141,8 @@ class Idea(Base):
     downvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
     title = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
+    body_json = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
+    body_jsonb = sa.Column(JSONB, autoincrement=False, nullable=True)
     color = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True)
     status = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)

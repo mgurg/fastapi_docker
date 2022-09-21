@@ -26,6 +26,8 @@ def upgrade() -> None:
         sa.Column("color", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("title", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
+        sa.Column("body_json", sa.TEXT, autoincrement=False, nullable=True),
+        sa.Column("body_jsonb", postgresql.JSONB, autoincrement=False, nullable=True),
         sa.Column("upvotes", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("downvotes", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("status", sa.VARCHAR(length=256), autoincrement=False, nullable=True),

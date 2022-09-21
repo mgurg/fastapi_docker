@@ -114,6 +114,8 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "color": idea.color,
         "title": idea.title,
         "description": idea.description,
+        "body_json": idea.body_json,
+        "body_jsonb": idea.body_json,
         "upvotes": 0,
         "downvotes": 0,
         "status": "pending",
