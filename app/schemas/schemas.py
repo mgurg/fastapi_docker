@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Json
 
 
 class StandardResponse(BaseModel):  # OK
@@ -147,6 +147,7 @@ class IdeaIndexResponse(BaseModel):
     color: str
     title: str
     description: str
+    body_json: Json | None
     upvotes: int | None
     downvotes: int | None
     status: str | None
