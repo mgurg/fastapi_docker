@@ -1,4 +1,5 @@
 import base64
+import json
 import re
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
@@ -114,8 +115,8 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "color": idea.color,
         "title": idea.title,
         "description": idea.description,
-        "body_json": idea.body_json,
-        "body_jsonb": idea.body_json,
+        "body_json": json.dumps(idea.body_json),
+        "body_jsonb": json.dumps(idea.body_json),
         "upvotes": 0,
         "downvotes": 0,
         "status": "pending",

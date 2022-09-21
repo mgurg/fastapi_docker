@@ -6,7 +6,7 @@ from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
 from app.crud import crud_auth, crud_permission, crud_users
-from app.db import engine, get_db, get_public_db
+from app.db import engine, get_db
 from app.schemas.requests import UserCreateIn
 from app.schemas.responses import StandardResponse, UserIndexResponse
 from app.service.bearer_auth import has_token

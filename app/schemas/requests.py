@@ -56,7 +56,7 @@ class UserCreateIn(BaseRequest):
 class IdeaAddIn(BaseRequest):
     title: str
     description: str
-    body_json: str | None
+    body_json: dict | None
     color: str = "green"
     files: List[UUID] | None
 
