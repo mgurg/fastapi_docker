@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
+from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
@@ -109,12 +110,19 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
             if db_file:
                 files.append(db_file)
 
+    html = "<h1>asd</h1><p>asasd</p>"
+
+    html = idea.body_html
+    soup = BeautifulSoup(html, "html.parser")
+    title = soup.find("h1").get_text().strip()
+    description = soup.h1.decompose()
+
     idea_data = {
         "uuid": str(uuid4()),
         "author_id": auth["user_id"],
         "color": idea.color,
-        "title": idea.title,
-        "description": idea.description,
+        "title": title,
+        "description": description,
         "body_json": json.dumps(idea.body_json),
         "body_jsonb": json.dumps(idea.body_json),
         "upvotes": 0,

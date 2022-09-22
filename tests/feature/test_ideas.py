@@ -23,6 +23,14 @@ def test_add_ideas(session: Session, client: TestClient):
         "title": fake.text(max_nb_chars=20),
         "description": fake.paragraph(nb_sentences=1),
         "color": fake.safe_color_name(),
+        "body_html": "<h1>asd</h1><p>asasd</p>",
+        "body_json": {
+            "type": "doc",
+            "content": [
+                {"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "asd"}]},
+                {"type": "paragraph", "content": [{"type": "text", "text": "asasd"}]},
+            ],
+        },
     }
     headers = {"tenant": "a", "Content-Type": "application/json"}
     response = client.post("/ideas/", data=json.dumps(data), headers=headers)
