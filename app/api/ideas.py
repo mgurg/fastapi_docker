@@ -110,12 +110,12 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
             if db_file:
                 files.append(db_file)
 
-    html = "<h1>asd</h1><p>asasd</p>"
-
     html = idea.body_html
     soup = BeautifulSoup(html, "html.parser")
     title = soup.find("h1").get_text().strip()
-    description = soup.h1.decompose()
+    for s in soup.select("h1"):
+        s.extract()
+    description = soup.get_text()
 
     idea_data = {
         "uuid": str(uuid4()),

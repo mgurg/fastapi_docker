@@ -1,6 +1,8 @@
+from pydoc import describe
 from uuid import uuid4
 
 import sentry_sdk
+from bs4 import BeautifulSoup
 from faker import Faker
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
