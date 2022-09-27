@@ -44,8 +44,9 @@ def create_application() -> FastAPI:
         CORSMiddleware,
         allow_origins=["*"],
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["*"],
+        max_age=86400,
     )
 
     app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
