@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+  web:
+    build:
+        context: .
+        dockerfile: ./Dockerfile
+        # args:
+        #   - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        #   - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+        #   - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+        #   - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+        #   - POSTGRES_USER=${POSTGRES_USER}
+        #   - POSTGRES_PW=${POSTGRES_PW}
+        #   - POSTGRES_URL=${POSTGRES_URL}
+        #   - POSTGRES_DB=${POSTGRES_DB}
+    # container_name: aws-ecs-demo
+    volumes:
+      - ./app:/src/app
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+    # environment:
+    #   - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    #   - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    #   - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    #   - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+    #   - POSTGRES_USER=${POSTGRES_USER}
+    #   - POSTGRES_PW=${POSTGRES_PW}
+    #   - POSTGRES_URL=${POSTGRES_URL}
+    #   - POSTGRES_DB=${POSTGRES_DB}  
+    env_file: ./app/.env
+  #   depends_on:
+  #     - db
+
+  # db:
+  #   image: postgres:12.8
+  #   expose:
+  #     - 5432
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=pg_db
