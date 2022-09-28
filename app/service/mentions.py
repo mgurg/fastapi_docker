@@ -1,11 +1,11 @@
 class Mention:
     def __init__(self, obj: dict, keyword: str):
-        self.arr = []
-        self.sub_arr = []
-        self.obj = obj
-        self.keyword = keyword
+        self.arr: list = []
+        self.sub_arr: list = []
+        self.obj: dict = obj
+        self.keyword: str = keyword
 
-    def extract(self, obj, sub_arr, val):
+    def extract(self, obj, sub_arr, val) -> list:
         if isinstance(obj, dict):
             for k, v in obj.items():
                 found_arr = [*sub_arr, k]
@@ -22,7 +22,7 @@ class Mention:
                     self.arr.append(found_arr)
         return self.arr
 
-    def traverse_dict_by_path(self, dictionary, paths):
+    def traverse_dict_by_path(self, dictionary: dict, paths: list) -> list:
         self.extract(self.obj, [], self.keyword)
 
         res = []
@@ -34,17 +34,10 @@ class Mention:
             res.append(_dictionary)
         return res
 
-    def process(self):
+    def process(self) -> list:
         mention_uuids = []
         mentions = self.traverse_dict_by_path(self.obj, self.arr)
 
         for mention in mentions:
             mention_uuids.append(mention["attrs"]["id"])
         return mention_uuids
-
-
-# g = Mention(json_object, "groupMention").process()
-# print("groups",g)
-
-# u = Mention(json_object, "userMention").process()
-# print("users", u)

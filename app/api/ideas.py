@@ -19,6 +19,7 @@ from app.schemas.responses import IdeaSummaryResponse, StandardResponse
 from app.schemas.schemas import IdeaIndexResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
+from app.service.mentions import Mention
 
 idea_router = APIRouter()
 
@@ -117,14 +118,19 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         s.extract()
     description = soup.get_text()
 
+    json_object = json.dumps(idea.body_json)
+
+    Mention(json_object, "groupMention").process()
+    Mention(json_object, "userMention").process()
+
     idea_data = {
         "uuid": str(uuid4()),
         "author_id": auth["user_id"],
         "color": idea.color,
         "title": title,
         "description": description,
-        "body_json": json.dumps(idea.body_json),
-        "body_jsonb": json.dumps(idea.body_json),
+        "body_json": json_object,
+        "body_jsonb": json_object,
         "upvotes": 0,
         "downvotes": 0,
         "status": "pending",

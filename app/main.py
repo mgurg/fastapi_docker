@@ -1,9 +1,6 @@
-import json
-from pydoc import describe
 from uuid import uuid4
 
 import sentry_sdk
-from bs4 import BeautifulSoup
 from faker import Faker
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +17,6 @@ from app.api.settings import setting_router
 from app.api.users import user_router
 from app.config import get_settings
 from app.service.health_check import test_db
-from app.service.helpers import get_mentions_uuids
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
@@ -144,23 +140,6 @@ def get_fake_users():
         users.append({"uuid": str(uuid4()), "label": f"{first_name} {last_name}"})
 
     return users
-
-
-@app.get("/fake_mentions")
-def get_fake_mentions():
-
-    json_string = """
-{"type": "doc", "content": [{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "Jeszcze bogatszy pomys\u0142"}]}, {"type": "paragraph", "content": [{"type": "text", "text": "Ca\u0142kiemna grubo: "}, {"type": "userMention", "attrs": {"id": "fb0106a5-2cea-49f5-9088-0b5c2fd10e20", "label": "Adam Nowak"}}, {"type": "text", "text": "  "}, {"type": "userMention", "attrs": {"id": "d3aa5e1d-cc36-41c4-9c06-a1b89b23eb5b", "label": "Jan Wojciuszkiewicz"}}, {"type": "text", "text": "  Dodatkowo: "}, {"type": "groupMention", "attrs": {"id": "113f5152-9130-4f20-a4dc-0d923e814988", "label": "Yearin"}}, {"type": "text", "text": " "}, {"type": "groupMention", "attrs": {"id": "571cf687-f71d-40a1-8b56-12ab62a6889c", "label": "Condax"}}, {"type": "text", "text": " "}]}]}
-"""
-    json_object = json.loads(json_string)
-
-    groups_mention_uuids = get_mentions_uuids(json_object, "groupMention")
-    users_mention_uuids = get_mentions_uuids(json_object, "userMention")
-    # print(groups_mention_uuids)
-    # print(users_mention_uuids)
-
-    # print(group_mention)
-    return None
 
 
 @app.get("/fake_groups")
