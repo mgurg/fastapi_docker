@@ -107,6 +107,15 @@ class UserBase(BaseModel):
         orm_mode = True
 
 
+class GroupAdd(BaseModel):
+    name: str
+    description: str
+    # users: List[UserBase]
+
+    class Config:
+        orm_mode = True
+
+
 class UserLoginIn(BaseModel):  # OK
     email: EmailStr
     password: str | None

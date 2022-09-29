@@ -180,3 +180,27 @@ class Setting(Base):
     updated_by = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+users_groups_rel = sa.Table(
+    "users_groups_link",
+    Base.metadata,
+    sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("user_is_supervisor", sa.BOOLEAN(), autoincrement=False, nullable=False),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
+    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
+    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
+)
+
+
+class UserGroup(Base):
+    __tablename__ = "users_groups"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    # users_FK = relationship("User", back_populates="role_FK")
+    # permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")

@@ -1,3 +1,8 @@
+# fastapi_docker
+Backend for simple TODO list app hosted on AWS cloud
+
+## Multitenancy
+
 Based on [Multitenancy with FastAPI, SQLAlchemy and PostgreSQL](https://mergeboard.com/blog/6-multitenancy-fastapi-sqlalchemy-postgresql/)
 
 Main differences: Alembic behavior. All tables are created using migrations. Each tenant schema has his own `alembic_version` table with information about current migration revision.
@@ -46,26 +51,25 @@ Wyniki:
 
 ### Alembic
 
-Auto generowanie modelu
+Auto generating migrations (❌ - please, don't use in this project!)
 ```bash
 alembic revision --autogenerate -m "Add description"
 ```
 
-Ręczne utworzenie migracji
+Manual generating migrations (✅ - yes, please ☺️)
 
 ```bash
 alembic revision -m "Add manual change"
 ```
 
 
-
-Uruchomienie wszystkich migracji:
+Execute All Migrations ⏩:
 
 ```bash
 alembic upgrade head
 ```
 
-Rollback migracji 
+Migration Rollback ↩️ (by one step) 
 ```bash
 alembic downgrade -1
 ```
