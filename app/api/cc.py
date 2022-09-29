@@ -15,7 +15,7 @@ from app.service.tenants import alembic_upgrade_head
 cc_router = APIRouter()
 
 
-@cc_router.get("/", name="companies:List")  # response_model=List[SettingAddIn],
+@cc_router.get("/", name="companies:List")
 def cc_get_all(*, db: Session = Depends(get_public_db)):
 
     db_companies = cc_crud.get_public_companies(db)
@@ -23,7 +23,7 @@ def cc_get_all(*, db: Session = Depends(get_public_db)):
     return db_companies
 
 
-@cc_router.post("/", name="migrate:All")  # response_model=List[SettingAddIn],
+@cc_router.post("/", name="migrate:All")
 def cc_migrate_all(*, db: Session = Depends(get_public_db)):
 
     db_companies = cc_crud.get_public_companies(db)
@@ -36,9 +36,7 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
     return processed
 
 
-@cc_router.post(
-    "/{tenant_id}", response_model=StandardResponse, name="migrate:One"
-)  # response_model=List[SettingAddIn],
+@cc_router.post("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
 def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str):
 
     scheduler.add_job(alembic_upgrade_head, args=[tenant_id], id="tenant_id")

@@ -130,6 +130,18 @@ class UserLoginOut(BaseModel):  # OK
         orm_mode = True
 
 
+class UserVerifyToken(BaseModel):  # OK
+    first_name: str
+    last_name: str
+    tz: str
+    lang: str
+    uuid: UUID
+    role_FK: RoleBasic
+
+    class Config:
+        orm_mode = True
+
+
 class FileBasicInfo(BaseModel):
     uuid: UUID
     file_name: str

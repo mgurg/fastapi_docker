@@ -26,7 +26,7 @@ from app.schemas.responses import (  # UserLoginOut
     PublicCompanyCounterResponse,
     StandardResponse,
 )
-from app.schemas.schemas import UserLoginOut
+from app.schemas.schemas import UserLoginOut, UserVerifyToken
 from app.service import auth
 from app.service.company_details import CompanyDetails
 from app.service.password import Password
@@ -253,9 +253,17 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
 #     return db_user
 
 
-@auth_router.get("/verify/{token}", response_model=StandardResponse)
+@auth_router.get("/verify/{token}", response_model=UserVerifyToken)
 def auth_verify(*, db: Session = Depends(get_db), token: str):
     user_db = crud_auth.get_tenant_user_by_auth_token(db, token)
     if user_db is None:
-        raise HTTPException(status_code=403, detail="Invalid token")
-    return {"ok": True}
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    db_user = db.execute(
+        select(User).where(User.email == user_db.email).options(selectinload("*"))
+    ).scalar_one_or_none()
+
+    if db_user is None:
+        raise HTTPException(status_code=401, detail="Strange error")
+
+    return db_user
