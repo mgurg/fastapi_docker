@@ -97,3 +97,17 @@ class PermissionResponse(BaseResponse):
     title: str
     name: str
     description: str
+
+
+class GroupSummaryResponse(BaseResponse):
+    uuid: UUID
+    name: str
+    description: str
+    # count: int
+
+
+class GroupResponse(BaseResponse):
+    uuid: UUID
+    name: str
+    description: str
+    # users: int

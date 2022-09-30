@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.models.models import Permission, Role, User
 
 
-def get_roles(db: Session):
+def get_roles_summary(db: Session):
     return db.execute(
         select(Role.uuid, Role.role_title, Role.role_description, Role.is_custom, func.count(User.id).label("count"))
         .outerjoin(User, User.user_role_id == Role.id)

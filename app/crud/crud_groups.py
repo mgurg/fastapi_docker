@@ -10,7 +10,7 @@ def get_user_groups(db: Session):
     return db.execute(select(UserGroup)).scalars().all()
 
 
-def get_role_by_uuid(db: Session, uuid: UUID) -> UserGroup:
+def get_user_group_by_uuid(db: Session, uuid: UUID) -> UserGroup:
     # return db.execute(select(UserGroup).where(UserGroup.uuid == uuid).options(selectinload("*"))).scalar_one_or_none()
     return db.execute(select(UserGroup).where(UserGroup.uuid == uuid)).scalar_one_or_none()
 
