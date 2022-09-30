@@ -2,17 +2,16 @@
 
 ## Naming
 
-Tables: plural
+Tables: plural (Multiple users are listed in the users table.)
+  - Users
+  - Ideas
 
-    Multiple users are listed in the users table.
+Models: singular (A singular user can be selected from the users table.)
+  - User
+  - Idea
 
-Models: singular
+Controllers: plural (http://myapp.com/users would list multiple users.)
 
-    A singular user can be selected from the users table.
-
-Controllers: plural
-
-    http://myapp.com/users would list multiple users.
 
 
 ## Configuration

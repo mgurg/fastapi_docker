@@ -46,6 +46,12 @@ class UserLoginOut(BaseResponse):  # OK
     role_FK: RoleBasic
 
 
+class UserBasicResponse(BaseResponse):
+    uuid: UUID
+    first_name: str
+    last_name: str
+
+
 class UserIndexResponse(BaseResponse):
     first_name: str
     last_name: str
@@ -110,4 +116,4 @@ class GroupResponse(BaseResponse):
     uuid: UUID
     name: str
     description: str
-    # users: int
+    users: list[UserBasicResponse]

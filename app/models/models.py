@@ -67,6 +67,17 @@ role_permission_rel = sa.Table(
     sa.Column("permission_id", sa.ForeignKey("permissions.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+users_groups_rel = sa.Table(
+    "users_groups_link",
+    Base.metadata,
+    sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("user_is_supervisor", sa.BOOLEAN(), autoincrement=False, nullable=False),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
+    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
+    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
+)
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -119,6 +130,7 @@ class User(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     role_FK = relationship("Role", back_populates="users_FK")
+    user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
 
 
 idea_file_rel = sa.Table(
@@ -182,18 +194,6 @@ class Setting(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-users_groups_rel = sa.Table(
-    "users_groups_link",
-    Base.metadata,
-    sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_is_supervisor", sa.BOOLEAN(), autoincrement=False, nullable=False),
-    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
-    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
-    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
-)
-
-
 class UserGroup(Base):
     __tablename__ = "users_groups"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
@@ -204,3 +204,5 @@ class UserGroup(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # users_FK = relationship("User", back_populates="role_FK")
     # permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
+
+    users = relationship("User", secondary=users_groups_rel, back_populates="user_group")  # Roles

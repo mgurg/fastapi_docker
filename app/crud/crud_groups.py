@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.models import UserGroup
 
@@ -12,7 +12,7 @@ def get_user_groups(db: Session):
 
 def get_user_group_by_uuid(db: Session, uuid: UUID) -> UserGroup:
     # return db.execute(select(UserGroup).where(UserGroup.uuid == uuid).options(selectinload("*"))).scalar_one_or_none()
-    return db.execute(select(UserGroup).where(UserGroup.uuid == uuid)).scalar_one_or_none()
+    return db.execute(select(UserGroup).where(UserGroup.uuid == uuid).options(selectinload("*"))).scalar_one_or_none()
 
 
 # def get_roles(db: Session):
