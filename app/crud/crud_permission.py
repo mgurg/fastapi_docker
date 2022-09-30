@@ -24,7 +24,7 @@ def get_permission_by_uuid(db: Session, uuid: UUID) -> Permission:
 
 
 def get_role_by_name(db: Session, name: str) -> Role:
-    return db.execute(select(Role).where(Role.role_title == name)).scalar_one_or_none()
+    return db.execute(select(Role).where(func.lower(Role.role_title) == name.lower())).scalar_one_or_none()
 
 
 def get_permissions(db: Session):

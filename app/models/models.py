@@ -72,10 +72,6 @@ users_groups_rel = sa.Table(
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
     sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_is_supervisor", sa.BOOLEAN(), autoincrement=False, nullable=False),
-    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
-    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
-    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
 )
 
 

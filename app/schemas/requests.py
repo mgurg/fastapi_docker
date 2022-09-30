@@ -89,6 +89,6 @@ class RoleEditIn(BaseRequest):
 
 
 class GroupAddIn(BaseRequest):
-    title: str
-    description: str
-    users: List[UUID]
+    name: str
+    description: str | None
+    users: list[UUID] | None

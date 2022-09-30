@@ -44,7 +44,7 @@ def upgrade() -> None:
         sa.Column("file_id", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk"),
         sa.ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk_1"),
-        sa.PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
+        sa.PrimaryKeyConstraint(["idea_id", "file_id"], name="ideas_files_link_pkey"),
         schema=None,
     )
 
