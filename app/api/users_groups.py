@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.crud import crud_groups, crud_users
 from app.db import get_db
 from app.schemas.requests import GroupAddIn
-from app.schemas.responses import GroupResponse, GroupSummaryResponse
+from app.schemas.responses import GroupResponse, GroupSummaryResponse, StandardResponse
 from app.schemas.schemas import GroupAdd, RolePermissionFull
 from app.service.bearer_auth import has_token
 
@@ -58,9 +58,16 @@ def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth=Depends(
 #     pass
 
 
-# @group_router.delete("/{group_uuid}", response_model=StandardResponse)
-# def group_delete(*, db: Session = Depends(get_db), group_uuid: UUID, auth=Depends(has_token)):
+@group_router.delete("/{group_uuid}", response_model=StandardResponse)
+def group_delete(*, db: Session = Depends(get_db), group_uuid: UUID, auth=Depends(has_token)):
 
-#     pass
+    db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
-#     return {"ok": True}
+    if not db_user_group:
+        raise HTTPException(status_code=404, detail="Role not found")
+
+    # TODO rel?
+    # db.delete(db_user_group)
+    # db.commit()
+
+    return {"ok": True}
