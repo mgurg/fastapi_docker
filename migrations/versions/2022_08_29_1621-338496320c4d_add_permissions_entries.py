@@ -110,7 +110,6 @@ def upgrade() -> None:
         sa.Column(
             "permission_id", sa.ForeignKey("permissions.id"), autoincrement=False, nullable=False, primary_key=True
         ),
-        sa.PrimaryKeyConstraint(["role_id", "permission_id"], name="roles_permissions_link_pkey"),
     )
 
     op.bulk_insert(

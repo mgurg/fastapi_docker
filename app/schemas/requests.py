@@ -92,3 +92,9 @@ class GroupAddIn(BaseRequest):
     name: str
     description: str | None
     users: list[UUID] | None
+
+
+class GroupEditIn(BaseRequest):
+    name: str | None
+    description: str | None
+    users: list[UUID] | None

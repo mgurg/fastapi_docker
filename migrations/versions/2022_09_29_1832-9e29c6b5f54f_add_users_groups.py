@@ -37,7 +37,7 @@ def upgrade() -> None:
         sa.Column("user_is_supervisor", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.ForeignKeyConstraint(["user_group_id"], ["users_groups.id"], name="users_groups_link_fk"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], name="users_groups_link_fk_1"),
-        sa.PrimaryKeyConstraint(["user_id", "user_group_id"], name="users_groups_link_pkey"),
+        sa.PrimaryKeyConstraint("user_id", "user_group_id", name="users_groups_link_pkey"),
         schema=None,
     )
 

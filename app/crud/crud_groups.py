@@ -41,12 +41,12 @@ def create_group_with_users(db: Session, data: dict) -> UserGroup:
 #     return db.execute(select(Permission).where(Permission.uuid == uuid)).scalar_one_or_none()
 
 
-# def update_UserGroup(db: Session, db_role: Role, update_data: dict) -> Role:
-#     for key, value in update_data.items():
-#         setattr(db_role, key, value)
+def update_user_group(db: Session, db_group: UserGroup, update_data: dict) -> UserGroup:
+    for key, value in update_data.items():
+        setattr(db_group, key, value)
 
-#     db.add(db_role)
-#     db.commit()
-#     db.refresh(db_role)
+    db.add(db_group)
+    db.commit()
+    db.refresh(db_group)
 
-#     return db_role
+    return db_group
