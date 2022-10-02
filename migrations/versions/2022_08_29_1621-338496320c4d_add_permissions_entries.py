@@ -50,6 +50,12 @@ def upgrade() -> None:
                 "title": "Removing users",
                 "description": "User can delete other users accounts",
             },
+            # {
+            #     "uuid": uuid4(),
+            #     "name": "USER_DELETE_FORCE",
+            #     "title": "Removing users (also included in groups)",
+            #     "description": "User can delete other users accounts (even if used)",
+            # },
             {
                 "uuid": uuid4(),
                 "name": "SETTINGS_IDEAS",
