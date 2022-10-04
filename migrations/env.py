@@ -5,6 +5,9 @@ from alembic import context
 from app.db import Base, metadata
 from dotenv import load_dotenv
 from sqlalchemy import MetaData, engine_from_config, pool
+import asyncio
+from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -62,7 +65,44 @@ def run_migrations_offline() -> None:
 
     with context.begin_transaction():
         context.run_migrations()
+        
 
+def do_run_migrations(connection):
+    current_tenant = context.get_x_argument(as_dictionary=True).get("tenant")
+    print("Tenant 2 : ", current_tenant)
+    dry_run = context.get_x_argument(as_dictionary=True).get("dry_run")
+    print("Dry Run : ", dry_run)
+    session = Session(bind=connection) 
+    session.execute("set search_path to %s" % current_tenant)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        version_table_schema=current_tenant,
+    )
+
+    with context.begin_transaction() as transaction:
+        context.run_migrations()
+        if bool(dry_run) == True:
+            print("Dry-run succeeded; now rolling back transaction...")
+            transaction.rollback()
+
+
+async def run_async_migrations():
+    connectable = async_engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+    current_tenant = context.get_x_argument(as_dictionary=True).get("tenant")
+    print("Tenant 1 : ", current_tenant)
+
+    async with connectable.connect() as connection:
+        await connection.execute("set search_path to %s" % current_tenant)
+        connection.dialect.default_schema_name = current_tenant
+
+        await connection.run_sync(do_run_migrations)
+    
+    await connectable.dispose()
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
@@ -71,29 +111,14 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-    current_tenant = context.get_x_argument(as_dictionary=True).get("tenant")
-    dry_run = context.get_x_argument(as_dictionary=True).get("dry_run")
-
-    with connectable.connect() as connection:
-        connection.execute("set search_path to %s" % current_tenant)
-        connection.dialect.default_schema_name = current_tenant
-
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            version_table_schema=current_tenant,
-        )
-
-        with context.begin_transaction() as transaction:
-            context.run_migrations()
-            if bool(dry_run) == True:
-                print("Dry-run succeeded; now rolling back transaction...")
-                transaction.rollback()
+    print("Running migrations online")
+    connectable = config.attributes.get("connection", None)
+    print("Connectable ::: ", connectable)
+    # connectable = None
+    if connectable is None:
+        asyncio.run(run_async_migrations())
+    else:
+        do_run_migrations(connectable)
 
 
 if context.is_offline_mode():

@@ -64,12 +64,12 @@ def auth_company_info(company: CompanyInfoRegisterIn):
 
 
 @auth_router.post("/register", response_model=StandardResponse)
-def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
+async def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
 
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
 
-    db_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
+    db_user: PublicUser = await crud_auth.get_public_user_by_email(shared_db, user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
@@ -81,7 +81,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
     if auth.is_timezone_correct is False:
         raise HTTPException(status_code=400, detail="Invalid timezone")
 
-    db_company = crud_auth.get_public_company_by_nip(shared_db, user.company_tax_id)
+    db_company = await crud_auth.get_public_company_by_nip(shared_db, user.company_tax_id)
 
     if not db_company:
         uuid = str(uuid4())
@@ -96,11 +96,11 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
             "country": "pl",
             "city": user.company_city,
             "tenant_id": tenant_id,
-            "qr_id": crud_auth.generate_qr_id(shared_db),
+            "qr_id": await crud_auth.generate_qr_id(shared_db),
             "created_at": datetime.now(timezone.utc),
         }
 
-        db_company = crud_auth.create_public_company(shared_db, company_data)
+        db_company = await crud_auth.create_public_company(shared_db, company_data)
 
     else:
         tenant_id = db_company.tenant_id
@@ -123,10 +123,12 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
         "lang": standardize_tag(user.lang),
         "created_at": datetime.now(timezone.utc),
     }
-    crud_auth.create_public_user(shared_db, user)
+    await crud_auth.create_public_user(shared_db, user)
 
-    scheduler.add_job(tenant_create, args=[db_company.tenant_id])
-    scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
+    # scheduler.add_job(tenant_create, args=[db_company.tenant_id])
+    await tenant_create(db_company.tenant_id)
+    # scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
+    await alembic_upgrade_head(db_company.tenant_id)
 
     # tenant_create(db_company.tenant_id)
     # alembic_upgrade_head(db_company.tenant_id)

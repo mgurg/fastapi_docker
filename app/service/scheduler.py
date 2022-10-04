@@ -22,5 +22,5 @@ def start_scheduler(app: FastAPI):
 
         print("start scheduler...")
 
-        scheduler.start()
+        # scheduler.start()
         print("start scheduler... DONE")

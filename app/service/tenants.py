@@ -14,13 +14,15 @@ from app.config import get_settings
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
 from app.utils.decorators import timer
 
+from sqlalchemy.ext.asyncio import create_async_engine
+
 settings = get_settings()
 
 
 @timer
-def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
+async def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
     logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
-    print("Schema upgrade START for" + tenant_name + " to version: " + revision)
+    print("Schema upgrade START for " + tenant_name + " to version: " + revision)
     # set the paths values
 
     if url is None:
@@ -50,9 +52,16 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
         sql = False
         tag = None
         # command.stamp(config, revision, sql=sql, tag=tag)
-
+        def run_upgrade(connection, cfg, revision, sql, tag):
+            cfg.attributes["connection"] = connection
+            command.upgrade(cfg, revision, sql=sql, tag=tag)
         # upgrade command
-        command.upgrade(config, revision, sql=sql, tag=tag)
+        async_engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+        async with async_engine.begin() as conn:
+        #     if tenant_name != "public":
+        #         await conn.execute("set search_path to %s" % tenant_name)
+        #         conn.dialect.default_schema_name = tenant_name
+            await conn.run_sync(run_upgrade, config, revision, sql, tag)
     except Exception as e:
         capture_exception(e)
         print(e)
@@ -61,14 +70,15 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
     logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
     print("Schema upgrade DONE for: " + tenant_name + " to version: " + revision)
 
-
+# for async support
+# added async and await
 @timer
-def tenant_create(schema: str) -> None:
+async def tenant_create(schema: str) -> None:
     logger.info("START create schema: " + schema)
     try:
-        with with_db("public") as db:
-            db.execute(sa.schema.CreateSchema(schema))
-            db.commit()
+        async with with_db("public") as db:
+            await db.execute(sa.schema.CreateSchema(schema))
+            await db.commit()
     except Exception as e:
         capture_exception(e)
         print(e)

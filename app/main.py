@@ -23,7 +23,7 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 
 settings = get_settings()
 # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
-sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
+# sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
@@ -60,8 +60,8 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-if settings.ENVIRONMENT == "PRD":
-    app.add_middleware(SentryAsgiMiddleware)
+# if settings.ENVIRONMENT == "PRD":
+#     app.add_middleware(SentryAsgiMiddleware)
 
 # if settings.ENVIRONMENT != "PRD":
 
@@ -77,9 +77,9 @@ if settings.ENVIRONMENT == "PRD":
 
 
 @app.on_event("startup")
-def startup():
+async def startup():
     logger.info("🚀 Starting up and initializing app...")
-    alembic_upgrade_head("public", "d6ba8c13303e")
+    await alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🚀 Starting up and initializing app... DONE")
     # job = scheduler.add_job(myfunc, "interval", minutes=1)
     # scheduler.start()

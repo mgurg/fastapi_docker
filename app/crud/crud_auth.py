@@ -12,8 +12,9 @@ from app.utils.decorators import timer
 
 
 @timer
-def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
-    return db.execute(select(PublicUser).where(PublicUser.email == email)).scalar_one_or_none()
+async def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
+    user = await db.execute(select(PublicUser).where(PublicUser.email == email))
+    return user.scalar_one_or_none()
 
 
 def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | None:
@@ -29,8 +30,9 @@ def get_public_company_count(db: Session) -> int:
     return db.execute(select([func.count(PublicCompany.id)])).scalar_one_or_none()
 
 
-def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
+async def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
+    company = await db.execute(select(PublicCompany).where(PublicCompany.nip == nip))
+    return company.scalar_one_or_none()
 
 
 def get_public_company_by_qr_id(db: Session, qr_id: str) -> PublicCompany | None:
@@ -41,20 +43,21 @@ def get_schemas_from_public_company(db: Session):
     return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
 
 
-def generate_qr_id(db: Session):
+async def generate_qr_id(db: Session):
     allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
-    company_ids = db.execute(select(PublicCompany.qr_id)).scalars().all()
+    qr_ids = await db.execute(select(PublicCompany.qr_id))
+    company_ids = qr_ids.scalars().all()
     proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
     while proposed_id in company_ids:
         proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
     return proposed_id
 
 
-def create_public_user(db: Session, public_user: dict) -> PublicUser:
+async def create_public_user(db: Session, public_user: dict) -> PublicUser:
     new_user = PublicUser(**public_user)
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    await db.commit()
+    await db.refresh(new_user)
     # new_user = PublicUser(
     #     uuid=str(uuid4()),
     #     email=user.email.strip(),
@@ -76,12 +79,12 @@ def create_public_user(db: Session, public_user: dict) -> PublicUser:
     return new_user
 
 
-def create_public_company(db: Session, company: dict) -> PublicCompany:
+async def create_public_company(db: Session, company: dict) -> PublicCompany:
 
     new_company = PublicCompany(**company)
     db.add(new_company)
-    db.commit()
-    db.refresh(new_company)
+    await db.commit()
+    await db.refresh(new_company)
 
     # uuid = str(uuid4())
 

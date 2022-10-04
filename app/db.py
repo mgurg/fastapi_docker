@@ -1,11 +1,12 @@
-from contextlib import contextmanager
+from contextlib import contextmanager, asynccontextmanager
 from functools import lru_cache
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from sqlalchemy import create_engine, select
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.config import get_settings
 from app.models.shared_models import PublicCompany
@@ -30,8 +31,14 @@ DEFAULT_DATABASE_DB = settings.DEFAULT_DATABASE_DB
 # )
 
 # SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+# SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
+# for async support
+SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
+print(f"SQLALCHEMY_DATABASE_URL {SQLALCHEMY_DATABASE_URL}")
+# engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+# for async support
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # print(SQLALCHEMY_DATABASE_URL)
 
@@ -46,9 +53,10 @@ class TenantNotFoundError(Exception):
         self.message = "Tenant %s not found!" % str(id)
         super().__init__(self.message)
 
-
+# for async support
+# added async
 @lru_cache()
-def get_tenant(request: Request) -> PublicCompany:
+async def get_tenant(request: Request) -> PublicCompany:
     try:
         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
         host_without_port = request.headers.get("tenant")  # based on tenant header: abc
@@ -56,7 +64,7 @@ def get_tenant(request: Request) -> PublicCompany:
         if host_without_port is None:
             return None
 
-        with with_db(None) as db:
+        async with with_db(None) as db:
             tenant = db.execute(
                 select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
             ).scalar_one_or_none()
@@ -68,23 +76,43 @@ def get_tenant(request: Request) -> PublicCompany:
         print(e)
     return tenant
 
-
-def get_db(tenant: PublicCompany = Depends(get_tenant)):
+# for async support
+# added async
+async def get_db(tenant: PublicCompany = Depends(get_tenant)):
     if tenant is None:
         yield None
 
-    with with_db(tenant.tenant_id) as db:
+    async with with_db(tenant.tenant_id) as db:
         yield db
 
-
-def get_public_db():
-    with with_db("public") as db:
+# for async support
+# added async
+async def get_public_db():
+    async with with_db("public") as db:
         yield db
     # --------------------
 
 
-@contextmanager
-def with_db(tenant_schema: str | None):
+# @contextmanager
+# def with_db(tenant_schema: str | None):
+#     if tenant_schema:
+#         schema_translate_map = dict(tenant=tenant_schema)
+#     else:
+#         schema_translate_map = None
+
+#     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+#     try:
+#         db = Session(autocommit=False, autoflush=False, bind=connectable)
+#         yield db
+#     except Exception:
+#         print("ERRRR: " + tenant_schema)
+#     finally:
+#         db.close()
+
+
+# for async support
+@asynccontextmanager
+async def with_db(tenant_schema: str | None):
     if tenant_schema:
         schema_translate_map = dict(tenant=tenant_schema)
     else:
@@ -92,9 +120,10 @@ def with_db(tenant_schema: str | None):
 
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     try:
-        db = Session(autocommit=False, autoflush=False, bind=connectable)
-        yield db
+        async with async_session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
     except Exception:
+        await session.rollback()
         print("ERRRR: " + tenant_schema)
     finally:
-        db.close()
+        await session.close()
