@@ -57,7 +57,7 @@ def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEd
 
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
     if not db_user_group:
-        raise HTTPException(status_code=400, detail="Role already exists!")
+        raise HTTPException(status_code=400, detail="Group not found exists!")
 
     group_data = role.dict(exclude_unset=True)
 

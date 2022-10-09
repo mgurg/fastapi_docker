@@ -106,6 +106,8 @@ def file_add(
         request.headers.get("tenant", "public"),
         "_".join([str(file_uuid), file.filename]),
     )
+
+    file.close()
     return new_file
 
 
