@@ -7,13 +7,13 @@ from sqlalchemy.orm import Session
 from app.models.models import User
 
 
-def get_users(db: Session, search: str, order: str) -> User:
+def get_users(db: Session, search: str, sortColumn: str, sortOrder: str) -> User:
     all_filters = []
 
     if search is not None:
         all_filters.append(func.concat(User.first_name, " ", User.last_name).ilike(f"%{search}%"))
 
-    return db.execute(select(User).filter(*all_filters).order_by(text(f"last_name {order}"))).scalars().all()
+    return db.execute(select(User).filter(*all_filters).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
 
 
 def get_user_by_uuid(db: Session, uuid: UUID) -> User:

@@ -1,6 +1,7 @@
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
 from app.crud import crud_groups, crud_users
@@ -12,10 +13,21 @@ from app.service.bearer_auth import has_token
 group_router = APIRouter()
 
 
-@group_router.get("/", response_model=list[GroupSummaryResponse])
-def group_get_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_user_groups = crud_groups.get_user_groups(db)
-    return db_user_groups
+@group_router.get("/", response_model=Page[GroupSummaryResponse])
+def group_get_all(
+    *,
+    db: Session = Depends(get_db),
+    params: Params = Depends(),
+    search: str = None,
+    sortOrder: str = "asc",
+    sortColumn: str = "name",
+    auth=Depends(has_token)
+):
+
+    sortTable = {"name": "name"}
+
+    db_user_groups = crud_groups.get_user_groups(db, search, sortTable[sortColumn], sortOrder)
+    return paginate(db_user_groups, params)
 
 
 @group_router.get("/{group_uuid}", response_model=GroupResponse)  # , response_model=Page[UserIndexResponse]

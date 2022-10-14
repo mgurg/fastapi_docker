@@ -1,17 +1,24 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.models import Permission, Role, User
 
 
-def get_roles_summary(db: Session):
+def get_roles_summary(db: Session, search: str, sortColumn: str, sortOrder: str):
+
+    all_filters = []
+
+    if search is not None:
+        all_filters.append(Role.role_title.ilike(f"%{search}%"))
+
     return db.execute(
         select(Role.uuid, Role.role_title, Role.role_description, Role.is_custom, func.count(User.id).label("count"))
+        .filter(*all_filters)
         .outerjoin(User, User.user_role_id == Role.id)
         .group_by(Role.uuid, Role.role_title, Role.role_description, Role.is_custom)
-        .order_by(Role.is_custom)
+        .order_by(text(f"{sortColumn} {sortOrder}"))
     ).all()
 
 

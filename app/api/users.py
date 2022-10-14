@@ -21,11 +21,14 @@ def user_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str = None,
-    order: str = "asc",
+    sortOrder: str = "asc",
+    sortColumn: str = "name",
     auth=Depends(has_token)
 ):
 
-    db_users = crud_users.get_users(db, search, order)
+    sortTable = {"name": "last_name"}
+
+    db_users = crud_users.get_users(db, search, sortTable[sortColumn], sortOrder)
     return paginate(db_users, params)
 
 

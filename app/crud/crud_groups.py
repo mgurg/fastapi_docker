@@ -1,13 +1,20 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.models import UserGroup
 
 
-def get_user_groups(db: Session):
-    return db.execute(select(UserGroup)).scalars().all()
+def get_user_groups(db: Session, search: str, sortColumn: str, sortOrder: str):
+    all_filters = []
+
+    if search is not None:
+        all_filters.append(UserGroup.name.ilike(f"%{search}%"))
+
+    return (
+        db.execute(select(UserGroup).filter(*all_filters).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
+    )
 
 
 def get_user_group_by_uuid(db: Session, uuid: UUID) -> UserGroup:

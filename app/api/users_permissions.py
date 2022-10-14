@@ -1,6 +1,7 @@
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
 from app.crud import crud_permission
@@ -17,10 +18,21 @@ from app.service.bearer_auth import has_token
 permission_router = APIRouter()
 
 
-@permission_router.get("/", response_model=list[RoleSummaryResponse])  # , response_model=Page[UserIndexResponse]
-def role_get_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_roles = crud_permission.get_roles_summary(db)
-    return db_roles
+@permission_router.get("/", response_model=Page[RoleSummaryResponse])  # , response_model=Page[UserIndexResponse]
+def role_get_all(
+    *,
+    db: Session = Depends(get_db),
+    params: Params = Depends(),
+    search: str = None,
+    sortOrder: str = "asc",
+    sortColumn: str = "name",
+    auth=Depends(has_token)
+):
+
+    sortTable = {"name": "role_title"}
+
+    db_roles = crud_permission.get_roles_summary(db, search, sortTable[sortColumn], sortOrder)
+    return paginate(db_roles, params)
 
 
 @permission_router.get("/all", response_model=list[PermissionResponse])
