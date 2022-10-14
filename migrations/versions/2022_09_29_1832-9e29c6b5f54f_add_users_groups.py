@@ -24,6 +24,7 @@ def upgrade() -> None:
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=False),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
+        sa.Column("symbol", sa.VARCHAR(length=64), autoincrement=False, nullable=True),
         sa.Column("supervisor_uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),

@@ -107,13 +107,15 @@ class PermissionResponse(BaseResponse):
 
 class GroupSummaryResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str
-    description: str
+    description: str | None
     # count: int
 
 
 class GroupResponse(BaseResponse):
     uuid: UUID
-    name: str
-    description: str
+    symbol: str | None
+    name: str | None
+    description: str | None
     users: list[UserBasicResponse]

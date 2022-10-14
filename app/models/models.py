@@ -196,6 +196,7 @@ class UserGroup(Base):
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    symbol = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # users_FK = relationship("User", back_populates="role_FK")

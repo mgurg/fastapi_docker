@@ -44,6 +44,7 @@ def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth=Depends(
         "uuid": str(uuid4()),
         "name": group.name,
         "description": group.description,
+        "symbol": group.symbol,
         "users": users,
     }
 
