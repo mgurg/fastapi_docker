@@ -57,6 +57,18 @@ Right now, manually created schema `a` is required to execute tests.
 coverage html
 ```
 
+### WIP: SQLAlchemy 2.0
+Running outside docker: 
+```
+export PYTHONPATH=$PWD
+export DB_HOST=database.url
+export DB_USERNAME=postgres
+(...rest of DB env)
+
+
+SQLALCHEMY_WARN_20=1 python -W always::DeprecationWarning ./app/main.py
+```
+
 
 
 ### 🏋️‍♂️Load test
