@@ -4,8 +4,7 @@ from functools import lru_cache
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from sqlalchemy import create_engine, select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
 from app.models.shared_models import PublicCompany

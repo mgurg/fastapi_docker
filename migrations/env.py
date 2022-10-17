@@ -3,7 +3,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import MetaData, engine_from_config, pool
+from sqlalchemy import MetaData, engine_from_config, pool, text
 
 from app.db import Base, metadata
 
@@ -81,7 +81,7 @@ def run_migrations_online() -> None:
     dry_run = context.get_x_argument(as_dictionary=True).get("dry_run")
 
     with connectable.connect() as connection:
-        connection.execute('set search_path to "%s"' % current_tenant)
+        connection.execute(text('set search_path to "%s"' % current_tenant))
         connection.dialect.default_schema_name = current_tenant
 
         context.configure(

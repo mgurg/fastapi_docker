@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 metadata = sa.MetaData(schema="shared")
 Base = declarative_base(metadata=metadata)
