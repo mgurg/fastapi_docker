@@ -91,7 +91,7 @@ def startup():
 
 def myfunc(text: str):
     logger.info("🚀 JOB" + text)
-    print("JOB" + text)
+    print("JOB " + text)
 
 
 start_scheduler(app)
@@ -101,7 +101,8 @@ job = scheduler.add_job(myfunc, args=["SDF"])
 
 @app.on_event("shutdown")
 def shutdown_event():
-    scheduler.shutdown()
+    # scheduler.shutdown()
+    pass
 
 
 @app.get("/", include_in_schema=False)

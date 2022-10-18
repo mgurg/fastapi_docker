@@ -25,7 +25,7 @@ def get_user_by_email(db: Session, email: EmailStr) -> User:
 
 
 def get_user_count(db: Session) -> int:
-    return db.execute(select([func.count(User.id)])).scalar_one_or_none()
+    return db.execute(select(func.count(User.id))).scalar_one_or_none()
 
 
 def create_user(db: Session, data: dict) -> User:
