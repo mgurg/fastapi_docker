@@ -4,6 +4,7 @@ FROM python:3.10.7-slim-bullseye
 
 RUN apt-get update && apt-get install -y \
   curl \
+  git \
   && rm -rf /var/lib/apt/lists/*
 
 
