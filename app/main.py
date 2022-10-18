@@ -101,7 +101,7 @@ job = scheduler.add_job(myfunc, args=["SDF"])
 
 @app.on_event("shutdown")
 def shutdown_event():
-    pass
+    scheduler.shutdown()
 
 
 @app.get("/", include_in_schema=False)
