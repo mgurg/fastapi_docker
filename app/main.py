@@ -131,47 +131,6 @@ def health_check_db():
     return test_db()
 
 
-@app.get("/fake_users")
-def get_fake_users():
-    faker = Faker()
-
-    users = []
-    for i in range(100):
-        first_name = faker.first_name()
-        last_name = faker.last_name()
-        users.append({"uuid": str(uuid4()), "label": f"{first_name} {last_name}"})
-
-    return users
-
-
-@app.get("/fake_groups")
-def get_fake_groups():
-    faker = Faker()
-
-    groups = []
-    for i in range(20):
-        company_name = faker.job()
-        groups.append({"uuid": str(uuid4()), "label": company_name})
-
-    return groups
-
-
-@app.get("/create")
-def read_item(schema: str):
-    tenant_create(schema)
-    # alembic_upgrade_head(schema)
-    return {"schema": schema}
-
-
-@app.get("/check_revision")
-def check_revision(schema: str):
-    # with with_db(schema) as db:
-    #     context = MigrationContext.configure(db.connection())
-    #     script = alembic.script.ScriptDirectory.from_config(alembic_config)
-    #     if context.get_current_revision() != script.get_current_head():
-    return {"ok": True}
-
-
 # if __name__ == "__main__":
 # if settings.ENV == "production":
 #     uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)

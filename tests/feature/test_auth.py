@@ -1,5 +1,7 @@
 import argparse
+import json
 import os
+import random
 import warnings
 from pathlib import Path
 
@@ -15,6 +17,7 @@ import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
 from dotenv import load_dotenv
+from faker import Faker
 from fastapi.testclient import TestClient
 from loguru import logger
 from sentry_sdk import capture_message
@@ -28,33 +31,72 @@ from app.service.bearer_auth import has_token
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
 
-def test_register():
-    assert 200 == 200
-    # DEFAULT_DATABASE_USER = os.getenv("DB_USERNAME")
-    # DEFAULT_DATABASE_PASSWORD = os.getenv("DB_PASSWORD")
-    # DEFAULT_DATABASE_HOSTNAME = os.getenv("DB_HOST")
-    # DEFAULT_DATABASE_DB = os.getenv("DB_DATABASE")
-    # URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
+def test_account_limit(publicClient: TestClient):
+    response = publicClient.get("/auth/account_limit", headers={"tenant": "public"})
+    data = response.json()
+    assert response.status_code == 200
+    assert data["accounts"]
+    assert data["limit"]
 
-    # engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
-    # schema_translate_map = dict(tenant="public")
-    # connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    # with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as session:
 
-    #     def get_session_override():
-    #         return session  #
+def test_company_info(publicClient: TestClient):
 
-    #     app.dependency_overrides[get_public_db] = get_session_override  #
+    result = {
+        "9542752600": {
+            "name": "Piekarnia - Cukiernia Bończyk Spółka Jawna",
+            "short_name": "Piekarnia - Cukiernia Bończyk Sp. J.",
+            "street": "Mysłowicka 40",
+            "postcode": "40-487",
+            "city": "Katowice",
+            "country_code": "PL",
+        }
+    }
 
-    #     client = TestClient(app)
-    #     data = {
-    #         "email": "test@example.com",
-    #         "password": "string",
-    #         "password_confirmation": "string",
-    #         "tos": True,
-    #         "tz": "Europe/Warsaw",
-    #         "lang": "pl",
-    #     }
-    #     response = client.post("/auth/register", json=data, headers={"tenant": "public", "host": "public"})
-    #     data = response.json()
-    #     assert response.status_code == 200
+    keys = []
+    for key, value in result.items():
+        keys.append(key)
+
+    company_NIP = random.choice(keys)
+    data = {"country": "pl", "company_tax_id": company_NIP}
+
+    headers = {"tenant": "public", "Content-Type": "application/json"}
+    response = publicClient.post("/auth/company_info", data=json.dumps(data), headers=headers)
+    data = response.json()
+
+    logger.error(data)
+    assert response.status_code == 200
+    assert data["name"] == result[company_NIP]["name"]
+    assert data["short_name"] == result[company_NIP]["short_name"]
+    assert data["street"] == result[company_NIP]["street"]
+    assert data["postcode"] == result[company_NIP]["postcode"]
+    assert data["city"] == result[company_NIP]["city"]
+    assert data["country_code"] == result[company_NIP]["country_code"]
+
+
+# def test_register(publicClient: TestClient):
+
+#     fake = Faker()
+
+#     data = {
+#         "first_name": "faker_000_" + fake.first_name(),
+#         "last_name": "faker_000_" + fake.last_name(),
+#         "email": "faker_000_" + fake.ascii_email(),
+#         "password": "string",
+#         "password_confirmation": "string",
+#         "country": "pl",
+#         "company_tax_id": "9542752600",
+#         "company_name": "faker_000_" + fake.company(),
+#         "company_street": "string",
+#         "company_city": "string",
+#         "company_postcode": "string",
+#         "company_info_changed": True,
+#         "tos": True,
+#         "tz": "Europe/Warsaw",
+#         "lang": "pl",
+#     }
+#     headers = {"tenant": "public", "Content-Type": "application/json"}
+#     response = publicClient.post("/auth/register", data=json.dumps(data), headers=headers)
+#     data = response.json()
+
+#     logger.error(data)
+#     assert response.status_code == 200

@@ -15,6 +15,22 @@ from app.service.tenants import alembic_upgrade_head
 cc_router = APIRouter()
 
 
+@cc_router.get("/create")
+def read_item(schema: str):
+    # tenant_create(schema)
+    # alembic_upgrade_head(schema)
+    return {"schema": schema}
+
+
+@cc_router.get("/check_revision")
+def check_revision(schema: str):
+    # with with_db(schema) as db:
+    #     context = MigrationContext.configure(db.connection())
+    #     script = alembic.script.ScriptDirectory.from_config(alembic_config)
+    #     if context.get_current_revision() != script.get_current_head():
+    return {"ok": True}
+
+
 @cc_router.get("/", name="companies:List")
 def cc_get_all(*, db: Session = Depends(get_public_db)):
 

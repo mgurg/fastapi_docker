@@ -24,7 +24,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
-from app.db import SQLALCHEMY_DATABASE_URL, get_db
+from app.db import SQLALCHEMY_DATABASE_URL, get_db, get_public_db
 from app.main import app
 from app.service.bearer_auth import has_token
 from app.service.tenants import alembic_upgrade_head, tenant_create
@@ -64,10 +64,15 @@ URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD
 # URL = SQLALCHEMY_DATABASE_URL
 
 
+def pytest_configure():
+    print("Hello World")
+
+
 @pytest.fixture(scope="module", autouse=True)
 def my_fixture():
     # app.dependency_overrides[get_settings] = get_settings_override
     os.environ["TESTING"] = "1"
+    os.environ["SQLALCHEMY_WARN_20"] = "1"
     logger.info("INITIALIZATION ")
     alembic_upgrade_head("a", "head", URL)
     yield
@@ -108,6 +113,32 @@ def client_fixture(session: Session):
         return {"user_id": 1}
 
     app.dependency_overrides[get_db] = get_session_override
+    app.dependency_overrides[has_token] = get_auth_override
+
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture(name="publicSession")
+def public_session_fixture():
+
+    engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+    schema_translate_map = dict(tenant="public")
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as session:
+        yield session
+
+
+@pytest.fixture(name="publicClient")
+def public_client_fixture(publicSession: Session):
+    def get_session_override():
+        return publicSession
+
+    def get_auth_override():
+        return {"user_id": 1}
+
+    app.dependency_overrides[get_public_db] = get_session_override
     app.dependency_overrides[has_token] = get_auth_override
 
     client = TestClient(app)
