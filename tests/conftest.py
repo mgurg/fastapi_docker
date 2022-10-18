@@ -57,8 +57,11 @@ URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD
 
 
 def pytest_configure():
-    print("Hello World")
+    print("Hello! 👋")
 
+
+def pytest_unconfigure():
+    print("Bye! 🏁")
     # tenant_create("test_fake_schema")
     # print("Tenant  created")
     # alembic_upgrade_head("test_fake_schema", "head", URL)

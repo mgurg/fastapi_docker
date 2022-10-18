@@ -19,8 +19,8 @@ settings = get_settings()
 
 @timer
 def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
-    logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
-    print("Schema upgrade START for" + tenant_name + " to version: " + revision)
+    logger.info("🔺 [Schema upgrade] " + tenant_name + " to version: " + revision)
+    print("🔺[Schema upgrade] " + tenant_name + " to version: " + revision)
     # set the paths values
 
     if url is None:
@@ -58,8 +58,8 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
         print(e)
         print(traceback.format_exc())
 
-    logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
-    print("Schema upgrade DONE for: " + tenant_name + " to version: " + revision)
+    logger.info("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
+    print("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
 
 
 @timer

@@ -75,29 +75,28 @@ if settings.ENVIRONMENT == "PRD":
 
 @app.on_event("startup")
 def startup():
-    logger.info("🚀 Starting up and initializing app...")
+    logger.info("🚀 [Starting up] Initializing DB data...")
     alembic_upgrade_head("public", "d6ba8c13303e")
-    logger.info("🚀 Starting up and initializing app... DONE")
-    # job = scheduler.add_job(myfunc, "interval", minutes=1)
-    # scheduler.start()
-    # jobs = scheduler.get_jobs()
-    # print(jobs)
-    logger.info("🚀 Starting up and initializing app... JOB")
-    # job.remove()
+    logger.info("🎽[Job] Running test Job")
 
 
 def myfunc(text: str):
-    logger.info("🚀 JOB" + text)
-    print("JOB " + text)
+    logger.info("👍 Job Message: " + text)
+    logger.info("Waiting for first request ...")
+    print("👍 Job Message: " + text)
+    print("Waiting for first request ...")
+    print()
 
 
 start_scheduler(app)
-job = scheduler.add_job(myfunc, args=["SDF"])
+job = scheduler.add_job(myfunc, args=["Everything OK, aplication is running correctly"])
 # scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
 
 
 @app.on_event("shutdown")
 def shutdown_event():
+    logger.info("👋 Bye!")
+    print("👋 Bye!")
     # scheduler.shutdown()
     pass
 
