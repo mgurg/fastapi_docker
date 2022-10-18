@@ -1,17 +1,10 @@
-import json
-
-from faker import Faker
 from fastapi.testclient import TestClient
-from loguru import logger
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-
-from app.models.models import User
 
 
 def test_get_users(session: Session, client: TestClient):
     response = client.get("/users", headers={"tenant": "a"})
-    data = response.json()
+    response.json()
     assert response.status_code == 200
 
 

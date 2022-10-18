@@ -1,9 +1,6 @@
 # project/tests/conftest.py
 
-import argparse
 import os
-import warnings
-from pathlib import Path
 
 # from starlette.testclient import TestClient
 import alembic
@@ -13,21 +10,16 @@ import alembic.runtime.environment  # pylint: disable=E0401
 import alembic.script  # pylint: disable=E0401
 import alembic.util  # pylint: disable=E0401
 import pytest
-import sqlalchemy as sa
-from alembic import command
-from alembic.config import Config
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from loguru import logger
-from sentry_sdk import capture_message
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.config import Settings, get_settings
-from app.db import SQLALCHEMY_DATABASE_URL, get_db, get_public_db
+from app.db import get_db, get_public_db
 from app.main import app
 from app.service.bearer_auth import has_token
-from app.service.tenants import alembic_upgrade_head, tenant_create
+from app.service.tenants import alembic_upgrade_head
 
 # def get_settings_override():
 #     load_dotenv("./app/.env")

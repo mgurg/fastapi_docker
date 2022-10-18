@@ -1,7 +1,4 @@
-from uuid import uuid4
-
 import sentry_sdk
-from faker import Faker
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -19,7 +16,7 @@ from app.api.users_permissions import permission_router
 from app.config import get_settings
 from app.service.health_check import test_db
 from app.service.scheduler import scheduler, start_scheduler
-from app.service.tenants import alembic_upgrade_head, tenant_create
+from app.service.tenants import alembic_upgrade_head
 
 settings = get_settings()
 # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573

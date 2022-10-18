@@ -1,24 +1,14 @@
-import io
-import json
-
-from faker import Faker
 from fastapi.testclient import TestClient
-from loguru import logger
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 
 settings = get_settings()
 
-from pathlib import Path
-
-from app.models.models import User
-
 
 def test_get_files(session: Session, client: TestClient):
     response = client.get("/files/", headers={"tenant": "a"})
-    data = response.json()
+    response.json()
     assert response.status_code == 200
 
 

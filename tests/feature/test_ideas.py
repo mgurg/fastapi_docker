@@ -11,7 +11,7 @@ from app.models.models import Idea
 
 def test_get_ideas(session: Session, client: TestClient):
     response = client.get("/ideas", headers={"tenant": "a"})
-    data = response.json()
+    response.json()
     assert response.status_code == 200
 
 
