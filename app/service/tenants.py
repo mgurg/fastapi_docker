@@ -71,9 +71,22 @@ def tenant_create(schema: str) -> None:
             db.commit()
     except Exception as e:
         capture_exception(e)
-        logger.error(e)
+        logger.error(e, exc_info=True)
         print(e)
     logger.info("Done create schema: " + schema)
+
+
+def tenant_remove(schema: str) -> None:
+    logger.info("START DROP schema: " + schema)
+    try:
+        with with_db("public") as db:
+            db.execute(sa.schema.DropSchema(schema, cascade=True))
+            db.commit()
+    except Exception as e:
+        capture_exception(e)
+        logger.error(e, exc_info=True)
+        print(e)
+    logger.info("Done DROP schema: " + schema)
 
 
 def generate_tenant_id(name: str, uuid: UUID) -> str:

@@ -3,6 +3,7 @@ from functools import lru_cache
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
+from loguru import logger
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, declarative_base
 
@@ -93,7 +94,8 @@ def with_db(tenant_schema: str | None):
     try:
         db = Session(autocommit=False, autoflush=False, bind=connectable)
         yield db
-    except Exception:
+    except Exception as e:
+        logger.error(e, exc_info=True)
         print("ERRRR: " + tenant_schema)
     finally:
         db.close()

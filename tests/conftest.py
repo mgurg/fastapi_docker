@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db, get_public_db
 from app.main import app
 from app.service.bearer_auth import has_token
-from app.service.tenants import alembic_upgrade_head
+from app.service.tenants import alembic_upgrade_head, tenant_create, tenant_remove
 
 # def get_settings_override():
 #     load_dotenv("./app/.env")
@@ -59,6 +59,12 @@ URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD
 def pytest_configure():
     print("Hello World")
 
+    # tenant_create("test_fake_schema")
+    # print("Tenant  created")
+    # alembic_upgrade_head("test_fake_schema", "head", URL)
+    # print("Tenant B upgraded")
+    # tenant_remove("b")
+
 
 @pytest.fixture(scope="module", autouse=True)
 def my_fixture():
@@ -66,7 +72,7 @@ def my_fixture():
     os.environ["TESTING"] = "1"
     os.environ["SQLALCHEMY_WARN_20"] = "1"
     logger.info("INITIALIZATION ")
-    alembic_upgrade_head("a", "head", URL)
+    # alembic_upgrade_head("a", "head", URL)
     yield
     logger.critical("TEAR DOWN")
 
