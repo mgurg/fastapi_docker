@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.10.7-slim-bullseye
+FROM python:3.10.8-slim-bullseye
 # FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
 
 RUN apt-get update && apt-get install -y \

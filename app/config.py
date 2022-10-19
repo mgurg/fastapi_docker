@@ -3,7 +3,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
+from loguru import logger
 from pydantic import BaseSettings
+
+APP_DIR = Path(__file__).parent.parent / "app"
 
 
 class Settings(BaseSettings):
@@ -50,9 +53,11 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = ""
         env_file_encoding = "utf-8"
-        env_file = ".env"
+        env_file = f"{APP_DIR}/.env"
 
 
 @lru_cache()
 def get_settings() -> BaseSettings:
+    # path = Path(__file__).parent.parent / "app" / ".env.testing"
+    # return Settings(_env_file=path.as_posix(), _env_file_encoding="utf-8")
     return Settings()

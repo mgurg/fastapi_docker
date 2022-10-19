@@ -1,3 +1,4 @@
+import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -5,6 +6,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
+from loguru import logger
 from passlib.hash import argon2
 from sentry_sdk import capture_exception
 from sqlalchemy import select
@@ -125,11 +127,15 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
     }
     crud_auth.create_public_user(shared_db, user)
 
-    scheduler.add_job(tenant_create, args=[db_company.tenant_id])
-    scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
-
-    # tenant_create(db_company.tenant_id)
-    # alembic_upgrade_head(db_company.tenant_id)
+    if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+        # tenant_create("fake_tenant_company_for_test_00000000000000000000000000000000")
+        # alembic_upgrade_head("fake_tenant_company_for_test_00000000000000000000000000000000")
+        logger.error("AUTH SCHEMA " + db_company.tenant_id)
+        tenant_create(db_company.tenant_id)
+        alembic_upgrade_head(db_company.tenant_id)
+    else:
+        scheduler.add_job(tenant_create, args=[db_company.tenant_id])
+        scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification {"mode": settings.environment}
     # email = EmailNotification(settings.email_labs_app_key, settings.email_labs_secret_key, settings.email_smtp)

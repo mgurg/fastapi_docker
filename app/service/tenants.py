@@ -1,4 +1,5 @@
 import argparse
+import os
 import re
 import traceback
 from uuid import UUID
@@ -54,9 +55,9 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
         # upgrade command
         command.upgrade(config, revision, sql=sql, tag=tag)
     except Exception as e:
+        logger.error(e)
         capture_exception(e)
-        print(e)
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
 
     logger.info("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
     print("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
@@ -65,14 +66,14 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
 @timer
 def tenant_create(schema: str) -> None:
     logger.info("START create schema: " + schema)
+
     try:
         with with_db("public") as db:
             db.execute(sa.schema.CreateSchema(schema))
             db.commit()
     except Exception as e:
+        logger.error(e)
         capture_exception(e)
-        logger.error(e, exc_info=True)
-        print(e)
     logger.info("Done create schema: " + schema)
 
 
