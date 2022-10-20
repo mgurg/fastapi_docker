@@ -12,12 +12,15 @@ class EmailNotification:
     def __init__(self):
         self.app_key = settings.email_labs_app_key
         self.secret_key = settings.email_labs_secret_key
-        self.smtp = ""
+        self.smtp = settings.email_smtp
         self.auth_header = base64.b64encode(f"{self.app_key}:{self.secret_key}".encode())
         self.url = "https://api.emaillabs.net.pl/api/sendmail_templates"
-        self.smtp = settings.email_smtp
+        self.sender = settings.email_sender
 
-    def send(self, sender: str, receiver: str, subject: str, template: str, vars: dict):
+    def send(self, receiver: str, subject: str, template: str, vars: dict):
+
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            return "TEST_EMAIL_NOTIFICATION"
 
         if settings.ENVIRONMENT != "PRD":
             receiver = settings.email_dev
@@ -29,7 +32,7 @@ class EmailNotification:
 
         headers = {"Authorization": f"Basic {self.auth_header.decode()}"}
         template_data = {
-            "from": sender,
+            "from": self.sender,
             "smtp_account": self.smtp,
             "subject": subject,
             "template_id": template,
@@ -51,9 +54,6 @@ class EmailNotification:
         #  'files[0][mime]' : "image/png",
         #  'files[0][content]' : base64.b64encode(file_get_contents("grafika.png")),
         # }
-
-        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
-            return "TEST_EMAIL_NOTIFICATION"
 
         # print(response.text)
         # pprint(payload)

@@ -144,7 +144,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
 
     # Notification
     email = EmailNotification()
-    receiver = user.email.strip()
+    receiver = user["email"]
 
     template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
         "product_name": "Intio",
@@ -153,7 +153,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
         "sender_name": "Michał",
         "action_url": "https://beta.remontmaszyn.pl/activate/" + service_token,
     }
-    email.send(settings.email_sender, receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
+    email.send(receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
 
     return {"ok": True}
 
