@@ -20,4 +20,6 @@ echo "isort"
 isort app
 echo "flake8"
 flake8 app --count --statistics --max-line-length 120
+echo "truncate log file"
+: > ~/Git/fastapi_docker/app/logs/logs.log
 echo "OK"

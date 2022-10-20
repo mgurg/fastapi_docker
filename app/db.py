@@ -29,16 +29,18 @@ DEFAULT_DATABASE_DB = settings.DEFAULT_DATABASE_DB
 #     path=settings.DEFAULT_DATABASE_DB,
 # )
 
-# SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+echo = False
+if settings.ENVIRONMENT != "PRD":
+    print(SQLALCHEMY_DATABASE_URL)
+    echo = True
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
 
 # print(SQLALCHEMY_DATABASE_URL)
 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
-
-print(SQLALCHEMY_DATABASE_URL)
 
 
 class TenantNotFoundError(Exception):

@@ -1,4 +1,5 @@
 import sentry_sdk
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -75,7 +76,7 @@ if settings.ENVIRONMENT == "PRD":
 def startup():
     logger.info("🚀 [Starting up] Initializing DB data...")
     alembic_upgrade_head("public", "d6ba8c13303e")
-    logger.info("🎽[Job] Running test Job")
+    logger.info("🎽 [Job] Running test Job")
 
 
 def myfunc(text: str):
@@ -124,8 +125,9 @@ def health_check_db():
     return test_db()
 
 
-# if __name__ == "__main__":
-# if settings.ENV == "production":
-#     uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-# else:
-# uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+if __name__ == "__main__":
+    logger.info("Running APP locally (not docker)")
+    if settings.ENVIRONMENT == "PRD":
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+    else:
+        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
