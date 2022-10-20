@@ -19,11 +19,7 @@ from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
 
 settings = get_settings()
-# TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
-sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
-
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
-
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
 
@@ -58,6 +54,8 @@ def create_application() -> FastAPI:
 
 app = create_application()
 if settings.ENVIRONMENT == "PRD":
+    # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
+    sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
     app.add_middleware(SentryAsgiMiddleware)
 
 # if settings.ENVIRONMENT != "PRD":

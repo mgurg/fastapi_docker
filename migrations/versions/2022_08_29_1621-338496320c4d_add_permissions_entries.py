@@ -27,6 +27,7 @@ def upgrade() -> None:
         sa.Column("name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+        sa.Column("group", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
     )
 
     op.bulk_insert(

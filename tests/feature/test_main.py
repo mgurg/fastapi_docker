@@ -9,10 +9,3 @@ def test_main():
     response = client.get("/")
     assert response.status_code == 200
     # assert response.json() == {"Hello": "World"}
-
-
-# def test_tenant_create():
-#     response = client.get("/create?name=a&schema=a&host=a")
-#     assert response.status_code == 200
-#     assert response.json() == {"name": "a", "schema": "a", "host": "a"}
-#     assert True

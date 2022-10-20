@@ -47,7 +47,24 @@ alembic downgrade -1
 ```
 ### 🧪 Tests
 
-Right now, manually created schema `a` is required to execute tests. 
+Right now, manual clean-up is required after each test: 
+
+```sql
+DELETE FROM public.public_users 
+WHERE email LIKE 'faker_000_%';
+
+DELETE FROM public.public_companies  
+WHERE city  LIKE 'faker_000_%';
+
+DROP SCHEMA IF EXISTS "fake_tenant_company_for_test_00000000000000000000000000000000" CASCADE;
+```
+
+To run tests locally in VS Code export environment variable first:
+```bash
+export DB_HOST=localhost DB_PORT=5432 DB_DATABASE=pg_db DB_USERNAME=postgres DB_PASSWORD=postgres
+``` 
+
+Test execution (with code coverage):
 
 ```bash
 (.venv) fastapi-multitenant-example-app$ coverage run -m pytest -v tests && coverage report -m

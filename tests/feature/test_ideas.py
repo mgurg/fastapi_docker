@@ -10,7 +10,9 @@ from app.models.models import Idea
 
 
 def test_get_ideas(session: Session, client: TestClient):
-    response = client.get("/ideas", headers={"tenant": "a"})
+    response = client.get(
+        "/ideas", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
     response.json()
     assert response.status_code == 200
 
@@ -32,7 +34,10 @@ def test_add_ideas(session: Session, client: TestClient):
             ],
         },
     }
-    headers = {"tenant": "a", "Content-Type": "application/json"}
+    headers = {
+        "tenant": "fake_tenant_company_for_test_00000000000000000000000000000000",
+        "Content-Type": "application/json",
+    }
     response = client.post("/ideas/", data=json.dumps(data), headers=headers)
     data = response.json()
     logger.info(data)
@@ -40,21 +45,23 @@ def test_add_ideas(session: Session, client: TestClient):
 
 
 def test_get_idea(session: Session, client: TestClient):
-    user = session.execute(select(Idea).order_by(func.random()).limit(1)).scalar_one()
-    response = client.get("/ideas/" + str(user.uuid), headers={"tenant": "a"})
+    idea = session.execute(select(Idea).order_by(func.random()).limit(1)).scalar_one()
+    response = client.get(
+        "/ideas/" + str(idea.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
     data = response.json()
     assert response.status_code == 200
-    assert data["color"] == user.color
-    assert data["title"] == user.title
-    assert data["description"] == user.description
-    assert data["uuid"] == str(user.uuid)
+    assert data["color"] == idea.color
+    assert data["title"] == idea.title
+    assert data["description"] == idea.description
+    assert data["uuid"] == str(idea.uuid)
 
 
-def test_delete_user(session: Session, client: TestClient):
-    user = session.execute(select(Idea).order_by(func.random()).limit(1)).scalar_one()
-    logger.info(user.uuid)
-    response = client.delete("/ideas/" + str(user.uuid), headers={"tenant": "a"})
-    data = response.json()
-    logger.info(data)
-    # {'ok': True}
-    assert response.status_code == 200
+# def test_delete_idea(session: Session, client: TestClient):
+#     idea = session.execute(select(Idea).order_by(func.random()).limit(1)).scalar_one()
+#     logger.info(idea.uuid)
+#     response = client.delete("/ideas/" + str(idea.uuid), headers={"tenant": "a"})
+#     data = response.json()
+#     logger.info(data)
+#     # {'ok': True}
+#     assert response.status_code == 200

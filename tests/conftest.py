@@ -34,9 +34,6 @@ from app.service.tenants import alembic_upgrade_head, tenant_create, tenant_remo
 #     return settings
 # return Settings(testing=1, TEST_SQLALCHEMY_DATABASE_URI='os.environ.get("TEST_SQLALCHEMY_DATABASE_URI")')
 
-
-# logger.info(Settings.TEST_SQLALCHEMY_DATABASE_URI)
-
 # @pytest.fixture
 # def aws_credentials():
 #     """Mocked AWS Credentials for moto."""
@@ -45,7 +42,7 @@ from app.service.tenants import alembic_upgrade_head, tenant_create, tenant_remo
 #     os.environ["AWS_SECURITY_TOKEN"] = "testing"
 #     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
-ENV_PATH = Path(__file__).parent.parent / "app" / ".env.testing"
+# ENV_PATH = Path(__file__).parent.parent / "app" / ".env.testing"
 
 # load_dotenv("/home/mgur/Git/fastapi_docker/app/.env.testing")
 DEFAULT_DATABASE_USER = os.getenv("DB_USERNAME")
@@ -60,25 +57,11 @@ os.environ["TESTING"] = str("1")
 os.environ["SQLALCHEMY_WARN_20"] = "1"
 
 
-# URL = SQLALCHEMY_DATABASE_URL
-
-
 def pytest_configure():
     print("Hello! 👋")
-
-    # load_dotenv(ENV_PATH)
-    # os.environ["TESTING"] = str("1")
-    # os.environ["SQLALCHEMY_WARN_20"] = "1"
     logger.error("Hello ENV: " + os.getenv("TESTING"))
     logger.error("Hello ENV: " + os.getenv("ENVIRONMENT"))
     # logger.error("Hello ENV: " + os.getenv("EMAIL_DEV"))
-
-    # DEFAULT_DATABASE_USER = os.getenv("DB_USERNAME")
-    # DEFAULT_DATABASE_PASSWORD = os.getenv("DB_PASSWORD")
-    # DEFAULT_DATABASE_HOSTNAME = os.getenv("DB_HOST")
-    # DEFAULT_DATABASE_PORT = os.getenv("DB_PORT")
-    # DEFAULT_DATABASE_DB = os.getenv("DB_DATABASE")
-    # URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
     # tenant_create("test_fake_schema")
 
@@ -123,7 +106,7 @@ def pytest_unconfigure():
 def session_fixture():
 
     engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
-    schema_translate_map = dict(tenant="a")
+    schema_translate_map = dict(tenant="fake_tenant_company_for_test_00000000000000000000000000000000")
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as session:
         yield session

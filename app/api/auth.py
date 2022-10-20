@@ -90,6 +90,9 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
         company = re.sub("[^A-Za-z0-9 _]", "", unidecode(user.company_name))
         tenant_id = "".join([company[:28], "_", uuid.replace("-", "")]).lower().replace(" ", "_")
 
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            tenant_id = "fake_tenant_company_for_test_00000000000000000000000000000000"
+
         company_data = {
             "uuid": uuid,
             "name": user.company_name,
@@ -108,6 +111,9 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
         tenant_id = db_company.tenant_id
 
     service_token = secrets.token_hex(32)
+    if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+        today = datetime.now().strftime("%A-%Y-%m-%d-%H")
+        service_token = ("a" * int(64 - len(today))) + today
 
     user = {
         "uuid": str(uuid4()),

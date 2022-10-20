@@ -1,11 +1,51 @@
 from fastapi.testclient import TestClient
+from loguru import logger
 from sqlalchemy.orm import Session
 
 
 def test_get_users(session: Session, client: TestClient):
-    response = client.get("/users", headers={"tenant": "a"})
-    response.json()
+    response = client.get(
+        "/users", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
+    r = {
+        "items": [
+            {
+                "first_name": "faker_000_Thomas",
+                "last_name": "faker_000_Franklin",
+                "email": "faker_000_@email.com",
+                "phone": None,
+                "uuid": "ef37fb58-98aa-4a85-8901-5b63a0c3563b",
+                "is_active": True,
+                "is_verified": True,
+                "role_FK": {
+                    "uuid": "e255f78e-704f-4046-b1d7-89bb83786fef",
+                    "role_name": "ADMIN_MASTER",
+                    "role_title": "Main admin",
+                },
+            }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 50,
+    }
+    data = response.json()
+    logger.error(data)
     assert response.status_code == 200
+    assert data["items"]
+    assert data["total"]
+    assert data["page"]
+    assert data["size"]
+    assert data["items"][0]["first_name"]
+    assert data["items"][0]["last_name"]
+    assert data["items"][0]["email"]
+    # assert data["items"][0]["phone"]
+    assert data["items"][0]["uuid"]
+    assert data["items"][0]["is_active"]
+    assert data["items"][0]["is_verified"]
+    assert data["items"][0]["role_FK"]
+    assert data["items"][0]["role_FK"]["uuid"]
+    assert data["items"][0]["role_FK"]["role_name"]
+    assert data["items"][0]["role_FK"]["role_title"]
 
 
 # TODO role_uuid
@@ -23,7 +63,7 @@ def test_get_users(session: Session, client: TestClient):
 #         "password_confirmation": password
 #         # "is_verified": True,
 #     }
-#     headers = {"tenant": "a", "Content-Type": "application/json"}
+#     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
 #     response = client.post("/users/", data=json.dumps(data), headers=headers)
 #     data = response.json()
 #     logger.info(data)
@@ -46,7 +86,7 @@ def test_get_users(session: Session, client: TestClient):
 #     }
 
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
-#     headers = {"tenant": "a", "Content-Type": "application/json"}
+#     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
 
 #     response = client.patch("/users/" + str(user.uuid), data=json.dumps(data), headers=headers)
 #     data = response.json()
@@ -55,7 +95,7 @@ def test_get_users(session: Session, client: TestClient):
 
 # def test_get_user(session: Session, client: TestClient):
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
-#     response = client.get("/users/" + str(user.uuid), headers={"tenant": "a"})
+#     response = client.get("/users/" + str(user.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
 #     data = response.json()
 #     assert response.status_code == 200
 #     assert data["first_name"] == user.first_name
@@ -67,7 +107,7 @@ def test_get_users(session: Session, client: TestClient):
 # def test_delete_user(session: Session, client: TestClient):
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
 #     logger.info(user.uuid)
-#     response = client.delete("/users/" + str(user.uuid), headers={"tenant": "a"})
+#     response = client.delete("/users/" + str(user.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
 #     data = response.json()
 #     logger.info(data)
 #     # {'ok': True}
