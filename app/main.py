@@ -96,7 +96,6 @@ def shutdown_event():
     logger.info("👋 Bye!")
     print("👋 Bye!")
     # scheduler.shutdown()
-    pass
 
 
 @app.get("/", include_in_schema=False)

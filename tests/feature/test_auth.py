@@ -1,5 +1,4 @@
 import json
-import random
 from datetime import datetime
 
 # from starlette.testclient import TestClient
@@ -95,7 +94,7 @@ def test_register(publicClient: TestClient):
 
 def test_first_run(publicClient: TestClient):
 
-    fake = Faker()
+    Faker()
     today = datetime.now().strftime("%A-%Y-%m-%d-%H")
     service_token = ("a" * int(64 - len(today))) + today
 

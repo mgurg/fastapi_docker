@@ -4,9 +4,7 @@ from sqlalchemy.orm import Session
 
 
 def test_get_users(session: Session, client: TestClient):
-    response = client.get(
-        "/users", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
-    )
+    response = client.get("/users", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
     r = {
         "items": [
             {

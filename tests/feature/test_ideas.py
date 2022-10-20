@@ -10,9 +10,7 @@ from app.models.models import Idea
 
 
 def test_get_ideas(session: Session, client: TestClient):
-    response = client.get(
-        "/ideas", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
-    )
+    response = client.get("/ideas", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
     response.json()
     assert response.status_code == 200
 

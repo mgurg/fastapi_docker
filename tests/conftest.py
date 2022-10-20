@@ -1,7 +1,6 @@
 # project/tests/conftest.py
 
 import os
-from pathlib import Path
 
 # from starlette.testclient import TestClient
 import alembic
@@ -11,7 +10,6 @@ import alembic.runtime.environment  # pylint: disable=E0401
 import alembic.script  # pylint: disable=E0401
 import alembic.util  # pylint: disable=E0401
 import pytest
-from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from loguru import logger
 from sqlalchemy import create_engine
@@ -20,7 +18,6 @@ from sqlalchemy.orm import Session
 from app.db import get_db, get_public_db
 from app.main import app
 from app.service.bearer_auth import has_token
-from app.service.tenants import alembic_upgrade_head, tenant_create, tenant_remove
 
 # def get_settings_override():
 #     load_dotenv("./app/.env")
@@ -52,6 +49,19 @@ DEFAULT_DATABASE_PORT = os.getenv("DB_PORT")
 DEFAULT_DATABASE_DB = os.getenv("DB_DATABASE")
 URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
+# engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+# connection = engine.connect()
+# trans = connection.begin()
+# try:
+#     connection.execute("DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';")
+#     connection.execute("DELETE FROM public.public_companies  WHERE city LIKE 'faker_000_%';")
+#     connection.execute(
+#         "DROP SCHEMA IF EXISTS 'fake_tenant_company_for_test_00000000000000000000000000000000' CASCADE;"
+#     )
+#     trans.commit()
+# except:
+#     trans.rollback()
+
 os.environ["ENVIRONMENT"] = "PYTEST"
 os.environ["TESTING"] = str("1")
 os.environ["SQLALCHEMY_WARN_20"] = "1"
@@ -69,11 +79,6 @@ def pytest_configure():
 def pytest_unconfigure():
     print("Bye! 🏁")
 
-    # print("Tenant  created")
-    # alembic_upgrade_head("test_fake_schema", "head", URL)
-    # print("Tenant B upgraded")
-    # tenant_remove("b")
-
 
 # @pytest.fixture(scope="module", autouse=True)
 # def my_fixture():
@@ -85,21 +90,6 @@ def pytest_unconfigure():
 #     # alembic_upgrade_head("a", "head", URL)
 #     yield
 #     logger.critical("TEAR DOWN")
-
-
-# @pytest.fixture(scope="session")
-# def apply_migrations():
-#     logger.critical("e1")
-#     warnings.filterwarnings("ignore", category=DeprecationWarning)
-#     os.environ["TESTING"] = "1"
-#     try:
-#         # tenant_create("a")
-#         alembic_upgrade_head("a", "head", "postgresql+psycopg2://postgres:postgres@192.166.219.228:5432/postgres")
-#     except Exception as e:
-#         print(e)
-#         logger.critical("e2")
-#     yield
-#     # alembic.command.downgrade(config, "base")
 
 
 @pytest.fixture(name="session")

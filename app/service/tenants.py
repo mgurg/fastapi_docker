@@ -1,7 +1,5 @@
 import argparse
-import os
 import re
-import traceback
 from uuid import UUID
 
 import sqlalchemy as sa

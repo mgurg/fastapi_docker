@@ -3,7 +3,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from loguru import logger
 from pydantic import BaseSettings
 
 APP_DIR = Path(__file__).parent.parent / "app"
