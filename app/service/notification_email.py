@@ -1,4 +1,5 @@
 import base64
+import os
 
 from requests import request
 
@@ -8,10 +9,13 @@ settings = get_settings()
 
 
 class EmailNotification:
-    def __init__(self, app_key: str, secret_key: str, smtp: str):
-        self.auth_header = base64.b64encode(f"{app_key}:{secret_key}".encode())
+    def __init__(self):
+        self.app_key = settings.email_labs_app_key
+        self.secret_key = settings.email_labs_secret_key
+        self.smtp = ""
+        self.auth_header = base64.b64encode(f"{self.app_key}:{self.secret_key}".encode())
         self.url = "https://api.emaillabs.net.pl/api/sendmail_templates"
-        self.smtp = smtp
+        self.smtp = settings.email_smtp
 
     def send(self, sender: str, receiver: str, subject: str, template: str, vars: dict):
 
@@ -48,9 +52,11 @@ class EmailNotification:
         #  'files[0][content]' : base64.b64encode(file_get_contents("grafika.png")),
         # }
 
-        response = request("POST", self.url, headers=headers, data=payload, files=files)
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            return "TEST_EMAIL_NOTIFICATION"
 
         # print(response.text)
         # pprint(payload)
 
+        response = request("POST", self.url, headers=headers, data=payload, files=files)
         return response.text
