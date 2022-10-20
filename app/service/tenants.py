@@ -83,7 +83,7 @@ def tenant_remove(schema: str) -> None:
             db.commit()
     except Exception as e:
         capture_exception(e)
-        logger.error(e, exc_info=True)
+        logger.error(e)
         print(e)
     logger.info("Done DROP schema: " + schema)
 
