@@ -11,7 +11,6 @@ from app.models.shared_models import PublicCompany, PublicUser
 from app.utils.decorators import timer
 
 
-@timer
 def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
     return db.execute(select(PublicUser).where(PublicUser.email == email)).scalar_one_or_none()
 

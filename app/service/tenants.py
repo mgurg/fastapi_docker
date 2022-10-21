@@ -61,7 +61,6 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
     print("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
 
 
-@timer
 def tenant_create(schema: str) -> None:
     logger.info("START create schema: " + schema)
 
