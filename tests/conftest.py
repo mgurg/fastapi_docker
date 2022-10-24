@@ -69,6 +69,7 @@ os.environ["SQLALCHEMY_WARN_20"] = "1"
 
 def pytest_configure():
     print("Hello! 👋")
+    # logger.error("Database URL: " + URL)
     logger.error("Hello ENV: " + os.getenv("TESTING"))
     logger.error("Hello ENV: " + os.getenv("ENVIRONMENT"))
     # logger.error("Hello ENV: " + os.getenv("EMAIL_DEV"))

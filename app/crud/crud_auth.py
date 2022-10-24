@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 
 from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
-from app.utils.decorators import timer
 
 
 def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
