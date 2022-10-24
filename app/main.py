@@ -128,9 +128,9 @@ def health_check_db():
     return test_db()
 
 
-if __name__ == "__main__":
-    logger.info("Running APP locally (not docker)")
-    if settings.ENVIRONMENT == "PRD":
-        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-    else:
-        uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+# if __name__ == "__main__":
+#     logger.info("Running APP locally (not docker)")
+#     if settings.ENVIRONMENT == "PRD":
+#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
+#     else:
+#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
