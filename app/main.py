@@ -124,11 +124,6 @@ def health_check_db():
     return test_db()
 
 
-@app.get("/req")
-def test_req(req: Request):
-    return req.headers
-
-
 # if __name__ == "__main__":
 #     logger.info("Running APP locally (not docker)")
 #     if settings.ENVIRONMENT == "PRD":
