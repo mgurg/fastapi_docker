@@ -38,6 +38,7 @@ APScheduler = "4.0.0a2"
 rich = "^12.5.1"
 #sqlalchemy-easy-profile = "^1.2.1"
 pyvieser = "^0.0.4"
+pyotp = "^2.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
