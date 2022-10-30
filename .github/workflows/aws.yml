@@ -76,6 +76,8 @@ jobs:
             --build-arg EMAIL_DEV="${{ secrets.EMAIL_DEV }}" \
             --build-arg SENTRY_DSN="${{ secrets.SENTRY_DSN }}" \
             --build-arg GUS_API_DEV="${{ secrets.GUS_API_DEV }}" \
+            --build-arg API_VIDEO="${{ secrets.API_VIDEO }}" \
+            --build-arg API_VIDEO_UPLOAD="${{ secrets.API_VIDEO_UPLOAD }}" \
             --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
             --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             --build-arg DB_HOST=${{ secrets.DB_HOST }} \

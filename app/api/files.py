@@ -1,9 +1,11 @@
 import io
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 from uuid import UUID, uuid4
 
+import requests
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
@@ -161,3 +163,33 @@ def file_download_presigned(tenant, file):
 
     url = generate_presigned_url(tenant, file)
     return url
+
+
+@file_router.get("/video_upload_token/", name="video:token")
+def video_upload_token(tenant, file):
+
+    # #  https://api.video/blog/tutorials/delegated-uploads
+    # # Part One
+    # payload = json.dumps({"apiKey": "47yczv1m0huXDEg6iyNRqYT9QXmUcMAArHY0Qqzgz0I"})
+    # headers = {"accept": "application/json", "content-type": "application/json"}
+
+    # response = requests.post("https://sandbox.api.video/auth/api-key", headers=headers, data=payload)
+
+    # print(response.text)  # get Bearer Token
+
+    # #  Part Two
+
+    # payload = {}
+    # headers = {
+    #     "accept": "application/vnd.api.video+json",
+    #     "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2NjcwNjk5NzEuOTc1NjMsIm5iZiI6MTY2NzA2OTk3MS45NzU2MywiZXhwIjoxNjY3MDczNTcxLjk3NTYzLCJhcGlLZXlWYWx1ZSI6IjQ3eWN6djFtMGh1WERFZzZpeU5ScVlUOVFYbVVjTUFBckhZMFFxemd6MEkifQ.mjmX4u_TjTinuSi2_ogSbLmA9mR7WvHSAqecadESPkTMUh_z6GHM6UJVCSYGZm6_fFjWrhkMAEJZeJ7PzMZsFW3bjsbrfm9SwcpBv71INOTr05xxRMqVxeY758mgfr6NwMqfoqHNJ6Tw-HzMG1N1zbxb8TFR8ow49O0l_HGpvlbH3TN5wAv8ju5iIGyjRT3W0KMMuBlU1duEE5SVerMqyINqbEyoz1m78mDrZDBzL3iUcLgfau1zbrpjOZ3nNF3mRDCXckij9nPVUkk1sSDXed_XS_wx5dZBuv0dF7w0SG6V1Py1Ho5eqNT_Jk3zpRUeeIj3tPHzswdGEBRPcT9Ytw",
+    # }
+
+    # response = requests.post("https://sandbox.api.video/upload-tokens", headers=headers, data=payload)
+
+    # print(response.text)  # final upload token
+
+    # url = generate_presigned_url(tenant, file)
+
+    token = settings.API_VIDEO_UPLOAD
+    return "url"
