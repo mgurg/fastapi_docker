@@ -191,5 +191,6 @@ def video_upload_token(auth=Depends(has_token)):
 
     # url = generate_presigned_url(tenant, file)
 
-    token = settings.API_VIDEO_UPLOAD
-    return {"token": token}
+    upload_token = settings.API_VIDEO_UPLOAD
+    api_token = settings.API_VIDEO
+    return {"api_token": api_token, "upload_token": upload_token}
