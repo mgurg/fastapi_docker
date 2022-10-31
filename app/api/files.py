@@ -166,7 +166,7 @@ def file_download_presigned(tenant, file):
 
 
 @file_router.get("/video_upload_token/", name="video:token")
-def video_upload_token(tenant, file):
+def video_upload_token(auth=Depends(has_token)):
 
     # #  https://api.video/blog/tutorials/delegated-uploads
     # # Part One
@@ -192,4 +192,4 @@ def video_upload_token(tenant, file):
     # url = generate_presigned_url(tenant, file)
 
     token = settings.API_VIDEO_UPLOAD
-    return "url"
+    return {"token": token}
