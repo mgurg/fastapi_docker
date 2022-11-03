@@ -119,3 +119,10 @@ class GroupResponse(BaseResponse):
     name: str | None
     description: str | None
     users: list[UserBasicResponse]
+
+
+class ItemResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    description: str | None
+    description_jsonb: dict | None

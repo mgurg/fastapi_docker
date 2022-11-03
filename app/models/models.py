@@ -160,6 +160,31 @@ class Idea(Base):
     pictures = relationship("File", secondary=idea_file_rel, back_populates="idea")
 
 
+item_file_rel = sa.Table(
+    "items_files_link",
+    Base.metadata,
+    sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="items_files_link_fk_1"),
+    # ForeignKeyConstraint(["item_id"], ["items.id"], name="items_files_link_fk"),
+    # PrimaryKeyConstraint("item_id", "file_id", name="items_files_link_pkey"),
+)
+
+
+class Item(Base):
+    __tablename__ = "items"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
+    description_jsonb = sa.Column(JSONB, autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    attachments = relationship("File", secondary=item_file_rel, back_populates="item")
+
+
 class File(Base):
     __tablename__ = "files"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
@@ -175,6 +200,7 @@ class File(Base):
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     idea = relationship("Idea", secondary=idea_file_rel, back_populates="pictures")
+    item = relationship("Item", secondary=item_file_rel, back_populates="attachments")
 
 
 class Setting(Base):

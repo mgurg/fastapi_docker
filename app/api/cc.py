@@ -46,7 +46,8 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
 
     processed = []
     for company in db_companies:
-        scheduler.add_job(alembic_upgrade_head, args=[company.tenant_id], id=company.tenant_id)
+        # TODO: one by one
+        scheduler.run_job(alembic_upgrade_head, args=[company.tenant_id])  #  id=company.tenant_id
         processed.append(company.tenant_id)
 
     return processed
@@ -55,6 +56,6 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
 @cc_router.post("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
 def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str):
 
-    scheduler.add_job(alembic_upgrade_head, args=[tenant_id], id="tenant_id")
+    scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
 
     return {"ok": True}

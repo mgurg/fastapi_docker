@@ -1,11 +1,9 @@
 import io
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 from uuid import UUID, uuid4
 
-import requests
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session

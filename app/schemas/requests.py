@@ -100,3 +100,15 @@ class GroupEditIn(BaseRequest):
     symbol: str | None
     description: str | None
     users: list[UUID] | None
+
+
+class ItemAddIn(BaseRequest):
+    name: str
+    description: str | None
+    description_jsonb: dict | None
+
+
+class ItemEditIn(BaseRequest):
+    name: str | None
+    description: str | None
+    description_jsonb: dict | None
