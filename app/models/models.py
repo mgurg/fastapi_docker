@@ -185,6 +185,22 @@ class Item(Base):
     attachments = relationship("File", secondary=item_file_rel, back_populates="item")
 
 
+class Guide(Base):
+    __tablename__ = "guides"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    resource = sa.Column("resource", sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    resource_id = sa.Column("resource_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    name = sa.Column("name", sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
+    is_starred = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=False)
+    text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
+    text_jsonb = sa.Column(JSONB, autoincrement=False, nullable=True)
+    video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    video_jsonb = sa.Column("video_jsonb", JSONB, autoincrement=False, nullable=True)
+    created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
 class File(Base):
     __tablename__ = "files"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)

@@ -112,3 +112,15 @@ class ItemEditIn(BaseRequest):
     name: str | None
     description: str | None
     description_jsonb: dict | None
+
+
+class GuideAddIn(BaseRequest):
+    name: str
+    text: str
+    text_jsonb: dict
+
+
+class GuideEditIn(BaseRequest):
+    name: str | None
+    text: str | None
+    text_jsonb: dict | None

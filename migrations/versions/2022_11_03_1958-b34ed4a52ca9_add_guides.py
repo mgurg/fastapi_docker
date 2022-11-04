@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column("resource", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("resource_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False),
-        sa.Column("is_starred", sa.BOOLEAN(), autoincrement=False, nullable=False),
+        sa.Column("is_starred", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("text", sa.TEXT, autoincrement=False, nullable=True),
         sa.Column("text_jsonb", postgresql.JSONB, autoincrement=False, nullable=True),
         sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True),

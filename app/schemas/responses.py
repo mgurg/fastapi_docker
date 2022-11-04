@@ -126,3 +126,10 @@ class ItemResponse(BaseResponse):
     name: str | None
     description: str | None
     description_jsonb: dict | None
+
+
+class GuideResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    text: str | None
+    text_jsonb: dict | None
