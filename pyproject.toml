@@ -47,6 +47,7 @@ isort = "^5.10.1"
 autoflake = "^1.4"
 sqlacodegen = "3.0.0rc1"
 pytest-cov = "^4.0.0"
+pytest-pretty = "^0.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
