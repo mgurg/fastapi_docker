@@ -116,8 +116,9 @@ class ItemEditIn(BaseRequest):
 
 class GuideAddIn(BaseRequest):
     name: str
-    text: str
-    text_jsonb: dict
+    text_html: str
+    text_json: dict
+    video_id: str | None
 
 
 class GuideEditIn(BaseRequest):

@@ -1,6 +1,8 @@
+import json
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
+from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
@@ -41,11 +43,21 @@ def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depend
 @guide_router.post("/", response_model=GuideResponse)
 def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
 
+    html = guide.text_html
+    soup = BeautifulSoup(html, "html.parser")
+    name = soup.find("h1").get_text().strip()
+    for s in soup.select("h1"):
+        s.extract()
+    description = soup.get_text()
+
+    json_object = json.dumps(guide.text_json)
+
     item_data = {
         "uuid": str(uuid4()),
-        "name": guide.name,
-        "text": guide.text,
-        "text_jsonb": guide.text_jsonb,
+        "name": name,
+        "text": description,
+        "text_jsonb": json_object,
+        "video_id": guide.video_id,
         "created_at": datetime.now(timezone.utc),
     }
 
