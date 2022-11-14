@@ -50,13 +50,13 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
         s.extract()
     description = soup.get_text()
 
-    json_object = json.dumps(guide.text_json)
+    json.dumps(guide.text_json)
 
     item_data = {
         "uuid": str(uuid4()),
         "name": name,
         "text": description,
-        "text_jsonb": json_object,
+        "text_jsonb": guide.text_json,
         "video_id": guide.video_id,
         "created_at": datetime.now(timezone.utc),
     }
