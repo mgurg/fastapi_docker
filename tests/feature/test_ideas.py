@@ -38,7 +38,7 @@ def test_add_ideas(session: Session, client: TestClient):
         "tenant": "fake_tenant_company_for_test_00000000000000000000000000000000",
         "Content-Type": "application/json",
     }
-    response = client.request("POST", "/ideas/", data=json.dumps(data), headers=headers)
+    response = client.request("POST", "/ideas/", content=json.dumps(data), headers=headers)
     data = response.json()
     logger.info(data)
     assert response.status_code == 200

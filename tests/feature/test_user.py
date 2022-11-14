@@ -64,7 +64,7 @@ def test_get_users(session: Session, client: TestClient):
 #         # "is_verified": True,
 #     }
 #     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
-#     response = client.request("POST","/users/", data=json.dumps(data), headers=headers)
+#     response = client.request("POST","/users/", content=json.dumps(data), headers=headers)
 #     data = response.json()
 #     logger.info(data)
 #     assert response.status_code == 200
@@ -88,7 +88,7 @@ def test_get_users(session: Session, client: TestClient):
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
 #     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
 
-#     response = client.request("PATCH","/users/" + str(user.uuid), data=json.dumps(data), headers=headers)
+#     response = client.request("PATCH","/users/" + str(user.uuid), content=json.dumps(data), headers=headers)
 #     data = response.json()
 #     assert response.status_code == 200
 

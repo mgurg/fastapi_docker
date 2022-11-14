@@ -50,7 +50,7 @@ def test_account_limit(publicClient: TestClient):
 #     data = {"country": "pl", "company_tax_id": company_NIP}
 
 #     headers = {"tenant": "public", "Content-Type": "application/json"}
-#     response = publicClient.request("POST","/auth/company_info", data=json.dumps(data), headers=headers)
+#     response = publicClient.request("POST","/auth/company_info", content=json.dumps(data), headers=headers)
 #     data = response.json()
 
 #     logger.error(data)
@@ -85,7 +85,7 @@ def test_register(publicClient: TestClient):
         "lang": "pl",
     }
     headers = {"tenant": "public", "Content-Type": "application/json"}
-    response = publicClient.request("POST", "/auth/register", data=json.dumps(data), headers=headers)
+    response = publicClient.request("POST", "/auth/register", content=json.dumps(data), headers=headers)
     data = response.json()
 
     assert response.status_code == 200
@@ -102,7 +102,7 @@ def test_first_run(publicClient: TestClient):
         "token": service_token,
     }
     headers = {"tenant": "public", "Content-Type": "application/json"}
-    response = publicClient.request("POST", "/auth/first_run", data=json.dumps(data), headers=headers)
+    response = publicClient.request("POST", "/auth/first_run", content=json.dumps(data), headers=headers)
     data = response.json()
 
     a = {
@@ -129,7 +129,7 @@ def test_login(publicClient: TestClient):
     data = {"email": "faker_000_@email.com", "password": "fake__password_string", "permanent": True}
 
     headers = {"tenant": "public", "Content-Type": "application/json"}
-    response = publicClient.request("POST", "/auth/login", data=json.dumps(data), headers=headers)
+    response = publicClient.request("POST", "/auth/login", content=json.dumps(data), headers=headers)
     data = response.json()
 
     r = {
