@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 
 
 def test_get_users(session: Session, client: TestClient):
-    response = client.get("/users", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
+    response = client.request(
+        "GET", "/users", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
     r = {
         "items": [
             {
@@ -62,7 +64,7 @@ def test_get_users(session: Session, client: TestClient):
 #         # "is_verified": True,
 #     }
 #     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
-#     response = client.post("/users/", data=json.dumps(data), headers=headers)
+#     response = client.request("POST","/users/", data=json.dumps(data), headers=headers)
 #     data = response.json()
 #     logger.info(data)
 #     assert response.status_code == 200
@@ -86,14 +88,14 @@ def test_get_users(session: Session, client: TestClient):
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
 #     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
 
-#     response = client.patch("/users/" + str(user.uuid), data=json.dumps(data), headers=headers)
+#     response = client.request("PATCH","/users/" + str(user.uuid), data=json.dumps(data), headers=headers)
 #     data = response.json()
 #     assert response.status_code == 200
 
 
 # def test_get_user(session: Session, client: TestClient):
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
-#     response = client.get("/users/" + str(user.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
+#     response = client.request("GET","/users/" + str(user.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
 #     data = response.json()
 #     assert response.status_code == 200
 #     assert data["first_name"] == user.first_name
@@ -105,7 +107,7 @@ def test_get_users(session: Session, client: TestClient):
 # def test_delete_user(session: Session, client: TestClient):
 #     user = session.execute(select(User).order_by(func.random()).limit(1)).scalar_one()
 #     logger.info(user.uuid)
-#     response = client.delete("/users/" + str(user.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
+#     response = client.request("DELETE","/users/" + str(user.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
 #     data = response.json()
 #     logger.info(data)
 #     # {'ok': True}

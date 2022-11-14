@@ -7,8 +7,8 @@ settings = get_settings()
 
 
 def test_get_files(session: Session, client: TestClient):
-    response = client.get(
-        "/files/", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    response = client.request(
+        "GET", "/files/", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
     )
     response.json()
     assert response.status_code == 200
@@ -27,7 +27,7 @@ def test_get_files(session: Session, client: TestClient):
 
 #     # headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "multipart/form-data"}
 #     headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
-#     response = client.post("/files/", data=data, headers=headers)
+#     response = client.request("POST","/files/", data=data, headers=headers)
 #     data = response.json()
 #     logger.info(data)
 #     assert response.status_code == 400

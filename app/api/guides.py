@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.crud import crud_guides
 from app.db import get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
-from app.schemas.responses import GuideResponse, ItemResponse, StandardResponse
+from app.schemas.responses import GuideResponse, StandardResponse
 from app.service.bearer_auth import has_token
 
 guide_router = APIRouter()

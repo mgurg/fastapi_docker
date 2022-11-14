@@ -10,7 +10,9 @@ from app.models.models import Idea
 
 
 def test_get_ideas(session: Session, client: TestClient):
-    response = client.get("/ideas", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"})
+    response = client.request(
+        "GET", "/ideas", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
     response.json()
     assert response.status_code == 200
 
@@ -36,7 +38,7 @@ def test_add_ideas(session: Session, client: TestClient):
         "tenant": "fake_tenant_company_for_test_00000000000000000000000000000000",
         "Content-Type": "application/json",
     }
-    response = client.post("/ideas/", data=json.dumps(data), headers=headers)
+    response = client.request("POST", "/ideas/", data=json.dumps(data), headers=headers)
     data = response.json()
     logger.info(data)
     assert response.status_code == 200
@@ -44,8 +46,10 @@ def test_add_ideas(session: Session, client: TestClient):
 
 def test_get_idea(session: Session, client: TestClient):
     idea = session.execute(select(Idea).order_by(func.random()).limit(1)).scalar_one()
-    response = client.get(
-        "/ideas/" + str(idea.uuid), headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    response = client.request(
+        "GET",
+        "/ideas/" + str(idea.uuid),
+        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"},
     )
     data = response.json()
     assert response.status_code == 200
@@ -58,7 +62,7 @@ def test_get_idea(session: Session, client: TestClient):
 # def test_delete_idea(session: Session, client: TestClient):
 #     idea = session.execute(select(Idea).order_by(func.random()).limit(1)).scalar_one()
 #     logger.info(idea.uuid)
-#     response = client.delete("/ideas/" + str(idea.uuid), headers={"tenant": "a"})
+#     response = client.request("DELETE","/ideas/" + str(idea.uuid), headers={"tenant": "a"})
 #     data = response.json()
 #     logger.info(data)
 #     # {'ok': True}
