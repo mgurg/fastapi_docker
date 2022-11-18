@@ -71,8 +71,7 @@ def file_add(
         raise HTTPException(status_code=400, detail="No file sent")
 
     quota = crud_files.get_files_size_in_db(db)
-    print("Quota:", quota)
-    if quota > 500000:
+    if quota > 50000000:  # ~5MB
         raise HTTPException(status_code=413, detail="Quota exceeded")
 
     if not uuid:
@@ -83,7 +82,7 @@ def file_add(
     try:
 
         s3_folder_path = "".join([str(request.headers.get("tenant", "None")), "/", file_uuid, "_", file.filename])
-        print(s3_folder_path)
+        # print(s3_folder_path)
 
         s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
     except Exception as e:
