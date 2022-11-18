@@ -119,9 +119,11 @@ class GuideAddIn(BaseRequest):
     text_html: str
     text_json: dict
     video_id: str | None
+    files: List[UUID] | None
 
 
 class GuideEditIn(BaseRequest):
     name: str | None
     text: str | None
     text_jsonb: dict | None
+    files: List[UUID] | None

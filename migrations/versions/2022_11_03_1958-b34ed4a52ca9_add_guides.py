@@ -36,6 +36,16 @@ def upgrade() -> None:
         schema=None,
     )
 
+    op.create_table(
+        "files_guides_link",
+        sa.Column("guide_id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
+        sa.Column("file_id", sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.ForeignKeyConstraint(["file_id"], ["files.id"], name="files_guides_link_fk"),
+        sa.ForeignKeyConstraint(["guide_id"], ["guides.id"], name="files_guides_link_fk_1"),
+        sa.PrimaryKeyConstraint("guide_id", "file_id", name="files_guides_link_pkey"),
+        schema=None,
+    )
+
 
 def downgrade() -> None:
     op.drop_table("guides", schema=None)

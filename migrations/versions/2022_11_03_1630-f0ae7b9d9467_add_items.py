@@ -32,19 +32,19 @@ def upgrade() -> None:
         schema=None,
     )
     op.create_table(
-        "items_files_link",
+        "files_items_link",
         sa.Column("item_id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("file_id", sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.ForeignKeyConstraint(["file_id"], ["files.id"], name="items_files_link_fk"),
-        sa.ForeignKeyConstraint(["item_id"], ["items.id"], name="items_files_link_fk_1"),
-        sa.PrimaryKeyConstraint("item_id", "file_id", name="items_files_link_pkey"),
+        sa.ForeignKeyConstraint(["file_id"], ["files.id"], name="files_items_link_fk"),
+        sa.ForeignKeyConstraint(["item_id"], ["items.id"], name="files_items_link_fk_1"),
+        sa.PrimaryKeyConstraint("item_id", "file_id", name="files_items_link_pkey"),
         schema=None,
     )
 
 
 def downgrade() -> None:
-    op.drop_constraint("items_files_link_fk", "items_files_link")
-    op.drop_constraint("items_files_link_fk_1", "items_files_link")
-    op.drop_constraint("items_files_link_pkey", "items_files_link")
+    op.drop_constraint("files_items_link_fk", "files_items_link")
+    op.drop_constraint("files_items_link_fk_1", "files_items_link")
+    op.drop_constraint("files_items_link_pkey", "files_items_link")
     op.drop_table("items", schema=None)
-    op.drop_table("items_files_link", schema=None)
+    op.drop_table("files_items_link", schema=None)

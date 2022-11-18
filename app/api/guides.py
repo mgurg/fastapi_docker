@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
-from app.crud import crud_guides
+from app.crud import crud_files, crud_guides
 from app.db import get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideResponse, StandardResponse
@@ -43,6 +43,13 @@ def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depend
 @guide_router.post("/", response_model=GuideResponse)
 def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
 
+    files = []
+    if guide.files is not None:
+        for file in guide.files:
+            db_file = crud_files.get_file_by_uuid(db, file)
+            if db_file:
+                files.append(db_file)
+
     html = guide.text_html
     soup = BeautifulSoup(html, "html.parser")
     name = soup.find("h1").get_text().strip()
@@ -54,7 +61,7 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
 
     item_data = {
         "uuid": str(uuid4()),
-        "name": name,
+        "name": guide.name,
         "text": description,
         "text_jsonb": guide.text_json,
         "video_id": guide.video_id,

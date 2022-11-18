@@ -129,14 +129,14 @@ class User(Base):
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
 
 
-idea_file_rel = sa.Table(
-    "ideas_files_link",
+file_idea_rel = sa.Table(
+    "files_ideas_link",
     Base.metadata,
     sa.Column("idea_id", sa.ForeignKey("ideas.id"), autoincrement=False, nullable=False, primary_key=True),
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
-    # ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
-    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
-    # PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="files_ideas_link_fk_1"),
+    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="files_ideas_link_fk"),
+    # PrimaryKeyConstraint("idea_id", "file_id", name="files_ideas_link_pkey"),
 )
 
 
@@ -157,17 +157,17 @@ class Idea(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    pictures = relationship("File", secondary=idea_file_rel, back_populates="idea")
+    pictures = relationship("File", secondary=file_idea_rel, back_populates="idea")
 
 
-item_file_rel = sa.Table(
-    "items_files_link",
+file_item_rel = sa.Table(
+    "files_items_link",
     Base.metadata,
     sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
-    # ForeignKeyConstraint(["file_id"], ["files.id"], name="items_files_link_fk_1"),
-    # ForeignKeyConstraint(["item_id"], ["items.id"], name="items_files_link_fk"),
-    # PrimaryKeyConstraint("item_id", "file_id", name="items_files_link_pkey"),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="files_items_link_fk_1"),
+    # ForeignKeyConstraint(["item_id"], ["items.id"], name="files_items_link_fk"),
+    # PrimaryKeyConstraint("item_id", "file_id", name="files_items_link_pkey"),
 )
 
 
@@ -182,7 +182,7 @@ class Item(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    attachments = relationship("File", secondary=item_file_rel, back_populates="item")
+    attachments = relationship("File", secondary=file_item_rel, back_populates="item")
 
 
 class Guide(Base):
@@ -215,8 +215,8 @@ class File(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    idea = relationship("Idea", secondary=idea_file_rel, back_populates="pictures")
-    item = relationship("Item", secondary=item_file_rel, back_populates="attachments")
+    idea = relationship("Idea", secondary=file_idea_rel, back_populates="pictures")
+    item = relationship("Item", secondary=file_item_rel, back_populates="attachments")
 
 
 class Setting(Base):
