@@ -53,9 +53,6 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
 
     html = guide.text_html
     soup = BeautifulSoup(html, "html.parser")
-    soup.find("h1").get_text().strip()
-    for s in soup.select("h1"):
-        s.extract()
     description = soup.get_text()
 
     json.dumps(guide.text_json)
@@ -66,7 +63,7 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
         "text": description,
         "text_jsonb": guide.text_json,
         "video_id": guide.video_id,
-        "imgs": files,
+        "files_guide": files,
         "created_at": datetime.now(timezone.utc),
     }
 

@@ -57,8 +57,8 @@ def ideas_get_all(
     if status is not None:
         all_filters.append(Idea.status == status)
     if hasImg is True:
-        all_filters.append(Idea.pictures.any())
-        # all_filters.append(Idea.pictures.any(Files.size > 279824))
+        all_filters.append(Idea.files_idea.any())
+        # all_filters.append(Idea.files_idea.any(Files.size > 279824))
     if search is not None:
         all_filters.append(func.concat(Idea.title, " ", Idea.description).ilike(f"%{search}%"))
 
@@ -76,7 +76,7 @@ def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, request: Re
         raise HTTPException(status_code=404, detail="Idea not found")
 
     try:
-        for picture in idea.pictures:
+        for picture in idea.files_idea:
             picture.url = generate_presigned_url(
                 request.headers.get("tenant", "public"),
                 "_".join([str(picture.uuid), picture.file_name]),
@@ -113,9 +113,9 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
 
     html = idea.body_html
     soup = BeautifulSoup(html, "html.parser")
-    title = soup.find("h1").get_text().strip()
-    for s in soup.select("h1"):
-        s.extract()
+    # title = soup.find("h1").get_text().strip()
+    # for s in soup.select("h1"):
+    #     s.extract()
     description = soup.get_text()
 
     json_object = json.dumps(idea.body_json)
@@ -127,14 +127,14 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "uuid": str(uuid4()),
         "author_id": auth["user_id"],
         "color": idea.color,
-        "title": title,
+        "title": idea.title,
         "description": description,
         "body_json": json_object,
         "body_jsonb": json_object,
         "upvotes": 0,
         "downvotes": 0,
         "status": "pending",
-        "pictures": files,
+        "files_idea": files,
         "created_at": datetime.now(timezone.utc),
     }
 
@@ -240,9 +240,9 @@ def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, auth=Depe
         raise HTTPException(status_code=404, detail="Idea not found")
 
     # Delete Files
-    for pictures in db_idea.pictures:
-        db_file = crud_files.get_file_by_id(db, pictures.id)
-        db_idea.pictures.remove(pictures)
+    for files_idea in db_idea.files_idea:
+        db_file = crud_files.get_file_by_id(db, files_idea.id)
+        db_idea.files_idea.remove(files_idea)
         db.delete(db_file)
         db.commit()
 

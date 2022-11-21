@@ -173,7 +173,7 @@ class IdeaIndexResponse(BaseModel):
     downvotes: int | None
     status: str | None
     created_at: datetime
-    pictures: List[FileBasicInfo] | None
+    files_idea: List[FileBasicInfo] | None
 
     class Config:
         orm_mode = True
@@ -185,7 +185,7 @@ class GuideIndexResponse(BaseModel):
     text: str | None
     text_jsonb: dict | None
     video_id: str | None
-    imgs: List[FileBasicInfo] | None
+    files_guide: List[FileBasicInfo] | None
 
     class Config:
         orm_mode = True

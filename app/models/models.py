@@ -157,7 +157,7 @@ class Idea(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    pictures = relationship("File", secondary=file_idea_rel, back_populates="idea")
+    files_idea = relationship("File", secondary=file_idea_rel, back_populates="idea")
 
 
 file_item_rel = sa.Table(
@@ -182,7 +182,7 @@ class Item(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    attachments = relationship("File", secondary=file_item_rel, back_populates="item")
+    files_item = relationship("File", secondary=file_item_rel, back_populates="item")
 
 
 file_guide_rel = sa.Table(
@@ -211,7 +211,7 @@ class Guide(Base):
     created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    imgs = relationship("File", secondary=file_guide_rel, back_populates="guide")
+    files_guide = relationship("File", secondary=file_guide_rel, back_populates="guide")
 
 
 class File(Base):
@@ -228,9 +228,9 @@ class File(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    idea = relationship("Idea", secondary=file_idea_rel, back_populates="pictures")
-    item = relationship("Item", secondary=file_item_rel, back_populates="attachments")
-    guide = relationship("Guide", secondary=file_guide_rel, back_populates="imgs")
+    idea = relationship("Idea", secondary=file_idea_rel, back_populates="files_idea")
+    item = relationship("Item", secondary=file_item_rel, back_populates="files_item")
+    guide = relationship("Guide", secondary=file_guide_rel, back_populates="files_guide")
 
 
 class Setting(Base):
