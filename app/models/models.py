@@ -185,6 +185,17 @@ class Item(Base):
     attachments = relationship("File", secondary=file_item_rel, back_populates="item")
 
 
+file_guide_rel = sa.Table(
+    "files_guides_link",
+    Base.metadata,
+    sa.Column("guide_id", sa.ForeignKey("guides.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
+    # ForeignKeyConstraint(["file_id"], ["files.id"], name="files_ideas_link_fk_1"),
+    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="files_ideas_link_fk"),
+    # PrimaryKeyConstraint("idea_id", "file_id", name="files_ideas_link_pkey"),
+)
+
+
 class Guide(Base):
     __tablename__ = "guides"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
@@ -199,6 +210,8 @@ class Guide(Base):
     video_jsonb = sa.Column("video_jsonb", JSONB, autoincrement=False, nullable=True)
     created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    imgs = relationship("File", secondary=file_guide_rel, back_populates="guide")
 
 
 class File(Base):
@@ -217,6 +230,7 @@ class File(Base):
 
     idea = relationship("Idea", secondary=file_idea_rel, back_populates="pictures")
     item = relationship("Item", secondary=file_item_rel, back_populates="attachments")
+    guide = relationship("Guide", secondary=file_guide_rel, back_populates="imgs")
 
 
 class Setting(Base):

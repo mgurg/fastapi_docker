@@ -80,7 +80,6 @@ def file_add(
         file_uuid = uuid
 
     try:
-
         s3_folder_path = "".join([str(request.headers.get("tenant", "None")), "/", file_uuid, "_", file.filename])
         # print(s3_folder_path)
 

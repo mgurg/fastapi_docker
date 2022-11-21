@@ -179,6 +179,18 @@ class IdeaIndexResponse(BaseModel):
         orm_mode = True
 
 
+class GuideIndexResponse(BaseModel):
+    uuid: UUID
+    name: str | None
+    text: str | None
+    text_jsonb: dict | None
+    video_id: str | None
+    imgs: List[FileBasicInfo] | None
+
+    class Config:
+        orm_mode = True
+
+
 class SettingBase(BaseModel):
     __tablename__ = "users"
     id: int

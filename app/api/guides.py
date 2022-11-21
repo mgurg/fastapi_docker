@@ -11,6 +11,7 @@ from app.crud import crud_files, crud_guides
 from app.db import get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideResponse, StandardResponse
+from app.schemas.schemas import GuideIndexResponse
 from app.service.bearer_auth import has_token
 
 guide_router = APIRouter()
@@ -33,7 +34,7 @@ def item_get_all(
     return paginate(db_guides, params)
 
 
-@guide_router.get("/{guide_uuid}", response_model=GuideResponse)  # , response_model=Page[UserIndexResponse]
+@guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
 def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
@@ -52,7 +53,7 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
 
     html = guide.text_html
     soup = BeautifulSoup(html, "html.parser")
-    name = soup.find("h1").get_text().strip()
+    soup.find("h1").get_text().strip()
     for s in soup.select("h1"):
         s.extract()
     description = soup.get_text()
@@ -65,6 +66,7 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
         "text": description,
         "text_jsonb": guide.text_json,
         "video_id": guide.video_id,
+        "imgs": files,
         "created_at": datetime.now(timezone.utc),
     }
 
