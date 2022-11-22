@@ -3,8 +3,9 @@ from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
+from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
 from app.crud import crud_files, crud_guides
@@ -12,6 +13,7 @@ from app.db import get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideResponse, StandardResponse
 from app.schemas.schemas import GuideIndexResponse
+from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
 guide_router = APIRouter()
@@ -35,8 +37,17 @@ def item_get_all(
 
 
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
-def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
+def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
+
+    try:
+        for picture in db_guide.files_guide:
+            picture.url = generate_presigned_url(
+                request.headers.get("tenant", "public"),
+                "_".join([str(picture.uuid), picture.file_name]),
+            )
+    except Exception as e:
+        capture_exception(e)
 
     return db_guide
 
