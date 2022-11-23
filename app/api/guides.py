@@ -95,7 +95,7 @@ def item_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEd
     files = []
     if ("files" in guide_data) and (guide_data["files"] is not None):
         for file in db_guide.file:
-            db_guide.file.remove(file)
+            db_guide.files_guide.remove(file)
         for file in guide_data["files"]:
             db_file = crud_files.get_file_by_uuid(db, file)
             if db_file:
