@@ -68,19 +68,19 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
 
     json.dumps(guide.text_json)
 
-    item_data = {
+    guide_data = {
         "uuid": str(uuid4()),
         "name": guide.name,
         "text": description,
-        "text_jsonb": guide.text_json,
+        "text_jsonb": guide.text_json,  # TODO -> to text_json
         "video_id": guide.video_id,
         "files_guide": files,
         "created_at": datetime.now(timezone.utc),
     }
 
-    new_item = crud_guides.create_guide(db, item_data)
+    new_guide = crud_guides.create_guide(db, guide_data)
 
-    return new_item
+    return new_guide
 
 
 @guide_router.patch("/{guide_uuid}", response_model=GuideResponse)
@@ -90,12 +90,25 @@ def item_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEd
     if not db_guide:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    item_data = guide.dict(exclude_unset=True)
-    item_data["updated_at"] = datetime.now(timezone.utc)
+    guide_data = guide.dict(exclude_unset=True)
 
-    new_item = crud_guides.update_guide(db, db_guide, item_data)
+    files = []
+    if ("files" in guide_data) and (guide_data["files"] is not None):
+        for file in db_guide.file:
+            db_guide.file.remove(file)
+        for file in guide_data["files"]:
+            db_file = crud_files.get_file_by_uuid(db, file)
+            if db_file:
+                files.append(db_file)
 
-    return new_item
+        guide_data["files_guide"] = files
+        del guide_data["files"]
+
+    guide_data["updated_at"] = datetime.now(timezone.utc)
+
+    new_guide = crud_guides.update_guide(db, db_guide, guide_data)
+
+    return new_guide
 
 
 @guide_router.delete("/{guide_uuid}", response_model=StandardResponse)
