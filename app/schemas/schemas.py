@@ -185,6 +185,7 @@ class GuideIndexResponse(BaseModel):
     text: str | None
     text_jsonb: dict | None
     video_id: str | None
+    video_jsonb: dict | None
     files_guide: List[FileBasicInfo] | None
 
     class Config:

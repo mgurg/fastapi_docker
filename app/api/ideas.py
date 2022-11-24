@@ -217,14 +217,14 @@ def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditI
 
     files = []
     if ("files" in idea_data) and (idea_data["files"] is not None):
-        for file in db_idea.file:
-            db_idea.file.remove(file)
+        for file in db_idea.files_idea:
+            db_idea.files_idea.remove(file)
         for file in idea_data["files"]:
             db_file = crud_files.get_file_by_uuid(db, file)
             if db_file:
                 files.append(db_file)
 
-        idea_data["file"] = files
+        idea_data["files_idea"] = files
         del idea_data["files"]
 
     crud_ideas.update_idea(db, db_idea, idea_data)

@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
@@ -66,13 +65,14 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
     soup = BeautifulSoup(html, "html.parser")
     description = soup.get_text()
 
-    json.dumps(guide.text_json)
+    # json.dumps(guide.text_json)
 
     guide_data = {
         "uuid": str(uuid4()),
         "name": guide.name,
         "text": description,
         "text_jsonb": guide.text_json,  # TODO -> to text_json
+        "video_jsonb": guide.video_jsonb,
         "video_id": guide.video_id,
         "files_guide": files,
         "created_at": datetime.now(timezone.utc),
