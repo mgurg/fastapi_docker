@@ -433,7 +433,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "httpcore"
-version = "0.16.1"
+version = "0.16.2"
 description = "A minimal low-level HTTP client."
 category = "main"
 optional = false

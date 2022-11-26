@@ -178,6 +178,7 @@ class Item(Base):
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
     description_jsonb = sa.Column(JSONB, autoincrement=False, nullable=True)
+    qr_code_id = sa.Column(sa.INTEGER, autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)

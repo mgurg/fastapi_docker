@@ -3,38 +3,38 @@ from uuid import UUID
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from app.models.models import Guide, Item
+from app.models.models import Item
 
 
-def get_guides(db: Session, search: str, sortColumn: str, sortOrder: str) -> Guide:
+def get_items(db: Session, search: str, sortColumn: str, sortOrder: str) -> Item:
     return db.execute(select(Item)).scalars().all()
     all_filters = []
 
     if search is not None:
-        all_filters.append(func.concat(Guide.first_name, " ", Guide.last_name).ilike(f"%{search}%"))
+        all_filters.append(func.concat(Item.first_name, " ", Item.last_name).ilike(f"%{search}%"))
 
     return db.execute(select(Item).filter(*all_filters).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
 
 
-def get_guide_by_uuid(db: Session, uuid: UUID) -> Guide:
-    return db.execute(select(Item).where(Guide.uuid == uuid)).scalar_one_or_none()
+def get_item_by_uuid(db: Session, uuid: UUID) -> Item:
+    return db.execute(select(Item).where(Item.uuid == uuid)).scalar_one_or_none()
 
 
-def create_guide(db: Session, data: dict) -> Guide:
-    new_guide = Item(**data)
-    db.add(new_guide)
+def create_item(db: Session, data: dict) -> Item:
+    new_item = Item(**data)
+    db.add(new_item)
     db.commit()
-    db.refresh(new_guide)
+    db.refresh(new_item)
 
-    return new_guide
+    return new_item
 
 
-def update_guide(db: Session, db_guide: Item, update_data: dict) -> Guide:
+def update_item(db: Session, db_item: Item, update_data: dict) -> Item:
     for key, value in update_data.items():
-        setattr(db_guide, key, value)
+        setattr(db_item, key, value)
 
-    db.add(db_guide)
+    db.add(db_item)
     db.commit()
-    db.refresh(db_guide)
+    db.refresh(db_item)
 
-    return db_guide
+    return db_item

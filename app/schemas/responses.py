@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -121,11 +122,28 @@ class GroupResponse(BaseResponse):
     users: list[UserBasicResponse]
 
 
+class FileBasicInfo(BaseResponse):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+    url: str | None
+
+
+class ItemIndexResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    description: str | None
+    description_jsonb: dict | None
+
+
 class ItemResponse(BaseResponse):
     uuid: UUID
     name: str | None
     description: str | None
     description_jsonb: dict | None
+    files_item: List[FileBasicInfo] | None
 
 
 class GuideResponse(BaseResponse):

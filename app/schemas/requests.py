@@ -70,6 +70,8 @@ class IdeasVotesIn(BaseRequest):
 class IdeaEditIn(BaseRequest):
     title: str | None
     description: str | None
+    body_json: dict | None
+    body_html: str | None
     color: str | None
     status: str | None
     vote: str | None
@@ -106,12 +108,16 @@ class ItemAddIn(BaseRequest):
     name: str
     description: str | None
     description_jsonb: dict | None
+    qr_code: str | None
+    files: List[UUID] | None
 
 
 class ItemEditIn(BaseRequest):
     name: str | None
     description: str | None
     description_jsonb: dict | None
+    qr_code: str | None
+    files: List[UUID] | None
 
 
 class GuideAddIn(BaseRequest):
