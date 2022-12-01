@@ -48,4 +48,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_constraint("files_guides_link_fk", "files_guides_link")
+    op.drop_constraint("files_guides_link_fk_1", "files_guides_link")
+    op.drop_constraint("files_guides_link_pkey", "files_guides_link")
     op.drop_table("guides", schema=None)
+    op.drop_table("files_guides_link", schema=None)
