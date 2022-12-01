@@ -138,12 +138,19 @@ class ItemIndexResponse(BaseResponse):
     description_jsonb: dict | None
 
 
+class GuideBasicResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    text: str | None
+
+
 class ItemResponse(BaseResponse):
     uuid: UUID
     name: str | None
     description: str | None
     description_jsonb: dict | None
     files_item: List[FileBasicInfo] | None
+    item_guides: List[GuideBasicResponse] | None
 
 
 class GuideResponse(BaseResponse):

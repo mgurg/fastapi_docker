@@ -71,7 +71,9 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column(
+        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
+    ),
 )
 
 
@@ -165,9 +167,14 @@ file_item_rel = sa.Table(
     Base.metadata,
     sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
-    # ForeignKeyConstraint(["file_id"], ["files.id"], name="files_items_link_fk_1"),
-    # ForeignKeyConstraint(["item_id"], ["items.id"], name="files_items_link_fk"),
-    # PrimaryKeyConstraint("item_id", "file_id", name="files_items_link_pkey"),
+)
+
+
+item_guide_rel = sa.Table(
+    "items_guides_link",
+    Base.metadata,
+    sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("guide_id", sa.ForeignKey("guides.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
 
@@ -184,6 +191,7 @@ class Item(Base):
     # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     files_item = relationship("File", secondary=file_item_rel, back_populates="item")
+    item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
 
 
 file_guide_rel = sa.Table(
@@ -213,6 +221,7 @@ class Guide(Base):
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     files_guide = relationship("File", secondary=file_guide_rel, back_populates="guide")
+    item = relationship("Item", secondary=item_guide_rel, back_populates="item_guides")
 
 
 class File(Base):
