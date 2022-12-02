@@ -91,7 +91,7 @@ def myfunc(text: str):
 
 
 start_scheduler(app)
-job = scheduler.add_job(myfunc, args=["Everything OK, aplication is running correctly"])
+job = scheduler.add_job(myfunc, args=["Everything OK, application is running correctly"])
 # scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
 
 
