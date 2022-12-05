@@ -211,6 +211,8 @@ def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditI
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")
 
+    json_object = json.dumps(idea.body_json)
+
     idea_data = idea.dict(exclude_unset=True)
     if "vote" in idea_data:
         del idea_data["vote"]
@@ -226,6 +228,8 @@ def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditI
 
         idea_data["files_idea"] = files
         del idea_data["files"]
+
+        idea_data["body_json"] = json_object
 
     crud_ideas.update_idea(db, db_idea, idea_data)
 
