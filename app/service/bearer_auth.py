@@ -14,20 +14,17 @@ settings = get_settings()
 security = HTTPBearer()
 
 
-def is_base64(sb: str | bytes) -> bool:
+def is_base64(sb: str) -> bool:
     try:
         if isinstance(sb, str):
             # If there's any unicode here, an exception will be thrown and the function will return false
-            sb_bytes = bytes(sb, "ascii")
-        elif isinstance(sb, bytes):
-            sb_bytes = sb
+            message_bytes = base64.b64decode(sb).decode("utf-8").encode("ascii")
+            base64_bytes = base64.b64encode(message_bytes)
+            base64_message = base64_bytes.decode("ascii")
+            return base64_message == sb
         else:
-            raise ValueError("Argument must be string or bytes")
+            raise ValueError("Argument must be string")
 
-        if len(sb_bytes.strip()) % 4 == 0:
-            return base64.b64encode(base64.b64decode(sb_bytes).decode("utf-8")) == sb_bytes
-        else:
-            return False
     except Exception:
         return False
 
