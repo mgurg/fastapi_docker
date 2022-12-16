@@ -71,7 +71,9 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column(
+        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
+    ),
 )
 
 
@@ -249,7 +251,20 @@ class Setting(Base):
     value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     prev_value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     descripton = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    updated_by = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+class QrCodes(Base):
+    __tablename__ = "qr_codes"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    resource = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    qr_code_id = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    qr_code_content = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    ecc = sa.Column(sa.CHAR(length=1), autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    anonymous_access = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 

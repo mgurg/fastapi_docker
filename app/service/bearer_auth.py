@@ -55,10 +55,11 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
         message_bytes = base64.b64decode(base64_bytes)
         message = message_bytes.decode("ascii")
 
-        tenant_id, date = message.split(".")  # TODO: tenant_id & date check
+        tenant_id, date = message.split(".")  # TODO: tenant_id
 
         dt = pendulum.from_format(date, "YYYY-MM-DD HH-mm-ss", tz="UTC")
-        print(date + " / " + dt)
+        if dt.diff(pendulum.now("UTC")).in_seconds() < 1:
+            raise HTTPException(status_code=401, detail="Anonymous token expired")
 
         return {"user_id": 0}
 

@@ -1,9 +1,11 @@
+import base64
 import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
+import pendulum
 from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
 from loguru import logger
@@ -14,7 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
 
 from app.config import get_settings
-from app.crud import crud_auth, crud_users
+from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
@@ -278,3 +280,41 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
         raise HTTPException(status_code=401, detail="Strange error")
 
     return db_user
+
+
+@auth_router.post("/qr/{qr_code}")
+def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str):
+
+    pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
+    if pattern.match(qr_code):
+
+        company, qr_id = qr_code.split("+")
+
+        # print("##################")
+        # print(company, board)
+
+        db_company = crud_auth.get_public_company_by_qr_id(shared_db, company)
+
+        if not db_company:
+            raise HTTPException(status_code=404, detail="Company not found")
+
+        token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
+        fake_token = f"{db_company.tenant_id}.{token_valid_to}"
+
+        message_bytes = fake_token.encode("ascii")
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode("ascii")
+
+        connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
+        with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+            db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
+
+            if not db_qr:
+                raise HTTPException(status_code=404, detail="QR not found")
+
+            if db_qr.anonymous_access is False:
+                base64_message = None
+
+            return {"url": f"/{db_qr.resource}/{db_qr.resource_uuid}", "anonymous_token": base64_message}
+
+    raise HTTPException(status_code=404, detail="Incorrect QR code")

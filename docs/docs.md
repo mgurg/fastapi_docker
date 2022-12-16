@@ -69,6 +69,27 @@ docker exec -it 64a05bfedffb sh
  - cancelled
 
 
+ ### QR CODES
+ `POST /auth/qr/{qr_code}`
+  
+  body:
+  
+  ```json
+  {
+    "tenant_id" : 1234,
+    "token": 213
+  }
+  ``` 
+
+QR Code format 4 letters (company/tentant ID) + 4 letters (resource id) ex: `8tl+234` 
+
+If `(token && tenant_id) == null`:
+  - Search QR Code (field: `qr_id`) in `public_companies`
+  - Return temporary token: `base64(db_company.tenant_id.token_valid_to)`
+  - Only available for anonymous Ideas without IMG/VIDEO
+
+  
+
 ### Events
 
 ```json
