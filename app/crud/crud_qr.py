@@ -1,6 +1,4 @@
-from uuid import UUID
-
-from sqlalchemy import func, select, text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.models import QrCodes

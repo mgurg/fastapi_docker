@@ -5,7 +5,6 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
-import pendulum
 from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
 from loguru import logger
@@ -289,9 +288,6 @@ def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str)
     if pattern.match(qr_code):
 
         company, qr_id = qr_code.split("+")
-
-        # print("##################")
-        # print(company, board)
 
         db_company = crud_auth.get_public_company_by_qr_id(shared_db, company)
 

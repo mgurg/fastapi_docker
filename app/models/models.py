@@ -71,9 +71,7 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column(
-        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
-    ),
+    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
 
