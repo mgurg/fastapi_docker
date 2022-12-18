@@ -127,6 +127,7 @@ class UserLoginIn(BaseModel):  # OK
 
 class UserLoginOut(BaseModel):  # OK
     auth_token: str
+    auth_token_valid_to: datetime
     first_name: str
     last_name: str
     tz: str
@@ -140,6 +141,7 @@ class UserLoginOut(BaseModel):  # OK
 
 
 class UserVerifyToken(BaseModel):  # OK
+    auth_token_valid_to: datetime
     first_name: str
     last_name: str
     tz: str
