@@ -55,6 +55,7 @@ def auth_account_limit(*, shared_db: Session = Depends(get_public_db)):
 
 @auth_router.post("/company_info")
 def auth_company_info(company: CompanyInfoRegisterIn):
+    company_details = None
     try:
         company = CompanyDetails(country=company.country, tax_id=company.company_tax_id)
         company_details = company.get_company_details()  # VIES -> GUS -> Rejestr.io
@@ -196,23 +197,23 @@ def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFir
             "tenant_id": db_public_user.tenant_id,
         }
 
-        db_tennat_user = crud_auth.create_tenant_user(db, user_data)
+        db_tenant_user = crud_auth.create_tenant_user(db, user_data)
 
     return {
         "ok": True,
-        "first_name": db_tennat_user.first_name,
-        "last_name": db_tennat_user.last_name,
-        "lang": db_tennat_user.lang,
-        "tz": db_tennat_user.tz,
-        "uuid": db_tennat_user.uuid,
-        "tenanat_id": db_tennat_user.tenant_id,
-        "token": db_tennat_user.auth_token,
+        "first_name": db_tenant_user.first_name,
+        "last_name": db_tenant_user.last_name,
+        "lang": db_tenant_user.lang,
+        "tz": db_tenant_user.tz,
+        "uuid": db_tenant_user.uuid,
+        "tenant_id": db_tenant_user.tenant_id,
+        "token": db_tenant_user.auth_token,
     }
 
 
 @auth_router.post("/login", response_model=UserLoginOut)
 def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
-    req.headers["User-Agent"]
+    print(req.headers["User-Agent"])
     db_public_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
 
     if db_public_user is None:
@@ -246,7 +247,7 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
             "updated_at": datetime.now(timezone.utc),
         }
 
-        db_user = crud_auth.update_tenant_user(db, db_user, update_package)
+        db_user_update = crud_auth.update_tenant_user(db, db_user, update_package)
 
         # Load with relations
         db_user = db.execute(

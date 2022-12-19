@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from random import randint
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -46,9 +47,6 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     except Exception as e:
         capture_exception(e)
 
-    print("############################")
-    print(db_item.qr_code)
-
     return db_item
 
 
@@ -67,7 +65,7 @@ def item_add(*, db: Session = Depends(get_db), item: ItemAddIn, auth=Depends(has
     qr_code_data = {
         "uuid": str(uuid4()),
         "resource": "items",
-        "qr_code_id": 132,
+        "qr_code_id": randint(100, 999),
         "qr_code_content": "https://beta.remontmaszyn.pl/qr/mzd+123",
         "ecc": "L",
         "created_at": datetime.now(timezone.utc),
