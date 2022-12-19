@@ -294,7 +294,7 @@ def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str)
         if not db_company:
             raise HTTPException(status_code=404, detail="Company not found")
 
-        token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H-%M-%S")
+        token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
         fake_token = f"{db_company.tenant_id}.{token_valid_to}"
 
         message_bytes = fake_token.encode("ascii")
