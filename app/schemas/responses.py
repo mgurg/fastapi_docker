@@ -37,6 +37,15 @@ class RoleBasic(BaseResponse):
     role_title: str
 
 
+class PermissionsLoginBasic(BaseResponse):
+    name: str
+
+
+class RoleLoginBasic(BaseResponse):
+    role_name: str
+    permission: list[PermissionsLoginBasic]
+
+
 class UserLoginOut(BaseResponse):  # OK
     auth_token: str
     first_name: str
@@ -44,7 +53,7 @@ class UserLoginOut(BaseResponse):  # OK
     tz: str
     lang: str
     uuid: UUID
-    role_FK: RoleBasic
+    role_FK: RoleLoginBasic
 
 
 class UserBasicResponse(BaseResponse):
@@ -180,7 +189,7 @@ class UserVerifyToken(BaseResponse):
     tz: str
     lang: str
     uuid: UUID
-    role_FK: RoleBasic
+    role_FK: RoleLoginBasic
 
 
 class UserLoginOut(BaseResponse):
@@ -191,5 +200,5 @@ class UserLoginOut(BaseResponse):
     tz: str
     lang: str
     uuid: UUID
-    role_FK: RoleBasic
+    role_FK: RoleLoginBasic
     tenant_id: str | None
