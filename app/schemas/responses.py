@@ -22,7 +22,7 @@ class ActivationResponse(BaseResponse):
     lang: str
     tz: str
     uuid: UUID
-    tenanat_id: str
+    tenant_id: str
     token: str
 
 

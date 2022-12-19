@@ -112,7 +112,7 @@ def test_first_run(publicClient: TestClient):
         "lang": "pl",
         "tz": "Europe/Warsaw",
         "uuid": "54495797-032c-4459-8dfb-7a0430235b78",
-        "tenanat_id": "fake_tenant_company_for_test_00000000000000000000000000000000",
+        "tenant_id": "fake_tenant_company_for_test_00000000000000000000000000000000",
         "token": "f8bcde19e66b142908af6afe4617f5e29b0eaf5b6a4717b9210d0d6e18b5731b",
     }
 
@@ -121,7 +121,7 @@ def test_first_run(publicClient: TestClient):
     assert data["ok"] == True
     assert data["lang"] == "pl"
     assert data["tz"] == "Europe/Warsaw"
-    assert data["tenanat_id"] == "fake_tenant_company_for_test_00000000000000000000000000000000"
+    assert data["tenant_id"] == "fake_tenant_company_for_test_00000000000000000000000000000000"
 
 
 def test_login(publicClient: TestClient):
