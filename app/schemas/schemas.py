@@ -125,32 +125,32 @@ class UserLoginIn(BaseModel):  # OK
         orm_mode = True
 
 
-class UserLoginOut(BaseModel):  # OK
-    auth_token: str
-    auth_token_valid_to: datetime
-    first_name: str
-    last_name: str
-    tz: str
-    lang: str
-    uuid: UUID
-    role_FK: RoleBasic
-    tenant_id: str | None
+# class UserLoginOut(BaseModel):  # OK
+#     auth_token: str
+#     auth_token_valid_to: datetime
+#     first_name: str
+#     last_name: str
+#     tz: str
+#     lang: str
+#     uuid: UUID
+#     role_FK: RoleBasic
+#     tenant_id: str | None
 
-    class Config:
-        orm_mode = True
+#     class Config:
+#         orm_mode = True
 
 
-class UserVerifyToken(BaseModel):  # OK
-    auth_token_valid_to: datetime
-    first_name: str
-    last_name: str
-    tz: str
-    lang: str
-    uuid: UUID
-    role_FK: RoleBasic
+# class UserVerifyToken(BaseModel):  # OK
+#     auth_token_valid_to: datetime
+#     first_name: str
+#     last_name: str
+#     tz: str
+#     lang: str
+#     uuid: UUID
+#     role_FK: RoleBasic
 
-    class Config:
-        orm_mode = True
+#     class Config:
+#         orm_mode = True
 
 
 class FileBasicInfo(BaseModel):

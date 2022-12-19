@@ -25,12 +25,14 @@ from app.schemas.requests import (
     UserLoginIn,
     UserRegisterIn,
 )
-from app.schemas.responses import (  # UserLoginOut
+from app.schemas.responses import (
     ActivationResponse,
     PublicCompanyCounterResponse,
     StandardResponse,
+    UserLoginOut,
+    UserQrToken,
+    UserVerifyToken,
 )
-from app.schemas.schemas import UserLoginOut, UserVerifyToken
 from app.service import auth
 from app.service.company_details import CompanyDetails
 from app.service.notification_email import EmailNotification
@@ -281,7 +283,7 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
     return db_user
 
 
-@auth_router.post("/qr/{qr_code}")
+@auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
 def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str):
 
     pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")

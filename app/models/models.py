@@ -71,7 +71,9 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column(
+        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
+    ),
 )
 
 
@@ -183,13 +185,15 @@ class Item(Base):
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
     description_jsonb = sa.Column(JSONB, autoincrement=False, nullable=True)
-    qr_code_id = sa.Column(sa.INTEGER, autoincrement=False, nullable=True)
+    qr_code_id = sa.Column(sa.INTEGER, sa.ForeignKey("qr_codes.id"), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     files_item = relationship("File", secondary=file_item_rel, back_populates="item")
     item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
+
+    qr_code = relationship("QrCodes", back_populates="items_FK")
 
 
 file_guide_rel = sa.Table(
@@ -265,6 +269,8 @@ class QrCodes(Base):
     anonymous_access = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    items_FK = relationship("Item", back_populates="qr_code")
 
 
 class UserGroup(Base):

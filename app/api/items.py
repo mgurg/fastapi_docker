@@ -6,7 +6,7 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_files, crud_items
+from app.crud import crud_files, crud_items, crud_qr
 from app.db import get_db
 from app.schemas.requests import ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
@@ -46,6 +46,9 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     except Exception as e:
         capture_exception(e)
 
+    print("############################")
+    print(db_item.qr_code)
+
     return db_item
 
 
@@ -59,12 +62,26 @@ def item_add(*, db: Session = Depends(get_db), item: ItemAddIn, auth=Depends(has
             if db_file:
                 files.append(db_file)
 
-    item_data = {
+    item_uuid = str(uuid4())
+
+    qr_code_data = {
         "uuid": str(uuid4()),
+        "resource": "items",
+        "qr_code_id": 132,
+        "qr_code_content": "https://beta.remontmaszyn.pl/qr/mzd+123",
+        "ecc": "L",
+        "created_at": datetime.now(timezone.utc),
+        "resource_uuid": item_uuid,
+    }
+
+    new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
+
+    item_data = {
+        "uuid": item_uuid,
         "name": item.name,
         "description": item.description,
         "description_jsonb": item.description_jsonb,
-        "qr_code_id": 1,
+        "qr_code_id": new_qr_code.id,
         "files_item": files,
         "created_at": datetime.now(timezone.utc),
     }

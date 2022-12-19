@@ -28,6 +28,7 @@ def upgrade() -> None:
         sa.Column("qr_code_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        # sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),
         sa.PrimaryKeyConstraint("id", name="items_pkey"),
         schema=None,
     )

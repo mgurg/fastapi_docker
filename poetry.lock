@@ -258,7 +258,7 @@ test = ["hypothesis (==3.55.3)", "flake8 (==3.7.8)"]
 
 [[package]]
 name = "coverage"
-version = "6.5.0"
+version = "7.0.0"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -1007,7 +1007,7 @@ crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "1.12.0"
+version = "1.12.1"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
 optional = false

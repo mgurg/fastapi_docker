@@ -144,6 +144,12 @@ class GuideBasicResponse(BaseResponse):
     text: str | None
 
 
+class QRCodeItemResponse(BaseResponse):
+    resource: str
+    qr_code_id: str
+    ecc: str
+
+
 class ItemResponse(BaseResponse):
     uuid: UUID
     name: str | None
@@ -151,6 +157,7 @@ class ItemResponse(BaseResponse):
     description_jsonb: dict | None
     files_item: List[FileBasicInfo] | None
     item_guides: List[GuideBasicResponse] | None
+    qr_code: QRCodeItemResponse | None
 
 
 class GuideResponse(BaseResponse):
@@ -159,3 +166,30 @@ class GuideResponse(BaseResponse):
     text: str | None
     text_jsonb: dict | None
     video_id: str | None
+
+
+class UserQrToken(BaseResponse):
+    url: str
+    anonymous_token: str
+
+
+class UserVerifyToken(BaseResponse):
+    auth_token_valid_to: datetime
+    first_name: str
+    last_name: str
+    tz: str
+    lang: str
+    uuid: UUID
+    role_FK: RoleBasic
+
+
+class UserLoginOut(BaseResponse):
+    auth_token: str
+    auth_token_valid_to: datetime
+    first_name: str
+    last_name: str
+    tz: str
+    lang: str
+    uuid: UUID
+    role_FK: RoleBasic
+    tenant_id: str | None
