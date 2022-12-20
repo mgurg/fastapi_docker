@@ -1,4 +1,3 @@
-import base64
 import os
 import re
 import secrets
@@ -104,7 +103,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
             "country": "pl",
             "city": user.company_city,
             "tenant_id": tenant_id,
-            "qr_id": crud_auth.generate_qr_id(shared_db),
+            "qr_id": crud_qr.generate_company_qr_id(shared_db),
             "created_at": datetime.now(timezone.utc),
         }
 
@@ -247,7 +246,7 @@ def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn
             "updated_at": datetime.now(timezone.utc),
         }
 
-        db_user_update = crud_auth.update_tenant_user(db, db_user, update_package)
+        crud_auth.update_tenant_user(db, db_user, update_package)
 
         # Load with relations
         db_user = db.execute(
@@ -287,33 +286,26 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
 def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str):
 
-    pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
-    if pattern.match(qr_code):
+    pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
+    if not pattern.match(qr_code):
+        raise HTTPException(status_code=404, detail="Incorrect QR code")
 
-        company, qr_id = qr_code.split("+")
+    company, qr_id = qr_code.split("+")
+    company = re.sub(r"\d+", "", company)
 
-        db_company = crud_auth.get_public_company_by_qr_id(shared_db, company)
+    db_company = crud_auth.get_public_company_by_qr_id(shared_db, company)
+    if not db_company:
+        raise HTTPException(status_code=404, detail="Company not found: " + company)
 
-        if not db_company:
-            raise HTTPException(status_code=404, detail="Company not found")
+    token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
 
-        token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
-        fake_token = f"{db_company.tenant_id}.{token_valid_to}"
+    base64_token = crud_auth.generate_base64_token(f"{db_company.tenant_id}.{token_valid_to}")
 
-        message_bytes = fake_token.encode("ascii")
-        base64_bytes = base64.b64encode(message_bytes)
-        base64_message = base64_bytes.decode("ascii")
-
-        connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
-        with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-            db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
-
-            if not db_qr:
-                raise HTTPException(status_code=404, detail="QR not found")
-
-            if db_qr.anonymous_access is False:
-                base64_message = None
-
-            return {"url": f"/{db_qr.resource}/{db_qr.resource_uuid}", "anonymous_token": base64_message}
-
-    raise HTTPException(status_code=404, detail="Incorrect QR code")
+    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
+    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+        db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
+        if not db_qr:
+            raise HTTPException(status_code=404, detail="QR not found")
+        if db_qr.anonymous_access is False:
+            base64_token = None
+        return {"url": f"/{db_qr.resource}/{db_qr.resource_uuid}", "anonymous_token": base64_token}

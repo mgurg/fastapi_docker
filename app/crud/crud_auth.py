@@ -1,4 +1,4 @@
-import random
+import base64
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -35,17 +35,12 @@ def get_public_company_by_qr_id(db: Session, qr_id: str) -> PublicCompany | None
     return db.execute(select(PublicCompany).where(PublicCompany.qr_id == qr_id)).scalar_one_or_none()
 
 
+def get_public_company_by_tenant_id(db: Session, tenant_id: str) -> PublicCompany | None:
+    return db.execute(select(PublicCompany).where(PublicCompany.tenant_id == tenant_id)).scalar_one_or_none()
+
+
 def get_schemas_from_public_company(db: Session):
     return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
-
-
-def generate_qr_id(db: Session):
-    allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
-    company_ids = db.execute(select(PublicCompany.qr_id)).scalars().all()
-    proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
-    while proposed_id in company_ids:
-        proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
-    return proposed_id
 
 
 def create_public_user(db: Session, public_user: dict) -> PublicUser:
@@ -53,23 +48,6 @@ def create_public_user(db: Session, public_user: dict) -> PublicUser:
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    # new_user = PublicUser(
-    #     uuid=str(uuid4()),
-    #     email=user.email.strip(),
-    #     password=argon2.hash(user.password),
-    #     service_token=secrets.token_hex(32),
-    #     service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
-    #     is_active=False,
-    #     is_verified=False,
-    #     tos=user.tos,
-    #     tz=user.tz,
-    #     lang=standardize_tag(user.lang),
-    #     created_at=datetime.now(timezone.utc),
-    # )
-
-    # db.add(new_user)
-    # db.commit()
-    # db.refresh(new_user)
 
     return new_user
 
@@ -80,24 +58,6 @@ def create_public_company(db: Session, company: dict) -> PublicCompany:
     db.add(new_company)
     db.commit()
     db.refresh(new_company)
-
-    # uuid = str(uuid4())
-
-    # new_company = PublicCompany(
-    #     uuid=uuid,
-    #     name=company["name"],
-    #     short_name=company["short_name"],
-    #     nip=company["nip"],
-    #     country=company["country"],
-    #     city=company["city"],
-    #     tenant_id=generate_tenant_id(company["short_name"], uuid),
-    #     qr_id=generate_qr_id(db, company["nip"]),
-    #     created_at=datetime.now(timezone.utc),
-    # )
-
-    # db.add(new_company)
-    # db.commit()
-    # db.refresh(new_company)
 
     return new_company
 
@@ -168,3 +128,9 @@ def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
         return db_tenant_user
     except Exception as e:
         print(e)
+
+
+def generate_base64_token(token: str) -> str:
+    message_bytes = token.encode("ascii")
+    base64_bytes = base64.b64encode(message_bytes)
+    return base64_bytes.decode("ascii")

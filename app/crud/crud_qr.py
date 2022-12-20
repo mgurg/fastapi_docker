@@ -1,11 +1,19 @@
+import random
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.models import QrCodes
+from app.models.shared_models import PublicCompany
 
 
 def get_entity_by_qr_code(db: Session, qr_code_id: str) -> QrCodes:
     return db.execute(select(QrCodes).where(QrCodes.qr_code_id == qr_code_id)).scalar_one_or_none()
+
+
+def get_qr_code_by_resource_uuid(db: Session, resource_uuid: UUID) -> QrCodes:
+    return db.execute(select(QrCodes).where(QrCodes.resource_uuid == resource_uuid)).scalar_one_or_none()
 
 
 def create_qr_code(db: Session, data: dict) -> QrCodes:
@@ -15,3 +23,26 @@ def create_qr_code(db: Session, data: dict) -> QrCodes:
     db.refresh(new_qr_code)
 
     return new_qr_code
+
+
+def generate_company_qr_id(db: Session) -> str:
+    allowed_chars = "abcdefghijkmnopqrstuvwxyz"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
+    company_ids = db.execute(select(PublicCompany.qr_id)).scalars().all()
+    proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
+    while proposed_id in company_ids:
+        proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
+    return proposed_id
+
+
+def add_noise_to_qr(qr_code: str) -> str:
+    noise = ["2", "3", "4", "5", "6", "7", "8", "9"]
+    return "".join(f"{x}{random.choice(noise) if random.randint(0, 1) else ''}" for x in qr_code)
+
+
+def generate_item_qr_id(db: Session) -> str:
+    allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
+    items_ids = db.execute(select(QrCodes.qr_code_id)).scalars().all()
+    proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
+    while proposed_id in items_ids:
+        proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
+    return proposed_id

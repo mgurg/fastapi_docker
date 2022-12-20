@@ -18,7 +18,7 @@ def test_db():
 
 def test_storage():
     try:
-        response = s3_client.head_bucket(Bucket=settings.s3_bucket_name)
+        s3_client.head_bucket(Bucket=settings.s3_bucket_name)  # response =
         # print("@@@@@@@@@@@@@", response)
     except Exception as err:
         logger.exception(err)  # , exc_info=True

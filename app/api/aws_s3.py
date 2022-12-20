@@ -29,7 +29,7 @@ def post_create_bucket():
     location = {"LocationConstraint": settings.s3_region}
 
     try:
-        response = s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
+        s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
     except BaseException as error:
         print(error)
 
@@ -52,7 +52,7 @@ def get_buckets_list():
 
 @s3_router.get("/list_files")
 @logger.catch()
-def get_buckets_list(*, session: Session = Depends(get_session)):
+def get_files_list(*, session: Session = Depends(get_session)):
 
     # https://realpython.com/python-boto3-aws-s3/#object-traversal
     # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)

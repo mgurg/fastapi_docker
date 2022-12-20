@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
+from app.crud.crud_auth import generate_base64_token
 from app.db import get_db
 from app.models.models import User
 
@@ -18,10 +19,12 @@ def is_base64(sb: str) -> bool:
     try:
         if isinstance(sb, str):
             # If there's any unicode here, an exception will be thrown and the function will return false
-            message_bytes = base64.b64decode(sb).decode("utf-8").encode("ascii")
-            base64_bytes = base64.b64encode(message_bytes)
-            base64_message = base64_bytes.decode("ascii")
-            return base64_message == sb
+            decoded_token = base64.b64decode(sb).decode("utf-8")
+            base64_token = generate_base64_token(decoded_token)
+            # message_bytes = .encode("ascii")
+            # base64_bytes = base64.b64encode(message_bytes)
+            # base64_message = base64_bytes.decode("ascii")
+            return base64_token == sb
         else:
             raise ValueError("Argument must be string")
 

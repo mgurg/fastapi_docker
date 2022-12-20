@@ -47,7 +47,7 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
     processed = []
     for company in db_companies:
         # TODO: one by one
-        scheduler.run_job(alembic_upgrade_head, args=[company.tenant_id])  #  id=company.tenant_id
+        scheduler.run_job(alembic_upgrade_head, args=[company.tenant_id])  # id=company.tenant_id
         processed.append(company.tenant_id)
 
     return processed

@@ -46,14 +46,16 @@ class RoleLoginBasic(BaseResponse):
     permission: list[PermissionsLoginBasic]
 
 
-class UserLoginOut(BaseResponse):  # OK
+class UserLoginOut(BaseResponse):
     auth_token: str
+    auth_token_valid_to: datetime
     first_name: str
     last_name: str
     tz: str
     lang: str
     uuid: UUID
     role_FK: RoleLoginBasic
+    tenant_id: str | None
 
 
 class UserBasicResponse(BaseResponse):
@@ -155,7 +157,7 @@ class GuideBasicResponse(BaseResponse):
 
 class QRCodeItemResponse(BaseResponse):
     resource: str
-    qr_code_id: str
+    qr_code_content: str
     ecc: str
 
 
@@ -190,15 +192,3 @@ class UserVerifyToken(BaseResponse):
     lang: str
     uuid: UUID
     role_FK: RoleLoginBasic
-
-
-class UserLoginOut(BaseResponse):
-    auth_token: str
-    auth_token_valid_to: datetime
-    first_name: str
-    last_name: str
-    tz: str
-    lang: str
-    uuid: UUID
-    role_FK: RoleLoginBasic
-    tenant_id: str | None

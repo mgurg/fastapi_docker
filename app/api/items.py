@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from random import randint
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -7,8 +6,8 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_files, crud_items, crud_qr
-from app.db import get_db
+from app.crud import crud_auth, crud_files, crud_items, crud_qr
+from app.db import engine, get_db
 from app.schemas.requests import ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
 from app.service.aws_s3 import generate_presigned_url
@@ -25,7 +24,7 @@ def item_get_all(
     search: str = None,
     sortOrder: str = "asc",
     sortColumn: str = "name",
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
 
     sortTable = {"name": "name"}
@@ -51,7 +50,19 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
 
 
 @item_router.post("/", response_model=ItemIndexResponse)
-def item_add(*, db: Session = Depends(get_db), item: ItemAddIn, auth=Depends(has_token)):
+def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn, auth=Depends(has_token)):
+
+    tenant_id = request.headers.get("tenant", None)
+    if not tenant_id:
+        raise HTTPException(status_code=400, detail="Unknown Company!")
+
+    company = None
+    schema_translate_map = dict(tenant="public")
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
+        company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
+    if not company:
+        raise HTTPException(status_code=400, detail="Unknown Company!")
 
     files = []
     if item.files is not None:
@@ -62,16 +73,22 @@ def item_add(*, db: Session = Depends(get_db), item: ItemAddIn, auth=Depends(has
 
     item_uuid = str(uuid4())
 
+    qr_code_id = crud_qr.generate_item_qr_id(db)
+    qr_code_company = crud_qr.add_noise_to_qr(company.qr_id)
+
     qr_code_data = {
         "uuid": str(uuid4()),
         "resource": "items",
-        "qr_code_id": randint(100, 999),
-        "qr_code_content": "https://beta.remontmaszyn.pl/qr/mzd+123",
+        "qr_code_id": qr_code_id,
+        "qr_code_content": f"{qr_code_company}+{qr_code_id}",
         "ecc": "L",
         "created_at": datetime.now(timezone.utc),
         "resource_uuid": item_uuid,
     }
 
+    # print("############################")
+    # print(qr_code_data)
+    # raise HTTPException(status_code=400, detail="Unknown Company!")
     new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
 
     item_data = {
@@ -120,12 +137,14 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, role: ItemEditI
 @item_router.delete("/{item_uuid}", response_model=StandardResponse)
 def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(has_token)):
 
+    db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     db.delete(db_item)
+    db.delete(db_qr)
     db.commit()
 
     return {"ok": True}
