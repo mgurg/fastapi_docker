@@ -19,7 +19,7 @@ guide_router = APIRouter()
 
 
 @guide_router.get("/", response_model=Page[GuideResponse])  #
-def item_get_all(
+def guide_get_all(
     *,
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -36,8 +36,11 @@ def item_get_all(
 
 
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
-def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth=Depends(has_token)):
+def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
+
+    if not db_guide:
+        raise HTTPException(status_code=400, detail="Guide not found!")
 
     try:
         for picture in db_guide.files_guide:
@@ -52,7 +55,7 @@ def item_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Re
 
 
 @guide_router.post("/", response_model=GuideResponse)
-def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
+def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
 
     files = []
     if guide.files is not None:
@@ -84,7 +87,7 @@ def item_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(h
 
 
 @guide_router.patch("/{guide_uuid}", response_model=GuideResponse)
-def item_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth=Depends(has_token)):
+def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth=Depends(has_token)):
 
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
     if not db_guide:
@@ -112,7 +115,7 @@ def item_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEd
 
 
 @guide_router.delete("/{guide_uuid}", response_model=StandardResponse)
-def item_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
+def guide_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
 
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 

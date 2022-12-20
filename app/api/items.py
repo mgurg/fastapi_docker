@@ -37,6 +37,9 @@ def item_get_all(
 def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
+    if not db_item:
+        raise HTTPException(status_code=400, detail="Item not found!")
+
     try:
         for picture in db_item.files_item:
             picture.url = generate_presigned_url(
