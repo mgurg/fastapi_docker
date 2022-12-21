@@ -266,7 +266,7 @@ class QrCodes(Base):
     qr_code_full_id = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     ecc = sa.Column(sa.CHAR(length=1), autoincrement=False, nullable=True)
     resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    anonymous_access = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    public_access = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 

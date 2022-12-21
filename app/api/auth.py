@@ -306,6 +306,6 @@ def auth_verify_qr(*, public_db: Session = Depends(get_public_db), qr_code: str)
         db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
         if not db_qr:
             raise HTTPException(status_code=404, detail="QR not found")
-        if db_qr.anonymous_access is False:
+        if db_qr.public_access is False:
             base64_token = None
         return {"url": f"/{db_qr.resource}/{db_qr.resource_uuid}", "anonymous_token": base64_token}
