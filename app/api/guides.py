@@ -7,7 +7,7 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_files, crud_guides
+from app.crud import crud_files, crud_guides, crud_items
 from app.db import get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideResponse, StandardResponse
@@ -57,6 +57,10 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 @guide_router.post("/", response_model=GuideResponse)
 def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
 
+    db_item = crud_items.get_item_by_uuid(db, guide.item_uuid)
+    if not db_item:
+        raise HTTPException(status_code=400, detail="Related Item not found!")
+
     files = []
     if guide.files is not None:
         for file in guide.files:
@@ -78,6 +82,7 @@ def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(
         "video_jsonb": guide.video_jsonb,
         "video_id": guide.video_id,
         "files_guide": files,
+        "item": [db_item],
         "created_at": datetime.now(timezone.utc),
     }
 

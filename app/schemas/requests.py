@@ -127,6 +127,7 @@ class GuideAddIn(BaseRequest):
     video_id: str | None
     video_jsonb: dict | None
     files: List[UUID] | None
+    item_uuid: str
 
 
 class GuideEditIn(BaseRequest):
