@@ -35,6 +35,20 @@ def guide_get_all(
     return paginate(db_guides, params)
 
 
+@guide_router.get("/item/{item_uuid}", response_model=Page[GuideResponse])
+def guides_get_by_item(
+    *, db: Session = Depends(get_db), item_uuid: UUID, params: Params = Depends(), auth=Depends(has_token)
+):
+
+    db_item = crud_items.get_item_by_uuid(db, item_uuid)
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    db_guides = crud_guides.get_guide_by_item_id(db, db_item.id)
+
+    return paginate(db_guides, params)
+
+
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
 def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)

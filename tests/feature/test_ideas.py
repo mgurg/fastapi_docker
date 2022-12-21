@@ -22,11 +22,11 @@ def test_add_ideas(session: Session, client: TestClient):
     fake = Faker()
 
     data = {
-        "title": fake.text(max_nb_chars=20),
-        "description": fake.paragraph(nb_sentences=1),
+        "name": fake.text(max_nb_chars=20),
+        "summary": fake.paragraph(nb_sentences=1),
         "color": fake.safe_color_name(),
-        "body_html": "<h1>asd</h1><p>asasd</p>",
-        "body_json": {
+        "text_html": "<h1>asd</h1><p>asasd</p>",
+        "text_json": {
             "type": "doc",
             "content": [
                 {"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "asd"}]},
@@ -54,8 +54,8 @@ def test_get_idea(session: Session, client: TestClient):
     data = response.json()
     assert response.status_code == 200
     assert data["color"] == idea.color
-    assert data["title"] == idea.title
-    assert data["description"] == idea.description
+    assert data["name"] == idea.name
+    assert data["text"] == idea.text
     assert data["uuid"] == str(idea.uuid)
 
 

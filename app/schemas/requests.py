@@ -54,10 +54,10 @@ class UserCreateIn(BaseRequest):
 
 
 class IdeaAddIn(BaseRequest):
-    title: str
-    description: str
-    body_json: dict
-    body_html: str
+    name: str
+    summary: str | None
+    text_json: dict
+    text_html: str
     color: str = "green"
     files: List[UUID] | None
 
@@ -68,10 +68,10 @@ class IdeasVotesIn(BaseRequest):
 
 
 class IdeaEditIn(BaseRequest):
-    title: str | None
-    description: str | None
-    body_json: dict | None
-    body_html: str | None
+    name: str | None
+    summary: str | None
+    text_json: dict | None
+    text_html: str | None
     color: str | None
     status: str | None
     vote: str | None

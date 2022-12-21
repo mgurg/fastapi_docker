@@ -44,7 +44,7 @@ def ideas_get_all(
     *,
     db: Session = Depends(get_db),
     sortOrder: str = "asc",
-    sortColumn: str = "title",
+    sortColumn: str = "name",
     search: str = None,
     status: str = None,
     hasImg: bool = None,
@@ -60,9 +60,9 @@ def ideas_get_all(
         all_filters.append(Idea.files_idea.any())
         # all_filters.append(Idea.files_idea.any(Files.size > 279824))
     if search is not None:
-        all_filters.append(func.concat(Idea.title, " ", Idea.description).ilike(f"%{search}%"))
+        all_filters.append(func.concat(Idea.name, " ", Idea.description).ilike(f"%{search}%"))
 
-    sortTable = {"title": "title", "age": "created_at", "counter": "upvotes"}
+    sortTable = {"name": "name", "age": "created_at", "counter": "upvotes"}
 
     ideas = crud_ideas.get_ideas(db, all_filters, sortTable[sortColumn], sortOrder)
 
@@ -111,14 +111,14 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
             if db_file:
                 files.append(db_file)
 
-    html = idea.body_html
+    html = idea.text_html
     soup = BeautifulSoup(html, "html.parser")
     # title = soup.find("h1").get_text().strip()
     # for s in soup.select("h1"):
     #     s.extract()
     description = soup.get_text()
 
-    json_object = json.dumps(idea.body_json)
+    json_object = json.dumps(idea.text_json)
 
     Mention(json_object, "groupMention").process()
     Mention(json_object, "userMention").process()
@@ -127,10 +127,10 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "uuid": str(uuid4()),
         "author_id": auth["user_id"],
         "color": idea.color,
-        "title": idea.title,
-        "description": description,
-        "body_json": json_object,
-        "body_jsonb": json_object,
+        "name": idea.name,
+        "summary": description,
+        "text": description,
+        "text_json": json_object,
         "upvotes": 0,
         "downvotes": 0,
         "status": "pending",
@@ -144,14 +144,14 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
 
 
 @idea_router.post("/new_idea/{idea_id}", name="idea:Add")
-def idea_add_anonymous_one(*, shared_db: Session = Depends(get_public_db), idea_id: str):
+def idea_add_anonymous_one(*, public_db: Session = Depends(get_public_db), idea_id: str):
 
     pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
     if pattern.match(idea_id):
 
         company, board = idea_id.split("+")
 
-        db_company = crud_auth.get_public_company_by_qr_id(shared_db, company)
+        db_company = crud_auth.get_public_company_by_qr_id(public_db, company)
 
         if not db_company:
             raise HTTPException(status_code=404, detail="Company not found")
@@ -211,7 +211,7 @@ def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditI
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")
 
-    json_object = json.dumps(idea.body_json)
+    json_object = json.dumps(idea.text_json)
 
     idea_data = idea.dict(exclude_unset=True)
     if "vote" in idea_data:

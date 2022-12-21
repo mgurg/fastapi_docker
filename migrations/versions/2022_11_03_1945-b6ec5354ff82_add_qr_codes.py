@@ -24,7 +24,7 @@ def upgrade() -> None:
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("resource", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("qr_code_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
-        sa.Column("qr_code_content", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
+        sa.Column("qr_code_full_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("ecc", sa.CHAR(length=1), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),

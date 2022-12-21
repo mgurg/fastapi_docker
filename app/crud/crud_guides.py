@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from app.models.models import Guide
+from app.models.models import Guide, Item
 
 
 def get_guides(db: Session, search: str, sortColumn: str, sortOrder: str) -> Guide:
@@ -38,3 +38,7 @@ def update_guide(db: Session, db_guide: Guide, update_data: dict) -> Guide:
     db.refresh(db_guide)
 
     return db_guide
+
+
+def get_guide_by_item_id(db, item_id):
+    return db.execute(select(Guide).filter(Guide.item.any(Item.id == item_id))).scalars().all()

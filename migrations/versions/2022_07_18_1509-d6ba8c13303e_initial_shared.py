@@ -63,7 +63,6 @@ def upgrade() -> None:
        country varchar(128),
        city varchar(128),
        tenant_id varchar(64) UNIQUE,
-       host varchar(64) UNIQUE,
        qr_id varchar(32) UNIQUE,
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
        updated_at TIMESTAMPTZ

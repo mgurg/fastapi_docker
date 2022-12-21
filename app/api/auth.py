@@ -44,9 +44,9 @@ auth_router = APIRouter()
 
 
 @auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
-def auth_account_limit(*, shared_db: Session = Depends(get_public_db)):
+def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
 
-    db_companies_no = crud_auth.get_public_company_count(shared_db)
+    db_companies_no = crud_auth.get_public_company_count(public_db)
     limit = 20
 
     return {"accounts": db_companies_no, "limit": limit}
@@ -68,12 +68,12 @@ def auth_company_info(company: CompanyInfoRegisterIn):
 
 
 @auth_router.post("/register", response_model=StandardResponse)
-def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
+def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegisterIn):
 
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
 
-    db_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
+    db_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
@@ -85,7 +85,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
     if auth.is_timezone_correct is False:
         raise HTTPException(status_code=400, detail="Invalid timezone")
 
-    db_company = crud_auth.get_public_company_by_nip(shared_db, user.company_tax_id)
+    db_company = crud_auth.get_public_company_by_nip(public_db, user.company_tax_id)
 
     if not db_company:
         uuid = str(uuid4())
@@ -103,11 +103,11 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
             "country": "pl",
             "city": user.company_city,
             "tenant_id": tenant_id,
-            "qr_id": crud_qr.generate_company_qr_id(shared_db),
+            "qr_id": crud_qr.generate_company_qr_id(public_db),
             "created_at": datetime.now(timezone.utc),
         }
 
-        db_company = crud_auth.create_public_company(shared_db, company_data)
+        db_company = crud_auth.create_public_company(public_db, company_data)
 
     else:
         tenant_id = db_company.tenant_id
@@ -133,7 +133,7 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
         "lang": standardize_tag(user.lang),
         "created_at": datetime.now(timezone.utc),
     }
-    crud_auth.create_public_user(shared_db, user)
+    crud_auth.create_public_user(public_db, user)
 
     if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
         # tenant_create("fake_tenant_company_for_test_00000000000000000000000000000000")
@@ -162,10 +162,10 @@ def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegi
 
 
 @auth_router.post("/first_run", response_model=ActivationResponse)
-def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
+def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFirstRunIn):
     """Activate user based on service token"""
 
-    db_public_user: PublicUser = crud_auth.get_public_user_by_service_token(shared_db, user.token)
+    db_public_user: PublicUser = crud_auth.get_public_user_by_service_token(public_db, user.token)
     if not db_public_user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -211,9 +211,9 @@ def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFir
 
 
 @auth_router.post("/login", response_model=UserLoginOut)
-def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
+def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
     print(req.headers["User-Agent"])
-    db_public_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
+    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
 
     if db_public_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -284,7 +284,7 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
-def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str):
+def auth_verify_qr(*, public_db: Session = Depends(get_public_db), qr_code: str):
 
     pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
     if not pattern.match(qr_code):
@@ -293,7 +293,7 @@ def auth_verify_qr(*, shared_db: Session = Depends(get_public_db), qr_code: str)
     company, qr_id = qr_code.split("+")
     company = re.sub(r"\d+", "", company)
 
-    db_company = crud_auth.get_public_company_by_qr_id(shared_db, company)
+    db_company = crud_auth.get_public_company_by_qr_id(public_db, company)
     if not db_company:
         raise HTTPException(status_code=404, detail="Company not found: " + company)
 

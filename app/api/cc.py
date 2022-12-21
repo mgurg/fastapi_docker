@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends
 # from sqlmodel import Session, select
 from sqlalchemy.orm import Session
 
-from app.crud import cc_crud
-from app.db import get_public_db
+from app.crud import cc_crud, crud_files
+from app.db import engine, get_public_db
 from app.schemas.responses import StandardResponse
 from app.service.scheduler import scheduler
 from app.service.tenants import alembic_upgrade_head
@@ -29,6 +29,24 @@ def check_revision(schema: str):
     #     script = alembic.script.ScriptDirectory.from_config(alembic_config)
     #     if context.get_current_revision() != script.get_current_head():
     return {"ok": True}
+
+
+@cc_router.post("/mark_orphan_files", name="files:MarkOrphans")
+def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db)):
+
+    db_companies = cc_crud.get_public_companies(public_db)
+
+    processed = []
+    for company in db_companies:
+        connectable = engine.execution_options(schema_translate_map={"tenant": company.tenant_id})
+        with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+            orphaned_files_uuid = crud_files.get_orphaned_files(db)
+            processed.append({company.tenant_id: orphaned_files_uuid})
+        # # TODO: one by one
+        # scheduler.run_job(alembic_upgrade_head, args=[company.tenant_id])  # id=company.tenant_id
+        # processed.append(company.tenant_id)
+
+    return processed
 
 
 @cc_router.get("/", name="companies:List")
@@ -59,18 +77,3 @@ def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str):
     scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
 
     return {"ok": True}
-
-
-@cc_router.post("/markOrphanFiles", name="files:MarkOrphans")
-def cc_migrate_all(*, db: Session = Depends(get_public_db)):
-
-    db_companies = cc_crud.get_public_companies(db)
-
-    processed = []
-    for company in db_companies:
-        processed.append(company.tenant_id)
-        # # TODO: one by one
-        # scheduler.run_job(alembic_upgrade_head, args=[company.tenant_id])  # id=company.tenant_id
-        # processed.append(company.tenant_id)
-
-    return processed

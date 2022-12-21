@@ -168,9 +168,9 @@ class FileBasicInfo(BaseModel):
 class IdeaIndexResponse(BaseModel):
     uuid: UUID
     color: str
-    title: str
-    description: str
-    body_json: Json | None
+    name: str
+    text: str
+    text_json: Json | None
     upvotes: int | None
     downvotes: int | None
     status: str | None
