@@ -83,7 +83,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
         "uuid": str(uuid4()),
         "resource": "items",
         "qr_code_id": qr_code_id,
-        "qr_code_content": f"{qr_code_company}+{qr_code_id}",
+        "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
         "ecc": "L",
         "created_at": datetime.now(timezone.utc),
         "resource_uuid": item_uuid,

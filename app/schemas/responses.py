@@ -157,7 +157,7 @@ class GuideBasicResponse(BaseResponse):
 
 class QRCodeItemResponse(BaseResponse):
     resource: str
-    qr_code_content: str
+    qr_code_full_id: str
     ecc: str
 
 
