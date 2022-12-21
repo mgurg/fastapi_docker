@@ -106,17 +106,17 @@ class GroupEditIn(BaseRequest):
 
 class ItemAddIn(BaseRequest):
     name: str
-    description: str | None
-    description_jsonb: dict | None
-    qr_code: str | None
+    summary: str | None
+    text_html: str | None
+    text_jsonb: dict | None
     files: List[UUID] | None
 
 
 class ItemEditIn(BaseRequest):
     name: str | None
-    description: str | None
-    description_jsonb: dict | None
-    qr_code: str | None
+    summary: str | None
+    text_html: str | None
+    text_jsonb: dict | None
     files: List[UUID] | None
 
 

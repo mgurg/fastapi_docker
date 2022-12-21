@@ -23,6 +23,7 @@ def upgrade() -> None:
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("resource", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
+        sa.Column("resource_uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("qr_code_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("qr_code_full_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("ecc", sa.CHAR(length=1), autoincrement=False, nullable=True),

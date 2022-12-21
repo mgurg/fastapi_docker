@@ -82,23 +82,21 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
     qr_code_data = {
         "uuid": str(uuid4()),
         "resource": "items",
+        "resource_uuid": item_uuid,
         "qr_code_id": qr_code_id,
         "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
         "ecc": "L",
         "created_at": datetime.now(timezone.utc),
-        "resource_uuid": item_uuid,
     }
 
-    # print("############################")
-    # print(qr_code_data)
-    # raise HTTPException(status_code=400, detail="Unknown Company!")
     new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
 
     item_data = {
         "uuid": item_uuid,
         "name": item.name,
-        "description": item.description,
-        "description_jsonb": item.description_jsonb,
+        "summary": item.summary,
+        "text": item.description,
+        "text_jsonb": item.description_jsonb,
         "qr_code_id": new_qr_code.id,
         "files_item": files,
         "created_at": datetime.now(timezone.utc),
