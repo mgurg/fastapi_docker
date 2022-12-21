@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column("summary", sa.VARCHAR(length=1024), unique=False, nullable=False),
         sa.Column("text", postgresql.TEXT, autoincrement=False, nullable=True),
         sa.Column("text_json", postgresql.JSONB, autoincrement=False, nullable=True),
-        # sa.Column("qr_code_id", sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column("qr_code_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         # sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),

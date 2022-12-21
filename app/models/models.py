@@ -71,7 +71,9 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column(
+        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
+    ),
 )
 
 
@@ -184,7 +186,7 @@ class Item(Base):
     name = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     summary = sa.Column(sa.VARCHAR(length=1024), autoincrement=False, nullable=True)
     text = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
-    text_jsonb = sa.Column(JSONB, autoincrement=False, nullable=True)
+    text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
     qr_code_id = sa.Column(sa.INTEGER, sa.ForeignKey("qr_codes.id"), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
@@ -216,7 +218,7 @@ class Guide(Base):
     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
     video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    video_json = sa.Column("video_jsonb", JSONB, autoincrement=False, nullable=True)
+    video_json = sa.Column("video_json", JSONB, autoincrement=False, nullable=True)
     created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 

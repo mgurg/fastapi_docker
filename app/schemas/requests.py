@@ -125,7 +125,7 @@ class GuideAddIn(BaseRequest):
     text_html: str
     text_json: dict
     video_id: str | None
-    video_jsonb: dict | None
+    video_json: dict | None
     files: List[UUID] | None
     item_uuid: str
 
@@ -133,7 +133,7 @@ class GuideAddIn(BaseRequest):
 class GuideEditIn(BaseRequest):
     name: str | None
     text: str | None
-    text_jsonb: dict | None
+    text_json: dict | None
     video_id: str | None
-    video_jsonb: dict | None
+    video_json: dict | None
     files: List[UUID] | None

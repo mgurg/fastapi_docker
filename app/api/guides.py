@@ -92,8 +92,8 @@ def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(
         "uuid": str(uuid4()),
         "name": guide.name,
         "text": description,
-        "text_jsonb": guide.text_json,  # TODO -> to text_json
-        "video_jsonb": guide.video_jsonb,
+        "text_json": guide.text_json,  # TODO -> to text_json
+        "video_json": guide.video_json,
         "video_id": guide.video_id,
         "files_guide": files,
         "item": [db_item],
