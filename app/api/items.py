@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
+from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
@@ -91,12 +92,15 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
 
     new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
 
+    description = BeautifulSoup(item.text_html, "html.parser").get_text()
+
     item_data = {
         "uuid": item_uuid,
+        "author_id": auth["user_id"],
         "name": item.name,
         "summary": item.summary,
-        "text": item.description,
-        "text_jsonb": item.description_jsonb,
+        "text": description,
+        "text_json": item.text_json,
         "qr_code_id": new_qr_code.id,
         "files_item": files,
         "created_at": datetime.now(timezone.utc),

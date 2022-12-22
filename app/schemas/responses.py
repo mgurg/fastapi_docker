@@ -145,8 +145,8 @@ class FileBasicInfo(BaseResponse):
 class ItemIndexResponse(BaseResponse):
     uuid: UUID
     name: str | None
-    description: str | None
-    description_jsonb: dict | None
+    text: str | None
+    text_json: dict | None
 
 
 class GuideBasicResponse(BaseResponse):
@@ -164,8 +164,8 @@ class QRCodeItemResponse(BaseResponse):
 class ItemResponse(BaseResponse):
     uuid: UUID
     name: str | None
-    description: str | None
-    description_jsonb: dict | None
+    text: str | None
+    text_json: dict | None
     files_item: List[FileBasicInfo] | None
     item_guides: List[GuideBasicResponse] | None
     qr_code: QRCodeItemResponse | None
@@ -175,7 +175,7 @@ class GuideResponse(BaseResponse):
     uuid: UUID
     name: str | None
     text: str | None
-    text_jsonb: dict | None
+    text_json: dict | None
     video_id: str | None
 
 

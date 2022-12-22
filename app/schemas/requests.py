@@ -108,7 +108,7 @@ class ItemAddIn(BaseRequest):
     name: str
     summary: str | None
     text_html: str | None
-    text_jsonb: dict | None
+    text_json: dict | None
     files: List[UUID] | None
 
 
@@ -116,7 +116,7 @@ class ItemEditIn(BaseRequest):
     name: str | None
     summary: str | None
     text_html: str | None
-    text_jsonb: dict | None
+    text_json: dict | None
     files: List[UUID] | None
 
 
