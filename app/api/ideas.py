@@ -15,8 +15,13 @@ from app.crud import crud_auth, crud_files, crud_ideas, crud_users
 from app.db import get_db, get_public_db
 from app.models.models import Idea
 from app.schemas.requests import IdeaAddIn, IdeaEditIn, IdeasVotesIn
-from app.schemas.responses import IdeaSummaryResponse, StandardResponse
-from app.schemas.schemas import IdeaIndexResponse
+from app.schemas.responses import (
+    IdeaIndexResponse,
+    IdeaSummaryResponse,
+    StandardResponse,
+)
+
+# from app.schemas.schemas import IdeaIndexResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 from app.service.mentions import Mention

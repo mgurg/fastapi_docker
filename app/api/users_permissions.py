@@ -9,10 +9,10 @@ from app.db import get_db
 from app.schemas.requests import RoleAddIn, RoleEditIn
 from app.schemas.responses import (
     PermissionResponse,
+    RolePermissionFull,
     RoleSummaryResponse,
     StandardResponse,
 )
-from app.schemas.schemas import RolePermissionFull
 from app.service.bearer_auth import has_token
 
 permission_router = APIRouter()

@@ -192,3 +192,57 @@ class UserVerifyToken(BaseResponse):
     lang: str
     uuid: UUID
     role_FK: RoleLoginBasic
+
+
+class BasicItems(BaseResponse):
+    uuid: UUID
+    name: str | None
+
+
+class GuideIndexResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    text: str | None
+    text_json: dict | None
+    video_id: str | None
+    video_json: dict | None
+    files_guide: List[FileBasicInfo] | None
+    item: List[BasicItems] | None
+
+
+class FileBasicInfo(BaseResponse):
+    uuid: UUID
+    file_name: str
+    extension: str
+    mimetype: str
+    size: int
+    url: str | None
+
+
+class IdeaIndexResponse(BaseResponse):
+    uuid: UUID
+    color: str
+    name: str
+    text: str
+    text_json: dict | None
+    upvotes: int | None
+    downvotes: int | None
+    status: str | None
+    created_at: datetime
+    files_idea: List[FileBasicInfo] | None
+
+
+class PermissionsFull(BaseResponse):
+    uuid: UUID
+    name: str
+    title: str
+    description: str
+    group: str
+
+
+class RolePermissionFull(BaseResponse):
+    role_name: str
+    role_description: str
+    role_title: str
+    is_custom: bool
+    permission: List[PermissionsFull]

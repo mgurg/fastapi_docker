@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from app.crud import crud_files, crud_guides, crud_items
 from app.db import get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
-from app.schemas.responses import GuideResponse, StandardResponse
-from app.schemas.schemas import GuideIndexResponse
+from app.schemas.responses import GuideIndexResponse, GuideResponse, StandardResponse
+
+# from app.schemas.schemas import GuideIndexResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
