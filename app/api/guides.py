@@ -71,9 +71,12 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 @guide_router.post("/", response_model=GuideResponse)
 def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
 
-    db_item = crud_items.get_item_by_uuid(db, guide.item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Related Item not found!")
+    related_item = None
+    if guide.item_uuid is not None:
+        db_item = crud_items.get_item_by_uuid(db, guide.item_uuid)
+        if not db_item:
+            raise HTTPException(status_code=400, detail="Related Item not found!")
+        related_item = [db_item]
 
     files = []
     if guide.files is not None:
@@ -82,23 +85,22 @@ def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(
             if db_file:
                 files.append(db_file)
 
-    html = guide.text_html
-    soup = BeautifulSoup(html, "html.parser")
-    description = soup.get_text()
-
-    # json.dumps(guide.text_json)
+    description = BeautifulSoup(guide.text_html, "html.parser").get_text()
 
     guide_data = {
         "uuid": str(uuid4()),
+        "author_id": auth["user_id"],
         "name": guide.name,
         "text": description,
-        "text_json": guide.text_json,  # TODO -> to text_json
+        "text_json": guide.text_json,
         "video_json": guide.video_json,
         "video_id": guide.video_id,
         "files_guide": files,
-        "item": [db_item],
         "created_at": datetime.now(timezone.utc),
     }
+
+    if related_item is not None:
+        guide_data["item"] = [db_item]
 
     new_guide = crud_guides.create_guide(db, guide_data)
 
@@ -125,6 +127,9 @@ def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideE
 
         guide_data["files_guide"] = files
         del guide_data["files"]
+
+    if ("text_html" in guide_data) and (guide_data["text_html"] is not None):
+        guide_data["text"] = BeautifulSoup(guide.text_html, "html.parser").get_text()
 
     guide_data["updated_at"] = datetime.now(timezone.utc)
 

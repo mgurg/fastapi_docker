@@ -112,13 +112,13 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
 
 
 @item_router.patch("/{item_uuid}", response_model=ItemIndexResponse)
-def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, role: ItemEditIn, auth=Depends(has_token)):
+def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditIn, auth=Depends(has_token)):
 
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    item_data = role.dict(exclude_unset=True)
+    item_data = item.dict(exclude_unset=True)
 
     files = []
     if ("files" in item_data) and (item_data["files"] is not None):
@@ -131,6 +131,9 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, role: ItemEditI
 
         item_data["files_item"] = files
         del item_data["files"]
+
+    if ("text_html" in item_data) and (item_data["text_html"] is not None):
+        item_data["text"] = BeautifulSoup(item.text_html, "html.parser").get_text()
 
     item_data["updated_at"] = datetime.now(timezone.utc)
 

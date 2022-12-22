@@ -127,12 +127,12 @@ class GuideAddIn(BaseRequest):
     video_id: str | None
     video_json: dict | None
     files: List[UUID] | None
-    item_uuid: str
+    item_uuid: str | None
 
 
 class GuideEditIn(BaseRequest):
     name: str | None
-    text: str | None
+    text_html: str | None
     text_json: dict | None
     video_id: str | None
     video_json: dict | None
