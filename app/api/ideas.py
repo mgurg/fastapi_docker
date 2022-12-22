@@ -135,7 +135,7 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
         "name": idea.name,
         "summary": description,
         "text": description,
-        "text_json": json_object,
+        "text_json": idea.text_json,
         "upvotes": 0,
         "downvotes": 0,
         "status": "pending",
