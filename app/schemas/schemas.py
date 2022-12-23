@@ -1,7 +1,3 @@
-from uuid import UUID
-
-from pydantic import BaseModel
-
 # class StandardResponse(BaseModel):  # OK
 #     ok: bool
 
@@ -41,15 +37,15 @@ from pydantic import BaseModel
 #         orm_mode = True
 #
 #
-class PermissionsFull(BaseModel):
-    uuid: UUID
-    name: str
-    title: str
-    description: str
-    group: str
+# class PermissionsFull(BaseModel):
+#     uuid: UUID
+#     name: str
+#     title: str
+#     description: str
+#     group: str
 
-    class Config:
-        orm_mode = True
+#     class Config:
+#         orm_mode = True
 
 
 # class RoleBasic(BaseModel):

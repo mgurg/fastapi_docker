@@ -1,4 +1,4 @@
-from typing import List
+# from typing import list
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
@@ -59,7 +59,7 @@ class IdeaAddIn(BaseRequest):
     text_json: dict
     text_html: str
     color: str = "green"
-    files: List[UUID] | None
+    files: list[UUID] | None
 
 
 class IdeasVotesIn(BaseRequest):
@@ -75,19 +75,19 @@ class IdeaEditIn(BaseRequest):
     color: str | None
     status: str | None
     vote: str | None
-    files: List[UUID] | None
+    files: list[UUID] | None
 
 
 class RoleAddIn(BaseRequest):
     title: str
     description: str
-    permissions: List[UUID]
+    permissions: list[UUID]
 
 
 class RoleEditIn(BaseRequest):
     title: str | None
     description: str | None
-    permissions: List[UUID] | None
+    permissions: list[UUID] | None
 
 
 class GroupAddIn(BaseRequest):
@@ -109,7 +109,7 @@ class ItemAddIn(BaseRequest):
     summary: str | None
     text_html: str | None
     text_json: dict | None
-    files: List[UUID] | None
+    files: list[UUID] | None
 
 
 class ItemEditIn(BaseRequest):
@@ -117,7 +117,7 @@ class ItemEditIn(BaseRequest):
     summary: str | None
     text_html: str | None
     text_json: dict | None
-    files: List[UUID] | None
+    files: list[UUID] | None
 
 
 class GuideAddIn(BaseRequest):
@@ -126,7 +126,7 @@ class GuideAddIn(BaseRequest):
     text_json: dict
     video_id: str | None
     video_json: dict | None
-    files: List[UUID] | None
+    files: list[UUID] | None
     item_uuid: str | None
 
 
@@ -136,4 +136,4 @@ class GuideEditIn(BaseRequest):
     text_json: dict | None
     video_id: str | None
     video_json: dict | None
-    files: List[UUID] | None
+    files: list[UUID] | None

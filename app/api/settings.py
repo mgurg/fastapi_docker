@@ -1,4 +1,4 @@
-from typing import List
+# from typing import list
 
 from fastapi import APIRouter, Depends, Query
 
@@ -14,8 +14,8 @@ from app.service.bearer_auth import has_token
 setting_router = APIRouter()
 
 
-@setting_router.get("/", name="settings:List")  # response_model=List[SettingAddIn],
-def setting_get_all(*, db: Session = Depends(get_db), setting_names: List[str] = Query(None), auth=Depends(has_token)):
+@setting_router.get("/", name="settings:list")  # response_model=list[SettingAddIn],
+def setting_get_all(*, db: Session = Depends(get_db), setting_names: list[str] = Query(None), auth=Depends(has_token)):
     pass
     # if setting_names is not None:
     #     allowed_settings = ["idea_registration_mode", "issue_registration_email"]

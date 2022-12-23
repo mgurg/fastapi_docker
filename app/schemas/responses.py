@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -166,8 +165,8 @@ class ItemResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
-    files_item: List[FileBasicInfo] | None
-    item_guides: List[GuideBasicResponse] | None
+    files_item: list[FileBasicInfo] | None
+    item_guides: list[GuideBasicResponse] | None
     qr_code: QRCodeItemResponse | None
 
 
@@ -206,8 +205,8 @@ class GuideIndexResponse(BaseResponse):
     text_json: dict | None
     video_id: str | None
     video_json: dict | None
-    files_guide: List[FileBasicInfo] | None
-    item: List[BasicItems] | None
+    files_guide: list[FileBasicInfo] | None
+    item: list[BasicItems] | None
 
 
 class FileBasicInfo(BaseResponse):
@@ -229,7 +228,7 @@ class IdeaIndexResponse(BaseResponse):
     downvotes: int | None
     status: str | None
     created_at: datetime
-    files_idea: List[FileBasicInfo] | None
+    files_idea: list[FileBasicInfo] | None
 
 
 class PermissionsFull(BaseResponse):
@@ -237,7 +236,7 @@ class PermissionsFull(BaseResponse):
     name: str
     title: str
     description: str
-    group: str
+    group: str | None
 
 
 class RolePermissionFull(BaseResponse):
@@ -245,4 +244,4 @@ class RolePermissionFull(BaseResponse):
     role_description: str
     role_title: str
     is_custom: bool
-    permission: List[PermissionsFull]
+    permission: list[PermissionsFull] | None

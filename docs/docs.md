@@ -258,7 +258,7 @@ Modyfikacja modeli
 `Users`:
 
 ```python
-usr_FK: List["Tasks"] = Relationship(back_populates="tasks_fk")
+usr_FK: list["Tasks"] = Relationship(back_populates="tasks_fk")
 ```
 
 Listowanie wyników razem z relacjami
