@@ -1,7 +1,6 @@
 import io
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
@@ -23,7 +22,7 @@ settings = get_settings()
 file_router = APIRouter()
 
 
-@file_router.get("/", response_model=List[FileResponse])
+@file_router.get("/", response_model=list[FileResponse])
 def file_get_info_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     if db is None:
         raise HTTPException(status_code=500, detail="General Error")
