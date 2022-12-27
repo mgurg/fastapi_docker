@@ -10,6 +10,7 @@ from app.api.cc import cc_router
 from app.api.files import file_router
 from app.api.guides import guide_router
 from app.api.ideas import idea_router
+from app.api.issues import issue_router
 from app.api.items import item_router
 from app.api.settings import setting_router
 from app.api.users import user_router
@@ -47,9 +48,12 @@ def create_application() -> FastAPI:
     app.include_router(user_router, prefix="/users", tags=["USER"])
     app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
     app.include_router(group_router, prefix="/groups", tags=["USER_GROUP"])
-    app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
+
     app.include_router(item_router, prefix="/items", tags=["ITEM"])
     app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
+    app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
+    app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
+
     app.include_router(file_router, prefix="/files", tags=["FILE"])
     app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
     app.include_router(cc_router, prefix="/cc", tags=["C&C"])

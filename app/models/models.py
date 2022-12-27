@@ -194,6 +194,7 @@ class Item(Base):
     item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
 
     qr_code = relationship("QrCodes", back_populates="items_FK")
+    issue_FK = relationship("Issue", back_populates="item")
 
 
 file_guide_rel = sa.Table(
@@ -224,6 +225,38 @@ class Guide(Base):
     item = relationship("Item", secondary=item_guide_rel, back_populates="item_guides")
 
 
+file_issue_rel = sa.Table(
+    "files_issues_link",
+    Base.metadata,
+    sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
+
+class Issue(Base):
+    __tablename__ = "issues"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    author_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    item_id = sa.Column(sa.INTEGER(), sa.ForeignKey("items.id"), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    summary = sa.Column(sa.VARCHAR(length=1024), autoincrement=False, nullable=True)
+    text = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
+    text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
+    color = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    priority = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    status = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    # qr_code_id = sa.Column(sa.INTEGER, sa.ForeignKey("qr_codes.id"), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    files_issue = relationship("File", secondary=file_issue_rel, back_populates="issue")
+
+    item = relationship("Item", back_populates="issue_FK")
+
+
 class File(Base):
     __tablename__ = "files"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
@@ -241,6 +274,7 @@ class File(Base):
     idea = relationship("Idea", secondary=file_idea_rel, back_populates="files_idea")
     item = relationship("Item", secondary=file_item_rel, back_populates="files_item")
     guide = relationship("Guide", secondary=file_guide_rel, back_populates="files_guide")
+    issue = relationship("Issue", secondary=file_issue_rel, back_populates="files_issue")
 
 
 class Setting(Base):

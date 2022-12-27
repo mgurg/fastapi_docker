@@ -141,11 +141,15 @@ class FileBasicInfo(BaseResponse):
     url: str | None
 
 
-class ItemIndexResponse(BaseResponse):
-    uuid: UUID
-    name: str | None
-    text: str | None
-    text_json: dict | None
+class QRCodeItemResponse(BaseResponse):
+    resource: str
+    qr_code_full_id: str
+    ecc: str
+
+
+class UserQrToken(BaseResponse):
+    url: str
+    anonymous_token: str
 
 
 class GuideBasicResponse(BaseResponse):
@@ -154,10 +158,19 @@ class GuideBasicResponse(BaseResponse):
     text: str | None
 
 
-class QRCodeItemResponse(BaseResponse):
-    resource: str
-    qr_code_full_id: str
-    ecc: str
+class GuideResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    text: str | None
+    text_json: dict | None
+    video_id: str | None
+
+
+class ItemIndexResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    text: str | None
+    text_json: dict | None
 
 
 class ItemResponse(BaseResponse):
@@ -170,17 +183,29 @@ class ItemResponse(BaseResponse):
     qr_code: QRCodeItemResponse | None
 
 
-class GuideResponse(BaseResponse):
+class IssueIndexResponse(BaseResponse):
     uuid: UUID
     name: str | None
     text: str | None
     text_json: dict | None
-    video_id: str | None
 
 
-class UserQrToken(BaseResponse):
-    url: str
-    anonymous_token: str
+class ItemNameResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+
+
+class IssueResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+    text: str | None
+    text_json: dict | None
+    files_issue: list[FileBasicInfo] | None
+    # item_guides: list[GuideBasicResponse] | None
+    item: ItemNameResponse | None
+    status: str | None
+    priority: str | None
+    color: str | None
 
 
 class UserVerifyToken(BaseResponse):
@@ -207,15 +232,6 @@ class GuideIndexResponse(BaseResponse):
     video_json: dict | None
     files_guide: list[FileBasicInfo] | None
     item: list[BasicItems] | None
-
-
-class FileBasicInfo(BaseResponse):
-    uuid: UUID
-    file_name: str
-    extension: str
-    mimetype: str
-    size: int
-    url: str | None
 
 
 class IdeaIndexResponse(BaseResponse):

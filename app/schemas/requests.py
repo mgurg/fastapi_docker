@@ -137,3 +137,23 @@ class GuideEditIn(BaseRequest):
     video_id: str | None
     video_json: dict | None
     files: list[UUID] | None
+
+
+class IssueAddIn(BaseRequest):
+    item_uuid: UUID | None
+    name: str
+    color: str | None
+    priority: str | None
+    status: str | None
+    summary: str | None
+    text_html: str | None
+    text_json: dict | None
+    files: list[UUID] | None
+
+
+class IssueEditIn(BaseRequest):
+    name: str | None
+    summary: str | None
+    text_html: str | None
+    text_json: dict | None
+    files: list[UUID] | None

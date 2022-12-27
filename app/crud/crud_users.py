@@ -20,6 +20,10 @@ def get_user_by_uuid(db: Session, uuid: UUID) -> User:
     return db.execute(select(User).where(User.uuid == uuid)).scalar_one_or_none()
 
 
+def get_user_by_id(db: Session, id: int) -> User:
+    return db.execute(select(User).where(User.id == id)).scalar_one_or_none()
+
+
 def get_user_by_email(db: Session, email: EmailStr) -> User:
     return db.execute(select(User).where(User.email == email)).scalar_one_or_none()
 

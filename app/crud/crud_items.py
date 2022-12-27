@@ -1,19 +1,24 @@
 from uuid import UUID
 
-from sqlalchemy import func, select, text
+from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Item
 
 
 def get_items(db: Session, search: str, sortColumn: str, sortOrder: str) -> Item:
-    return db.execute(select(Item)).scalars().all()
-    all_filters = []
-
+    search_filters = []
     if search is not None:
-        all_filters.append(func.concat(Item.first_name, " ", Item.last_name).ilike(f"%{search}%"))
+        search_filters.append(Item.name.ilike(f"%{search}%"))
+        search_filters.append(Item.text.ilike(f"%{search}%"))
 
-    return db.execute(select(Item).filter(*all_filters).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
+        return (
+            db.execute(select(Item).filter(or_(False, *search_filters)).order_by(text(f"{sortColumn} {sortOrder}")))
+            .scalars()
+            .all()
+        )
+
+    return db.execute(select(Item).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
 
 
 def get_item_by_uuid(db: Session, uuid: UUID) -> Item:
