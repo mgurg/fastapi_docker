@@ -4,8 +4,8 @@ from uuid import uuid4
 import pendulum
 from sqlalchemy.orm import Session
 
-from app.crud import crud_events, crud_items
-from app.models.models import Issue, Item, User
+from app.crud import crud_events
+from app.models.models import Event, Issue, Item, User
 
 # OPEN (start)
 # REJECT (?)
@@ -20,152 +20,52 @@ from app.models.models import Issue, Item, User
 # Resolution – why the issue is no longer in flight (for example, because it’s completed)
 
 
-def issue_create_new(db: Session, author: User, item: Item, issue: Issue, event_action: str, stat_entries: list):
-    """Add event for newly created Issue"""
+def create_new_event(db: Session, author: User, item: Item, issue: Issue, action: str, value: str = None) -> Event:
+
+    description = None
 
     event_data = {
         "uuid": str(uuid4()),
         "author_id": author.id,
+        "author_uuid": author.uuid,
         "author_name": f"{author.first_name} {author.last_name}",
         "resource": "item",
-        "resource_uuid": item.uuid,
         "resource_id": item.id,
-        "action": event_action,
+        "resource_uuid": item.uuid,
+        "action": action,
+        "description": description,
+        "value": value,
         "created_at": datetime.now(timezone.utc),
-        "description": issue.text,
     }
 
     new_event = crud_events.create_event(db, event_data)
-
-    for entry in stat_entries:
-        event_statistic = {
-            "uuid": str(uuid4()),
-            "item_uuid": item.uuid,
-            "issue_uuid": issue.uuid,
-            "action": entry,
-            "date_from": datetime.now(timezone.utc),
-            "date_to": None,
-            "duration": None,
-        }
-        crud_events.create_event_statistic(db, event_statistic)
+    return new_event
 
 
-def issue_change_status(
-    db: Session, author: User, item: Item, issue: Issue, event_action: str, prev_event_stat: str = None
-):
-    # if author is None:
-    #     author_name = f"{db_user.first_name} {db_user.last_name}"
-
-    event_data = {
+def create_new_event_statistic(db: Session, item: Item, issue: Issue, action: str):
+    event_statistic = {
         "uuid": str(uuid4()),
-        "author_id": author.id,
-        "author_name": f"{author.first_name} {author.last_name}",
         "resource": "item",
         "resource_uuid": item.uuid,
-        "resource_id": item.id,
-        "action": event_action,
+        "issue_uuid": issue.uuid,
+        "action": action,
+        "date_from": datetime.now(timezone.utc),
+        "date_to": None,
+        "duration": None,
         "created_at": datetime.now(timezone.utc),
     }
-
-    new_event = crud_events.create_event(db, event_data)
-
-    if prev_event_stat is not None:
-        event = crud_events.get_statistics_by_issue_uuid_and_status(db, issue.uuid, prev_event_stat)
-
-        if event is not None:
-            dt = pendulum.parse(str(event.date_from))
-
-        event_statistic_update = {
-            "date_to": datetime.now(timezone.utc),
-            "duration": dt.diff(pendulum.now("UTC")).in_seconds(),
-        }
-        crud_events.update_event(db, event, event_statistic_update)
+    new_event_statistics = crud_events.create_event_statistic(db, event_statistic)
+    return new_event_statistics
 
 
-def issue_reject_new(db: Session, author_id: int, item_id: int, issue: Issue):
-    event_data = {
-        "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_name": "author_name",
-        "action": "issueRejected",
-        "created_at": datetime.now(timezone.utc),
-    }
+def close_event_statistics(db: Session, issue: Issue, previous_event: str):
+    event = crud_events.get_statistics_by_issue_uuid_and_status(db, issue.uuid, previous_event)
 
-    print("#################################")
-    print(event_data)
-    print("#################################")
+    if event is not None:
+        dt = pendulum.parse(str(event.date_from))
+        time_diff = dt.diff(pendulum.now("UTC")).in_seconds()
 
-    # new_event = crud_events.create_event(db, event_data)
-    # crud_events.create_event_statistic(db, event_statistic_data)
+        event_statistic_update = {"date_to": datetime.now(timezone.utc), "duration": time_diff}
+        event = crud_events.update_event(db, event, event_statistic_update)
 
-
-def issue_assign_person(db: Session, author_id: int, item_id: int, issue: Issue):
-    event_data = {
-        "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_name": "author_name",
-        "action": "issueAssignedPerson",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_event = crud_events.create_event(db, event_data)
-
-
-def issue_start_repair(db: Session, author_id: int, item_id: int, issue: Issue):
-    event_data = {
-        "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_name": "author_name",
-        "action": "issueRepairStart",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_event = crud_events.create_event(db, event_data)
-    # crud_events.create_event_statistic(db, event_statistic_data)
-
-
-def issue_pause_repair(db: Session, author_id: int, item_id: int, issue: Issue):
-    event_data = {
-        "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_name": "author_name",
-        "action": "issueRepairPause",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_event = crud_events.create_event(db, event_data)
-    # crud_events.create_event_statistic(db, event_statistic_data)
-
-
-def issue_continue_repair(db: Session, author_id: int, item_id: int, issue: Issue):
-    event_data = {
-        "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_name": "author_name",
-        "action": "issueRepairContinue",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_event = crud_events.create_event(db, event_data)
-    # crud_events.create_event_statistic(db, event_statistic_data)
-
-
-def issue_accept_repair(db: Session, author_id: int, item_id: int, issue: Issue):
-    event_data = {
-        "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_name": "author_name",
-        "action": "issueRepairContinue",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_event = crud_events.create_event(db, event_data)
-    # crud_events.create_event_statistic(db, event_statistic_data)
-
-
-def issue_reject_repair():
-    ...
-
-
-def issue_reopen_repair():
-    ...
+    return event

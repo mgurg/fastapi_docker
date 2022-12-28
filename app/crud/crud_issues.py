@@ -36,7 +36,7 @@ def create_issue(db: Session, data: dict) -> Issue:
 
 
 def update_issue(db: Session, db_issue: Issue, update_data: dict) -> Issue:
-    for key, value in update_data.issues():
+    for key, value in update_data.items():
         setattr(db_issue, key, value)
 
     db.add(db_issue)

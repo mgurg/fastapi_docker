@@ -1,17 +1,33 @@
 from uuid import UUID
 
-from sqlalchemy import or_, select, text
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.models import Event, EventStatistic
+from app.models.models import Event, EventSummary
 
 
-def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, status: str) -> EventStatistic:
+def get_event_time_statistics_by_item(db: Session, item_uuid: UUID):
     return db.execute(
-        select(EventStatistic)
-        .where(EventStatistic.issue_uuid == issue_uuid)
-        .where(EventStatistic.action == status)
-        .where(EventStatistic.date_to == None)
+        select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
+        .where(EventSummary.item_uuid == item_uuid)
+        .group_by(EventSummary.action)
+    ).all()
+
+
+def get_event_time_statistics_by_issue(db: Session, issue_uuid: UUID):
+    return db.execute(
+        select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
+        .where(EventSummary.issue_uuid == issue_uuid)
+        .group_by(EventSummary.action)
+    ).all()
+
+
+def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, status: str) -> EventSummary:
+    return db.execute(
+        select(EventSummary)
+        .where(EventSummary.issue_uuid == issue_uuid)
+        .where(EventSummary.action == status)
+        .where(EventSummary.date_to == None)
     ).scalar_one_or_none()
 
 
@@ -42,8 +58,8 @@ def create_event(db: Session, data: dict) -> Event:
     return new_event
 
 
-def create_event_statistic(db: Session, data: dict) -> EventStatistic:
-    new_event_statistics = EventStatistic(**data)
+def create_event_statistic(db: Session, data: dict) -> EventSummary:
+    new_event_statistics = EventSummary(**data)
     db.add(new_event_statistics)
     db.commit()
     db.refresh(new_event_statistics)
@@ -51,7 +67,7 @@ def create_event_statistic(db: Session, data: dict) -> EventStatistic:
     return new_event_statistics
 
 
-def update_event(db: Session, db_event: EventStatistic, update_data: dict) -> EventStatistic:
+def update_event(db: Session, db_event: EventSummary, update_data: dict) -> EventSummary:
     for key, value in update_data.items():
         setattr(db_event, key, value)
 

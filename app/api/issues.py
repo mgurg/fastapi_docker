@@ -126,31 +126,54 @@ def issue_change_status(
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    current_status = db_issue.status
+    db_issue.status
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
     if not db_user:
         raise HTTPException(status_code=400, detail="User not found!")
-    author_name = "anonymous"
     if db_user:
-        author_name = f"{db_user.first_name} {db_user.last_name}"
+        f"{db_user.first_name} {db_user.last_name}"
 
     match issue.status:
         case "accept_issue":
-            event.issue_change_status(db, db_user, db_item, db_issue, "issueAccepted", "issueStartTime")
-            print("accept")
-        case "reject_issue":
-            event.issue_change_status(db, db_user, db_item, db_issue, "issueRejected", "issueStartTime")
-            print("accept")
-        case "in_progress_issue":
-            print("in_progress_issue")
-        case "pause_issue":
-            print("pause_issue")
-        case "resume_issue":
-            print("resume_issue")
+            event.create_new_event(db, db_user, db_item, db_issue, "issueAccepted")
+            event.close_event_statistics(db, db_issue, "issueStartTime")
 
-    # issue_update = {"status": issue.status, "updated_at": datetime.now(timezone.utc)}
-    # new_issue = crud_issues.update_issue(db, db_issue, {"status": issue.status})
+            print("accept")
+
+        case "reject_issue":
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRejected")
+            event.close_event_statistics(db, db_issue, "issueStartTime")
+
+            print("## accept")
+        case "assign_person":
+            event.create_new_event(db, db_user, db_item, db_issue, "issueAssignedPerson")
+
+            print("## assign_person")
+        case "in_progress_issue":
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairStart")
+            event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
+
+            print("## in_progress_issue")
+        case "pause_issue":
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairPause")
+            event.close_event_statistics(db, db_issue, "issueRepairTime")
+            event.create_new_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
+
+            print("## pause_issue")
+        case "resume_issue":
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairResume")
+            event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
+            event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
+
+        case "resolved_issue":
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairFinish")
+            event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
+            event.close_event_statistics(db, db_issue, "issueRepairTime")
+            event.close_event_statistics(db, db_issue, "issueTotalTime")
+
+    issue_update = {"status": issue.status, "updated_at": datetime.now(timezone.utc)}
+    new_issue = crud_issues.update_issue(db, db_issue, {"status": issue.status})
     return {"ok": True}
 
 

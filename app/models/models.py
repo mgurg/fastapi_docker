@@ -15,9 +15,7 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column(
-        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
-    ),
+    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
 
@@ -271,23 +269,27 @@ class Event(Base):
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     resource = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     resource_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    author_name = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
-    count_time = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    author_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    author_name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    value = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-class EventStatistic(Base):
-    __tablename__ = "events_statistics"
+class EventSummary(Base):
+    __tablename__ = "events_summary"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    resource = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     issue_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    item_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     date_from = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     date_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
