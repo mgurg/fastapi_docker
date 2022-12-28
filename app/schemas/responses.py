@@ -173,6 +173,15 @@ class ItemIndexResponse(BaseResponse):
     text_json: dict | None
 
 
+class ItemTimelineResponse(BaseResponse):
+    created_at: datetime
+    author_name: str | None
+    action: str | None
+    description: str | None
+    resource: str | None
+    resource_uuid: UUID | None
+
+
 class ItemResponse(BaseResponse):
     uuid: UUID
     name: str | None

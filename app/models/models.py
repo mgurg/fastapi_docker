@@ -4,62 +4,6 @@ from sqlalchemy.orm import relationship
 
 from app.db import Base
 
-# role_permission_rel = Table(
-#     "roles_permissions_link",
-#     Base.metadata,
-#     Column("role_id", ForeignKey("roles.id"), autoincrement=False, nullable=False, primary_key=True),
-#     Column("permission_id", ForeignKey("permissions.id"), autoincrement=False, nullable=False, primary_key=True),
-# )
-
-
-# class Role(Base):
-#     __tablename__ = "roles"
-#     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-#     role_name = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-#     role_description = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-
-#     users_FK = relationship("User", back_populates="role_FK")
-#     # PrimaryKeyConstraint("id", name="roles_pkey"),
-#     # UniqueConstraint("uuid", name="roles_uuid_key"),
-
-#     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
-
-
-# class Permission(Base):
-#     __tablename__ = "permissions"
-#     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-#     uuid = Column("uuid", UUID(as_uuid=True), autoincrement=False, nullable=True)
-#     name = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-#     title = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-#     description = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-
-#     # PrimaryKeyConstraint("id", name="permissions_pkey"),
-#     # UniqueConstraint("uuid", name="permissions_uuid_key"),
-
-#     # role = relationship("Role", secondary=role_permission_rel, back_populates="permission")
-
-
-# class User(Base):
-#     __tablename__ = "users"
-#     id = Column(INTEGER(), Identity(), primary_key=True, autoincrement=True, nullable=False)
-#     # uuid = Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-#     email = Column(VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
-#     first_name = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-#     last_name = Column(VARCHAR(length=100), autoincrement=False, nullable=True)
-#     user_role_id = Column(INTEGER(), ForeignKey("roles.id"), autoincrement=False, nullable=True)
-#     created_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-#     updated_at = Column(TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-
-#     # role_FK = relationship("Role", back_populates="users_FK")
-
-#     # ForeignKeyConstraint(["user_role_id"], ["roles.id"], name="role_FK"),
-#     # PrimaryKeyConstraint("id", name="users_pkey"),
-#     # UniqueConstraint("email", name="users_email_key"),
-#     # UniqueConstraint("phone", name="users_phone_key"),
-
-
-# ===============
-
 role_permission_rel = sa.Table(
     "roles_permissions_link",
     Base.metadata,
@@ -71,7 +15,9 @@ users_groups_rel = sa.Table(
     "users_groups_link",
     Base.metadata,
     sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column(
+        "user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True
+    ),
 )
 
 
@@ -193,7 +139,7 @@ class Item(Base):
     files_item = relationship("File", secondary=file_item_rel, back_populates="item")
     item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
 
-    qr_code = relationship("QrCodes", back_populates="items_FK")
+    qr_code = relationship("QrCode", back_populates="items_FK")
     issue_FK = relationship("Issue", back_populates="item")
 
 
@@ -289,7 +235,7 @@ class Setting(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-class QrCodes(Base):
+class QrCode(Base):
     __tablename__ = "qr_codes"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
@@ -318,3 +264,30 @@ class UserGroup(Base):
     # permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
     users = relationship("User", secondary=users_groups_rel, back_populates="user_group")  # Roles
+
+
+class Event(Base):
+    __tablename__ = "events"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    resource = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    resource_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    author_name = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    description = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
+    count_time = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+class EventStatistic(Base):
+    __tablename__ = "events_statistics"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    issue_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    item_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    date_from = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    date_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)

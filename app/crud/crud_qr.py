@@ -4,20 +4,20 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.models import QrCodes
+from app.models.models import QrCode
 from app.models.shared_models import PublicCompany
 
 
-def get_entity_by_qr_code(db: Session, qr_code_id: str) -> QrCodes:
-    return db.execute(select(QrCodes).where(QrCodes.qr_code_id == qr_code_id)).scalar_one_or_none()
+def get_entity_by_qr_code(db: Session, qr_code_id: str) -> QrCode:
+    return db.execute(select(QrCode).where(QrCode.qr_code_id == qr_code_id)).scalar_one_or_none()
 
 
-def get_qr_code_by_resource_uuid(db: Session, resource_uuid: UUID) -> QrCodes:
-    return db.execute(select(QrCodes).where(QrCodes.resource_uuid == resource_uuid)).scalar_one_or_none()
+def get_qr_code_by_resource_uuid(db: Session, resource_uuid: UUID) -> QrCode:
+    return db.execute(select(QrCode).where(QrCode.resource_uuid == resource_uuid)).scalar_one_or_none()
 
 
-def create_qr_code(db: Session, data: dict) -> QrCodes:
-    new_qr_code = QrCodes(**data)
+def create_qr_code(db: Session, data: dict) -> QrCode:
+    new_qr_code = QrCode(**data)
     db.add(new_qr_code)
     db.commit()
     db.refresh(new_qr_code)
@@ -41,7 +41,7 @@ def add_noise_to_qr(qr_code: str) -> str:
 
 def generate_item_qr_id(db: Session) -> str:
     allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
-    items_ids = db.execute(select(QrCodes.qr_code_id)).scalars().all()
+    items_ids = db.execute(select(QrCode.qr_code_id)).scalars().all()
     proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
     while proposed_id in items_ids:
         proposed_id = "".join(random.choice(allowed_chars) for x in range(3))

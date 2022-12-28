@@ -157,3 +157,8 @@ class IssueEditIn(BaseRequest):
     text_html: str | None
     text_json: dict | None
     files: list[UUID] | None
+
+
+class IssueChangeStatus(BaseRequest):
+    status: str
+    reason: str | None

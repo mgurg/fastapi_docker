@@ -33,7 +33,7 @@ SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAU
 echo = False
 if settings.ENVIRONMENT != "PRD":
     print(SQLALCHEMY_DATABASE_URL)
-    echo = True
+    echo = False
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
 

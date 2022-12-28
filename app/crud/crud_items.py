@@ -25,6 +25,10 @@ def get_item_by_uuid(db: Session, uuid: UUID) -> Item:
     return db.execute(select(Item).where(Item.uuid == uuid)).scalar_one_or_none()
 
 
+def get_item_by_id(db: Session, id: int) -> Item:
+    return db.execute(select(Item).where(Item.id == id)).scalar_one_or_none()
+
+
 def create_item(db: Session, data: dict) -> Item:
     new_item = Item(**data)
     db.add(new_item)
