@@ -197,6 +197,7 @@ class IssueIndexResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
+    created_at: datetime
 
 
 class ItemNameResponse(BaseResponse):

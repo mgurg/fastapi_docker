@@ -88,8 +88,9 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     if db_item:
         item_id = db_item.id
 
-    description = BeautifulSoup(issue.text_html, "html.parser").get_text()
+    description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
 
+    print("#########################", db_item.id)
     issue_data = {
         "uuid": issue_uuid,
         "author_id": auth["user_id"],
@@ -108,7 +109,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     new_issue = crud_issues.create_issue(db, issue_data)
 
-    event.issue_create_new(db, db_user, db_item, new_issue, "issueAdd", ["issueStartTime", "issueTotalTime"])
+    # event.create_new_event(db, db_user, db_item, new_issue, "issueAdd")
 
     return new_issue
 
