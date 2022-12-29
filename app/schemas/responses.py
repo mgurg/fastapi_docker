@@ -197,6 +197,9 @@ class IssueIndexResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
+    status: str | None
+    priority: str | None
+    color: str | None
     created_at: datetime
 
 
@@ -210,12 +213,13 @@ class IssueResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
-    files_issue: list[FileBasicInfo] | None
-    # item_guides: list[GuideBasicResponse] | None
     item: ItemNameResponse | None
     status: str | None
     priority: str | None
     color: str | None
+    users_issue: list[UserBasicResponse] | None
+    files_issue: list[FileBasicInfo] | None
+    # item_guides: list[GuideBasicResponse] | None
 
 
 class UserVerifyToken(BaseResponse):

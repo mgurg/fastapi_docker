@@ -54,7 +54,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
     return db_issue
 
 
-@issue_router.post("/", response_model=IssueIndexResponse)
+@issue_router.post("/", response_model=IssueResponse)
 def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAddIn, auth=Depends(has_token)):
 
     tenant_id = request.headers.get("tenant", None)
@@ -174,11 +174,11 @@ def issue_change_status(
             event.close_event_statistics(db, db_issue, "issueTotalTime")
 
     issue_update = {"status": issue.status, "updated_at": datetime.now(timezone.utc)}
-    new_issue = crud_issues.update_issue(db, db_issue, {"status": issue.status})
+    crud_issues.update_issue(db, db_issue, issue_update)
     return {"ok": True}
 
 
-@issue_router.patch("/{issue_uuid}", response_model=IssueIndexResponse)
+@issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
 def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueEditIn, auth=Depends(has_token)):
 
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
@@ -198,6 +198,18 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
 
         issue_data["files_issue"] = files
         del issue_data["files"]
+
+    users = []
+    if ("users" in issue_data) and (issue_data["users"] is not None):
+        for user in db_issue.users_issue:
+            db_issue.users_issue.remove(user)
+        for user in issue_data["users"]:
+            db_user = crud_users.get_user_by_uuid(db, user)
+            if db_user:
+                users.append(db_user)
+
+        issue_data["users_issue"] = users
+        del issue_data["users"]
 
     if ("text_html" in issue_data) and (issue_data["text_html"] is not None):
         issue_data["text"] = BeautifulSoup(issue.text_html, "html.parser").get_text()

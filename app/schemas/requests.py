@@ -157,6 +157,7 @@ class IssueEditIn(BaseRequest):
     text_html: str | None
     text_json: dict | None
     files: list[UUID] | None
+    users: list[UUID] | None
 
 
 class IssueChangeStatus(BaseRequest):

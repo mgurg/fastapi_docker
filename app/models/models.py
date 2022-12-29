@@ -18,6 +18,13 @@ users_groups_rel = sa.Table(
     sa.Column("user_group_id", sa.ForeignKey("users_groups.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+users_issues_rel = sa.Table(
+    "users_issues_link",
+    Base.metadata,
+    sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -71,6 +78,7 @@ class User(Base):
 
     role_FK = relationship("Role", back_populates="users_FK")
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
+    problem = relationship("Issue", secondary=users_issues_rel, back_populates="users_issue")
 
 
 file_idea_rel = sa.Table(
@@ -197,6 +205,7 @@ class Issue(Base):
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     files_issue = relationship("File", secondary=file_issue_rel, back_populates="issue")
+    users_issue = relationship("User", secondary=users_issues_rel, back_populates="problem")
 
     item = relationship("Item", back_populates="issue_FK")
 

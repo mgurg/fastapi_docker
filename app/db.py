@@ -1,10 +1,12 @@
+import time
 from contextlib import contextmanager
 from functools import lru_cache
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from loguru import logger
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, event, select
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
@@ -28,6 +30,22 @@ DEFAULT_DATABASE_DB = settings.DEFAULT_DATABASE_DB
 #     port=5432,
 #     path=settings.DEFAULT_DATABASE_DB,
 # )
+
+sql_performance_monitoring = False
+if sql_performance_monitoring is True:
+
+    @event.listens_for(Engine, "before_cursor_execute")
+    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        conn.info.setdefault("query_start_time", []).append(time.time())
+        logger.debug("Start Query:")
+        logger.debug("%s" % statement)
+
+    @event.listens_for(Engine, "after_cursor_execute")
+    def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        total = time.time() - conn.info["query_start_time"].pop(-1)
+        logger.debug("Query Complete!")
+        logger.debug("Total Time: %f" % total)
+
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 echo = False
