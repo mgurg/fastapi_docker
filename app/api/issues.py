@@ -10,7 +10,12 @@ from sqlalchemy.orm import Session
 from app.crud import crud_auth, crud_files, crud_issues, crud_items, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
-from app.schemas.responses import IssueIndexResponse, IssueResponse, StandardResponse
+from app.schemas.responses import (
+    IssueIndexResponse,
+    IssueResponse,
+    IssueSummaryResponse,
+    StandardResponse,
+)
 from app.service import event
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
@@ -35,8 +40,31 @@ def issue_get_all(
     return paginate(db_issues, params)
 
 
+@issue_router.get("/stats", response_model=IssueSummaryResponse)
+def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+
+    ideas_summary = crud_issues.get_issue_summary(db)
+    if not ideas_summary:
+        return {
+            "new": 0,
+            "accepted": 0,
+            "rejected": 0,
+            "assigned": 0,
+            "in_progress": 0,
+            "paused": 0,
+            "resolved": 0,
+        }
+
+    ideas_status = dict(ideas_summary)
+
+    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
+        ideas_status.setdefault(status, 0)
+
+    return ideas_status
+
+
 @issue_router.get("/user/{user_uuid}", response_model=Page[IssueIndexResponse])
-def issue_get_all(
+def issue_get_by_user_all(
     *,
     db: Session = Depends(get_db),
     user_uuid: UUID,
@@ -55,9 +83,7 @@ def issue_get_all(
         raise HTTPException(status_code=401, detail="User not found")
 
     db_issues = crud_issues.get_issues_by_user_id(db, db_user.id)
-    # print("#####################")
-    # print(db_issues.users_issue)
-    # print(dict(db_issues))
+
     return paginate(db_issues, params)
 
 
@@ -130,7 +156,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
         "files_issue": files,
         "color": issue.color,
         "priority": issue.priority,
-        "status": issue.status,
+        "status": "new",
         "created_at": datetime.now(timezone.utc),
     }
 
@@ -164,41 +190,50 @@ def issue_change_status(
     if db_user:
         f"{db_user.first_name} {db_user.last_name}"
 
+    status = None
     match issue.status:
         case "accept_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueAccepted")
             event.close_event_statistics(db, db_issue, "issueStartTime")
+            status = "accepted"
 
         case "reject_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRejected")
             event.close_event_statistics(db, db_issue, "issueStartTime")
             event.close_event_statistics(db, db_issue, "issueTotalTime")
+            status = "rejected"
 
         case "assign_person":
             event.create_new_event(db, db_user, db_item, db_issue, "issueAssignedPerson")
+            status = "assigned"
 
         case "in_progress_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairStart")
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
+            status = "in_progress"
 
         case "pause_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairPause")
             event.close_event_statistics(db, db_issue, "issueRepairTime")
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
+            status = "paused"
 
         case "resume_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairResume")
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
+            status = "in_progress"
 
         case "resolved_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairFinish")
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
             event.close_event_statistics(db, db_issue, "issueRepairTime")
             event.close_event_statistics(db, db_issue, "issueTotalTime")
+            status = "resolved"
 
-    issue_update = {"status": issue.status, "updated_at": datetime.now(timezone.utc)}
-    crud_issues.update_issue(db, db_issue, issue_update)
+    if status is not None:
+        issue_update = {"status": status, "updated_at": datetime.now(timezone.utc)}
+        crud_issues.update_issue(db, db_issue, issue_update)
     return {"ok": True}
 
 

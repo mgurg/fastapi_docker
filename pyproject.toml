@@ -35,7 +35,6 @@ fastapi-pagination = {extras = ["sqlalchemy"], version = "^0.11.0"}
 pydantic-factories = "^1.4.1"
 RegonAPI = "^1.3.1"
 APScheduler = "4.0.0a2"
-#rich = "^12.5.1"
 #sqlalchemy-easy-profile = "^1.2.1"
 pyvieser = "^0.0.4"
 pyotp = "^2.7.0"

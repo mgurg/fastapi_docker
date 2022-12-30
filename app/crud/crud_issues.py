@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import or_, select, text
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Issue, User
@@ -28,6 +28,10 @@ def get_issues_by_user_id(db, user_id) -> Issue:
 
 def get_issue_by_uuid(db: Session, uuid: UUID) -> Issue:
     return db.execute(select(Issue).where(Issue.uuid == uuid)).scalar_one_or_none()
+
+
+def get_issue_summary(db: Session):
+    return db.execute(select(Issue.status, func.count(Issue.status)).group_by(Issue.status)).all()
 
 
 def create_issue(db: Session, data: dict) -> Issue:

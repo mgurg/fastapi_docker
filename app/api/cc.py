@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends
-
-# from sqlmodel import Session, select
 from sqlalchemy.orm import Session
 
 from app.crud import cc_crud, crud_files

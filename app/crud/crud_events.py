@@ -7,28 +7,37 @@ from app.models.models import Event, EventSummary
 
 
 def get_event_time_statistics_by_item(db: Session, item_uuid: UUID):
-    return db.execute(
-        select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
-        .where(EventSummary.item_uuid == item_uuid)
-        .group_by(EventSummary.action)
-    ).all()
+    return (
+        db.execute(
+            select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
+            .where(EventSummary.item_uuid == item_uuid)
+            .group_by(EventSummary.action)
+        )
+        .scalars()
+        .all()
+    )
 
 
 def get_event_time_statistics_by_issue(db: Session, issue_uuid: UUID):
-    return db.execute(
-        select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
-        .where(EventSummary.issue_uuid == issue_uuid)
-        .group_by(EventSummary.action)
-    ).all()
+    return (
+        db.execute(
+            select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
+            .where(EventSummary.issue_uuid == issue_uuid)
+            .group_by(EventSummary.action)
+        )
+        .scalars()
+        .all()
+    )
 
 
 def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, status: str) -> EventSummary:
-    return db.execute(
+    query = (
         select(EventSummary)
         .where(EventSummary.issue_uuid == issue_uuid)
         .where(EventSummary.action == status)
         .where(EventSummary.date_to == None)
-    ).scalar_one_or_none()
+    )
+    return db.execute(query).scalar_one_or_none()
 
 
 def get_events_by_uuid_and_resource(
@@ -38,13 +47,8 @@ def get_events_by_uuid_and_resource(
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 
-    print("######################")
-    print(resource_uuid, resource)
-    events_with_date = (
-        db.execute(select(Event).where(Event.resource_uuid == resource_uuid).where(Event.resource == resource))
-        .scalars()
-        .all()
-    )
+    query = select(Event).where(Event.resource_uuid == resource_uuid).where(Event.resource == resource)
+    events_with_date = db.execute(query).scalars().all()
 
     return events_with_date
 

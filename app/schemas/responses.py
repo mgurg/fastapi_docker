@@ -100,6 +100,16 @@ class IdeaSummaryResponse(BaseResponse):
     todo: int
 
 
+class IssueSummaryResponse(BaseResponse):
+    new: int
+    accepted: int
+    rejected: int
+    assigned: int
+    in_progress: int
+    paused: int
+    resolved: int
+
+
 class RoleSummaryResponse(BaseResponse):
     uuid: UUID
     role_title: str

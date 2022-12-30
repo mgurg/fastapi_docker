@@ -2,11 +2,8 @@ import io
 from typing import Optional
 from uuid import uuid4
 
-# import magic
 from fastapi import APIRouter, Depends, Request, UploadFile
 from loguru import logger
-
-# from sqlmodel import Session, select
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
