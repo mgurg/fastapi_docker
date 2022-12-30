@@ -35,6 +35,32 @@ def issue_get_all(
     return paginate(db_issues, params)
 
 
+@issue_router.get("/user/{user_uuid}", response_model=Page[IssueIndexResponse])
+def issue_get_all(
+    *,
+    db: Session = Depends(get_db),
+    user_uuid: UUID,
+    params: Params = Depends(),
+    search: str = None,
+    sortOrder: str = "asc",
+    sortColumn: str = "name",
+    auth=Depends(has_token),
+):
+
+    sortTable = {"name": "name"}
+
+    db_user = crud_users.get_user_by_uuid(db, user_uuid)
+
+    if db_user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id)
+    # print("#####################")
+    # print(db_issues.users_issue)
+    # print(dict(db_issues))
+    return paginate(db_issues, params)
+
+
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
 def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
@@ -88,9 +114,10 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     if db_item:
         item_id = db_item.id
 
-    description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
+    description = None
+    if issue.text_html is not None:
+        description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
 
-    print("#########################", db_item.id)
     issue_data = {
         "uuid": issue_uuid,
         "author_id": auth["user_id"],
@@ -109,7 +136,9 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     new_issue = crud_issues.create_issue(db, issue_data)
 
-    # event.create_new_event(db, db_user, db_item, new_issue, "issueAdd")
+    event.create_new_event(db, db_user, db_item, new_issue, "issueAdd")
+    event.create_new_event_statistic(db, db_item, new_issue, "issueStartTime")
+    event.create_new_event_statistic(db, db_item, new_issue, "issueTotalTime")
 
     return new_issue
 
@@ -140,28 +169,23 @@ def issue_change_status(
             event.create_new_event(db, db_user, db_item, db_issue, "issueAccepted")
             event.close_event_statistics(db, db_issue, "issueStartTime")
 
-            print("accept")
-
         case "reject_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRejected")
             event.close_event_statistics(db, db_issue, "issueStartTime")
+            event.close_event_statistics(db, db_issue, "issueTotalTime")
 
-            print("## accept")
         case "assign_person":
             event.create_new_event(db, db_user, db_item, db_issue, "issueAssignedPerson")
 
-            print("## assign_person")
         case "in_progress_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairStart")
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
 
-            print("## in_progress_issue")
         case "pause_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairPause")
             event.close_event_statistics(db, db_issue, "issueRepairTime")
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
 
-            print("## pause_issue")
         case "resume_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairResume")
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")

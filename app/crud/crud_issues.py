@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
-from app.models.models import Issue
+from app.models.models import Issue, User
 
 
 def get_issues(db: Session, search: str, sortColumn: str, sortOrder: str) -> Issue:
@@ -20,6 +20,10 @@ def get_issues(db: Session, search: str, sortColumn: str, sortOrder: str) -> Iss
         )
 
     return db.execute(select(Issue).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
+
+
+def get_issues_by_user_id(db, user_id) -> Issue:
+    return db.execute(select(Issue).filter(Issue.users_issue.any(User.id == user_id))).scalars().all()
 
 
 def get_issue_by_uuid(db: Session, uuid: UUID) -> Issue:

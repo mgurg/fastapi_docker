@@ -192,20 +192,22 @@ class ItemResponse(BaseResponse):
     qr_code: QRCodeItemResponse | None
 
 
+class ItemNameResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+
+
 class IssueIndexResponse(BaseResponse):
     uuid: UUID
     name: str | None
     text: str | None
     text_json: dict | None
+    item: ItemNameResponse | None
     status: str | None
     priority: str | None
     color: str | None
+    users_issue: list[UserBasicResponse] | None
     created_at: datetime
-
-
-class ItemNameResponse(BaseResponse):
-    uuid: UUID
-    name: str | None
 
 
 class IssueResponse(BaseResponse):
