@@ -35,15 +35,15 @@ def create_new_event(
             case "issueRepairFinish":
                 description = "Issue resolved"
 
-    if description == "issueChangeAssignedPerson" and description == "added":
+    if action == "issueChangeAssignedPerson" and description == "added":
         description = "New person assigned to issue"
-        person = crud_users.get_user_by_uuid(value)
+        person = crud_users.get_user_by_uuid(db, value)
         if person is not None:
             value = person.first_name + " " + person.last_name
 
-    if description == "issueChangeAssignedPerson" and description == "removed":
+    if action == "issueChangeAssignedPerson" and description == "removed":
         description = "Person removed from issue"
-        person = crud_users.get_user_by_uuid(value)
+        person = crud_users.get_user_by_uuid(db, value)
         if person is not None:
             value = person.first_name + " " + person.last_name
 
