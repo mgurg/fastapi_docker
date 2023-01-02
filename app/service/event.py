@@ -32,6 +32,8 @@ def create_new_event(
                 description = "Issue rejected"
             case "issueRepairPause":
                 description = "Issue paused"
+            case "issueRepairResume":
+                description = "Issue resumed"
             case "issueRepairFinish":
                 description = "Issue resolved"
 

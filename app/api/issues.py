@@ -226,7 +226,7 @@ def issue_change_status(
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
             status = "in_progress"
 
-        case "resolved_issue":
+        case "resolve_issue":
             event.create_new_event(db, db_user, db_item, db_issue, "issueRepairFinish", issue.description, issue.value)
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
             event.close_event_statistics(db, db_issue, "issueRepairTime")
