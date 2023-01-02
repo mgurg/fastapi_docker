@@ -41,13 +41,17 @@ def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, statu
 
 
 def get_events_by_uuid_and_resource(
-    db: Session, resource_uuid: UUID, resource: str, date_from=None, date_to=None
+    db: Session, resource_uuid: UUID, action: str = None, date_from=None, date_to=None
 ) -> Event:
 
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 
-    query = select(Event).where(Event.resource_uuid == resource_uuid).where(Event.resource == resource)
+    query = select(Event).where(Event.resource_uuid == resource_uuid).where(Event.resource == "item")
+
+    if action is not None:
+        query = query.where(Event.action == action)
+
     events_with_date = db.execute(query).scalars().all()
 
     return events_with_date

@@ -58,13 +58,15 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     return db_item
 
 
-@item_router.get("/timeline/{item_uuid}", response_model=list[ItemTimelineResponse])  #
-def item_get_timeline_history(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(has_token)):
+@item_router.get("/timeline/{item_uuid}", response_model=list[ItemTimelineResponse])
+def item_get_timeline_history(
+    *, db: Session = Depends(get_db), item_uuid: UUID, action: str | None = None, auth=Depends(has_token)
+):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_events = crud_events.get_events_by_uuid_and_resource(db, item_uuid, "item")
+    db_events = crud_events.get_events_by_uuid_and_resource(db, item_uuid, action)
     return db_events
 
 
