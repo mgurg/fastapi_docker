@@ -4,7 +4,7 @@ from uuid import uuid4
 import pendulum
 from sqlalchemy.orm import Session
 
-from app.crud import crud_events
+from app.crud import crud_events, crud_users
 from app.models.models import Event, Issue, Item, User
 
 # OPEN (start)
@@ -20,9 +20,32 @@ from app.models.models import Event, Issue, Item, User
 # Resolution – why the issue is no longer in flight (for example, because it’s completed)
 
 
-def create_new_event(db: Session, author: User, item: Item, issue: Issue, action: str, value: str = None) -> Event:
+def create_new_event(
+    db: Session, author: User, item: Item, issue: Issue, action: str, description: str = None, value: str = None
+) -> Event:
 
-    description = None
+    if description is None:
+        match action:
+            case "issueAccepted":
+                description = "Issue accepted"
+            case "issueRejected":
+                description = "Issue rejected"
+            case "issueRepairPause":
+                description = "Issue paused"
+            case "issueRepairFinish":
+                description = "Issue resolved"
+
+    if description == "issueChangeAssignedPerson" and description == "added":
+        description = "New person assigned to issue"
+        person = crud_users.get_user_by_uuid(value)
+        if person is not None:
+            value = person.first_name + " " + person.last_name
+
+    if description == "issueChangeAssignedPerson" and description == "removed":
+        description = "Person removed from issue"
+        person = crud_users.get_user_by_uuid(value)
+        if person is not None:
+            value = person.first_name + " " + person.last_name
 
     event_data = {
         "uuid": str(uuid4()),

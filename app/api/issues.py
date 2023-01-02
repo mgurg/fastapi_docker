@@ -193,18 +193,20 @@ def issue_change_status(
     status = None
     match issue.status:
         case "accept_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueAccepted")
+            event.create_new_event(db, db_user, db_item, db_issue, "issueAccepted", issue.description, issue.value)
             event.close_event_statistics(db, db_issue, "issueStartTime")
             status = "accepted"
 
         case "reject_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRejected")
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRejected", issue.description, issue.value)
             event.close_event_statistics(db, db_issue, "issueStartTime")
             event.close_event_statistics(db, db_issue, "issueTotalTime")
             status = "rejected"
 
-        case "assign_person":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueAssignedPerson")
+        case "change_assigned_person":
+            event.create_new_event(
+                db, db_user, db_item, db_issue, "issueChangeAssignedPerson", issue.description, issue.value
+            )
             status = "assigned"
 
         case "in_progress_issue":
@@ -213,7 +215,7 @@ def issue_change_status(
             status = "in_progress"
 
         case "pause_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairPause")
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairPause", issue.description, issue.value)
             event.close_event_statistics(db, db_issue, "issueRepairTime")
             event.create_new_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
             status = "paused"
@@ -225,7 +227,7 @@ def issue_change_status(
             status = "in_progress"
 
         case "resolved_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairFinish")
+            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairFinish", issue.description, issue.value)
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
             event.close_event_statistics(db, db_issue, "issueRepairTime")
             event.close_event_statistics(db, db_issue, "issueTotalTime")

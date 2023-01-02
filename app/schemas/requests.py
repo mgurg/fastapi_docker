@@ -162,4 +162,5 @@ class IssueEditIn(BaseRequest):
 
 class IssueChangeStatus(BaseRequest):
     status: str
-    reason: str | None
+    description: str | None
+    value: str | None
