@@ -233,9 +233,10 @@ def issue_change_status(
             event.close_event_statistics(db, db_issue, "issueTotalTime")
             status = "resolved"
 
-    if status is not None:
+    if status in ["accepted", "rejected", "in_progress", "paused", "resolved"]:
         issue_update = {"status": status, "updated_at": datetime.now(timezone.utc)}
         crud_issues.update_issue(db, db_issue, issue_update)
+
     return {"ok": True}
 
 

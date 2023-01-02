@@ -188,6 +188,7 @@ class ItemTimelineResponse(BaseResponse):
     author_name: str | None
     action: str | None
     description: str | None
+    value: str | None
     resource: str | None
     resource_uuid: UUID | None
 
