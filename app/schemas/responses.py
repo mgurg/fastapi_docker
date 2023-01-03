@@ -188,6 +188,7 @@ class EventTimelineResponse(BaseResponse):
     author_name: str | None
     author_uuid: UUID | None
     action: str | None
+    name: str | None
     description: str | None
     value: str | None
     resource: str | None
