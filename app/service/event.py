@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pendulum
 from sqlalchemy.orm import Session
@@ -20,33 +20,25 @@ from app.models.models import Event, Issue, Item, User
 # Resolution – why the issue is no longer in flight (for example, because it’s completed)
 
 
-def create_new_event(
-    db: Session, author: User, item: Item, issue: Issue, action: str, description: str = None, value: str = None
+def create_new_item_event(
+    db: Session,
+    author: User,
+    item: Item,
+    issue: Issue,
+    action: str,
+    name: str,
+    description: str | None = None,
+    value: str | None = None,
 ) -> Event:
 
-    if description is None:
-        match action:
-            case "issueAccepted":
-                description = "Issue accepted"
-            case "issueRejected":
-                description = "Issue rejected"
-            case "issueRepairPause":
-                description = "Issue paused"
-            case "issueRepairStart":
-                description = "Issue started"
-            case "issueRepairResume":
-                description = "Issue resumed"
-            case "issueRepairFinish":
-                description = "Issue resolved"
-
-    if action == "issueChangeAssignedPerson" and description == "added":
-        description = "New person assigned to issue"
+    if action == "issue_change_assigned_person" and description == "added":
+        # description = "New person assigned to issue"
         person = crud_users.get_user_by_uuid(db, value)
         if person is not None:
             value = person.first_name + " " + person.last_name
 
-    if action == "issueChangeAssignedPerson" and description == "removed":
-        description = "Person removed from issue"
+    if action == "issue_change_assigned_person" and description == "removed":
+        # description = "Person removed from issue"
         person = crud_users.get_user_by_uuid(db, value)
         if person is not None:
             value = person.first_name + " " + person.last_name
@@ -59,7 +51,10 @@ def create_new_event(
         "resource": "item",
         "resource_id": item.id,
         "resource_uuid": item.uuid,
+        "thread_uuid": issue.uuid,
+        "thread_resource": "issue",
         "action": action,
+        "name": name,
         "description": description,
         "value": value,
         "created_at": datetime.now(timezone.utc),
@@ -69,7 +64,7 @@ def create_new_event(
     return new_event
 
 
-def create_new_event_statistic(db: Session, item: Item, issue: Issue, action: str):
+def create_new_item_event_statistic(db: Session, item: Item, issue: Issue, action: str):
     event_statistic = {
         "uuid": str(uuid4()),
         "resource": "item",

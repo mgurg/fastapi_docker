@@ -260,7 +260,7 @@ test = ["hypothesis (==3.55.3)", "flake8 (==3.7.8)"]
 
 [[package]]
 name = "coverage"
-version = "7.0.1"
+version = "7.0.2"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false

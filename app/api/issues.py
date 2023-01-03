@@ -162,9 +162,11 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     new_issue = crud_issues.create_issue(db, issue_data)
 
-    event.create_new_event(db, db_user, db_item, new_issue, "issueAdd")
-    event.create_new_event_statistic(db, db_item, new_issue, "issueStartTime")
-    event.create_new_event_statistic(db, db_item, new_issue, "issueTotalTime")
+    event.create_new_item_event(
+        db, db_user, db_item, new_issue, "issue_add", "Issue added", issue_data.name, issue_data.text
+    )
+    event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
+    event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
 
     return new_issue
 
@@ -192,42 +194,57 @@ def issue_change_status(
 
     status = None
     match issue.status:
-        case "accept_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueAccepted", issue.description, issue.value)
+        case "issue_accept":
+            event.create_new_item_event(
+                db, db_user, db_item, db_issue, "issue_accept", issue.name, issue.description, issue.value
+            )
             event.close_event_statistics(db, db_issue, "issueStartTime")
             status = "accepted"
 
-        case "reject_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRejected", issue.description, issue.value)
+        case "issue_reject":
+            event.create_new_item_event(
+                db, db_user, db_item, db_issue, "issue_reject", issue.name, issue.description, issue.value
+            )
             event.close_event_statistics(db, db_issue, "issueStartTime")
             event.close_event_statistics(db, db_issue, "issueTotalTime")
             status = "rejected"
 
-        case "change_assigned_person":
-            event.create_new_event(
-                db, db_user, db_item, db_issue, "issueChangeAssignedPerson", issue.description, issue.value
+        case "issue_change_assigned_person":
+            event.create_new_item_event(
+                db,
+                db_user,
+                db_item,
+                db_issue,
+                "issue_change_assigned_person",
+                issue.name,
+                issue.description,
+                issue.value,
             )
             status = "assigned"
 
-        case "in_progress_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairStart")
-            event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
+        case "issue_start_progress":
+            event.create_new_item_event(db, db_user, db_item, db_issue, "issue_start_progress", issue.name)
+            event.create_new_item_event_statistic(db, db_item, db_issue, "issueRepairTime")
             status = "in_progress"
 
-        case "pause_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairPause", issue.description, issue.value)
+        case "issue_pause":
+            event.create_new_item_event(
+                db, db_user, db_item, db_issue, "issue_pause", issue.name, issue.description, issue.value
+            )
             event.close_event_statistics(db, db_issue, "issueRepairTime")
-            event.create_new_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
+            event.create_new_item_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
             status = "paused"
 
-        case "resume_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairResume")
+        case "issue_resume":
+            event.create_new_item_event(db, db_user, db_item, db_issue, "issue_resume", issue.name)
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
-            event.create_new_event_statistic(db, db_item, db_issue, "issueRepairTime")
+            event.create_new_item_event_statistic(db, db_item, db_issue, "issueRepairTime")
             status = "in_progress"
 
-        case "resolve_issue":
-            event.create_new_event(db, db_user, db_item, db_issue, "issueRepairFinish", issue.description, issue.value)
+        case "issue_resolve":
+            event.create_new_item_event(
+                db, db_user, db_item, db_issue, "issue_resolve", issue.name, issue.description, issue.value
+            )
             event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
             event.close_event_statistics(db, db_issue, "issueRepairTime")
             event.close_event_statistics(db, db_issue, "issueTotalTime")
