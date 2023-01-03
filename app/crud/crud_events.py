@@ -57,6 +57,23 @@ def get_events_by_uuid_and_resource(
     return events_with_date
 
 
+def get_events_by_thread(
+    db: Session, thread_uuid: UUID, thread_resource: str = None, date_from=None, date_to=None
+) -> Event:
+
+    # .where(Event.created_at > date_from)
+    # .where(Event.created_at < date_to)
+
+    query = select(Event).where(Event.thread_uuid == thread_uuid)
+
+    if thread_resource is not None:
+        query = query.where(Event.thread_resource == thread_resource)
+
+    events_with_date = db.execute(query).scalars().all()
+
+    return events_with_date
+
+
 def create_event(db: Session, data: dict) -> Event:
     new_event = Event(**data)
     db.add(new_event)

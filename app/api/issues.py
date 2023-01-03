@@ -7,10 +7,18 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_auth, crud_files, crud_issues, crud_items, crud_users
+from app.crud import (
+    crud_auth,
+    crud_events,
+    crud_files,
+    crud_issues,
+    crud_items,
+    crud_users,
+)
 from app.db import engine, get_db
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import (
+    EventTimelineResponse,
     IssueIndexResponse,
     IssueResponse,
     IssueSummaryResponse,
@@ -61,6 +69,18 @@ def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token))
         ideas_status.setdefault(status, 0)
 
     return ideas_status
+
+
+@issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])
+def item_get_timeline_history(
+    *, db: Session = Depends(get_db), issue_uuid: UUID, thread_resource: str | None = None, auth=Depends(has_token)
+):
+    # db_item = crud_items.get_item_by_uuid(db, issue_uuid)
+    # if not db_item:
+    #     raise HTTPException(status_code=400, detail="Item not found!")
+
+    db_events = crud_events.get_events_by_thread(db, issue_uuid, thread_resource)
+    return db_events
 
 
 @issue_router.get("/user/{user_uuid}", response_model=Page[IssueIndexResponse])

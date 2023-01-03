@@ -11,9 +11,9 @@ from app.crud import crud_auth, crud_events, crud_files, crud_items, crud_qr
 from app.db import engine, get_db
 from app.schemas.requests import ItemAddIn, ItemEditIn
 from app.schemas.responses import (
+    EventTimelineResponse,
     ItemIndexResponse,
     ItemResponse,
-    ItemTimelineResponse,
     StandardResponse,
 )
 from app.service.aws_s3 import generate_presigned_url
@@ -58,7 +58,7 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     return db_item
 
 
-@item_router.get("/timeline/{item_uuid}", response_model=list[ItemTimelineResponse])
+@item_router.get("/timeline/{item_uuid}", response_model=list[EventTimelineResponse])
 def item_get_timeline_history(
     *, db: Session = Depends(get_db), item_uuid: UUID, action: str | None = None, auth=Depends(has_token)
 ):

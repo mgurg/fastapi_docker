@@ -183,14 +183,17 @@ class ItemIndexResponse(BaseResponse):
     text_json: dict | None
 
 
-class ItemTimelineResponse(BaseResponse):
+class EventTimelineResponse(BaseResponse):
     created_at: datetime
     author_name: str | None
+    author_uuid: UUID | None
     action: str | None
     description: str | None
     value: str | None
     resource: str | None
     resource_uuid: UUID | None
+    thread_resource: str | None
+    thread_uuid: UUID | None
 
 
 class ItemResponse(BaseResponse):
