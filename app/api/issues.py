@@ -163,7 +163,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     new_issue = crud_issues.create_issue(db, issue_data)
 
     event.create_new_item_event(
-        db, db_user, db_item, new_issue, "issue_add", "Issue added", issue_data.name, issue_data.text
+        db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
     )
     event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
     event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")

@@ -69,6 +69,18 @@ docker exec -it 64a05bfedffb sh
  - cancelled
 
 
+```mermaid
+graph TD
+    A[Issue] -->|?| B{Accept/Reject}
+	B -->|Reject| D[rejected]
+    B -->|Accept| C[accepted]
+    C -->|Assign User| E[assigned]
+	E -->|Start| F[in_progress]
+	F -->|Pause| G[paused]
+	G -->|Resume| H[in_progress]
+	H -->|Resolve| I[resolved]
+```
+
  ### QR CODES
  `POST /auth/qr/{qr_code}`
   
