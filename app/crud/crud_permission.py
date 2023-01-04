@@ -23,7 +23,7 @@ def get_roles_summary(db: Session, search: str, sortColumn: str, sortOrder: str)
 
     result = db.execute(query)  # await db.execute(query)
 
-    return result.scalars().all()
+    return result.all()
 
 
 def get_role_by_uuid(db: Session, uuid: UUID) -> Role:

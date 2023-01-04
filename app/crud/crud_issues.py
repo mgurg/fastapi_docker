@@ -1,12 +1,12 @@
 from uuid import UUID
 
-from sqlalchemy import func, or_, select, text
+from sqlalchemy import func, not_, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Issue, User
 
 
-def get_issues(db: Session, search: str, sort_column: str, sort_order: str) -> Issue:
+def get_issues(db: Session, search: str, active_only: bool, sort_column: str, sort_order: str) -> Issue:
     # return db.execute(select(Issue)).scalars().all()
     search_filters = []
 
@@ -17,6 +17,9 @@ def get_issues(db: Session, search: str, sort_column: str, sort_order: str) -> I
         search_filters.append(Issue.text.ilike(f"%{search}%"))
 
         query = query.filter(or_(False, *search_filters))
+
+    if active_only is True:
+        query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
 
     result = db.execute(query)  # await db.execute(query)
 

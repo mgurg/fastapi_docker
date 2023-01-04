@@ -37,6 +37,7 @@ def issue_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str | None = None,
+    active: bool | None = False,
     field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
@@ -46,7 +47,7 @@ def issue_get_all(
     if field not in sort_fields:
         field = "created_at"
 
-    db_issues = crud_issues.get_issues(db, search, field, order)
+    db_issues = crud_issues.get_issues(db, search, active, field, order)
     return paginate(db_issues, params)
 
 
@@ -92,12 +93,10 @@ def issue_get_by_user_all(
     user_uuid: UUID,
     params: Params = Depends(),
     search: str = None,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
+    field: str = "name",
+    order: str = "asc",
     auth=Depends(has_token),
 ):
-
-    sortTable = {"name": "name"}
 
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
