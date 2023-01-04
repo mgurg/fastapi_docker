@@ -36,15 +36,17 @@ def issue_get_all(
     *,
     db: Session = Depends(get_db),
     params: Params = Depends(),
-    search: str = None,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
+    search: str | None = None,
+    field: str = "created_at",
+    order: str = "asc",
     auth=Depends(has_token),
 ):
+    sort_fields = ["created_at", "name", "priority", "status"]
 
-    sortTable = {"name": "name"}
+    if field not in sort_fields:
+        field = "created_at"
 
-    db_issues = crud_issues.get_issues(db, search, sortTable[sortColumn], sortOrder)
+    db_issues = crud_issues.get_issues(db, search, field, order)
     return paginate(db_issues, params)
 
 

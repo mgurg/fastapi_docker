@@ -21,14 +21,17 @@ def user_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str = None,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
+    field: str = "name",
+    order: str = "asc",
     auth=Depends(has_token)
 ):
 
-    sortTable = {"name": "last_name"}
+    sort_fields = ["first_name", "last_name", "created_at"]
 
-    db_users = crud_users.get_users(db, search, sortTable[sortColumn], sortOrder)
+    if field not in sort_fields:
+        field = "last_name"
+
+    db_users = crud_users.get_users(db, search, field, order)
     return paginate(db_users, params)
 
 

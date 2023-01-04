@@ -8,18 +8,22 @@ from app.models.models import Permission, Role, User
 
 def get_roles_summary(db: Session, search: str, sortColumn: str, sortOrder: str):
 
+    query = (
+        select(Role.uuid, Role.role_title, Role.role_description, Role.is_custom, func.count(User.id).label("count"))
+        .outerjoin(User, User.user_role_id == Role.id)
+        .group_by(Role.uuid, Role.role_title, Role.role_description, Role.is_custom)
+        .order_by(text(f"{sortColumn} {sortOrder}"))
+    )
+
     all_filters = []
 
     if search is not None:
         all_filters.append(Role.role_title.ilike(f"%{search}%"))
+        query = query.filter(*all_filters)
 
-    return db.execute(
-        select(Role.uuid, Role.role_title, Role.role_description, Role.is_custom, func.count(User.id).label("count"))
-        .filter(*all_filters)
-        .outerjoin(User, User.user_role_id == Role.id)
-        .group_by(Role.uuid, Role.role_title, Role.role_description, Role.is_custom)
-        .order_by(text(f"{sortColumn} {sortOrder}"))
-    ).all()
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.scalars().all()
 
 
 def get_role_by_uuid(db: Session, uuid: UUID) -> Role:
@@ -34,7 +38,7 @@ def get_role_by_name(db: Session, name: str) -> Role:
     return db.execute(select(Role).where(func.lower(Role.role_title) == name.lower())).scalar_one_or_none()
 
 
-def get_permissions(db: Session):
+def get_permissions(db: Session) -> Permission:
     return db.execute(select(Permission).order_by(Permission.group)).scalars().all()
 
 

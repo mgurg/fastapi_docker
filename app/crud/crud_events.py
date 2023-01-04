@@ -52,7 +52,8 @@ def get_events_by_uuid_and_resource(
     if action is not None:
         query = query.where(Event.action == action)
 
-    events_with_date = db.execute(query).scalars().all()
+    result = db.execute(query)  # await db.execute(query)
+    events_with_date = result.scalars().all()
 
     return events_with_date
 

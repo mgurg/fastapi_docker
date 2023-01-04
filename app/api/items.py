@@ -27,15 +27,18 @@ def item_get_all(
     *,
     db: Session = Depends(get_db),
     params: Params = Depends(),
-    search: str = None,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
+    search: str | None = None,
+    field: str = "name",
+    order: str = "asc",
     auth=Depends(has_token),
 ):
 
-    sortTable = {"name": "name"}
+    sort_fields = ["name", "created_at"]
 
-    db_items = crud_items.get_items(db, search, sortTable[sortColumn], sortOrder)
+    if field not in sort_fields:
+        field = "name"
+
+    db_items = crud_items.get_items(db, search, field, order)
     return paginate(db_items, params)
 
 
