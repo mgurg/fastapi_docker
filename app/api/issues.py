@@ -93,7 +93,8 @@ def issue_get_by_user_all(
     user_uuid: UUID,
     params: Params = Depends(),
     search: str = None,
-    field: str = "name",
+    active: bool | None = False,
+    field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
 ):
@@ -103,7 +104,7 @@ def issue_get_by_user_all(
     if db_user is None:
         raise HTTPException(status_code=401, detail="User not found")
 
-    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id)
+    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id, search, active, field, order)
 
     return paginate(db_issues, params)
 

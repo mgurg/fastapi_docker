@@ -26,8 +26,21 @@ def get_issues(db: Session, search: str, active_only: bool, sort_column: str, so
     return result.scalars().all()
 
 
-def get_issues_by_user_id(db, user_id) -> Issue:
-    query = select(Issue).filter(Issue.users_issue.any(User.id == user_id))
+def get_issues_by_user_id(db, user_id: int, search: str, active_only: bool, sort_column: str, sort_order: str) -> Issue:
+    query = (
+        select(Issue).order_by(text(f"{sort_column} {sort_order}")).filter(Issue.users_issue.any(User.id == user_id))
+    )
+
+    search_filters = []
+
+    if search is not None:
+        search_filters.append(Issue.name.ilike(f"%{search}%"))
+        search_filters.append(Issue.text.ilike(f"%{search}%"))
+
+        query = query.filter(or_(False, *search_filters))
+
+    if active_only is True:
+        query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
 
     result = db.execute(query)  # await db.execute(query)
     return result.scalars().all()
