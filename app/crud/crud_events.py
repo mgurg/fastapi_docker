@@ -7,27 +7,20 @@ from app.models.models import Event, EventSummary
 
 
 def get_event_time_statistics_by_item(db: Session, item_uuid: UUID):
-    return (
-        db.execute(
-            select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
-            .where(EventSummary.item_uuid == item_uuid)
-            .group_by(EventSummary.action)
-        )
-        .scalars()
-        .all()
-    )
+    return db.execute(
+        select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
+        .where(EventSummary.resource == "item")
+        .where(EventSummary.resource_uuid == item_uuid)
+        .group_by(EventSummary.action)
+    ).all()
 
 
 def get_event_time_statistics_by_issue(db: Session, issue_uuid: UUID):
-    return (
-        db.execute(
-            select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
-            .where(EventSummary.issue_uuid == issue_uuid)
-            .group_by(EventSummary.action)
-        )
-        .scalars()
-        .all()
-    )
+    return db.execute(
+        select(EventSummary.action, func.sum(EventSummary.duration).label("time_duration"))
+        .where(EventSummary.issue_uuid == issue_uuid)
+        .group_by(EventSummary.action)
+    ).all()
 
 
 def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, status: str) -> EventSummary:

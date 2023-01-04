@@ -38,10 +38,12 @@ def get_issue_by_uuid(db: Session, uuid: UUID) -> Issue:
 
 
 def get_issue_summary(db: Session):
-    query = select(Issue.status, func.count(Issue.status))
+    # return db.execute(select(Issue.status, func.count(Issue.status)).group_by(Issue.status)).all()
+
+    query = select(Issue.status, func.count(Issue.status)).group_by(Issue.status)
 
     result = db.execute(query)  # await db.execute(query)
-    return result.scalars().all()
+    return result.all()
 
 
 def create_issue(db: Session, data: dict) -> Issue:
