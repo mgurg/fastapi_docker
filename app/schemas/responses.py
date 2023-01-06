@@ -158,6 +158,8 @@ class QRCodeItemResponse(BaseResponse):
 
 
 class UserQrToken(BaseResponse):
+    resource: str
+    resource_uuid: UUID
     url: str
     anonymous_token: str
 

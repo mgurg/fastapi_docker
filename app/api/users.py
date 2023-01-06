@@ -120,7 +120,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
     user_data = user.dict(exclude_unset=True)
 
-    if "password" in user_data.keys():
+    if ("password" in user_data.keys()) and (user_data["password"] is not None):
         password = Password(user_data["password"])
         is_password_ok = password.compare(user_data["password_confirmation"])
 
