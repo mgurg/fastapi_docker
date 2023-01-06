@@ -43,14 +43,28 @@ def create_new_item_event(
         if person is not None:
             value = person.first_name + " " + person.last_name
 
+    author_id = None
+    author_uuid = None
+    author_name = "anonymous"
+    if author is not None:
+        author_id = author.id
+        author_uuid = author.uuid
+        author_name = f"{author.first_name} {author.last_name}"
+
+    resource_id = None
+    resource_uuid = None
+    if item is not None:
+        resource_id = item.id
+        resource_uuid = item.uuid
+
     event_data = {
         "uuid": str(uuid4()),
-        "author_id": author.id,
-        "author_uuid": author.uuid,
-        "author_name": f"{author.first_name} {author.last_name}",
+        "author_id": author_id,
+        "author_uuid": author_uuid,
+        "author_name": author_name,
         "resource": "item",
-        "resource_id": item.id,
-        "resource_uuid": item.uuid,
+        "resource_id": resource_id,
+        "resource_uuid": resource_uuid,
         "thread_uuid": issue.uuid,
         "thread_resource": "issue",
         "action": action,
@@ -65,10 +79,15 @@ def create_new_item_event(
 
 
 def create_new_item_event_statistic(db: Session, item: Item, issue: Issue, action: str):
+
+    resource_uuid = None
+    if item is not None:
+        resource_uuid = item.uuid
+
     event_statistic = {
         "uuid": str(uuid4()),
         "resource": "item",
-        "resource_uuid": item.uuid,
+        "resource_uuid": resource_uuid,
         "issue_uuid": issue.uuid,
         "action": action,
         "date_from": datetime.now(timezone.utc),

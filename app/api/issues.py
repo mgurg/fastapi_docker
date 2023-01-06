@@ -187,8 +187,9 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     event.create_new_item_event(
         db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
     )
-    event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
-    event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
+    if db_item is not None:
+        event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
+        event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
 
     return new_issue
 
@@ -203,8 +204,8 @@ def issue_change_status(
         raise HTTPException(status_code=400, detail="Issue not found!")
 
     db_item = crud_items.get_item_by_id(db, db_issue.item_id)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
+    # if not db_item:
+    #     raise HTTPException(status_code=400, detail="Item not found!")
 
     db_issue.status
 
