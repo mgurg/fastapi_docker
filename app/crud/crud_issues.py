@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.models import Issue, User
 
 
-def get_issues(db: Session, search: str, status: str, sort_column: str, sort_order: str) -> Issue:
+def get_issues(db: Session, search: str, status: str, priority: str, sort_column: str, sort_order: str) -> Issue:
     # return db.execute(select(Issue)).scalars().all()
     search_filters = []
 
@@ -25,6 +25,14 @@ def get_issues(db: Session, search: str, status: str, sort_column: str, sort_ord
             query = query.where(Issue.status.in_(["resolved", "rejected"]))
         case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "resolved" as issue_status:
             query = query.where(Issue.status == issue_status)
+
+    match priority:
+        case "low":
+            query = query.where(Issue.priority == "10")
+        case "medium":
+            query = query.where(Issue.priority == "20")
+        case "high":
+            query = query.where(Issue.priority == "30")
 
     result = db.execute(query)  # await db.execute(query)
 

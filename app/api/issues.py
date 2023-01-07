@@ -38,6 +38,7 @@ def issue_get_all(
     params: Params = Depends(),
     search: str | None = None,
     status: str = "active",
+    priority: str | None = None,
     field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
@@ -47,7 +48,7 @@ def issue_get_all(
     if field not in sort_fields:
         field = "created_at"
 
-    db_issues = crud_issues.get_issues(db, search, status, field, order)
+    db_issues = crud_issues.get_issues(db, search, status, priority, field, order)
     return paginate(db_issues, params)
 
 
@@ -93,7 +94,7 @@ def issue_get_by_user_all(
     user_uuid: UUID,
     params: Params = Depends(),
     search: str = None,
-    active: bool | None = False,
+    status: str = "active",
     field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
@@ -104,7 +105,7 @@ def issue_get_by_user_all(
     if db_user is None:
         raise HTTPException(status_code=401, detail="User not found")
 
-    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id, search, active, field, order)
+    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id, search, status, field, order)
 
     return paginate(db_issues, params)
 
