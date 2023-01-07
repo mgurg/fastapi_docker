@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.models import Issue, User
 
 
-def get_issues(db: Session, search: str, active_only: bool, sort_column: str, sort_order: str) -> Issue:
+def get_issues(db: Session, search: str, status: str, sort_column: str, sort_order: str) -> Issue:
     # return db.execute(select(Issue)).scalars().all()
     search_filters = []
 
@@ -18,15 +18,20 @@ def get_issues(db: Session, search: str, active_only: bool, sort_column: str, so
 
         query = query.filter(or_(False, *search_filters))
 
-    if active_only is True:
-        query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
+    match status:
+        case "active":
+            query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
+        case "inactive":
+            query = query.where(Issue.status.in_(["resolved", "rejected"]))
+        case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "resolved" as issue_status:
+            query = query.where(Issue.status == issue_status)
 
     result = db.execute(query)  # await db.execute(query)
 
     return result.scalars().all()
 
 
-def get_issues_by_user_id(db, user_id: int, search: str, active_only: bool, sort_column: str, sort_order: str) -> Issue:
+def get_issues_by_user_id(db, user_id: int, search: str, status: str, sort_column: str, sort_order: str) -> Issue:
     query = (
         select(Issue).order_by(text(f"{sort_column} {sort_order}")).filter(Issue.users_issue.any(User.id == user_id))
     )
@@ -39,8 +44,13 @@ def get_issues_by_user_id(db, user_id: int, search: str, active_only: bool, sort
 
         query = query.filter(or_(False, *search_filters))
 
-    if active_only is True:
-        query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
+    match status:
+        case "active":
+            query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
+        case "inactive":
+            query = query.where(Issue.status.in_(["resolved", "rejected"]))
+        case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "resolved" as issue_status:
+            query = query.where(Issue.status == issue_status)
 
     result = db.execute(query)  # await db.execute(query)
     return result.scalars().all()

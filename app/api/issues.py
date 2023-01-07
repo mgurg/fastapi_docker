@@ -37,7 +37,7 @@ def issue_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str | None = None,
-    active: bool | None = False,
+    status: str = "active",
     field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
@@ -47,7 +47,7 @@ def issue_get_all(
     if field not in sort_fields:
         field = "created_at"
 
-    db_issues = crud_issues.get_issues(db, search, active, field, order)
+    db_issues = crud_issues.get_issues(db, search, status, field, order)
     return paginate(db_issues, params)
 
 
