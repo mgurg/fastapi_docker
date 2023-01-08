@@ -1,16 +1,15 @@
 from uuid import UUID
 
-from sqlalchemy import func, not_, or_, select, text
+from sqlalchemy import func, not_, nulls_last, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Issue, User
 
 
 def get_issues(db: Session, search: str, status: str, priority: str, sort_column: str, sort_order: str) -> Issue:
-    # return db.execute(select(Issue)).scalars().all()
     search_filters = []
 
-    query = select(Issue).order_by(text(f"{sort_column} {sort_order}"))
+    query = select(Issue)
 
     if search is not None:
         search_filters.append(Issue.name.ilike(f"%{search}%"))
@@ -33,6 +32,8 @@ def get_issues(db: Session, search: str, status: str, priority: str, sort_column
             query = query.where(Issue.priority == "20")
         case "high":
             query = query.where(Issue.priority == "30")
+
+    query = query.order_by(text(f"{sort_column} {sort_order}"))
 
     result = db.execute(query)  # await db.execute(query)
 
