@@ -1,4 +1,4 @@
-alembic @ git+https://github.com/sqlalchemy/alembic@main ; python_version >= "3.7"
+alembic==1.9.1; python_version >= "3.7"
 anyio==3.6.2; python_full_version >= "3.6.2" and python_version >= "3.7"
 appdirs==1.4.4; python_version >= "2.7"
 apscheduler==4.0.0a2; python_version >= "3.7"
