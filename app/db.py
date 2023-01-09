@@ -47,8 +47,8 @@ if sql_performance_monitoring is True:
         logger.debug("Total Time: %f" % total)
 
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
-echo = False
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
+echo = True
 if settings.ENVIRONMENT != "PRD":
     print(SQLALCHEMY_DATABASE_URL)
     echo = False

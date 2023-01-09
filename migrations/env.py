@@ -90,11 +90,11 @@ def run_migrations_online() -> None:
             version_table_schema=current_tenant,
         )
 
-        with context.begin_transaction() as transaction:
+        with context.begin_transaction():
             context.run_migrations()
-            if bool(dry_run) == True:
-                print("Dry-run succeeded; now rolling back transaction...")
-                transaction.rollback()
+            # if bool(dry_run) == True:
+            #     print("Dry-run succeeded; now rolling back transaction...")
+            #     transaction.rollback()
 
 
 if context.is_offline_mode():

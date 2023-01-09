@@ -7,8 +7,8 @@ authors = ["Your Name <you@example.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.89"
-SQLAlchemy = "^1.4.39"
-alembic = "^1.8.0"
+SQLAlchemy = "2.0.0rc1"
+alembic = {git = "https://github.com/sqlalchemy/alembic", rev = "main"}
 uvicorn = "^0.18.2"
 gunicorn = "^20.1.0"
 python-dotenv = "^0.20.0"

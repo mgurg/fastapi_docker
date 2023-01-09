@@ -72,6 +72,7 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
 @cc_router.post("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
 def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str):
 
-    scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
+    # scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
 
+    alembic_upgrade_head(tenant_id)
     return {"ok": True}
