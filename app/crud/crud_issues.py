@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import func, not_, nulls_last, or_, select, text
+from sqlalchemy import func, not_, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Issue, User

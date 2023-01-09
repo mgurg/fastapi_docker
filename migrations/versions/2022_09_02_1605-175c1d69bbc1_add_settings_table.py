@@ -35,6 +35,19 @@ def upgrade() -> None:
         schema=None,
     )
 
+    op.create_table(
+        "settings_notifications",
+        sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
+        sa.Column("user_uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("user_id", sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column("sms_notification_level", sa.VARCHAR(length=128), autoincrement=False, nullable=True),
+        sa.Column("email_notification_level", sa.VARCHAR(length=128), autoincrement=False, nullable=True),
+        sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.PrimaryKeyConstraint("id", name="settings_notifications_pkey"),
+        schema=None,
+    )
+
     # StringValue
     # IntValue
     # DateValue

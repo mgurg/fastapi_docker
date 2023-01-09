@@ -165,3 +165,8 @@ class IssueChangeStatus(BaseRequest):
     name: str | None
     description: str | None
     value: str | None
+
+
+class SettingNotificationIn(BaseRequest):
+    sms_notification_level: str | None
+    email_notification_level: str | None

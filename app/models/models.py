@@ -242,6 +242,17 @@ class Setting(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
+class SettingNotification(Base):
+    __tablename__ = "settings_notifications"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    user_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    user_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    sms_notification_level = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True)
+    email_notification_level = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
 class QrCode(Base):
     __tablename__ = "qr_codes"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)

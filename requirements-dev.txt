@@ -44,7 +44,7 @@ mako==1.2.4; python_version >= "3.7"
 markupsafe==2.1.1; python_version >= "3.7"
 mccabe==0.6.1; python_version >= "3.6"
 mypy-extensions==0.4.3; python_version >= "3.7"
-packaging==22.0; python_version >= "3.8" and python_version < "4.0"
+packaging==23.0; python_version >= "3.8" and python_version < "4.0"
 passlib==1.7.4
 pathspec==0.10.3; python_version >= "3.7"
 pendulum==2.1.2; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")

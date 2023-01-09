@@ -1,9 +1,13 @@
 # from typing import list
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.crud import crud_settings
 from app.db import get_db
+from app.schemas.requests import SettingNotificationIn
+from app.schemas.responses import SettingNotificationResponse
 
 # from app.models.models import Accounts, SettingAddIn, StandardResponse
 # from app.schemas.schemas import SettingBase
@@ -42,3 +46,38 @@ def setting_get_all(*, db: Session = Depends(get_db), setting_names: list[str] =
     #         res.setdefault(status, None)
 
     # return res
+
+
+@setting_router.get("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
+def setting_notification_get(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+
+    user_id = auth["user_id"]
+
+    db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
+
+    if db_settings is None:
+        raise HTTPException(status_code=404, detail="Notification setting not found")
+
+    return db_settings
+
+
+@setting_router.post("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
+def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingNotificationIn, auth=Depends(has_token)):
+
+    user_id = auth["user_id"]
+
+    db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
+
+    if db_settings is None:
+        setting_data = {
+            "user_id": user_id,
+            "sms_notification_level": setting.sms_notification_level,
+            "email_notification_level": setting.email_notification_level,
+            "created_at": datetime.now(timezone.utc),
+        }
+
+        crud_settings.create_notification_setting(db, setting_data)
+
+    crud_settings.update_notification_setting(db, db_settings, setting.dict(exclude_unset=False))
+
+    return db_settings

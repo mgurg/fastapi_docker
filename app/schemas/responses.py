@@ -294,3 +294,8 @@ class RolePermissionFull(BaseResponse):
     role_title: str
     is_custom: bool
     permission: list[PermissionsFull] | None
+
+
+class SettingNotificationResponse(BaseResponse):
+    sms_notification_level: str | None
+    email_notification_level: str | None
