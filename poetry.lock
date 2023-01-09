@@ -1,11 +1,10 @@
 [[package]]
 name = "alembic"
-version = "1.9.2.dev0"
+version = "1.9.1"
 description = "A database migration tool for SQLAlchemy."
 category = "main"
 optional = false
 python-versions = ">=3.7"
-develop = false
 
 [package.dependencies]
 Mako = "*"
@@ -13,12 +12,6 @@ SQLAlchemy = ">=1.3.0"
 
 [package.extras]
 tz = ["python-dateutil"]
-
-[package.source]
-type = "git"
-url = "https://github.com/sqlalchemy/alembic"
-reference = "main"
-resolved_reference = "7cd6e2861e211f04226c553aebe973d9c108b099"
 
 [[package]]
 name = "anyio"
@@ -1298,7 +1291,7 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "fcd5219c50f65321db4489d25e0a5e1a9b5b362ca6f6c678bd3e25cffceec43f"
+content-hash = "f07efae791db5483f9cd9b9ae0e43b1a9c49758fbc0e1a1d7670f8d9ac586f32"
 
 [metadata.files]
 alembic = []

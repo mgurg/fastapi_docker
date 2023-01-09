@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.10"
 fastapi = "^0.89"
 SQLAlchemy = "2.0.0rc1"
-alembic = {git = "https://github.com/sqlalchemy/alembic", rev = "main"}
+alembic = "^1.9.1"
 uvicorn = "^0.18.2"
 gunicorn = "^20.1.0"
 python-dotenv = "^0.20.0"
