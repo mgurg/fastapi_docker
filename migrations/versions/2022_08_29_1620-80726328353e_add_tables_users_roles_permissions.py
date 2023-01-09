@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name="roles_pkey"),
         schema=None,
     )
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
     op.create_table(
         "users",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
