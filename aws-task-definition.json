@@ -26,7 +26,7 @@
       "secrets": null,
       "dockerSecurityOptions": null,
       "memory": null,
-      "memoryReservation": 128,
+      "memoryReservation": 512,
       "volumesFrom": [],
       "stopTimeout": null,
       "image": "142827160281.dkr.ecr.eu-central-1.amazonaws.com/amzn-ecs-ecr",
