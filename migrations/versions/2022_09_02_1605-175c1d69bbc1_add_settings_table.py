@@ -44,6 +44,7 @@ def upgrade() -> None:
         sa.Column("email_notification_level", sa.VARCHAR(length=128), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], name="user_notification_fk"),
         sa.PrimaryKeyConstraint("id", name="settings_notifications_pkey"),
         schema=None,
     )

@@ -13,6 +13,7 @@ from app.crud import (
     crud_files,
     crud_issues,
     crud_items,
+    crud_settings,
     crud_users,
 )
 from app.db import engine, get_db
@@ -27,6 +28,7 @@ from app.schemas.responses import (
 from app.service import event
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
+from app.service.notifications import notify_users
 
 issue_router = APIRouter()
 
@@ -129,7 +131,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
     return db_issue
 
 
-@issue_router.post("/", response_model=IssueResponse)
+@issue_router.post("/", response_model=IssueResponse)  #
 def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAddIn, auth=Depends(has_token)):
 
     tenant_id = request.headers.get("tenant", None)
@@ -184,6 +186,17 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     }
 
     new_issue = crud_issues.create_issue(db, issue_data)
+
+    # Notification
+    email_notifications = crud_settings.get_users_for_email_notification(db, "all")
+    sms_notifications = crud_settings.get_users_for_sms_notification(db, "all")
+
+    keys = ("phone", "mode")
+    list_of_sms_notifications = [dict(zip(keys, values)) for values in sms_notifications]
+
+    keys = ("email", "mode")
+    list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
+    notify_users(list_of_sms_notifications, list_of_email_notifications, new_issue)
 
     event.create_new_item_event(
         db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text

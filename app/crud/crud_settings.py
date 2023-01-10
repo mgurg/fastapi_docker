@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.models import SettingNotification
+from app.models.models import SettingNotification, User
 
 
 def get_notification_settings_by_user_id(db: Session, user_id: int) -> SettingNotification:
@@ -10,6 +10,30 @@ def get_notification_settings_by_user_id(db: Session, user_id: int) -> SettingNo
     result = db.execute(query)
 
     return result.scalar_one_or_none()
+
+
+def get_users_for_sms_notification(db: Session, notification_level: str):
+    query = (
+        select(User.phone, SettingNotification.sms_notification_level)
+        .where(SettingNotification.sms_notification_level == notification_level)
+        .outerjoin(User, User.id == SettingNotification.user_id)
+    )
+
+    result = db.execute(query)
+
+    return result.all()
+
+
+def get_users_for_email_notification(db: Session, notification_level: str):
+    query = (
+        select(User.email, SettingNotification.email_notification_level)
+        .where(SettingNotification.email_notification_level == notification_level)
+        .outerjoin(User, User.id == SettingNotification.user_id)
+    )
+
+    result = db.execute(query)
+
+    return result.all()
 
 
 def create_notification_setting(db: Session, data: dict) -> SettingNotification:
