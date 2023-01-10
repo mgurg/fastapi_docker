@@ -25,6 +25,13 @@ users_issues_rel = sa.Table(
     sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+users_items_rel = sa.Table(
+    "users_items_link",
+    Base.metadata,
+    sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -79,6 +86,7 @@ class User(Base):
     role_FK = relationship("Role", back_populates="users_FK")
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
     problem = relationship("Issue", secondary=users_issues_rel, back_populates="users_issue")
+    item = relationship("Item", secondary=users_items_rel, back_populates="users_item")
 
 
 file_idea_rel = sa.Table(
@@ -144,6 +152,7 @@ class Item(Base):
 
     files_item = relationship("File", secondary=file_item_rel, back_populates="item")
     item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
+    users_item = relationship("User", secondary=users_items_rel, back_populates="item")
 
     qr_code = relationship("QrCode", back_populates="items_FK")
     issue_FK = relationship("Issue", back_populates="item")

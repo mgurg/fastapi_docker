@@ -37,6 +37,7 @@ def get_issues(
 
     if user_id is not None:
         query = query.filter(Issue.users_issue.any(User.id == user_id))
+
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 
     result = db.execute(query)  # await db.execute(query)

@@ -206,6 +206,7 @@ class ItemResponse(BaseResponse):
     text_json: dict | None
     files_item: list[FileBasicInfo] | None
     item_guides: list[GuideBasicResponse] | None
+    users_item: list[UserBasicResponse] | None
     qr_code: QRCodeItemResponse | None
 
 

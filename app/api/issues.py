@@ -17,7 +17,12 @@ from app.crud import (
     crud_users,
 )
 from app.db import engine, get_db
-from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
+from app.schemas.requests import (
+    FavouritesAddIn,
+    IssueAddIn,
+    IssueChangeStatus,
+    IssueEditIn,
+)
 from app.schemas.responses import (
     EventTimelineResponse,
     IssueIndexResponse,

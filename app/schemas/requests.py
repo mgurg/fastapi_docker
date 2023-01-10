@@ -151,6 +151,12 @@ class IssueAddIn(BaseRequest):
     files: list[UUID] | None
 
 
+class FavouritesAddIn(BaseRequest):
+    item_uuid: UUID | None
+    user_uuid: UUID | None
+    action: str
+
+
 class IssueEditIn(BaseRequest):
     name: str | None
     summary: str | None
