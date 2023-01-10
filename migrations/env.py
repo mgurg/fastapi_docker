@@ -84,7 +84,7 @@ def run_migrations_online() -> None:
         connection.execute(text('set search_path to "%s"' % current_tenant))
         connection.dialect.default_schema_name = current_tenant
 
-        connection.commit()
+        # connection.commit()
 
         context.configure(
             connection=connection,
