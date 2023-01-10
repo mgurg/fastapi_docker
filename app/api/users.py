@@ -26,9 +26,7 @@ def user_get_all(
     auth=Depends(has_token)
 ):
 
-    sort_fields = ["first_name", "last_name", "created_at"]
-
-    if field not in sort_fields:
+    if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
     db_users = crud_users.get_users(db, search, field, order)

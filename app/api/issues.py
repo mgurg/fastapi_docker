@@ -46,9 +46,7 @@ def issue_get_all(
     order: str = "asc",
     auth=Depends(has_token),
 ):
-    sort_fields = ["created_at", "name", "priority", "status"]
-
-    if field not in sort_fields:
+    if field not in ["created_at", "name", "priority", "status"]:
         field = "created_at"
 
     user_id = None

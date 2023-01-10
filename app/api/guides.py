@@ -31,23 +31,17 @@ def guide_get_all(
     auth=Depends(has_token)
 ):
 
-    sortTable = {"name": "name"}
+    if field not in ["name"]:
+        field = "name"
 
-    db_guides = crud_guides.get_guides(db, search, sortTable[field], order)
-    return paginate(db_guides, params)
+    item_id = None
+    if item_uuid is not None:
+        db_item = crud_items.get_item_by_uuid(db, item_uuid)
+        if db_item is None:
+            raise HTTPException(status_code=401, detail="Item not found")
+        item_id = db_item.id
 
-
-@guide_router.get("/item/{item_uuid}", response_model=Page[GuideResponse])
-def guides_get_by_item(
-    *, db: Session = Depends(get_db), item_uuid: UUID, params: Params = Depends(), auth=Depends(has_token)
-):
-
-    db_item = crud_items.get_item_by_uuid(db, item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    db_guides = crud_guides.get_guide_by_item_id(db, db_item.id)
-
+    db_guides = crud_guides.get_guides(db, search, item_id, field, order)
     return paginate(db_guides, params)
 
 

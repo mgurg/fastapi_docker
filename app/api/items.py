@@ -32,10 +32,7 @@ def item_get_all(
     order: str = "asc",
     auth=Depends(has_token),
 ):
-
-    sort_fields = ["name", "created_at"]
-
-    if field not in sort_fields:
+    if field not in ["name", "created_at"]:
         field = "name"
 
     db_items = crud_items.get_items(db, search, field, order)
