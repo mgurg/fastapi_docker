@@ -25,14 +25,15 @@ def guide_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str = None,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
+    item_uuid: UUID | None = None,
+    order: str = "asc",
+    field: str = "name",
     auth=Depends(has_token)
 ):
 
     sortTable = {"name": "name"}
 
-    db_guides = crud_guides.get_guides(db, search, sortTable[sortColumn], sortOrder)
+    db_guides = crud_guides.get_guides(db, search, sortTable[field], order)
     return paginate(db_guides, params)
 
 

@@ -40,6 +40,7 @@ def issue_get_all(
     params: Params = Depends(),
     search: str | None = None,
     status: str = "active",
+    user_uuid: UUID | None = None,
     priority: str | None = None,
     field: str = "created_at",
     order: str = "asc",
@@ -50,7 +51,14 @@ def issue_get_all(
     if field not in sort_fields:
         field = "created_at"
 
-    db_issues = crud_issues.get_issues(db, search, status, priority, field, order)
+    user_id = None
+    if user_uuid is not None:
+        db_user = crud_users.get_user_by_uuid(db, user_uuid)
+        if db_user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        user_id = db_user.id
+
+    db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order)
     return paginate(db_issues, params)
 
 
@@ -87,29 +95,6 @@ def item_get_timeline_history(
 
     db_events = crud_events.get_events_by_thread(db, issue_uuid, thread_resource)
     return db_events
-
-
-@issue_router.get("/user/{user_uuid}", response_model=Page[IssueIndexResponse])
-def issue_get_by_user_all(
-    *,
-    db: Session = Depends(get_db),
-    user_uuid: UUID,
-    params: Params = Depends(),
-    search: str = None,
-    status: str = "active",
-    field: str = "created_at",
-    order: str = "asc",
-    auth=Depends(has_token),
-):
-
-    db_user = crud_users.get_user_by_uuid(db, user_uuid)
-
-    if db_user is None:
-        raise HTTPException(status_code=401, detail="User not found")
-
-    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id, search, status, field, order)
-
-    return paginate(db_issues, params)
 
 
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]

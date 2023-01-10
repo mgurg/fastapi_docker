@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 from app.models.models import Issue, User
 
 
-def get_issues(db: Session, search: str, status: str, priority: str, sort_column: str, sort_order: str) -> Issue:
+def get_issues(
+    db: Session, search: str, status: str, user_id: int, priority: str, sort_column: str, sort_order: str
+) -> Issue:
     search_filters = []
 
     query = select(Issue)
@@ -33,6 +35,8 @@ def get_issues(db: Session, search: str, status: str, priority: str, sort_column
         case "high":
             query = query.where(Issue.priority == "30")
 
+    if user_id is not None:
+        query = query.filter(Issue.users_issue.any(User.id == user_id))
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 
     result = db.execute(query)  # await db.execute(query)
