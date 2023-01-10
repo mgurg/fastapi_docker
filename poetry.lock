@@ -361,7 +361,7 @@ test = ["anyio[trio] (>=3.2.1,<4.0.0)", "black (==22.10.0)", "coverage[toml] (>=
 
 [[package]]
 name = "fastapi-pagination"
-version = "0.11.1"
+version = "0.11.2"
 description = "FastAPI pagination"
 category = "main"
 optional = false
@@ -376,15 +376,15 @@ SQLAlchemy = {version = ">=1.3.20", optional = true, markers = "extra == \"sqlal
 [package.extras]
 sqlalchemy = ["SQLAlchemy (>=1.3.20)", "sqlakeyset (>=1.0.1659142803,<2.0.0)"]
 asyncpg = ["SQLAlchemy (>=1.3.20)", "asyncpg (>=0.24.0)"]
-all = ["SQLAlchemy (>=1.3.20)", "databases (>=0.6.0)", "orm (>=0.3.1)", "tortoise-orm (>=0.16.18,<0.20.0)", "asyncpg (>=0.24.0)", "ormar (>=0.11.2)", "django (<5.0.0)", "piccolo (>=0.89,<0.102)", "motor (>=2.5.1,<4.0.0)", "mongoengine (>=0.23.1,<0.25.0)", "sqlmodel (>=0.0.8,<0.0.9)", "pony (>=0.7.16,<0.8.0)", "beanie (>=1.11.9,<2.0.0)", "sqlakeyset (>=1.0.1659142803,<2.0.0)", "scylla-driver (>=3.25.6,<4.0.0)"]
+all = ["SQLAlchemy (>=1.3.20)", "databases (>=0.6.0)", "orm (>=0.3.1)", "tortoise-orm (>=0.16.18,<0.20.0)", "asyncpg (>=0.24.0)", "ormar (>=0.11.2)", "django (<5.0.0)", "piccolo (>=0.89,<0.106)", "motor (>=2.5.1,<4.0.0)", "mongoengine (>=0.23.1,<0.26.0)", "sqlmodel (>=0.0.8,<0.0.9)", "pony (>=0.7.16,<0.8.0)", "beanie (>=1.11.9,<2.0.0)", "sqlakeyset (>=1.0.1659142803,<2.0.0)", "scylla-driver (>=3.25.6,<4.0.0)"]
 databases = ["databases (>=0.6.0)"]
 orm = ["databases (>=0.6.0)", "orm (>=0.3.1)"]
 django = ["databases (>=0.6.0)", "django (<5.0.0)"]
 tortoise = ["tortoise-orm (>=0.16.18,<0.20.0)"]
 ormar = ["ormar (>=0.11.2)"]
-piccolo = ["piccolo (>=0.89,<0.102)"]
+piccolo = ["piccolo (>=0.89,<0.106)"]
 motor = ["motor (>=2.5.1,<4.0.0)"]
-mongoengine = ["mongoengine (>=0.23.1,<0.25.0)"]
+mongoengine = ["mongoengine (>=0.23.1,<0.26.0)"]
 sqlmodel = ["sqlmodel (>=0.0.8,<0.0.9)", "sqlakeyset (>=1.0.1659142803,<2.0.0)"]
 beanie = ["beanie (>=1.11.9,<2.0.0)"]
 scylla-driver = ["scylla-driver (>=3.25.6,<4.0.0)"]
@@ -700,14 +700,6 @@ description = "PostgreSQL database adapter for Python -- C optimisation distribu
 category = "main"
 optional = false
 python-versions = ">=3.7"
-
-[[package]]
-name = "psycopg2-binary"
-version = "2.9.4"
-description = "psycopg2 - Python-PostgreSQL Database Adapter"
-category = "main"
-optional = false
-python-versions = ">=3.6"
 
 [[package]]
 name = "pycodestyle"
@@ -1069,34 +1061,37 @@ sqlalchemy = ">=1.3.11"
 
 [[package]]
 name = "sqlalchemy"
-version = "1.4.46"
+version = "2.0.0rc2"
 description = "Database Abstraction Library"
 category = "main"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
+python-versions = ">=3.7"
 
 [package.dependencies]
-greenlet = {version = "!=0.4.17", markers = "python_version >= \"3\" and (platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\")"}
+greenlet = {version = "!=0.4.17", markers = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\""}
+typing-extensions = ">=4.2.0"
 
 [package.extras]
 aiomysql = ["greenlet (!=0.4.17)", "aiomysql"]
-aiosqlite = ["typing_extensions (!=3.10.0.1)", "greenlet (!=0.4.17)", "aiosqlite"]
+aiosqlite = ["greenlet (!=0.4.17)", "aiosqlite", "typing-extensions (!=3.10.0.1)"]
 asyncio = ["greenlet (!=0.4.17)"]
 asyncmy = ["greenlet (!=0.4.17)", "asyncmy (>=0.2.3,!=0.2.4)"]
-mariadb_connector = ["mariadb (>=1.0.1,!=1.1.2)"]
+mariadb_connector = ["mariadb (>=1.0.1,!=1.1.2,!=1.1.5)"]
 mssql = ["pyodbc"]
 mssql_pymssql = ["pymssql"]
 mssql_pyodbc = ["pyodbc"]
-mypy = ["sqlalchemy2-stubs", "mypy (>=0.910)"]
-mysql = ["mysqlclient (>=1.4.0,<2)", "mysqlclient (>=1.4.0)"]
+mypy = ["mypy (>=0.910)"]
+mysql = ["mysqlclient (>=1.4.0)"]
 mysql_connector = ["mysql-connector-python"]
-oracle = ["cx_oracle (>=7,<8)", "cx_oracle (>=7)"]
+oracle = ["cx-oracle (>=7)"]
+oracle_oracledb = ["oracledb (>=1.0.1)"]
 postgresql = ["psycopg2 (>=2.7)"]
 postgresql_asyncpg = ["greenlet (!=0.4.17)", "asyncpg"]
-postgresql_pg8000 = ["pg8000 (>=1.16.6,!=1.29.0)"]
+postgresql_pg8000 = ["pg8000 (>=1.29.1)"]
+postgresql_psycopg = ["psycopg (>=3.0.7)"]
 postgresql_psycopg2binary = ["psycopg2-binary"]
 postgresql_psycopg2cffi = ["psycopg2cffi"]
-pymysql = ["pymysql (<1)", "pymysql"]
+pymysql = ["pymysql"]
 sqlcipher = ["sqlcipher3-binary"]
 
 [[package]]
@@ -1288,7 +1283,7 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "092b0e7d5cdfe9ff8a2f80e33aa4da64716dcfa57273b14df057d92496447ee9"
+content-hash = "a2f3e369028bde36f89ca0fc75b3a71bff03023099fee1214f633527f074f98e"
 
 [metadata.files]
 alembic = []
@@ -1460,7 +1455,6 @@ pluggy = [
 ]
 psycopg = []
 psycopg-binary = []
-psycopg2-binary = []
 pycodestyle = []
 pycparser = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
