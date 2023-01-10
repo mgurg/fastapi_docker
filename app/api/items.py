@@ -102,7 +102,7 @@ def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: Favouri
         "users_item": [db_user],
     }
 
-    new_item = crud_items.update_item(db, db_item, item_data)
+    crud_items.update_item(db, db_item, item_data)
 
     return "OK"
 
