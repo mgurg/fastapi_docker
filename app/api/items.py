@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_auth, crud_events, crud_files, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
-from app.schemas.requests import ItemAddIn, ItemEditIn
+from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import (
     EventTimelineResponse,
     ItemIndexResponse,
@@ -88,23 +88,23 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
     return db_events
 
 
-# @item_router.post("/favourites")  #
-# def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: FavouritesAddIn, auth=Depends(has_token)):
-#     db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
-#     if not db_item:
-#         raise HTTPException(status_code=400, detail="Item not found!")
+@item_router.post("/favourites")  #
+def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: FavouritesAddIn, auth=Depends(has_token)):
+    db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
+    if not db_item:
+        raise HTTPException(status_code=400, detail="Item not found!")
 
-#     db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
-#     if not db_user:
-#         raise HTTPException(status_code=404, detail="User not found")
+    db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-#     item_data = {
-#         "users_item": [db_user],
-#     }
+    item_data = {
+        "users_item": [db_user],
+    }
 
-#     crud_items.update_item(db, db_item, item_data)
+    crud_items.update_item(db, db_item, item_data)
 
-#     return "OK"
+    return "OK"
 
 
 @item_router.post("/", response_model=ItemIndexResponse)
