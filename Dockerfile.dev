@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.10.8-slim-bullseye
+FROM python:3.10.9-slim-bullseye
 # FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
 
 RUN apt-get update && apt-get install -y \
@@ -35,6 +35,10 @@ ARG SENTRY_DSN
 # GUS
 ARG GUS_API_DEV 
 
+# API_VIDEO
+ARG API_VIDEO 
+ARG API_VIDEO_UPLOAD 
+
 # AWS RDS vars
 ARG DB_USERNAME
 ARG DB_PASSWORD
@@ -62,6 +66,8 @@ ENV AWS_S3_SECRET_ACCESS_KEY $AWS_S3_SECRET_ACCESS_KEY
 
 ENV SENTRY_DSN $SENTRY_DSN
 ENV GUS_API_DEV $GUS_API_DEV 
+ENV API_VIDEO $API_VIDEO
+ENV API_VIDEO_UPLOAD $API_VIDEO_UPLOAD 
 
 ENV EMAIL_LABS_APP_KEY $EMAIL_LABS_APP_KEY
 ENV EMAIL_LABS_SECRET_KEY $EMAIL_LABS_SECRET_KEY
