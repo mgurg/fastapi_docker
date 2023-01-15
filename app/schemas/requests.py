@@ -154,7 +154,6 @@ class IssueAddIn(BaseRequest):
 class FavouritesAddIn(BaseRequest):
     item_uuid: UUID | None
     user_uuid: UUID | None
-    action: str
 
 
 class IssueEditIn(BaseRequest):
