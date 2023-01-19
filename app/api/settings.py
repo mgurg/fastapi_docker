@@ -76,7 +76,8 @@ def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingN
             "created_at": datetime.now(timezone.utc),
         }
 
-        crud_settings.create_notification_setting(db, setting_data)
+        db_settings = crud_settings.create_notification_setting(db, setting_data)
+        return db_settings
 
     crud_settings.update_notification_setting(db, db_settings, setting.dict(exclude_unset=False))
 
