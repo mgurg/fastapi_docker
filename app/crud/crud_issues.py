@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import func, not_, or_, select, text
@@ -7,7 +8,15 @@ from app.models.models import Issue, User
 
 
 def get_issues(
-    db: Session, search: str, status: str, user_id: int, priority: str, sort_column: str, sort_order: str
+    db: Session,
+    search: str,
+    status: str,
+    user_id: int,
+    priority: str,
+    sort_column: str,
+    sort_order: str,
+    date_from: datetime = None,
+    date_to: datetime = None,
 ) -> Issue:
     search_filters = []
 
@@ -37,6 +46,12 @@ def get_issues(
 
     if user_id is not None:
         query = query.filter(Issue.users_issue.any(User.id == user_id))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
 
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 
