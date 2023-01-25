@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     email_sender: str = os.getenv("EMAIL_LABS_SENDER")
     email_dev: str = os.getenv("EMAIL_DEV")
 
+    email_mailjet_app_key: str = os.getenv("MAILJET_EMAIL_API_KEY")
+    email_mailjet_secret_key: str = os.getenv("MAILJET_EMAIL_SECRET")
+    email_mailjet_sender: str = os.getenv("MAILJET_EMAIL_SENDER")
+    sms_mailjet_api_key: str = os.getenv("MAILJET_SMS_API_KEY")
+    sms_mailjet_sender: str = os.getenv("MAILJET_SMS_SENDER")
+
     # API
     REJESTR_IO_KEY: str = os.getenv("REJESTR_IO_KEY")
     GUS_KEY: str = os.getenv("GUS_API")
