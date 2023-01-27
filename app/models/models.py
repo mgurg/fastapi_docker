@@ -251,6 +251,18 @@ class Setting(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
+class SettingUser(Base):
+    __tablename__ = "settings_users"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    user_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
+    value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    prev_value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
 class SettingNotification(Base):
     __tablename__ = "settings_notifications"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)

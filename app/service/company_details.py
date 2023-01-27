@@ -164,9 +164,11 @@ class CompanyDetails:
         newlines = address.count("\n")
 
         # -DE does not return address on VIES at all
-        # -IE has pretty much unparsable addresses in VIES - split by commas, in different orders, without postcode codes, often without street number etc
+        # -IE has pretty much unparsable addresses in VIES - split by commas, in different orders,
+        #   without postcode codes, often without street number etc
         # -ES VIES does not return address unless you tell it what it is
-        # -RO does not have postcode codes in VIES data, but we parse the rest. postcode will return false - needs to be input by customer manualy
+        # -RO does not have postcode codes in VIES data, but we parse the rest.
+        #   postcode will return false - needs to be input by customer manualy
         # -EL additionaly gets transliterated to English characters (resulting in Greeklish)
 
         if country_code not in self.get_vies_supported_countries():

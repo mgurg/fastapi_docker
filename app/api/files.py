@@ -100,8 +100,7 @@ def file_add(
     new_file = crud_files.create_file(db, file_data)
 
     new_file.url = generate_presigned_url(
-        request.headers.get("tenant", "public"),
-        "_".join([str(file_uuid), file.filename]),
+        request.headers.get("tenant", "public"), "_".join([str(file_uuid), file.filename])
     )
 
     file.close()
@@ -177,7 +176,7 @@ def video_upload_token(auth=Depends(has_token)):
     # payload = {}
     # headers = {
     #     "accept": "application/vnd.api.video+json",
-    #     "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2NjcwNjk5NzEuOTc1NjMsIm5iZiI6MTY2NzA2OTk3MS45NzU2MywiZXhwIjoxNjY3MDczNTcxLjk3NTYzLCJhcGlLZXlWYWx1ZSI6IjQ3eWN6djFtMGh1WERFZzZpeU5ScVlUOVFYbVVjTUFBckhZMFFxemd6MEkifQ.mjmX4u_TjTinuSi2_ogSbLmA9mR7WvHSAqecadESPkTMUh_z6GHM6UJVCSYGZm6_fFjWrhkMAEJZeJ7PzMZsFW3bjsbrfm9SwcpBv71INOTr05xxRMqVxeY758mgfr6NwMqfoqHNJ6Tw-HzMG1N1zbxb8TFR8ow49O0l_HGpvlbH3TN5wAv8ju5iIGyjRT3W0KMMuBlU1duEE5SVerMqyINqbEyoz1m78mDrZDBzL3iUcLgfau1zbrpjOZ3nNF3mRDCXckij9nPVUkk1sSDXed_XS_wx5dZBuv0dF7w0SG6V1Py1Ho5eqNT_Jk3zpRUeeIj3tPHzswdGEBRPcT9Ytw",
+    #     "Authorization": "Bearer 5dZBuv0dF7w0SG6V1Py1Ho5eqNT_Jk3zpRUeeIj3tPHzswdGEBRPcT9Ytw",
     # }
 
     # response = requests.post("https://sandbox.api.video/upload-tokens", headers=headers, data=payload)

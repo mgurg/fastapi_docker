@@ -18,12 +18,7 @@ from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import (
-    CompanyInfoRegisterIn,
-    UserFirstRunIn,
-    UserLoginIn,
-    UserRegisterIn,
-)
+from app.schemas.requests import CompanyInfoRegisterIn, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
     ActivationResponse,
     PublicCompanyCounterResponse,

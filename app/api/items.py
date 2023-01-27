@@ -10,12 +10,7 @@ from sqlalchemy.orm import Session
 from app.crud import crud_auth, crud_events, crud_files, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
-from app.schemas.responses import (
-    EventTimelineResponse,
-    ItemIndexResponse,
-    ItemResponse,
-    StandardResponse,
-)
+from app.schemas.responses import EventTimelineResponse, ItemIndexResponse, ItemResponse, StandardResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
@@ -57,8 +52,7 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     try:
         for picture in db_item.files_item:
             picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"),
-                "_".join([str(picture.uuid), picture.file_name]),
+                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
             )
     except Exception as e:
         capture_exception(e)

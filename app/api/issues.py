@@ -7,15 +7,7 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import (
-    crud_auth,
-    crud_events,
-    crud_files,
-    crud_issues,
-    crud_items,
-    crud_settings,
-    crud_users,
-)
+from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import (
@@ -67,15 +59,7 @@ def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token))
 
     ideas_summary = crud_issues.get_issue_summary(db)
     if not ideas_summary:
-        return {
-            "new": 0,
-            "accepted": 0,
-            "rejected": 0,
-            "assigned": 0,
-            "in_progress": 0,
-            "paused": 0,
-            "resolved": 0,
-        }
+        return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "resolved": 0}
 
     ideas_status = dict(ideas_summary)
 
@@ -107,8 +91,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
     try:
         for picture in db_issue.files_issue:
             picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"),
-                "_".join([str(picture.uuid), picture.file_name]),
+                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
             )
     except Exception as e:
         capture_exception(e)

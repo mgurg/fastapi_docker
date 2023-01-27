@@ -1,9 +1,20 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.models import SettingNotification, User
+from app.models.models import Setting, SettingNotification, User
 
 
+# GENERAL
+def get_general_settings_by_names(db: Session, user_id, names: list) -> Setting:
+
+    query = select(Setting).where(Setting.user_id == user_id).where(Setting.entity.in_(names))
+
+    result = db.execute(query)
+
+    return result.scalar_one_or_none()
+
+
+#  NOTIFICATIONS
 def get_notification_settings_by_user_id(db: Session, user_id: int) -> SettingNotification:
     query = select(SettingNotification).where(SettingNotification.user_id == user_id)
 

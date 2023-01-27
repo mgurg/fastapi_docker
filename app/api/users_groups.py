@@ -22,7 +22,7 @@ def group_get_all(
     search: str = None,
     field: str = "name",
     order: str = "asc",
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
 
     if field not in ["name", "created_at"]:

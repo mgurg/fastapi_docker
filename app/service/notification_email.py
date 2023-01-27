@@ -43,12 +43,7 @@ class EmailNotification:
             receiver_data[f"to[{receiver}][vars][{key}]"] = value
 
         headers = {"Authorization": f"Basic {self.auth_header.decode()}"}
-        template_data = {
-            "from": self.sender,
-            "smtp_account": self.smtp,
-            "subject": subject,
-            "template_id": template,
-        }
+        template_data = {"from": self.sender, "smtp_account": self.smtp, "subject": subject, "template_id": template}
 
         payload = receiver_data | template_data
         files = {}
@@ -73,6 +68,8 @@ class EmailNotification:
             ]
         }
 
+        print(payload_dict)
+
         payload = json.dumps(
             {
                 "Messages": [
@@ -88,10 +85,7 @@ class EmailNotification:
             }
         )
 
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Basic XXXXX=",
-        }
+        headers = {"Content-Type": "application/json", "Authorization": "Basic XXXXX="}
 
         response = request("POST", url, headers=headers, data=payload)
 

@@ -300,3 +300,13 @@ class RolePermissionFull(BaseResponse):
 class SettingNotificationResponse(BaseResponse):
     sms_notification_level: str | None
     email_notification_level: str | None
+
+
+class StatsIssuesCounterResponse(BaseResponse):
+    new: int
+    accepted: int
+    rejected: int
+    assigned: int
+    in_progress: int
+    paused: int
+    resolved: int

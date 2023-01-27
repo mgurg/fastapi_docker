@@ -23,7 +23,7 @@ def user_get_all(
     search: str = None,
     field: str = "name",
     order: str = "asc",
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
 
     if field not in ["first_name", "last_name", "created_at"]:
@@ -79,7 +79,6 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
         "user_role_id": db_role.id,
         "is_active": True,
         "is_verified": True,
-        "tos": True,
         "tz": "Europe/Warsaw",
         "lang": "pl",
         "tenant_id": tenant_id,

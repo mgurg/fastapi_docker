@@ -28,12 +28,7 @@ class SMSNotification:
             receiver_data[f"to[{receiver}][vars][{key}]"] = value
 
         headers = {"Authorization": f"Basic {self.auth_header.decode()}"}
-        template_data = {
-            "from": sender,
-            "smtp_account": self.smtp,
-            "subject": "subject",
-            "template_id": template,
-        }
+        template_data = {"from": sender, "smtp_account": self.smtp, "subject": "subject", "template_id": template}
 
         payload = receiver_data | template_data
         files = {}

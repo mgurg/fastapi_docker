@@ -28,7 +28,7 @@ def guide_get_all(
     item_uuid: UUID | None = None,
     order: str = "asc",
     field: str = "name",
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
 
     if field not in ["name"]:
@@ -55,8 +55,7 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
     try:
         for picture in db_guide.files_guide:
             picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"),
-                "_".join([str(picture.uuid), picture.file_name]),
+                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
             )
     except Exception as e:
         capture_exception(e)
