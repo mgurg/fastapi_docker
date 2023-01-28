@@ -1,17 +1,46 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.models import Setting, SettingNotification, User
+from app.models.models import Setting, SettingNotification, SettingUser, User
 
 
 # GENERAL
-def get_general_settings_by_names(db: Session, user_id, names: list) -> Setting:
+def get_general_settings_by_names(db: Session, user_id: int, names: list[str]) -> Setting:
 
-    query = select(Setting).where(Setting.user_id == user_id).where(Setting.entity.in_(names))
+    query = select(SettingUser).where(SettingUser.user_id == user_id).where(SettingUser.name.in_(names))
+
+    result = db.execute(query)
+
+    return result.scalars().all()
+
+
+def get_user_general_setting_by_name(db: Session, user_id: int, name: str) -> Setting:
+
+    query = select(SettingUser).where(SettingUser.user_id == user_id).where(SettingUser.name == name)
 
     result = db.execute(query)
 
     return result.scalar_one_or_none()
+
+
+def create_user_setting(db: Session, data: dict) -> SettingUser:
+    new_setting = SettingUser(**data)
+    db.add(new_setting)
+    db.commit()
+    db.refresh(new_setting)
+
+    return new_setting
+
+
+def update_user_setting(db: Session, db_setting: SettingUser, update_data: dict) -> SettingUser:
+    for key, value in update_data.items():
+        setattr(db_setting, key, value)
+
+    db.add(db_setting)
+    db.commit()
+    db.refresh(db_setting)
+
+    return db_setting
 
 
 #  NOTIFICATIONS

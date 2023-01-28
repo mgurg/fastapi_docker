@@ -2,50 +2,73 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
 from app.crud import crud_settings
 from app.db import get_db
-from app.schemas.requests import SettingNotificationIn
+from app.schemas.requests import SettingGeneralIn, SettingNotificationIn
 from app.schemas.responses import SettingNotificationResponse
-
-# from app.models.models import Accounts, SettingAddIn, StandardResponse
-# from app.schemas.schemas import SettingBase
 from app.service.bearer_auth import has_token
+from app.service.default_settings import allowed_settings
 
 setting_router = APIRouter()
 
 # GENERAL
-@setting_router.get("/", name="settings:list")  # response_model=list[SettingAddIn],
-def setting_get_all(*, db: Session = Depends(get_db), setting_names: list[str] = Query(None), auth=Depends(has_token)):
-    ...
-    # if setting_names is not None:
-    #     allowed_settings = ["idea_registration_mode", "issue_registration_email"]
-    #     if not set(setting_names).issubset(allowed_settings):
-    #         raise HTTPException(status_code=404, detail="Setting not allowed")
+@setting_router.get("/", name="setting:read")
+def setting_get_all(*, db: Session = Depends(get_db), settings: list[str] = Query(None), auth=Depends(has_token)):
 
-    #     db_setting = (
-    #         db.execute(
-    #             select(Setting).where(Setting.account_id == auth["account"]).where(Setting.entity.in_(setting_names))
-    #         )
-    #         .scalars()
-    #         .all()
-    #     )
-    # else:
-    #     db_setting = db.execute(select(Setting).where(Setting.account_id == auth["account"])).scalars().all()
+    user_id = auth["user_id"]
 
-    # if not db_setting:
-    #     raise HTTPException(status_code=404, detail="Settings not found")
+    if user_id == 0:
+        raise HTTPException(status_code=404, detail="Setting for anonymous user not exists!")
 
-    # res = {}
-    # for elt in db_setting:
-    #     res[elt.entity] = elt.value
+    if settings is None or not set(settings).issubset(allowed_settings.keys()):
+        raise HTTPException(status_code=404, detail="Setting not allowed")
 
-    # if setting_names is not None:
-    #     for status in setting_names:
-    #         res.setdefault(status, None)
+    db_settings = crud_settings.get_general_settings_by_names(db, user_id, settings)
 
-    # return res
+    result = {}
+    for elt in db_settings:
+        result[elt.name] = parse_obj_as(elt.value_type, elt.value)
+
+    if settings is not None:
+        for status in settings:
+            result.setdefault(status, allowed_settings[status])
+
+    return result
+
+
+@setting_router.post("/", name="setting:add")
+def setting_set_one(*, db: Session = Depends(get_db), setting: SettingGeneralIn, auth=Depends(has_token)):
+    user_id = auth["user_id"]
+
+    db_setting = crud_settings.get_user_general_setting_by_name(db, user_id, setting.name)
+
+    if db_setting is None:
+        data = {
+            "user_id": user_id,
+            "name": setting.name,
+            "value": setting.value,
+            "value_type": setting.type,
+            "created_at": datetime.now(timezone.utc),
+        }
+
+        new_setting = crud_settings.create_user_setting(db, data)
+
+        return new_setting
+
+    data = {
+        "value": setting.value,
+        "value_type": setting.type,
+        "prev_value": db_setting.value,
+        "updated_at": datetime.now(timezone.utc),
+    }
+
+    updated_setting = crud_settings.update_user_setting(db, db_setting, data)
+    return updated_setting
+
+    # return "OK"
 
 
 # Notifications
