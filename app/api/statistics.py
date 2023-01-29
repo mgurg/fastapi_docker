@@ -43,10 +43,10 @@ def stats_first_steps(*, db: Session = Depends(get_db), auth=Depends(has_token))
     active = ["new", "accepted", "assigned", "in_progress", "paused"]
     inactive = ["rejected", "resolved"]
 
-    issues_active = crud_statistics.get_issues_counter_summary(db, active)
+    issues_active = crud_statistics.get_issues_counter_by_status(db, active)
     issues_active = dict(issues_active)
 
-    issues_inactive = crud_statistics.get_issues_counter_summary(db, inactive)
+    issues_inactive = crud_statistics.get_issues_counter_by_status(db, inactive)
     issues_inactive = dict(issues_inactive)
 
     response["items"] = {"total": sum(items.values()), "me": items.setdefault(user_id, 0)}

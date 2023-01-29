@@ -10,6 +10,15 @@ def get_issues_counter_summary(db: Session):
     return result.all()
 
 
+def get_issues_counter_by_status(db: Session, status: list):
+    query = (
+        select(Issue.author_id, func.count(Issue.author_id)).where(Issue.status.in_(status)).group_by(Issue.author_id)
+    )
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.all()
+
+
 def get_items_counter_summary(db: Session):
     query = select(Item.author_id, func.count(Item.author_id)).group_by(Item.author_id)
     result = db.execute(query)  # await db.execute(query)
