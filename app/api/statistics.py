@@ -6,6 +6,7 @@
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+import pandas as pd 
 
 from app.crud import crud_statistics
 from app.db import get_db
@@ -61,3 +62,20 @@ def stats_first_steps(*, db: Session = Depends(get_db), auth=Depends(has_token))
 @statistics_router.get("/all_items_failures")
 def stats_all_items_failures(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     pass
+
+
+@statistics_router.get("/events")
+def stats_events_to_pd(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+   
+    events = crud_statistics.get_events(db)
+
+    columns=[
+        "id","action","author_id"
+        ]
+    df_from_records = pd.DataFrame.from_records(events, index='id', columns=columns)
+    
+    print("########")
+    print(df_from_records.head(5))
+    print("########")
+
+    return events

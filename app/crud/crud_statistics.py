@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.models import Issue, Item, User
+from app.models.models import Event, Issue, Item, User
 
 
 def get_issues_counter_summary(db: Session):
@@ -36,3 +36,11 @@ def get_favourites_counter_summary(db: Session, user_id: int):
 
     result = db.execute(query)  # await db.execute(query)
     return result.scalar_one_or_none()
+
+
+def get_events(db: Session):
+    query = select(Event.id, Event.action, Event.author_id)
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
