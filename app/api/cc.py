@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.crud import cc_crud, crud_files
 from app.db import engine, get_public_db
 from app.schemas.responses import StandardResponse
+from app.service.notification_email import EmailNotification
 from app.service.scheduler import scheduler
 from app.service.tenants import alembic_upgrade_head
-from app.service.notification_email import EmailNotification
-
-from app.config import get_settings
 
 settings = get_settings()
 
@@ -21,14 +20,14 @@ def read_item(schema: str):
     # alembic_upgrade_head(schema)
     return {"schema": schema}
 
+
 @cc_router.get("/manual_test", name="")
-def cc_get_all(*, db: Session = Depends(get_public_db)):
+def cc_manual_test(*, db: Session = Depends(get_public_db)):
 
     url = ""
     receivers = ["mgurgul@telecube.pl"]
 
     email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
-
 
     template_data = {  # Template: b04fd986 	Failure_notification_PL
         "issue_name": "name",
@@ -41,8 +40,8 @@ def cc_get_all(*, db: Session = Depends(get_public_db)):
     }
     email.send(receivers, "Nowe zgłoszenie", "b04fd986", template_data)
 
-
     return {"ok": True}
+
 
 @cc_router.get("/check_revision")
 def check_revision(schema: str):

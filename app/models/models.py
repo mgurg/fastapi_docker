@@ -222,7 +222,7 @@ class Issue(Base):
 
     files_issue = relationship("File", secondary=file_issue_rel, back_populates="issue")
     users_issue = relationship("User", secondary=users_issues_rel, back_populates="problem")
-    tags_issue = relationship("Tag", secondary=tag_issue_rel, back_populates="flag")
+    tags_issue = relationship("Tag", secondary=tag_issue_rel, back_populates="tag")
 
     item = relationship("Item", back_populates="issue_FK")
 
@@ -356,5 +356,6 @@ class Tag(Base):
     icon = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    issue = relationship("Issue", secondary=tag_issue_rel, back_populates="tags_issue")
+    tag = relationship("Issue", secondary=tag_issue_rel, back_populates="tags_issue")

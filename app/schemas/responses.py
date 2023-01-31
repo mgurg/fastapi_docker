@@ -151,6 +151,16 @@ class FileBasicInfo(BaseResponse):
     url: str | None
 
 
+
+class TagResponse(BaseResponse):
+    uuid: UUID
+    name: str
+
+class TagBasicInfo(BaseResponse):
+    uuid: UUID
+    name: str
+
+
 class QRCodeItemResponse(BaseResponse):
     resource: str
     qr_code_full_id: str
@@ -239,6 +249,7 @@ class IssueResponse(BaseResponse):
     color: str | None
     users_issue: list[UserBasicResponse] | None
     files_issue: list[FileBasicInfo] | None
+    tags_issue: list[TagBasicInfo] | None
     # item_guides: list[GuideBasicResponse] | None
 
 

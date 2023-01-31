@@ -55,25 +55,23 @@ class EmailNotification:
 
         url = "https://api.mailjet.com/v3.1/send"
 
-   
         to_field = {"Email": f"{receiver}", "Name": "user"}
         from_field = settings.email_mailjet_sender
 
-
-        payload = json.dumps({
-            "Messages": [
-                {
-                    "From": {"Email": f"{from_field}", "Name": "rm.pl"},
-                    "To": [to_field],
-                    "TemplateID": 4534065,
-                    "TemplateLanguage": True,
-                    "Subject": "Nowa",
-                    "Variables": {"issue_name": "a", "issue_url": "b"},
-                }
-            ]
-        })
-
-
+        payload = json.dumps(
+            {
+                "Messages": [
+                    {
+                        "From": {"Email": f"{from_field}", "Name": "rm.pl"},
+                        "To": [to_field],
+                        "TemplateID": 4534065,
+                        "TemplateLanguage": True,
+                        "Subject": "Nowa",
+                        "Variables": {"issue_name": "a", "issue_url": "b"},
+                    }
+                ]
+            }
+        )
 
         # payload = json.dumps(
         #     {
@@ -99,6 +97,3 @@ class EmailNotification:
         # return response.text
 
         return "OK"
-
-
-
