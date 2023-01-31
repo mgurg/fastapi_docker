@@ -193,6 +193,13 @@ file_issue_rel = sa.Table(
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+tag_issue_rel = sa.Table(
+    "tags_issues_link",
+    Base.metadata,
+    sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("tag_id", sa.ForeignKey("tags.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
 
 class Issue(Base):
     __tablename__ = "issues"
@@ -215,6 +222,7 @@ class Issue(Base):
 
     files_issue = relationship("File", secondary=file_issue_rel, back_populates="issue")
     users_issue = relationship("User", secondary=users_issues_rel, back_populates="problem")
+    tags_issue = relationship("Tag", secondary=tag_issue_rel, back_populates="flag")
 
     item = relationship("Item", back_populates="issue_FK")
 
@@ -337,3 +345,16 @@ class EventSummary(Base):
     duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+class Tag(Base):
+    __tablename__ = "tags"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    color = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    icon = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    issue = relationship("Issue", secondary=tag_issue_rel, back_populates="tags_issue")

@@ -6,9 +6,11 @@ from app.db import engine, get_public_db
 from app.schemas.responses import StandardResponse
 from app.service.scheduler import scheduler
 from app.service.tenants import alembic_upgrade_head
+from app.service.notification_email import EmailNotification
 
-# from app.models.models import Accounts, SettingAddIn, StandardResponse
-# from app.schemas.schemas import SettingBase
+from app.config import get_settings
+
+settings = get_settings()
 
 cc_router = APIRouter()
 
@@ -19,6 +21,28 @@ def read_item(schema: str):
     # alembic_upgrade_head(schema)
     return {"schema": schema}
 
+@cc_router.get("/manual_test", name="")
+def cc_get_all(*, db: Session = Depends(get_public_db)):
+
+    url = ""
+    receivers = ["mgurgul@telecube.pl"]
+
+    email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
+
+
+    template_data = {  # Template: b04fd986 	Failure_notification_PL
+        "issue_name": "name",
+        "issue_description": "description",
+        "issue_url": "https://onet.pl/" + url,
+        "action_url": "https://onet.pl/" + url,
+        "product_name": "Intio",
+        "sender_name": "Michał",
+        "login_url": "https://onet.pl",
+    }
+    email.send(receivers, "Nowe zgłoszenie", "b04fd986", template_data)
+
+
+    return {"ok": True}
 
 @cc_router.get("/check_revision")
 def check_revision(schema: str):
