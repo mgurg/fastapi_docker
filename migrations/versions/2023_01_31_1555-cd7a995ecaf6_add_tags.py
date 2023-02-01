@@ -36,7 +36,7 @@ def upgrade() -> None:
         "tags_issues_link",
         sa.Column("issue_id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("tag_id", sa.INTEGER(), autoincrement=False, nullable=False),
-        # sa.Column("user_id", sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column("user_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.ForeignKeyConstraint(["tag_id"], ["tags.id"], name="tags_issues_link_fk"),
         sa.ForeignKeyConstraint(["issue_id"], ["issues.id"], name="tags_issues_link_fk_1"),
         sa.PrimaryKeyConstraint("issue_id", "tag_id", name="tags_issues_link_pkey"),

@@ -141,7 +141,7 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification
-    email = EmailNotification()
+    email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
     receiver = user["email"]
 
     template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
