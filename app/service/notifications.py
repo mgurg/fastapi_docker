@@ -6,6 +6,7 @@ from app.service.notification_email import EmailNotification
 
 settings = get_settings()
 
+
 def notify_users(sms_list: list[dict], email_list: list[dict], issue: Issue = None):
     phones = []
     emails = []

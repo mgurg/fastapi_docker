@@ -181,3 +181,9 @@ class SettingGeneralIn(BaseRequest):
     name: str
     value: str
     type: str
+
+
+class TagCreateIn(BaseRequest):
+    name: str
+    color: str | None
+    icon: str | None
