@@ -149,7 +149,7 @@ class IssueAddIn(BaseRequest):
     text_html: str | None
     text_json: dict | None
     files: list[UUID] | None
-
+    tags: list[UUID] | None
 
 class FavouritesAddIn(BaseRequest):
     item_uuid: UUID | None
@@ -162,6 +162,7 @@ class IssueEditIn(BaseRequest):
     text_html: str | None
     text_json: dict | None
     files: list[UUID] | None
+    tags: list[UUID] | None
     users: list[UUID] | None
 
 

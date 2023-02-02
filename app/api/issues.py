@@ -7,7 +7,7 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_users
+from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import (
@@ -54,19 +54,19 @@ def issue_get_all(
     return paginate(db_issues, params)
 
 
-@issue_router.get("/stats", response_model=IssueSummaryResponse)
-def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+# @issue_router.get("/stats", response_model=IssueSummaryResponse)
+# def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
-    ideas_summary = crud_issues.get_issue_summary(db)
-    if not ideas_summary:
-        return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "resolved": 0}
+#     ideas_summary = crud_issues.get_issue_summary(db)
+#     if not ideas_summary:
+#         return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "resolved": 0}
 
-    ideas_status = dict(ideas_summary)
+#     ideas_status = dict(ideas_summary)
 
-    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
-        ideas_status.setdefault(status, 0)
+#     for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
+#         ideas_status.setdefault(status, 0)
 
-    return ideas_status
+#     return ideas_status
 
 
 @issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])
@@ -121,6 +121,13 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
             if db_file:
                 files.append(db_file)
 
+    tags = []
+    if issue.tags is not None:
+        for tag in issue.tags:
+            db_tag = crud_tags.get_tag_by_uuid(db, tag)
+            if db_tag:
+                tags.append(db_tag)
+                
     issue_uuid = str(uuid4())
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
@@ -147,6 +154,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
         "text": description,
         "text_json": issue.text_json,
         "files_issue": files,
+        "tags_issue": tags,
         "color": issue.color,
         "priority": issue.priority,
         "status": "new",
@@ -283,6 +291,18 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
         issue_data["files_issue"] = files
         del issue_data["files"]
 
+    tags = []
+    if ("tags" in issue_data) and (issue_data["tags"] is not None):
+        for tag in db_issue.tags_issue:
+            db_issue.tags_issue.remove(tag)
+        for tag in issue_data["tags"]:
+            db_tag = crud_tags.get_tag_by_uuid(db, tag)
+            if db_tag:
+                tags.append(db_tag)
+
+        issue_data["tags_issue"] = tags
+        del issue_data["tags"]
+        
     users = []
     if ("users" in issue_data) and (issue_data["users"] is not None):
         for user in db_issue.users_issue:

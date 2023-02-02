@@ -68,6 +68,7 @@ class EmailNotification:
                         "TemplateLanguage": True,
                         "Subject": "Nowa",
                         "Variables": {"issue_name": "a", "issue_url": "b"},
+                        "TemplateErrorReporting": {"Email": settings.email_dev, "Name": "Mailjet Template Errors"},
                     }
                 ]
             }
@@ -97,3 +98,11 @@ class EmailNotification:
         # return response.text
 
         return "OK"
+
+    def _add_template_debugging(message_data: dict) -> None:
+        message_data["TemplateErrorReporting"] = {
+            "Email": settings.DEV_EMAIL_ADDRESS,
+            "Name": "Mailjet Template Errors",
+        }
+
+        # https://github.com/pass-culture/pass-culture-api/blob/b24db94a2fb2dd6473705c3bde97c9e28fac3390/api/src/pcapi/utils/mailing.py#L195
