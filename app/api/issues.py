@@ -10,13 +10,7 @@ from sqlalchemy.orm import Session
 from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
-from app.schemas.responses import (
-    EventTimelineResponse,
-    IssueIndexResponse,
-    IssueResponse,
-    IssueSummaryResponse,
-    StandardResponse,
-)
+from app.schemas.responses import EventTimelineResponse, IssueIndexResponse, IssueResponse, StandardResponse
 from app.service import event
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
@@ -127,7 +121,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
             db_tag = crud_tags.get_tag_by_uuid(db, tag)
             if db_tag:
                 tags.append(db_tag)
-                
+
     issue_uuid = str(uuid4())
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
@@ -302,7 +296,7 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
 
         issue_data["tags_issue"] = tags
         del issue_data["tags"]
-        
+
     users = []
     if ("users" in issue_data) and (issue_data["users"] is not None):
         for user in db_issue.users_issue:
