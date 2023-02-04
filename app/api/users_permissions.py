@@ -7,12 +7,7 @@ from sqlalchemy.orm import Session
 from app.crud import crud_permission
 from app.db import get_db
 from app.schemas.requests import RoleAddIn, RoleEditIn
-from app.schemas.responses import (
-    PermissionResponse,
-    RolePermissionFull,
-    RoleSummaryResponse,
-    StandardResponse,
-)
+from app.schemas.responses import PermissionResponse, RolePermissionFull, RoleSummaryResponse, StandardResponse
 from app.service.bearer_auth import has_token
 
 permission_router = APIRouter()
@@ -26,7 +21,7 @@ def role_get_all(
     search: str = None,
     sortOrder: str = "asc",
     sortColumn: str = "name",
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
 
     sortTable = {"name": "role_title"}

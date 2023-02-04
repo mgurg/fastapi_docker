@@ -98,9 +98,7 @@ def test_first_run(publicClient: TestClient):
     today = datetime.now().strftime("%A-%Y-%m-%d-%H")
     service_token = ("a" * int(64 - len(today))) + today
 
-    data = {
-        "token": service_token,
-    }
+    data = {"token": service_token}
     headers = {"tenant": "public", "Content-Type": "application/json"}
     response = publicClient.request("POST", "/auth/first_run", content=json.dumps(data), headers=headers)
     data = response.json()

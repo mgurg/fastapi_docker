@@ -7,15 +7,10 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_auth, crud_events, crud_files, crud_items, crud_qr
+from app.crud import crud_auth, crud_events, crud_files, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
-from app.schemas.requests import ItemAddIn, ItemEditIn
-from app.schemas.responses import (
-    EventTimelineResponse,
-    ItemIndexResponse,
-    ItemResponse,
-    StandardResponse,
-)
+from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
+from app.schemas.responses import EventTimelineResponse, ItemIndexResponse, ItemResponse, StandardResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
@@ -28,17 +23,22 @@ def item_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str | None = None,
+    user_uuid: UUID | None = None,
     field: str = "name",
     order: str = "asc",
     auth=Depends(has_token),
 ):
-
-    sort_fields = ["name", "created_at"]
-
-    if field not in sort_fields:
+    if field not in ["name", "created_at"]:
         field = "name"
 
-    db_items = crud_items.get_items(db, search, field, order)
+    user_id = None
+    if user_uuid is not None:
+        db_user = crud_users.get_user_by_uuid(db, user_uuid)
+        if db_user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        user_id = db_user.id
+
+    db_items = crud_items.get_items(db, search, user_id, field, order)
     return paginate(db_items, params)
 
 
@@ -52,8 +52,7 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     try:
         for picture in db_item.files_item:
             picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"),
-                "_".join([str(picture.uuid), picture.file_name]),
+                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
             )
     except Exception as e:
         capture_exception(e)
@@ -81,6 +80,30 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
 
     db_events = crud_events.get_event_time_statistics_by_item(db, item_uuid)
     return db_events
+
+
+@item_router.post("/favourites", response_model=StandardResponse)
+def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: FavouritesAddIn, auth=Depends(has_token)):
+    db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
+    if not db_item:
+        raise HTTPException(status_code=400, detail="Item not found!")
+
+    for user in db_item.users_item:
+        if user.uuid == favourites.user_uuid:
+            db_item.users_item.remove(user)
+            db.add(user)
+            db.commit()
+            return {"ok": True}
+
+    db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    item_data = {"users_item": [db_user]}
+
+    crud_items.update_item(db, db_item, item_data)
+
+    return {"ok": True}
 
 
 @item_router.post("/", response_model=ItemIndexResponse)

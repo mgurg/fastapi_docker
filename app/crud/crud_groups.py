@@ -6,15 +6,20 @@ from sqlalchemy.orm import Session, selectinload
 from app.models.models import UserGroup
 
 
-def get_user_groups(db: Session, search: str, sortColumn: str, sortOrder: str):
-    all_filters = []
+def get_user_groups(db: Session, search: str, sort_column: str, sort_order: str):
+    query = select(UserGroup)
 
+    search_filters = []
     if search is not None:
-        all_filters.append(UserGroup.name.ilike(f"%{search}%"))
+        search_filters.append(UserGroup.name.ilike(f"%{search}%"))
 
-    return (
-        db.execute(select(UserGroup).filter(*all_filters).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
-    )
+        query = query.filter(*search_filters)
+
+    query = query.order_by(text(f"{sort_column} {sort_order}"))
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.scalars().all()
 
 
 def get_user_group_by_uuid(db: Session, uuid: UUID) -> UserGroup:

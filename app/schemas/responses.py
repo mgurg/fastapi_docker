@@ -151,6 +151,16 @@ class FileBasicInfo(BaseResponse):
     url: str | None
 
 
+class TagResponse(BaseResponse):
+    uuid: UUID
+    name: str
+
+
+class TagBasicInfo(BaseResponse):
+    uuid: UUID
+    name: str
+
+
 class QRCodeItemResponse(BaseResponse):
     resource: str
     qr_code_full_id: str
@@ -206,6 +216,7 @@ class ItemResponse(BaseResponse):
     text_json: dict | None
     files_item: list[FileBasicInfo] | None
     item_guides: list[GuideBasicResponse] | None
+    users_item: list[UserBasicResponse] | None
     qr_code: QRCodeItemResponse | None
 
 
@@ -238,6 +249,7 @@ class IssueResponse(BaseResponse):
     color: str | None
     users_issue: list[UserBasicResponse] | None
     files_issue: list[FileBasicInfo] | None
+    tags_issue: list[TagBasicInfo] | None
     # item_guides: list[GuideBasicResponse] | None
 
 
@@ -299,3 +311,13 @@ class RolePermissionFull(BaseResponse):
 class SettingNotificationResponse(BaseResponse):
     sms_notification_level: str | None
     email_notification_level: str | None
+
+
+class StatsIssuesCounterResponse(BaseResponse):
+    new: int
+    accepted: int
+    rejected: int
+    assigned: int
+    in_progress: int
+    paused: int
+    resolved: int

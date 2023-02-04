@@ -10,13 +10,7 @@ Base = declarative_base(metadata=metadata)
 
 class Tenant(Base):
     __tablename__ = "tenants"
-    id = sa.Column(
-        sa.Integer(),
-        sa.Identity(),
-        primary_key=True,
-        autoincrement=True,
-        nullable=False,
-    )
+    id = sa.Column(sa.Integer(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), default=uuid4(), unique=True)
     name = sa.Column("name", sa.String(128), nullable=True)
     schema = sa.Column(sa.String(128), nullable=True)
@@ -48,13 +42,7 @@ class PublicUser(Base):
 
 class PublicCompany(Base):
     __tablename__ = "public_companies"
-    id = sa.Column(
-        sa.INTEGER(),
-        sa.Identity(),
-        primary_key=True,
-        autoincrement=True,
-        nullable=False,
-    )
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     short_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)

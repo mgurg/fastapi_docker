@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,21 +20,20 @@ def group_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str = None,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
-    auth=Depends(has_token)
+    field: str = "name",
+    order: str = "asc",
+    auth=Depends(has_token),
 ):
 
-    sortTable = {"name": "name"}
+    if field not in ["name", "created_at"]:
+        field = "name"
 
-    db_user_groups = crud_groups.get_user_groups(db, search, sortTable[sortColumn], sortOrder)
+    db_user_groups = crud_groups.get_user_groups(db, search, field, order)
     return paginate(db_user_groups, params)
 
 
-@group_router.get("/{group_uuid}", response_model=GroupResponse)  # , response_model=Page[UserIndexResponse]
+@group_router.get("/{group_uuid}", response_model=GroupResponse)
 def group_get_one(*, db: Session = Depends(get_db), group_uuid: UUID, auth=Depends(has_token)):
-    # https://github.com/ben519/fastapi-many-to-many/blob/master/with-extra-data-1.py <-ExtraField Support
-    # https://stackoverflow.com/questions/7417906/sqlalchemy-manytomany-secondary-table-with-additional-fields
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
     return db_user_group
@@ -58,6 +58,7 @@ def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth=Depends(
         "description": group.description,
         "symbol": group.symbol,
         "users": users,
+        "created_at": datetime.now(timezone.utc),
     }
 
     new_group = crud_groups.create_group_with_users(db, group_data)

@@ -6,19 +6,25 @@ from sqlalchemy.orm import Session
 from app.models.models import Guide, Item
 
 
-def get_guides(db: Session, search: str, sortColumn: str, sortOrder: str) -> Guide:
+def get_guides(db: Session, search: str, item_id: int, sort_column: str, sort_order: str) -> Guide:
+
+    query = select(Guide)
+
     search_filters = []
     if search is not None:
         search_filters.append(Guide.name.ilike(f"%{search}%"))
         search_filters.append(Guide.text.ilike(f"%{search}%"))
 
-        return (
-            db.execute(select(Guide).filter(or_(False, *search_filters)).order_by(text(f"{sortColumn} {sortOrder}")))
-            .scalars()
-            .all()
-        )
+        query = query.filter(or_(False, *search_filters))
 
-    return db.execute(select(Guide).order_by(text(f"{sortColumn} {sortOrder}"))).scalars().all()
+    if item_id is not None:
+        query = query.filter(Guide.item.any(Item.id == item_id))
+
+    query = query.order_by(text(f"{sort_column} {sort_order}"))
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.scalars().all()
 
 
 def get_guide_by_uuid(db: Session, uuid: UUID) -> Guide:
@@ -43,7 +49,3 @@ def update_guide(db: Session, db_guide: Guide, update_data: dict) -> Guide:
     db.refresh(db_guide)
 
     return db_guide
-
-
-def get_guide_by_item_id(db, item_id):
-    return db.execute(select(Guide).filter(Guide.item.any(Item.id == item_id))).scalars().all()

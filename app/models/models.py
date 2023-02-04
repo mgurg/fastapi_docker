@@ -25,6 +25,13 @@ users_issues_rel = sa.Table(
     sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+users_items_rel = sa.Table(
+    "users_items_link",
+    Base.metadata,
+    sa.Column("user_id", sa.ForeignKey("users.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -79,6 +86,7 @@ class User(Base):
     role_FK = relationship("Role", back_populates="users_FK")
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
     problem = relationship("Issue", secondary=users_issues_rel, back_populates="users_issue")
+    item = relationship("Item", secondary=users_items_rel, back_populates="users_item")
 
 
 file_idea_rel = sa.Table(
@@ -144,6 +152,7 @@ class Item(Base):
 
     files_item = relationship("File", secondary=file_item_rel, back_populates="item")
     item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
+    users_item = relationship("User", secondary=users_items_rel, back_populates="item")
 
     qr_code = relationship("QrCode", back_populates="items_FK")
     issue_FK = relationship("Issue", back_populates="item")
@@ -184,6 +193,13 @@ file_issue_rel = sa.Table(
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+tag_issue_rel = sa.Table(
+    "tags_issues_link",
+    Base.metadata,
+    sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("tag_id", sa.ForeignKey("tags.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
 
 class Issue(Base):
     __tablename__ = "issues"
@@ -206,6 +222,7 @@ class Issue(Base):
 
     files_issue = relationship("File", secondary=file_issue_rel, back_populates="issue")
     users_issue = relationship("User", secondary=users_issues_rel, back_populates="problem")
+    tags_issue = relationship("Tag", secondary=tag_issue_rel, back_populates="tag")
 
     item = relationship("Item", back_populates="issue_FK")
 
@@ -238,6 +255,18 @@ class Setting(Base):
     value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     prev_value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     descripton = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+class SettingUser(Base):
+    __tablename__ = "settings_users"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    user_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
+    value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    prev_value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
@@ -316,3 +345,17 @@ class EventSummary(Base):
     duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+
+class Tag(Base):
+    __tablename__ = "tags"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    color = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    icon = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    tag = relationship("Issue", secondary=tag_issue_rel, back_populates="tags_issue")

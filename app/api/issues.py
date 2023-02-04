@@ -7,14 +7,7 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import (
-    crud_auth,
-    crud_events,
-    crud_files,
-    crud_issues,
-    crud_items,
-    crud_users,
-)
+from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import (
@@ -27,6 +20,7 @@ from app.schemas.responses import (
 from app.service import event
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
+from app.service.notifications import notify_users
 
 issue_router = APIRouter()
 
@@ -38,41 +32,41 @@ def issue_get_all(
     params: Params = Depends(),
     search: str | None = None,
     status: str = "active",
+    user_uuid: UUID | None = None,
     priority: str | None = None,
+    dateFrom: datetime | None = None,
+    dateTo: datetime | None = None,
     field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
 ):
-    sort_fields = ["created_at", "name", "priority", "status"]
-
-    if field not in sort_fields:
+    if field not in ["created_at", "name", "priority", "status"]:
         field = "created_at"
 
-    db_issues = crud_issues.get_issues(db, search, status, priority, field, order)
+    user_id = None
+    if user_uuid is not None:
+        db_user = crud_users.get_user_by_uuid(db, user_uuid)
+        if db_user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        user_id = db_user.id
+
+    db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order, dateFrom, dateTo)
     return paginate(db_issues, params)
 
 
-@issue_router.get("/stats", response_model=IssueSummaryResponse)
-def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+# @issue_router.get("/stats", response_model=IssueSummaryResponse)
+# def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
-    ideas_summary = crud_issues.get_issue_summary(db)
-    if not ideas_summary:
-        return {
-            "new": 0,
-            "accepted": 0,
-            "rejected": 0,
-            "assigned": 0,
-            "in_progress": 0,
-            "paused": 0,
-            "resolved": 0,
-        }
+#     ideas_summary = crud_issues.get_issue_summary(db)
+#     if not ideas_summary:
+#         return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "resolved": 0}
 
-    ideas_status = dict(ideas_summary)
+#     ideas_status = dict(ideas_summary)
 
-    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
-        ideas_status.setdefault(status, 0)
+#     for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
+#         ideas_status.setdefault(status, 0)
 
-    return ideas_status
+#     return ideas_status
 
 
 @issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])
@@ -87,29 +81,6 @@ def item_get_timeline_history(
     return db_events
 
 
-@issue_router.get("/user/{user_uuid}", response_model=Page[IssueIndexResponse])
-def issue_get_by_user_all(
-    *,
-    db: Session = Depends(get_db),
-    user_uuid: UUID,
-    params: Params = Depends(),
-    search: str = None,
-    status: str = "active",
-    field: str = "created_at",
-    order: str = "asc",
-    auth=Depends(has_token),
-):
-
-    db_user = crud_users.get_user_by_uuid(db, user_uuid)
-
-    if db_user is None:
-        raise HTTPException(status_code=401, detail="User not found")
-
-    db_issues = crud_issues.get_issues_by_user_id(db, db_user.id, search, status, field, order)
-
-    return paginate(db_issues, params)
-
-
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
 def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
@@ -120,8 +91,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
     try:
         for picture in db_issue.files_issue:
             picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"),
-                "_".join([str(picture.uuid), picture.file_name]),
+                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
             )
     except Exception as e:
         capture_exception(e)
@@ -129,7 +99,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
     return db_issue
 
 
-@issue_router.post("/", response_model=IssueResponse)
+@issue_router.post("/", response_model=IssueResponse)  #
 def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAddIn, auth=Depends(has_token)):
 
     tenant_id = request.headers.get("tenant", None)
@@ -151,6 +121,13 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
             if db_file:
                 files.append(db_file)
 
+    tags = []
+    if issue.tags is not None:
+        for tag in issue.tags:
+            db_tag = crud_tags.get_tag_by_uuid(db, tag)
+            if db_tag:
+                tags.append(db_tag)
+                
     issue_uuid = str(uuid4())
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
@@ -177,6 +154,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
         "text": description,
         "text_json": issue.text_json,
         "files_issue": files,
+        "tags_issue": tags,
         "color": issue.color,
         "priority": issue.priority,
         "status": "new",
@@ -184,6 +162,17 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     }
 
     new_issue = crud_issues.create_issue(db, issue_data)
+
+    # Notification
+    email_notifications = crud_settings.get_users_for_email_notification(db, "all")
+    sms_notifications = crud_settings.get_users_for_sms_notification(db, "all")
+
+    keys = ("phone", "mode")
+    list_of_sms_notifications = [dict(zip(keys, values)) for values in sms_notifications]
+
+    keys = ("email", "mode")
+    list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
+    notify_users(list_of_sms_notifications, list_of_email_notifications, new_issue)
 
     event.create_new_item_event(
         db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
@@ -302,6 +291,18 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
         issue_data["files_issue"] = files
         del issue_data["files"]
 
+    tags = []
+    if ("tags" in issue_data) and (issue_data["tags"] is not None):
+        for tag in db_issue.tags_issue:
+            db_issue.tags_issue.remove(tag)
+        for tag in issue_data["tags"]:
+            db_tag = crud_tags.get_tag_by_uuid(db, tag)
+            if db_tag:
+                tags.append(db_tag)
+
+        issue_data["tags_issue"] = tags
+        del issue_data["tags"]
+        
     users = []
     if ("users" in issue_data) and (issue_data["users"] is not None):
         for user in db_issue.users_issue:

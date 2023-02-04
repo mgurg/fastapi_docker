@@ -3,12 +3,12 @@ from uuid import UUID
 from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
-from app.models.models import Item
+from app.models.models import Item, User
 
 
-def get_items(db: Session, search: str, sort_column: str, sort_order: str) -> Item:
+def get_items(db: Session, search: str, user_id: int, sort_column: str, sort_order: str) -> Item:
 
-    query = select(Item).order_by(text(f"{sort_column} {sort_order}"))
+    query = select(Item)
 
     search_filters = []
     if search is not None:
@@ -16,6 +16,11 @@ def get_items(db: Session, search: str, sort_column: str, sort_order: str) -> It
         search_filters.append(Item.text.ilike(f"%{search}%"))
 
         query = query.filter(or_(False, *search_filters))
+
+    if user_id is not None:
+        query = query.filter(Item.users_item.any(User.id == user_id))
+
+    query = query.order_by(text(f"{sort_column} {sort_order}"))
 
     result = db.execute(query)  # await db.execute(query)
 

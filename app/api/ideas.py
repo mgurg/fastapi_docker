@@ -15,11 +15,7 @@ from app.crud import crud_auth, crud_files, crud_ideas, crud_users
 from app.db import get_db, get_public_db
 from app.models.models import Idea
 from app.schemas.requests import IdeaAddIn, IdeaEditIn, IdeasVotesIn
-from app.schemas.responses import (
-    IdeaIndexResponse,
-    IdeaSummaryResponse,
-    StandardResponse,
-)
+from app.schemas.responses import IdeaIndexResponse, IdeaSummaryResponse, StandardResponse
 
 # from app.schemas.schemas import IdeaIndexResponse
 from app.service.aws_s3 import generate_presigned_url
@@ -83,8 +79,7 @@ def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, request: Re
     try:
         for picture in idea.files_idea:
             picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"),
-                "_".join([str(picture.uuid), picture.file_name]),
+                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
             )
     except Exception as e:
         capture_exception(e)

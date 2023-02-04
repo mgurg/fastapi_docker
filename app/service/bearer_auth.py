@@ -3,13 +3,11 @@ import base64
 import pendulum
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.crud.crud_auth import generate_base64_token
+from app.crud import crud_auth
 from app.db import get_db
-from app.models.models import User
 
 settings = get_settings()
 security = HTTPBearer()
@@ -20,7 +18,7 @@ def is_base64(sb: str) -> bool:
         if isinstance(sb, str):
             # If there's any unicode here, an exception will be thrown and the function will return false
             decoded_token = base64.b64decode(sb).decode("utf-8")
-            base64_token = generate_base64_token(decoded_token)
+            base64_token = crud_auth.generate_base64_token(decoded_token)
             # message_bytes = .encode("ascii")
             # base64_bytes = base64.b64encode(message_bytes)
             # base64_message = base64_bytes.decode("ascii")
@@ -43,7 +41,7 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     if token is None:
         raise HTTPException(status_code=401, detail="Missing auth token")
 
-    db_user_data = db.execute(select(User).where(User.auth_token == token)).scalar_one_or_none()
+    db_user_data = crud_auth.get_tenant_user_by_auth_token(db, token)
 
     if db_user_data is not None:
         # user_id, account_id = db_user_data

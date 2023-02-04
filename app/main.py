@@ -13,6 +13,8 @@ from app.api.ideas import idea_router
 from app.api.issues import issue_router
 from app.api.items import item_router
 from app.api.settings import setting_router
+from app.api.statistics import statistics_router
+from app.api.tags import tag_router
 from app.api.users import user_router
 from app.api.users_groups import group_router
 from app.api.users_permissions import permission_router
@@ -55,7 +57,9 @@ def create_application() -> FastAPI:
     app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
 
     app.include_router(file_router, prefix="/files", tags=["FILE"])
+    app.include_router(tag_router, prefix="/tags", tags=["TAG"])
     app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
+    app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
     app.include_router(cc_router, prefix="/cc", tags=["C&C"])
     return app
 
@@ -108,11 +112,7 @@ def shutdown_event():
 
 @app.get("/", include_in_schema=False)
 def read_root(request: Request):
-    return {
-        "Hello": "World",
-        "tenant": request.headers.get("tenant", "public"),
-        "env": settings.ENVIRONMENT,
-    }
+    return {"Hello": "World", "tenant": request.headers.get("tenant", "public"), "env": settings.ENVIRONMENT}
 
 
 @app.get("/health")

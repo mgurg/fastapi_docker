@@ -18,12 +18,7 @@ from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import (
-    CompanyInfoRegisterIn,
-    UserFirstRunIn,
-    UserLoginIn,
-    UserRegisterIn,
-)
+from app.schemas.requests import CompanyInfoRegisterIn, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
     ActivationResponse,
     PublicCompanyCounterResponse,
@@ -146,7 +141,7 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification
-    email = EmailNotification()
+    email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
     receiver = user["email"]
 
     template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL

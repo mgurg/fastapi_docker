@@ -149,6 +149,11 @@ class IssueAddIn(BaseRequest):
     text_html: str | None
     text_json: dict | None
     files: list[UUID] | None
+    tags: list[UUID] | None
+
+class FavouritesAddIn(BaseRequest):
+    item_uuid: UUID | None
+    user_uuid: UUID | None
 
 
 class IssueEditIn(BaseRequest):
@@ -157,6 +162,7 @@ class IssueEditIn(BaseRequest):
     text_html: str | None
     text_json: dict | None
     files: list[UUID] | None
+    tags: list[UUID] | None
     users: list[UUID] | None
 
 
@@ -170,3 +176,15 @@ class IssueChangeStatus(BaseRequest):
 class SettingNotificationIn(BaseRequest):
     sms_notification_level: str | None
     email_notification_level: str | None
+
+
+class SettingGeneralIn(BaseRequest):
+    name: str
+    value: str
+    type: str
+
+
+class TagCreateIn(BaseRequest):
+    name: str
+    color: str | None
+    icon: str | None
