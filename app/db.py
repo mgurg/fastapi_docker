@@ -48,7 +48,7 @@ if sql_performance_monitoring is True:
 
 
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql+psycopg2://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
+    f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 )
 echo = False
 if settings.ENVIRONMENT != "PRD":

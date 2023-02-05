@@ -160,14 +160,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.61"
+version = "1.26.64"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.29.61,<1.30.0"
+botocore = ">=1.29.64,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -176,7 +176,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.61"
+version = "1.29.64"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -188,7 +188,7 @@ python-dateutil = ">=2.1,<3.0.0"
 urllib3 = ">=1.25.4,<1.27"
 
 [package.extras]
-crt = ["awscrt (==0.15.3)"]
+crt = ["awscrt (==0.16.9)"]
 
 [[package]]
 name = "cached-property"
@@ -595,11 +595,11 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "mypy-extensions"
-version = "0.4.3"
-description = "Experimental type system extensions for programs checked with the mypy typechecker."
+version = "1.0.0"
+description = "Type system extensions for programs checked with the mypy type checker."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.5"
 
 [[package]]
 name = "numpy"
@@ -725,14 +725,6 @@ description = "PostgreSQL database adapter for Python -- C optimisation distribu
 category = "main"
 optional = false
 python-versions = ">=3.7"
-
-[[package]]
-name = "psycopg2-binary"
-version = "2.9.4"
-description = "psycopg2 - Python-PostgreSQL Database Adapter"
-category = "main"
-optional = false
-python-versions = ">=3.6"
 
 [[package]]
 name = "pycparser"
@@ -1317,7 +1309,7 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "f9dc8cd5610269eb43021dfe53c6eca173934e7949c17ebb60e8a3e716f8bc8a"
+content-hash = "7f52db9f2b388ff4ede3d2516168034fed51bfb3221a43b32256598eabbb3056"
 
 [metadata.files]
 alembic = []
@@ -1401,10 +1393,7 @@ mako = []
 markdown-it-py = []
 markupsafe = []
 mdurl = []
-mypy-extensions = [
-    {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
-    {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
-]
+mypy-extensions = []
 numpy = []
 packaging = []
 pandas = []
@@ -1443,7 +1432,6 @@ pluggy = [
 ]
 psycopg = []
 psycopg-binary = []
-psycopg2-binary = []
 pycparser = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
     {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
