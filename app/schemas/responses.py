@@ -57,6 +57,8 @@ class UserLoginOut(BaseResponse):
     tenant_id: str | None
 
 
+class CompanyInfoBasic(BaseResponse):
+    name: str
 class UserBasicResponse(BaseResponse):
     uuid: UUID
     first_name: str

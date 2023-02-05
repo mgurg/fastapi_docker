@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.crud import crud_tags
+from app.crud import crud_issues, crud_tags
 from app.db import get_db
 from app.schemas.requests import TagCreateIn
 from app.schemas.responses import StandardResponse, TagResponse
@@ -43,15 +43,21 @@ def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, auth=Depends
 
 
 @tag_router.delete("/{tag_uuid}", response_model=StandardResponse)
-def tags_delete_one(*, db: Session = Depends(get_db), tag_uuid: UUID, auth=Depends(has_token)):
-    db_user = crud_tags.get_tag_by_uuid(db, tag_uuid)
+def tags_delete_one(
+    *, db: Session = Depends(get_db), tag_uuid: UUID, force_delete: bool = False, auth=Depends(has_token)
+):
+    db_tag = crud_tags.get_tag_by_uuid(db, tag_uuid)
 
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+    if not db_tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
 
-    db_user.email
+    tag_usage = crud_issues.count_issues_by_tag(db, db_tag.id)
 
-    db.delete(db_user)
-    db.commit()
+    if tag_usage > 0:
+        raise HTTPException(status_code=400, detail="Tag in use")
+
+    print(tag_usage)
+    # db.delete(db_tag)
+    # db.commit()
 
     return {"ok": True}

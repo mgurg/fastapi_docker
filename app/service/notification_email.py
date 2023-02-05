@@ -1,5 +1,4 @@
 import base64
-import json
 import os
 
 from requests import request
@@ -58,42 +57,28 @@ class EmailNotification:
         to_field = {"Email": f"{receiver}", "Name": "user"}
         from_field = settings.email_mailjet_sender
 
-        payload = json.dumps(
-            {
-                "Messages": [
-                    {
-                        "From": {"Email": f"{from_field}", "Name": "rm.pl"},
-                        "To": [to_field],
-                        "TemplateID": 4534065,
-                        "TemplateLanguage": True,
-                        "Subject": "Nowa",
-                        "Variables": {"issue_name": "a", "issue_url": "b"},
-                        "TemplateErrorReporting": {"Email": settings.email_dev, "Name": "Mailjet Template Errors"},
-                    }
-                ]
-            }
-        )
-
-        # payload = json.dumps(
-        #     {
-        #         "Messages": [
-        #             {
-        #                 "From": {"Email": "xxxxx+mailjet@gmail.com", "Name": "remontmaszyn.pl"},
-        #                 "To": [{"Email": "passenger1@example.com", "Name": "passenger 1"}],
-        #                 "TemplateID": 4534065,
-        #                 "TemplateLanguage": True,
-        #                 "Subject": "Nowa awaria",
-        #                 "Variables": {"issue_name": "", "issue_url": ""},
-        #             }
-        #         ]
-        #     }
-        # )
+        payload = {
+            "Messages": [
+                {
+                    "From": {"Email": f"{from_field}", "Name": "rm.pl"},
+                    "To": [to_field],
+                    "TemplateID": 4534065,
+                    "TemplateLanguage": True,
+                    "Subject": "Nowa awaria",
+                    "Variables": {
+                        "issue_name": "Awaria",
+                        "issue_url": "www.onet.pl",
+                        "sender_name": "Michał",
+                        "product_name": "Intio",
+                    },
+                    "TemplateErrorReporting": {"Email": settings.email_dev, "Name": "Mailjet Template Errors"},
+                }
+            ]
+        }
 
         headers = {"Content-Type": "application/json", "Authorization": f"Basic {self.auth_header.decode()}"}
 
-        # response = request("POST", url, headers=headers, data=payload)
-
-        # print(response.text)
+        # response = request("POST", url, headers=headers, json=payload)
 
         # return response.text
 

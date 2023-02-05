@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import func, not_, or_, select, text
 from sqlalchemy.orm import Session
 
-from app.models.models import Issue, User
+from app.models.models import Issue, Tag, User
 
 
 def get_issues(
@@ -67,13 +67,21 @@ def get_issue_by_uuid(db: Session, uuid: UUID) -> Issue:
     return result.scalar_one_or_none()
 
 
-def get_issue_summary(db: Session):
-    # return db.execute(select(Issue.status, func.count(Issue.status)).group_by(Issue.status)).all()
+def count_issues_by_tag(db: Session, tag_id: int):
 
-    query = select(Issue.status, func.count(Issue.status)).group_by(Issue.status)
+    query = select(func.count(Issue.id)).filter(Issue.tags_issue.any(Tag.id == tag_id))
 
     result = db.execute(query)  # await db.execute(query)
-    return result.all()
+    return result.scalar_one_or_none()
+
+
+# def get_issue_summary(db: Session):
+#     # return db.execute(select(Issue.status, func.count(Issue.status)).group_by(Issue.status)).all()
+
+#     query = select(Issue.status, func.count(Issue.status)).group_by(Issue.status)
+
+#     result = db.execute(query)  # await db.execute(query)
+#     return result.all()
 
 
 def create_issue(db: Session, data: dict) -> Issue:

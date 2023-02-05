@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
 from loguru import logger
 from passlib.hash import argon2
+from pydantic import EmailStr
 from sentry_sdk import capture_exception
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -21,6 +22,7 @@ from app.models.shared_models import PublicUser
 from app.schemas.requests import CompanyInfoRegisterIn, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
     ActivationResponse,
+    CompanyInfoBasic,
     PublicCompanyCounterResponse,
     StandardResponse,
     UserLoginOut,
@@ -251,6 +253,14 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
 
         return db_user
 
+@auth_router.get("/company_info", response_model=CompanyInfoBasic)
+def auth_login(*, public_db: Session = Depends(get_public_db), request: Request):
+    print(request.headers.get("tenant"))
+    db_public_company: PublicUser = crud_auth.get_public_company_by_tenant_id(public_db, request.headers.get("tenant"))
+    print(db_public_company)
+    if db_public_company is None:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return "OK"
 
 # @auth_router.post("/login_tenant", response_model=UserLoginOut)
 # def auth_login_tenant(*, db: Session = Depends(get_db), email: str, request: Request):

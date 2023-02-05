@@ -1,11 +1,6 @@
-# Failures per machine
-
-# SELECT events.resource_uuid, count(events.id) from piekarnia__cukiernia.events where action ='issue_add'
-# group by events.resource_uuid;
-
-
 import pandas as pd
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.crud import crud_statistics
@@ -76,4 +71,12 @@ def stats_events_to_pd(*, db: Session = Depends(get_db), auth=Depends(has_token)
     print(df_from_records.head(5))
     print("########")
 
-    return events
+    df_from_records.info()
+
+    output = df_from_records.to_csv(index=False)
+
+    # https://stackoverflow.com/questions/61140398/fastapi-return-a-file-response-with-the-output-of-a-sql-query
+
+    return StreamingResponse(
+        iter([output]), media_type='text/csv', headers={"Content-Disposition": "attachment;filename=<file_name>.csv"}
+    )
