@@ -54,7 +54,7 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
         command.upgrade(config, revision, sql=sql, tag=tag)
     except Exception as e:
         logger.error(e)
-        capture_exception(e)
+        # capture_exception(e)
         # print(traceback.format_exc())
 
     logger.info("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
