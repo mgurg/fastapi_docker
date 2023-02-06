@@ -42,7 +42,7 @@ def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends
 
 
 @user_router.get("/count")
-def get_users_count(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     db_user_cnt = crud_users.get_user_count(db)
 
     return db_user_cnt
