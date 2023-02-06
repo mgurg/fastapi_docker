@@ -41,6 +41,13 @@ def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends
     return user
 
 
+@user_router.get("/count")
+def get_users_count(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+    db_user_cnt = crud_users.get_user_count(db)
+
+    return db_user_cnt
+
+
 @user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth=Depends(has_token)
 def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Request, auth=Depends(has_token)):
 

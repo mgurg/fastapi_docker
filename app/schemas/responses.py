@@ -59,6 +59,11 @@ class UserLoginOut(BaseResponse):
 
 class CompanyInfoBasic(BaseResponse):
     name: str
+    street: str | None
+    city: str | None
+    nip: str
+
+
 class UserBasicResponse(BaseResponse):
     uuid: UUID
     first_name: str

@@ -56,6 +56,14 @@ def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth=Depe
     return db_file
 
 
+@file_router.get("/used_space")
+def file_get_used_space(*, db: Session = Depends(get_db), uuid: UUID, auth=Depends(has_token)):
+
+    db_file_size = crud_files.get_files_size_in_db(db)
+
+    return db_file_size
+
+
 @file_router.post("/", response_model=FileResponse)
 def file_add(
     *,

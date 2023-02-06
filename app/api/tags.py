@@ -56,8 +56,8 @@ def tags_delete_one(
     if tag_usage > 0:
         raise HTTPException(status_code=400, detail="Tag in use")
 
-    print(tag_usage)
-    # db.delete(db_tag)
-    # db.commit()
+    # print(tag_usage)
+    db.delete(db_tag)
+    db.commit()
 
     return {"ok": True}

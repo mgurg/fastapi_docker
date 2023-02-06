@@ -65,7 +65,7 @@ def stats_events_to_pd(*, db: Session = Depends(get_db), auth=Depends(has_token)
     events = crud_statistics.get_events(db)
 
     columns = ["id", "action", "author_id"]
-    df_from_records = pd.DataFrame.from_records(events, index='id', columns=columns)
+    df_from_records = pd.DataFrame.from_records(events, index="id", columns=columns)
 
     print("########")
     print(df_from_records.head(5))
@@ -78,5 +78,5 @@ def stats_events_to_pd(*, db: Session = Depends(get_db), auth=Depends(has_token)
     # https://stackoverflow.com/questions/61140398/fastapi-return-a-file-response-with-the-output-of-a-sql-query
 
     return StreamingResponse(
-        iter([output]), media_type='text/csv', headers={"Content-Disposition": "attachment;filename=<file_name>.csv"}
+        iter([output]), media_type="text/csv", headers={"Content-Disposition": "attachment;filename=<file_name>.csv"}
     )
