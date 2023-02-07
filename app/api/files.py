@@ -57,7 +57,7 @@ def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth=Depe
 
 
 @file_router.get("/used_space")
-def file_get_used_space(*, db: Session = Depends(get_db),auth=Depends(has_token)):
+def file_get_used_space(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
     db_file_size = crud_files.get_files_size_in_db(db)
 

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
@@ -30,12 +30,17 @@ def issue_get_all(
     priority: str | None = None,
     dateFrom: datetime | None = None,
     dateTo: datetime | None = None,
+    tag: list[UUID] | None = Query(default=None),
     field: str = "created_at",
     order: str = "asc",
     auth=Depends(has_token),
 ):
     if field not in ["created_at", "name", "priority", "status"]:
         field = "created_at"
+
+    tag_ids = None
+    if tag is not None:
+        tag_ids = crud_tags.get_tags_id_by_uuid(db, tag)
 
     user_id = None
     if user_uuid is not None:
@@ -44,23 +49,8 @@ def issue_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order, dateFrom, dateTo)
+    db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order, dateFrom, dateTo, tag_ids)
     return paginate(db_issues, params)
-
-
-# @issue_router.get("/stats", response_model=IssueSummaryResponse)
-# def issue_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
-#     ideas_summary = crud_issues.get_issue_summary(db)
-#     if not ideas_summary:
-#         return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "resolved": 0}
-
-#     ideas_status = dict(ideas_summary)
-
-#     for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
-#         ideas_status.setdefault(status, 0)
-
-#     return ideas_status
 
 
 @issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])

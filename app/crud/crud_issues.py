@@ -17,6 +17,7 @@ def get_issues(
     sort_order: str,
     date_from: datetime = None,
     date_to: datetime = None,
+    tags: list[int] = None,
 ) -> Issue:
     search_filters = []
 
@@ -52,6 +53,9 @@ def get_issues(
 
     if date_to is not None:
         query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    if tags is not None:
+        query = query.where((Issue.tags_issue.any(Tag.id.in_(tags))))
 
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 

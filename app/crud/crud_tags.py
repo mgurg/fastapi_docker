@@ -18,6 +18,14 @@ def get_tag_by_uuid(db: Session, uuid: UUID) -> Tag:
     return result.scalar_one_or_none()
 
 
+def get_tags_id_by_uuid(db: Session, uuid: list[UUID]) -> Tag:
+    query = select(Tag.id).filter(Tag.uuid.in_(uuid))
+
+    result = db.execute(query)
+
+    return result.scalars().all()
+
+
 def create_tag(db: Session, data: dict) -> Tag:
     new_tag = Tag(**data)
     db.add(new_tag)
