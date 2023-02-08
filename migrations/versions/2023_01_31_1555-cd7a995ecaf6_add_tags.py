@@ -26,6 +26,7 @@ def upgrade() -> None:
         sa.Column("color", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("icon", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column("is_hidden",sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="tags_pkey"),

@@ -1,13 +1,20 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import not_, select
 from sqlalchemy.orm import Session
 
 from app.models.models import Tag
 
 
-def get_tags(db: Session) -> Tag:
-    return db.execute(select(Tag).where(Tag.deleted_at.is_(None))).scalars().all()
+def get_tags(db: Session, is_hidden: bool | None = None) -> Tag:
+    query = select(Tag).where(Tag.deleted_at.is_(None))
+
+    if is_hidden == True:
+        query = query.where(not_(Tag.is_hidden.is_(True)))
+
+    result = db.execute(query)
+
+    return result.scalars().all()
 
 
 def get_tag_by_uuid(db: Session, uuid: UUID) -> Tag:

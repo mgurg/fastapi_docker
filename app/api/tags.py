@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_issues, crud_tags
 from app.db import get_db
-from app.schemas.requests import TagCreateIn
+from app.schemas.requests import TagCreateIn, TagEditIn
 from app.schemas.responses import StandardResponse, TagResponse
 from app.service.bearer_auth import has_token
 
@@ -14,8 +14,8 @@ tag_router = APIRouter()
 
 
 @tag_router.get("/", response_model=list[TagResponse])
-def tags_get_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    tags = crud_tags.get_tags(db)
+def tags_get_all(*, db: Session = Depends(get_db), is_hidden: bool | None = None, auth=Depends(has_token)):
+    tags = crud_tags.get_tags(db, is_hidden)
     return tags
 
 
@@ -37,8 +37,10 @@ def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depend
 
 
 @tag_router.patch("/{tag_uuid}", response_model=TagResponse)
-def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, auth=Depends(has_token)):
+def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, tag: TagEditIn, auth=Depends(has_token)):
     db_tag = crud_tags.get_tag_by_uuid(db, tag_uuid)
+
+    crud_tags.update_tag(db, db_tag, {"is_hidden": tag.is_hidden})
     return db_tag
 
 

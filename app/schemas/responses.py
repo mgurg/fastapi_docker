@@ -161,6 +161,7 @@ class FileBasicInfo(BaseResponse):
 class TagResponse(BaseResponse):
     uuid: UUID
     name: str
+    is_hidden: bool | None
 
 
 class TagBasicInfo(BaseResponse):

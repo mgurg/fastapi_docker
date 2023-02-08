@@ -355,6 +355,7 @@ class Tag(Base):
     color = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     icon = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    is_hidden = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 

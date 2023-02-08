@@ -189,3 +189,8 @@ class TagCreateIn(BaseRequest):
     name: str
     color: str | None
     icon: str | None
+    is_hidden: bool | None
+
+
+class TagEditIn(BaseRequest):
+    is_hidden: bool | None
