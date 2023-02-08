@@ -14,8 +14,19 @@ tag_router = APIRouter()
 
 
 @tag_router.get("/", response_model=list[TagResponse])
-def tags_get_all(*, db: Session = Depends(get_db), is_hidden: bool | None = None, auth=Depends(has_token)):
-    tags = crud_tags.get_tags(db, is_hidden)
+def tags_get_all(
+    *,
+    db: Session = Depends(get_db),
+    field: str = "name",
+    order: str = "asc",
+    is_hidden: bool | None = None,
+    auth=Depends(has_token),
+):
+
+    if field not in ["name"]:
+        field = "name"
+
+    tags = crud_tags.get_tags(db, field, order, is_hidden)
     return tags
 
 
