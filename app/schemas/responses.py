@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
+from pydantic.color import Color
 
 
 class BaseResponse(BaseModel):
@@ -161,6 +162,7 @@ class FileBasicInfo(BaseResponse):
 class TagResponse(BaseResponse):
     uuid: UUID
     name: str
+    color: Color | None = '#1976D2'
     is_hidden: bool | None
 
 

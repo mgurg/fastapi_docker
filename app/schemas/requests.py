@@ -2,6 +2,7 @@
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
+from pydantic.color import Color
 
 
 class BaseRequest(BaseModel):
@@ -189,8 +190,9 @@ class TagCreateIn(BaseRequest):
     name: str
     color: str | None
     icon: str | None
-    is_hidden: bool | None
+    is_hidden: bool | None = False
 
 
 class TagEditIn(BaseRequest):
     is_hidden: bool | None
+    color: Color | None

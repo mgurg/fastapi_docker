@@ -51,7 +51,7 @@ def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depend
 def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, tag: TagEditIn, auth=Depends(has_token)):
     db_tag = crud_tags.get_tag_by_uuid(db, tag_uuid)
 
-    crud_tags.update_tag(db, db_tag, {"is_hidden": tag.is_hidden})
+    crud_tags.update_tag(db, db_tag, {"is_hidden": tag.is_hidden, "color": tag.color.as_hex()})
     return db_tag
 
 
