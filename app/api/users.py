@@ -1,8 +1,10 @@
 import csv
 from datetime import datetime, timezone
+import io
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from starlette.responses import StreamingResponse
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
@@ -42,13 +44,26 @@ def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     db_users = crud_users.get_users(db, None, "last_name", "asc")
 
+    f = io.StringIO()
+    csv_file = csv.writer(f, delimiter=";")
+    csv_file.writerow(["First Name","Last Name","Email"])
+    for u in db_users:
+        csv_file.writerow([u.first_name, u.last_name, u.email])
+
+    f.seek(0)
+    response = StreamingResponse(f, media_type="text/csv")
+    response.headers[
+        "Content-Disposition"
+    ] = f"attachment; filename=privacy_requests_download_{datetime.today().strftime('%Y-%m-%d')}.csv"
+    return response
+
+    # https://github.com/Nasajon/fidesops/blob/03800a1e1c654eb34739d7097d74b37e318bcb50/src/fidesops/api/v1/endpoints/privacy_request_endpoints.py#L3
+
     # with open('users.csv', 'w', newline='') as csvfile:
     #     csv_writer = csv.writer(csvfile, delimiter=";")
     #     csv_writer.writerow(["First Name","Last Name","Email"])
-    #     for u in db_users:
-    #         csv_writer.writerow([u.])
 
-    return db_users
+
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
 def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
