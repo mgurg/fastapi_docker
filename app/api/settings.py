@@ -14,10 +14,10 @@ from app.service.default_settings import allowed_settings
 
 setting_router = APIRouter()
 
+
 # GENERAL
 @setting_router.get("/", name="setting:read")
 def setting_get_all(*, db: Session = Depends(get_db), settings: list[str] = Query(None), auth=Depends(has_token)):
-
     user_id = auth["user_id"]
 
     if user_id == 0:
@@ -74,7 +74,6 @@ def setting_set_one(*, db: Session = Depends(get_db), setting: SettingGeneralIn,
 # Notifications
 @setting_router.get("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
 def setting_notification_get(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
     user_id = auth["user_id"]
 
     db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
@@ -87,7 +86,6 @@ def setting_notification_get(*, db: Session = Depends(get_db), auth=Depends(has_
 
 @setting_router.post("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
 def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingNotificationIn, auth=Depends(has_token)):
-
     user_id = auth["user_id"]
 
     db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)

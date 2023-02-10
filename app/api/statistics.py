@@ -29,7 +29,6 @@ def stats_issues_counter(*, db: Session = Depends(get_db), auth=Depends(has_toke
 
 @statistics_router.get("/first_steps")
 def stats_first_steps(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
     user_id = auth["user_id"]
     response: dict = {}
 
@@ -61,7 +60,6 @@ def stats_all_items_failures(*, db: Session = Depends(get_db), auth=Depends(has_
 
 @statistics_router.get("/events")
 def stats_events_to_pd(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
     events = crud_statistics.get_events(db)
 
     columns = ["id", "action", "author_id"]

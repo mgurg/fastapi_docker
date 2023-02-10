@@ -41,7 +41,6 @@ auth_router = APIRouter()
 
 @auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
 def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
-
     db_companies_no = crud_auth.get_public_company_count(public_db)
     limit = 20
 
@@ -65,7 +64,6 @@ def auth_company_info(company: CompanyInfoRegisterIn):
 
 @auth_router.post("/register", response_model=StandardResponse)
 def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegisterIn):
-
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
 
@@ -167,7 +165,6 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
 
     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-
         db_user_cnt = crud_users.get_user_count(db)
         user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
         is_verified = False
@@ -217,7 +214,6 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
     schema_translate_map = dict(tenant=db_public_user.tenant_id)
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
-
         db_user = crud_users.get_user_by_email(db, user.email)
 
         if db_user is None:
@@ -292,7 +288,6 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
 def auth_verify_qr(*, public_db: Session = Depends(get_public_db), qr_code: str):
-
     pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
     if not pattern.match(qr_code):
         raise HTTPException(status_code=404, detail="Incorrect QR code")

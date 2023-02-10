@@ -7,7 +7,6 @@ from app.models.models import Item, User
 
 
 def get_items(db: Session, search: str, user_id: int, sort_column: str, sort_order: str) -> Item:
-
     query = select(Item)
 
     search_filters = []

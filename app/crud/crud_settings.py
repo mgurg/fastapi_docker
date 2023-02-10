@@ -6,7 +6,6 @@ from app.models.models import Setting, SettingNotification, SettingUser, User
 
 # GENERAL
 def get_general_settings_by_names(db: Session, user_id: int, names: list[str]) -> Setting:
-
     query = select(SettingUser).where(SettingUser.user_id == user_id).where(SettingUser.name.in_(names))
 
     result = db.execute(query)
@@ -15,7 +14,6 @@ def get_general_settings_by_names(db: Session, user_id: int, names: list[str]) -
 
 
 def get_user_general_setting_by_name(db: Session, user_id: int, name: str) -> Setting:
-
     query = select(SettingUser).where(SettingUser.user_id == user_id).where(SettingUser.name == name)
 
     result = db.execute(query)

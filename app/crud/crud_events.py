@@ -36,7 +36,6 @@ def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, statu
 def get_events_by_uuid_and_resource(
     db: Session, resource_uuid: UUID, action: str = None, date_from=None, date_to=None
 ) -> Event:
-
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 
@@ -54,7 +53,6 @@ def get_events_by_uuid_and_resource(
 def get_events_by_thread(
     db: Session, thread_uuid: UUID, thread_resource: str = None, date_from=None, date_to=None
 ) -> Event:
-
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 

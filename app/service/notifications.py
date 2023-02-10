@@ -25,7 +25,6 @@ def notify_users(sms_list: list[dict], email_list: list[dict], issue: Issue = No
 
 
 def bulk_email_send(receivers: list[str], name: str, description: str, url: UUID):
-
     receivers = ["ours86@gmail.com"]
     url = str(url)
 

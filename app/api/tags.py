@@ -22,7 +22,6 @@ def tags_get_all(
     is_hidden: bool | None = None,
     auth=Depends(has_token),
 ):
-
     if field not in ["name"]:
         field = "name"
 
@@ -32,7 +31,6 @@ def tags_get_all(
 
 @tag_router.post("/", response_model=TagResponse)
 def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depends(has_token)):
-
     tag_data = {
         "uuid": str(uuid4()),
         "name": tag.name,
@@ -54,7 +52,7 @@ def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, tag: TagEdit
     tag_data = {}
     tag_data["is_hidden"] = tag.is_hidden
     if tag.color is not None:
-        tag_data['color'] = tag.color.as_hex()
+        tag_data["color"] = tag.color.as_hex()
 
     crud_tags.update_tag(db, db_tag, tag_data)
     return db_tag

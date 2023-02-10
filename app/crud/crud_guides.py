@@ -7,7 +7,6 @@ from app.models.models import Guide, Item
 
 
 def get_guides(db: Session, search: str, item_id: int, sort_column: str, sort_order: str) -> Guide:
-
     query = select(Guide)
 
     search_filters = []

@@ -23,7 +23,6 @@ def role_get_all(
     sortColumn: str = "name",
     auth=Depends(has_token),
 ):
-
     sortTable = {"name": "role_title"}
 
     db_roles = crud_permission.get_roles_summary(db, search, sortTable[sortColumn], sortOrder)
@@ -46,7 +45,6 @@ def role_get_one(*, db: Session = Depends(get_db), role_uuid: UUID, auth=Depends
 
 @permission_router.post("/", response_model=RolePermissionFull)
 def role_add(*, db: Session = Depends(get_db), role: RoleAddIn, auth=Depends(has_token)):
-
     db_role = crud_permission.get_role_by_name(db, role.title)
     if db_role:
         raise HTTPException(status_code=400, detail="Role already exists!")
@@ -74,7 +72,6 @@ def role_add(*, db: Session = Depends(get_db), role: RoleAddIn, auth=Depends(has
 
 @permission_router.patch("/{role_uuid}", response_model=RolePermissionFull)
 def role_edit(*, db: Session = Depends(get_db), role_uuid: UUID, role: RoleEditIn, auth=Depends(has_token)):
-
     db_role = crud_permission.get_role_by_uuid(db, role_uuid)
     if not db_role:
         raise HTTPException(status_code=400, detail="Role already exists!")
@@ -100,7 +97,6 @@ def role_edit(*, db: Session = Depends(get_db), role_uuid: UUID, role: RoleEditI
 
 @permission_router.delete("/{role_uuid}", response_model=StandardResponse)
 def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, auth=Depends(has_token)):
-
     db_role = crud_permission.get_role_by_uuid(db, role_uuid)
 
     if not db_role:

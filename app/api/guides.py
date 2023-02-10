@@ -30,7 +30,6 @@ def guide_get_all(
     field: str = "name",
     auth=Depends(has_token),
 ):
-
     if field not in ["name"]:
         field = "name"
 
@@ -65,7 +64,6 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 
 @guide_router.post("/", response_model=GuideResponse)
 def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
-
     related_item = None
     if guide.item_uuid is not None:
         db_item = crud_items.get_item_by_uuid(db, guide.item_uuid)
@@ -104,7 +102,6 @@ def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(
 
 @guide_router.patch("/{guide_uuid}", response_model=GuideResponse)
 def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth=Depends(has_token)):
-
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
     if not db_guide:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -135,7 +132,6 @@ def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideE
 
 @guide_router.delete("/{guide_uuid}", response_model=StandardResponse)
 def guide_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
-
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:

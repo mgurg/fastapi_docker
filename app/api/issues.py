@@ -85,7 +85,6 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
 
 @issue_router.post("/", response_model=IssueResponse)  #
 def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAddIn, auth=Depends(has_token)):
-
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -172,7 +171,6 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 def issue_change_status(
     *, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueChangeStatus, auth=Depends(has_token)
 ):
-
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
@@ -256,7 +254,6 @@ def issue_change_status(
 
 @issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
 def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueEditIn, auth=Depends(has_token)):
-
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
@@ -311,7 +308,6 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
 
 @issue_router.delete("/{issue_uuid}", response_model=StandardResponse)
 def issue_delete(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depends(has_token)):
-
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue:

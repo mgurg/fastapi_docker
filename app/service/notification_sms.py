@@ -18,7 +18,6 @@ class SMSNotification:
         self.smtp = settings.email_smtp
 
     def send(self, sender: str, receiver: list, message: str, template: str):
-
         if settings.ENVIRONMENT != "PRD":
             receiver = settings.email_dev
 

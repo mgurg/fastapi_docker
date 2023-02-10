@@ -23,7 +23,6 @@ def read_item(schema: str):
 
 @cc_router.get("/manual_test", name="")
 def cc_manual_test(*, db: Session = Depends(get_public_db)):
-
     url = ""
     receivers = ["mgurgul@telecube.pl"]
 
@@ -54,7 +53,6 @@ def check_revision(schema: str):
 
 @cc_router.post("/mark_orphan_files", name="files:MarkOrphans")
 def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db)):
-
     db_companies = cc_crud.get_public_companies(public_db)
 
     processed = []
@@ -72,7 +70,6 @@ def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db)):
 
 @cc_router.get("/", name="companies:List")
 def cc_get_all(*, db: Session = Depends(get_public_db)):
-
     db_companies = cc_crud.get_public_companies(db)
 
     return db_companies
@@ -80,7 +77,6 @@ def cc_get_all(*, db: Session = Depends(get_public_db)):
 
 @cc_router.post("/", name="migrate:All")
 def cc_migrate_all(*, db: Session = Depends(get_public_db)):
-
     db_companies = cc_crud.get_public_companies(db)
 
     processed = []
@@ -94,7 +90,6 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
 
 @cc_router.post("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
 def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str):
-
     scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
 
     return {"ok": True}

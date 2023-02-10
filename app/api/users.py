@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
@@ -25,13 +26,29 @@ def user_get_all(
     order: str = "asc",
     auth=Depends(has_token),
 ):
-
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
     db_users = crud_users.get_users(db, search, field, order)
     return paginate(db_users, params)
 
+@user_router.get("/count")
+def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+    db_user_cnt = crud_users.get_user_count(db)
+
+    return db_user_cnt
+
+@user_router.get("/export")
+def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+    db_users = crud_users.get_users(db, None, "last_name", "asc")
+
+    # with open('users.csv', 'w', newline='') as csvfile:
+    #     csv_writer = csv.writer(csvfile, delimiter=";")
+    #     csv_writer.writerow(["First Name","Last Name","Email"])
+    #     for u in db_users:
+    #         csv_writer.writerow([u.])
+
+    return db_users
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
 def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
@@ -41,16 +58,10 @@ def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends
     return user
 
 
-@user_router.get("/count")
-def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_user_cnt = crud_users.get_user_count(db)
-
-    return db_user_cnt
 
 
 @user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth=Depends(has_token)
 def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Request, auth=Depends(has_token)):
-
     db_user = crud_users.get_user_by_email(db, user.email)
     if db_user is not None:
         raise HTTPException(status_code=400, detail="User already exists")
@@ -149,7 +160,6 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
 def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
-
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
     if not db_user:

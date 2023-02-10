@@ -27,7 +27,6 @@ idea_router = APIRouter()
 
 @idea_router.get("/stats", response_model=IdeaSummaryResponse)
 def ideas_get_summary(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
     ideas_summary = crud_ideas.get_ideas_summary(db)
     if not ideas_summary:
         return {"accepted": 0, "pending": 0, "rejected": 0, "todo": 0}
@@ -52,7 +51,6 @@ def ideas_get_all(
     params: Params = Depends(),
     auth=Depends(has_token),
 ):
-
     all_filters = []
 
     if status is not None:
@@ -91,7 +89,6 @@ def ideas_get_one(*, db: Session = Depends(get_db), idea_uuid: UUID, request: Re
 def ideas_get_by_user(
     *, db: Session = Depends(get_db), user_uuid: UUID, params: Params = Depends(), auth=Depends(has_token)
 ):
-
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -103,7 +100,6 @@ def ideas_get_by_user(
 
 @idea_router.post("/", response_model=StandardResponse)
 def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has_token)):
-
     files = []
     if idea.files is not None:
         for file in idea.files:
@@ -145,10 +141,8 @@ def idea_add(*, db: Session = Depends(get_db), idea: IdeaAddIn, auth=Depends(has
 
 @idea_router.post("/new_idea/{idea_id}", name="idea:Add")
 def idea_add_anonymous_one(*, public_db: Session = Depends(get_public_db), idea_id: str):
-
     pattern = re.compile(r"^[a-z2-9]{2,3}\+[a-z2-9]{2,3}$")
     if pattern.match(idea_id):
-
         company, board = idea_id.split("+")
 
         db_company = crud_auth.get_public_company_by_qr_id(public_db, company)
@@ -186,7 +180,6 @@ def idea_add_anonymous_one(*, public_db: Session = Depends(get_public_db), idea_
 
 @idea_router.post("/vote", response_model=StandardResponse, name="idea:Add")
 def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth=Depends(has_token)):
-
     db_idea = crud_ideas.get_idea_by_uuid(db, vote.idea_uuid)
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")
@@ -206,7 +199,6 @@ def idea_add_vote_one(*, db: Session = Depends(get_db), vote: IdeasVotesIn, auth
 
 @idea_router.patch("/{idea_uuid}", response_model=StandardResponse)
 def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditIn, auth=Depends(has_token)):
-
     db_idea = crud_ideas.get_idea_by_uuid(db, idea_uuid)
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")
@@ -238,7 +230,6 @@ def idea_edit(*, db: Session = Depends(get_db), idea_uuid: UUID, idea: IdeaEditI
 
 @idea_router.delete("/{idea_uuid}", response_model=StandardResponse, name="idea:Delete")
 def idea_delete_one(*, db: Session = Depends(get_db), idea_uuid: UUID, auth=Depends(has_token)):
-
     db_idea = crud_ideas.get_idea_by_uuid(db, idea_uuid)
     if not db_idea:
         raise HTTPException(status_code=404, detail="Idea not found")

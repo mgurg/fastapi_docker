@@ -44,7 +44,6 @@ def file_get_info_all(*, db: Session = Depends(get_db), auth=Depends(has_token))
 
 @file_router.get("/{uuid}", response_model=FileResponse, name="file:GetInfoFromDB")
 def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth=Depends(has_token)):
-
     db_file = crud_files.get_file_by_uuid()
 
     if not db_file:
@@ -58,7 +57,6 @@ def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth=Depe
 
 @file_router.get("/used_space")
 def file_get_used_space(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-
     db_file_size = crud_files.get_files_size_in_db(db)
 
     return db_file_size
@@ -73,7 +71,6 @@ def file_add(
     uuid: UUID | None = Form(None),
     auth=Depends(has_token),
 ):
-
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
 
@@ -117,7 +114,6 @@ def file_add(
 
 @file_router.delete("/{file_uuid}", response_model=StandardResponse)
 def remove_bucket(*, db: Session = Depends(get_db), request: Request, file_uuid: UUID, auth=Depends(has_token)):
-
     db_file = crud_files.get_file_by_uuid(db, file_uuid)
 
     if not db_file:
@@ -139,7 +135,6 @@ def remove_bucket(*, db: Session = Depends(get_db), request: Request, file_uuid:
 
 @file_router.get("/download/{file_uuid}", name="file:Download")
 def file_download(*, db: Session = Depends(get_db), request: Request, file_uuid: UUID):
-
     db_file = crud_files.get_file_by_uuid(db, file_uuid)
 
     if not db_file:
@@ -162,14 +157,12 @@ def file_download(*, db: Session = Depends(get_db), request: Request, file_uuid:
 
 @file_router.get("/download/", name="file:Download")
 def file_download_presigned(tenant, file):
-
     url = generate_presigned_url(tenant, file)
     return url
 
 
 @file_router.get("/video_upload_token/", name="video:token")
 def video_upload_token(auth=Depends(has_token)):
-
     # #  https://api.video/blog/tutorials/delegated-uploads
     # # Part One
     # payload = json.dumps({"apiKey": "47yczv1m0huXDEg6iyNRqYT9QXmUcMAArHY0Qqzgz0I"})

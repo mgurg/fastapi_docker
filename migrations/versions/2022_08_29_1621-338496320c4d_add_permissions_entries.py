@@ -30,28 +30,6 @@ def upgrade() -> None:
         sa.Column("group", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
     )
 
-
-# USER_ADD
-# USER_EDIT
-# USER_DELETE <- softDelete ?
-
-# ISSUE_ADD
-# ISSUE_EDIT
-# ISSUE_DELETE <- softDelete ?
-# ISSUE_USER_ASSIGN
-# ISSUE_WORK_CONTROLS
-# ISSUE_SHOw_HISTORY
-
-# ITEM_ADD
-# ITEM_EDIT
-# ITEM_DELETE <- softDelete ?
-# ITEM_SHOW_QR
-# ITEM_SHOw_HISTORY
-
-# TAG_ADD
-# TAG_HIDE
-
-
     op.bulk_insert(
         permissions,
         [

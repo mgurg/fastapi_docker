@@ -24,7 +24,6 @@ def group_get_all(
     order: str = "asc",
     auth=Depends(has_token),
 ):
-
     if field not in ["name", "created_at"]:
         field = "name"
 
@@ -68,7 +67,6 @@ def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth=Depends(
 
 @group_router.patch("/{group_uuid}", response_model=GroupResponse)
 def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEditIn, auth=Depends(has_token)):
-
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
     if not db_user_group:
         raise HTTPException(status_code=400, detail="Group not found exists!")
@@ -94,7 +92,6 @@ def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEd
 
 @group_router.delete("/{group_uuid}", response_model=StandardResponse)
 def group_delete(*, db: Session = Depends(get_db), group_uuid: UUID, auth=Depends(has_token)):
-
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
     if not db_user_group:

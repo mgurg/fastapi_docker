@@ -72,7 +72,6 @@ def get_issue_by_uuid(db: Session, uuid: UUID) -> Issue:
 
 
 def count_issues_by_tag(db: Session, tag_id: int):
-
     query = select(func.count(Issue.id)).filter(Issue.tags_issue.any(Tag.id == tag_id))
 
     result = db.execute(query)  # await db.execute(query)

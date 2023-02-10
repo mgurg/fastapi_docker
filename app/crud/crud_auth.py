@@ -53,7 +53,6 @@ def create_public_user(db: Session, public_user: dict) -> PublicUser:
 
 
 def create_public_company(db: Session, company: dict) -> PublicCompany:
-
     new_company = PublicCompany(**company)
     db.add(new_company)
     db.commit()
@@ -74,7 +73,6 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
 
 
 def update_tenant_user(db: Session, db_user: User, update_data: dict) -> User:
-
     try:
         for key, value in update_data.items():
             setattr(db_user, key, value)

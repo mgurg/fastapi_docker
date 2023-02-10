@@ -64,7 +64,6 @@ def test_account_limit(publicClient: TestClient):
 
 
 def test_register(publicClient: TestClient):
-
     fake = Faker()
 
     data = {
@@ -93,7 +92,6 @@ def test_register(publicClient: TestClient):
 
 
 def test_first_run(publicClient: TestClient):
-
     Faker()
     today = datetime.now().strftime("%A-%Y-%m-%d-%H")
     service_token = ("a" * int(64 - len(today))) + today
@@ -123,7 +121,6 @@ def test_first_run(publicClient: TestClient):
 
 
 def test_login(publicClient: TestClient):
-
     data = {"email": "faker_000_@email.com", "password": "fake__password_string", "permanent": True}
 
     headers = {"tenant": "public", "Content-Type": "application/json"}

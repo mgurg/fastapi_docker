@@ -30,7 +30,6 @@ def create_new_item_event(
     description: str | None = None,
     value: str | None = None,
 ) -> Event:
-
     if action == "issue_change_assigned_person" and description == "added":
         # description = "New person assigned to issue"
         person = crud_users.get_user_by_uuid(db, value)
@@ -79,7 +78,6 @@ def create_new_item_event(
 
 
 def create_new_item_event_statistic(db: Session, item: Item, issue: Issue, action: str):
-
     resource_uuid = None
     if item is not None:
         resource_uuid = item.uuid

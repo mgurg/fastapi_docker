@@ -162,7 +162,7 @@ class FileBasicInfo(BaseResponse):
 class TagResponse(BaseResponse):
     uuid: UUID
     name: str
-    color: Color | None = '#1976D2'
+    color: Color | None = "#1976D2"
     is_hidden: bool | None
 
 

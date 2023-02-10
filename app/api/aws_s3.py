@@ -50,7 +50,6 @@ def get_buckets_list():
 @s3_router.get("/list_files")
 @logger.catch()
 def get_files_list(*, session: Session = Depends(get_session)):
-
     # https://realpython.com/python-boto3-aws-s3/#object-traversal
     # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
 
@@ -80,7 +79,6 @@ def get_files_list(*, session: Session = Depends(get_session)):
 
 @s3_router.delete("/delete_file/")
 def remove_bucket(*, session: Session = Depends(get_session), objectName: str):
-
     a = s3_resource.Object(settings.s3_bucket_name, objectName).delete()
     print(a)
 
@@ -159,7 +157,6 @@ def upload_aws_s3(*, session: Session = Depends(get_session), request: Request, 
 
 @s3_router.get("/upload_signed_url")
 def sign_s3_upload(objectName: str):
-
     try:
         url = s3_client.generate_presigned_url(
             "put_object",
@@ -175,7 +172,6 @@ def sign_s3_upload(objectName: str):
 
 @s3_router.get("/download_signed_url")
 def sign_s3_download(tenant: str, file: str) -> str:
-
     url = s3_client.generate_presigned_url(
         ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": f"folder/{file}"}, ExpiresIn=3600
     )

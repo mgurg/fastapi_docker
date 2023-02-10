@@ -20,7 +20,6 @@ class EmailNotification:
         return base64.b64encode(f"{username}:{password}".encode())
 
     def send(self, receiver: str, subject: str, template: str, vars: dict):
-
         if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
             return "TEST_EMAIL_NOTIFICATION"
 
@@ -51,7 +50,6 @@ class EmailNotification:
         return response.text
 
     def send_by_mailjet(self, receiver: str, subject: str, template: str, vars: dict):
-
         url = "https://api.mailjet.com/v3.1/send"
 
         to_field = {"Email": f"{receiver}", "Name": "user"}

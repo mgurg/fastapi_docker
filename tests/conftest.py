@@ -95,7 +95,6 @@ def pytest_unconfigure():
 
 @pytest.fixture(name="session")
 def session_fixture():
-
     engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
     schema_translate_map = dict(tenant="fake_tenant_company_for_test_00000000000000000000000000000000")
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
@@ -121,7 +120,6 @@ def client_fixture(session: Session):
 
 @pytest.fixture(name="publicSession")
 def public_session_fixture():
-
     engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
     schema_translate_map = dict(tenant="public")
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)

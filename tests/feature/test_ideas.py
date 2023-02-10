@@ -18,7 +18,6 @@ def test_get_ideas(session: Session, client: TestClient):
 
 
 def test_add_ideas(session: Session, client: TestClient):
-
     fake = Faker()
 
     data = {

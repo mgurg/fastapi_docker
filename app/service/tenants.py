@@ -88,7 +88,6 @@ def tenant_remove(schema: str) -> None:
 
 
 def generate_tenant_id(name: str, uuid: UUID) -> str:
-
     company = re.sub("[^A-Za-z0-9 _]", "", unidecode(name))
     uuid = uuid.replace("-", "")
 

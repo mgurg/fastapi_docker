@@ -20,7 +20,6 @@ s3_client = boto3.client(
 
 
 def generate_presigned_url(tenant: str, file: str) -> str:
-
     presigned_url = s3_client.generate_presigned_url(
         ClientMethod="get_object", Params={"Bucket": settings.s3_bucket_name, "Key": f"{tenant}/{file}"}, ExpiresIn=3600
     )
