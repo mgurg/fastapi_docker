@@ -1,12 +1,13 @@
+import codecs
 import csv
-from datetime import datetime, timezone
 import io
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from starlette.responses import StreamingResponse
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
+from starlette.responses import StreamingResponse
 
 from app.crud import crud_auth, crud_permission, crud_users
 from app.db import engine, get_db
@@ -34,11 +35,13 @@ def user_get_all(
     db_users = crud_users.get_users(db, search, field, order)
     return paginate(db_users, params)
 
+
 @user_router.get("/count")
 def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     db_user_cnt = crud_users.get_user_count(db)
 
     return db_user_cnt
+
 
 @user_router.get("/export")
 def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
@@ -46,15 +49,14 @@ def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
-    csv_file.writerow(["First Name","Last Name","Email"])
+    csv_file.writerow(["First Name", "Last Name", "Email"])
     for u in db_users:
         csv_file.writerow([u.first_name, u.last_name, u.email])
 
     f.seek(0)
     response = StreamingResponse(f, media_type="text/csv")
-    response.headers[
-        "Content-Disposition"
-    ] = f"attachment; filename=privacy_requests_download_{datetime.today().strftime('%Y-%m-%d')}.csv"
+    filename = f"users_{datetime.today().strftime('%Y-%m-%d')}.csv"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
     return response
 
     # https://github.com/Nasajon/fidesops/blob/03800a1e1c654eb34739d7097d74b37e318bcb50/src/fidesops/api/v1/endpoints/privacy_request_endpoints.py#L3
@@ -63,7 +65,33 @@ def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     #     csv_writer = csv.writer(csvfile, delimiter=";")
     #     csv_writer.writerow(["First Name","Last Name","Email"])
 
+@user_router.post("/import")
+def get_export_users(*, db: Session = Depends(get_db),file: UploadFile | None = None, auth=Depends(has_token)):
+    if not file:
+        raise HTTPException(status_code=400, detail="No file sent")
 
+    csvReader = csv.DictReader(codecs.iterdecode(file.file, 'utf-8'), delimiter=";")
+    data = {}
+    for idx, rows in enumerate(csvReader):             
+        key = idx  # Assuming a column named 'Id' to be the primary key
+        data[key] = rows 
+        data[key]["uuid"] = str(uuid4()) 
+        data[key]["is_active"] = True
+        data[key]["is_verified"] = True
+        data[key]["tz"] = "Europe/Warsaw"
+        data[key]["lang"] = "pl"
+        data[key]["phone"] = None
+        # print(rows)
+    
+    file.file.close()
+
+    print(list(data.values()))
+
+    crud_users.bulk_insert(db, list(data.values()))
+
+    # https://stackoverflow.com/a/70655118
+
+    return data
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
 def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
@@ -71,8 +99,6 @@ def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
-
-
 
 
 @user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth=Depends(has_token)
