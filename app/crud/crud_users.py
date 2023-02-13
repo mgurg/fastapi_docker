@@ -63,7 +63,7 @@ def create_user(db: Session, data: dict) -> User:
 
 
 def bulk_insert(db: Session, data: dict) -> bool:
-    new_users = db.bulk_insert_mappings(User, data)
+    db.bulk_insert_mappings(User, data)
     db.commit()
 
     return True

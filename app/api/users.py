@@ -4,7 +4,7 @@ import io
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
@@ -65,33 +65,35 @@ def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     #     csv_writer = csv.writer(csvfile, delimiter=";")
     #     csv_writer.writerow(["First Name","Last Name","Email"])
 
+
 @user_router.post("/import")
-def get_export_users(*, db: Session = Depends(get_db),file: UploadFile | None = None, auth=Depends(has_token)):
+def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None = None, auth=Depends(has_token)):
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
 
-    csvReader = csv.DictReader(codecs.iterdecode(file.file, 'utf-8'), delimiter=";")
+    csvReader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
     data = {}
-    for idx, rows in enumerate(csvReader):             
+    for idx, rows in enumerate(csvReader):
         key = idx  # Assuming a column named 'Id' to be the primary key
-        data[key] = rows 
-        data[key]["uuid"] = str(uuid4()) 
+        data[key] = rows
+        data[key]["uuid"] = str(uuid4())
         data[key]["is_active"] = True
         data[key]["is_verified"] = True
         data[key]["tz"] = "Europe/Warsaw"
         data[key]["lang"] = "pl"
         data[key]["phone"] = None
         # print(rows)
-    
+
     file.file.close()
 
     print(list(data.values()))
 
-    crud_users.bulk_insert(db, list(data.values()))
+    # crud_users.bulk_insert(db, list(data.values()))
 
     # https://stackoverflow.com/a/70655118
 
     return data
+
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
 def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):

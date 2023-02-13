@@ -69,7 +69,7 @@ def file_add(
     request: Request,
     file: UploadFile | None = None,
     uuid: UUID | None = Form(None),
-    auth=Depends(has_token)
+    auth=Depends(has_token),
 ):
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")

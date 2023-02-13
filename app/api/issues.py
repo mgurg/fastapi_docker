@@ -65,6 +65,18 @@ def item_get_timeline_history(
     return db_events
 
 
+@issue_router.get("/summary/{issue_uuid}")
+def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depends(has_token)):
+    db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
+
+    if not db_issue or db_issue.status != "resolved":
+        raise HTTPException(status_code=400, detail="Issue not found!")
+
+    result = crud_events.get_events_for_issue_summary(db, issue_uuid)
+
+    return result
+
+
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
 def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: Request, auth=Depends(has_token)):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
