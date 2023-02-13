@@ -317,18 +317,15 @@ class Event(Base):
     __tablename__ = "events"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    title = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     resource = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     resource_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    thread_resource = sa.Column(sa.VARCHAR(length=128), unique=True, autoincrement=False, nullable=True)
-    thread_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)   
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     author_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     author_name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
-    name = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True)
-    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
-    value = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
