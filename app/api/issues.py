@@ -74,7 +74,8 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
 
     result = crud_events.get_events_for_issue_summary(db, issue_uuid)
 
-    return result
+    print(dict(result))
+    return "result"
 
 
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
