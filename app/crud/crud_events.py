@@ -33,6 +33,19 @@ def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, statu
     return db.execute(query).scalar_one_or_none()
 
 
+def get_event_summary_by_resource_uuid_and_status(
+    db: Session, resource: str, resource_uuid: UUID, status: str
+) -> EventSummary:
+    query = (
+        select(EventSummary)
+        .where(EventSummary.resource == resource)
+        .where(EventSummary.resource_uuid == resource_uuid)
+        .where(EventSummary.action == status)
+        .where(EventSummary.date_to == None)
+    )
+    return db.execute(query).scalar_one_or_none()
+
+
 def get_events_by_uuid_and_resource(
     db: Session, resource_uuid: UUID, action: str = None, date_from=None, date_to=None
 ) -> Event:
@@ -50,8 +63,32 @@ def get_events_by_uuid_and_resource(
     return events_with_date
 
 
-def get_events_for_issue_summary(db: Session, issue_uuid: UUID):
-    query = select(EventSummary.action,  EventSummary.duration).where(EventSummary.issue_uuid == issue_uuid)
+def get_event_status_list(db: Session, resource: str, resource_uuid: UUID):
+    query = select(Event.action).where(Event.resource_uuid == resource_uuid).where(Event.resource == resource)
+
+    result = db.execute(query)  # await db.execute(query)
+    event_actions = result.scalars().all()
+
+    return event_actions
+
+
+def get_events_for_issue_summary(db: Session, resource: str, resource_uuid: UUID):
+    # query = (
+    #     select(EventSummary.action, EventSummary.duration)
+    #     .where(EventSummary.resource == resource)
+    #     .where(EventSummary.resource_uuid == resource_uuid)
+    # )
+
+    query = (
+        select(
+            EventSummary.action,
+            func.sum(EventSummary.duration).label("time_duration"),
+            func.count(EventSummary.action).label("total"),
+        )
+        .where(EventSummary.resource == resource)
+        .where(EventSummary.resource_uuid == resource_uuid)
+        .group_by(EventSummary.action)
+    )
 
     result = db.execute(query)  # await db.execute(query)
     events_with_date = result.all()

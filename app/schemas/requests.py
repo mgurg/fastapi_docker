@@ -171,8 +171,9 @@ class IssueEditIn(BaseRequest):
 class IssueChangeStatus(BaseRequest):
     status: str
     name: str | None
+    title: str | None
     description: str | None
-    value: str | None
+    internal_value: str | None
 
 
 class SettingNotificationIn(BaseRequest):

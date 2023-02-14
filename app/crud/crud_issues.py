@@ -78,6 +78,14 @@ def count_issues_by_tag(db: Session, tag_id: int):
     return result.scalar_one_or_none()
 
 
+def get_item_issues_uuids(db, item_id: int):
+    query = select(Issue.uuid).where(Issue.item_id == item_id)
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.scalars().all()
+
+
 # def get_issue_summary(db: Session):
 #     # return db.execute(select(Issue.status, func.count(Issue.status)).group_by(Issue.status)).all()
 
