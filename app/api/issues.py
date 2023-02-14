@@ -203,6 +203,7 @@ def issue_change_status(
     actions_list = crud_events.get_event_status_list(db, "issue", issue_uuid)
 
     actions_counter = Counter(actions_list)
+    internal_value = "284728ef-7c96-44ee-ab52-f3bb506bccb1"
 
     match issue.status:
         case "issue_add":
@@ -230,21 +231,17 @@ def issue_change_status(
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
 
         case "issue_add_person":
-            event.create_new_basic_event(
-                db, db_user, db_issue, "issue_add_person", internal_value="284728ef-7c96-44ee-ab52-f3bb506bccb1"
-            )
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", )
-            
-            
+            event.create_new_basic_event(db, db_user, db_issue, "issue_add_person", internal_value=internal_value)
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity")
 
         case "issue_remove_person":
             if "issue_add_person" not in actions_list:
                 raise HTTPException(status_code=400, detail="No user to remove!")
 
-            event.create_new_basic_event(
-                db, db_user, db_issue, "issue_remove_person", internal_value="284728ef-7c96-44ee-ab52-f3bb506bccb1"
+            event.create_new_basic_event(db, db_user, db_issue, "issue_remove_person", internal_value=internal_value)
+            event.close_new_basic_summary(
+                db, "issue", db_issue.uuid, "issueRepairPauseTime", internal_value=internal_value
             )
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime", internal_value="284728ef-7c96-44ee-ab52-f3bb506bccb1")
 
         case "issue_start_progress":
             event.create_new_basic_event(db, db_user, db_issue, "issue_start_progress")
