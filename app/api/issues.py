@@ -233,6 +233,9 @@ def issue_change_status(
             event.create_new_basic_event(
                 db, db_user, db_issue, "issue_add_person", internal_value="284728ef-7c96-44ee-ab52-f3bb506bccb1"
             )
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", )
+            
+            
 
         case "issue_remove_person":
             if "issue_add_person" not in actions_list:
@@ -241,6 +244,8 @@ def issue_change_status(
             event.create_new_basic_event(
                 db, db_user, db_issue, "issue_remove_person", internal_value="284728ef-7c96-44ee-ab52-f3bb506bccb1"
             )
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime", internal_value="284728ef-7c96-44ee-ab52-f3bb506bccb1")
+
         case "issue_start_progress":
             event.create_new_basic_event(db, db_user, db_issue, "issue_start_progress")
             event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
