@@ -129,15 +129,13 @@ def get_events_user_issue_summary(db: Session, resource: str, resource_uuid: UUI
 
 
 def get_events_by_thread(
-    db: Session, thread_uuid: UUID, thread_resource: str = None, date_from=None, date_to=None
+    db: Session, resource_uuid: UUID, resource: str = None, date_from=None, date_to=None
 ) -> Event:
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 
-    query = select(Event).where(Event.thread_uuid == thread_uuid)
-
-    if thread_resource is not None:
-        query = query.where(Event.thread_resource == thread_resource)
+    query = select(Event).where(Event.resource == resource)
+    query = query.where(Event.resource_uuid == resource_uuid)
 
     events_with_date = db.execute(query).scalars().all()
 

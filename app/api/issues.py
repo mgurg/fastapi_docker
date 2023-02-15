@@ -62,7 +62,7 @@ def item_get_timeline_history(
     # if not db_item:
     #     raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_events = crud_events.get_events_by_thread(db, issue_uuid, thread_resource)
+    db_events = crud_events.get_events_by_thread(db, issue_uuid, "issue")
     return db_events
 
 
