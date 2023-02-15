@@ -51,7 +51,7 @@ def get_events_by_uuid_and_resource(
 
 
 def get_events_for_issue_summary(db: Session, issue_uuid: UUID):
-    query = select(EventSummary.action,  EventSummary.duration).where(EventSummary.issue_uuid == issue_uuid)
+    query = select(EventSummary.action, EventSummary.duration).where(EventSummary.issue_uuid == issue_uuid)
 
     result = db.execute(query)  # await db.execute(query)
     events_with_date = result.all()
