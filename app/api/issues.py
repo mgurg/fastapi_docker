@@ -78,8 +78,7 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
     events_dict_keys = ("action", "duration", "counter")
     events_info_dict = [dict(zip(events_dict_keys, l)) for l in events_info]
 
-
-    users_uuids = crud_events.get_basic_summary_users_uuids(db,"issue", db_issue.uuid , "issueUserActivity")
+    users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
 
     events_users_info = crud_events.get_events_user_issue_summary(db, "issue", issue_uuid, users_uuids)
 
@@ -87,16 +86,14 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
     events_users_info_dict = [dict(zip(events_users_info_keys, l)) for l in events_users_info]
 
     for user in events_users_info_dict:
-        user_details = crud_users.get_user_by_uuid(db, user['user_uuid'])
-        user['name'] = user_details.first_name + " " + user_details.last_name
-        del user['user_uuid']
+        user_details = crud_users.get_user_by_uuid(db, user["user_uuid"])
+        user["name"] = user_details.first_name + " " + user_details.last_name
+        del user["user_uuid"]
         # events_users_info_dict
 
-
-
     result = {}
-    result['events'] = events_info_dict
-    result['users'] = events_users_info_dict
+    result["events"] = events_info_dict
+    result["users"] = events_users_info_dict
 
     return result
 
@@ -254,10 +251,9 @@ def issue_change_status(
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
 
-            users_uuids = crud_events.get_basic_summary_users_uuids(db,"issue", db_issue.uuid , "issueUserActivity")
+            users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
             for user_uuid in users_uuids:
                 event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
-
 
             status = "rejected"
 
@@ -305,13 +301,12 @@ def issue_change_status(
             if "issue_done" in actions_list:
                 raise HTTPException(status_code=400, detail="Task already finished!")
 
-            
             event.create_new_basic_event(db, db_user, db_issue, "issue_done")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
 
-            users_uuids = crud_events.get_basic_summary_users_uuids(db,"issue", db_issue.uuid , "issueUserActivity")
+            users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
             for user_uuid in users_uuids:
                 event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
 
@@ -328,7 +323,6 @@ def issue_change_status(
     if status in ["accepted", "rejected", "in_progress", "paused", "done"]:
         issue_update = {"status": status, "updated_at": datetime.now(timezone.utc)}
         crud_issues.update_issue(db, db_issue, issue_update)
-
 
     return {"ok": True}
 

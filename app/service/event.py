@@ -4,8 +4,8 @@ from uuid import UUID, uuid4
 import pendulum
 from sqlalchemy.orm import Session
 
-from app.crud import crud_events, crud_users
-from app.models.models import Event, EventSummary, Issue, Item, User
+from app.crud import crud_events
+from app.models.models import Event, EventSummary, Issue, User
 
 # OPEN (start)
 # REJECT (?)
@@ -84,7 +84,9 @@ def open_new_basic_summary(
 def close_new_basic_summary(
     db: Session, resource: str, resource_uuid: UUID, previous_event: str, internal_value: str | None = None
 ):
-    event = crud_events.get_event_summary_by_resource_uuid_and_status(db, resource, resource_uuid, previous_event, internal_value)
+    event = crud_events.get_event_summary_by_resource_uuid_and_status(
+        db, resource, resource_uuid, previous_event, internal_value
+    )
 
     if event is not None:
         dt = pendulum.parse(str(event.date_from))

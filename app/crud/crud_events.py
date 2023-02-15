@@ -107,6 +107,7 @@ def get_events_for_issue_summary(db: Session, resource: str, resource_uuid: UUID
 
     return events_with_date
 
+
 def get_events_user_issue_summary(db: Session, resource: str, resource_uuid: UUID, user_uuid: list[UUID]):
     query = (
         select(
