@@ -341,7 +341,7 @@ class EventSummary(Base):
     date_from = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     date_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    internal_value = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 

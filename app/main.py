@@ -1,9 +1,11 @@
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.auth import auth_router
 from app.api.cc import cc_router
@@ -65,6 +67,7 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
+
 if settings.ENVIRONMENT == "PRD":
     # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
     sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
