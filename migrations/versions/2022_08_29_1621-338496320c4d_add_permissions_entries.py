@@ -91,28 +91,28 @@ def upgrade() -> None:
                 "description": "",
                 "group": "issues"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "ISSUE_ADD",
                 "title": "",
                 "description": "",
                 "group": "issues"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "ISSUE_EDIT",
                 "title": "",
                 "description": "",
                 "group": "issues"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "ISSUE_DELETE",
                 "title": "",
                 "description": "",
                 "group": "issues"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "ISSUE_EXCLUDE",
                 "title": "",
@@ -213,21 +213,21 @@ def upgrade() -> None:
                 "description": "",
                 "group": "tags"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "TAG_EDIT",
                 "title": "",
                 "description": "",
                 "group": "tags"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "TAG_HIDE",
                 "title": "",
                 "description": "",
                 "group": "tags"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "TAG_DELETE",
                 "title": "",
@@ -240,18 +240,21 @@ def upgrade() -> None:
                 "name": "SETTINGS_IDEAS",
                 "title": "Acces to Idea's Settings",
                 "description": "User can change Idea related settings",
+                "group": "settings"
             },
             {
                 "uuid": uuid4(),
                 "name": "SETTINGS_ROLES",
                 "title": "Acces to Role's Settings",
                 "description": "User can change Roles related settings",
+                "group": "settings"
             },
             {
                 "uuid": uuid4(),
                 "name": "SETTINGS_GROUPS",
                 "title": "Acces to Groups's Settings",
                 "description": "User can change Groups related settings",
+                "group": "settings"
             },
         ],
     )

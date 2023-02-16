@@ -8,14 +8,27 @@ import os
 import shutil
 import subprocess
 import tempfile
+from pathlib import Path
 from tempfile import mkstemp
 
 import boto3
 import psycopg
+import typer
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.markdown import Markdown
 from rich.table import Table
+
+app = typer.Typer(help="Postgres database management")
+
+from enum import Enum
+
+
+class Actions(str, Enum):
+    list= 'list', 
+    list_dbs = 'list_dbs'
+    restore = 'restore', 
+    backup = 'backup'
 
 # from psycopg.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -224,6 +237,7 @@ def create_db(db_host, database, db_port, user_name, user_password):
         exit(1)
 
     # con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    con.autocommit = True
     cur = con.cursor()
     try:
         cur.execute(
@@ -245,6 +259,7 @@ def swap_after_restore(db_host, restore_database, new_active_database, db_port, 
     try:
         con = psycopg.connect(dbname="postgres", port=db_port, user=user_name, host=db_host, password=user_password)
         # con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        con.autocommit = True
         cur = con.cursor()
         cur.execute(
             "SELECT pg_terminate_backend( pid ) "
@@ -269,23 +284,15 @@ def move_to_local_storage(comp_file, filename_compressed, manager_config):
     shutil.move(comp_file, f"{manager_config.get('LOCAL_BACKUP_PATH')}{filename_compressed}")
 
 
-def main():
-    # logger = logging.getLogger(__name__)
-    # logger.setLevel(logging.INFO)
-    # handler = logging.StreamHandler()
-    # formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    # handler.setFormatter(formatter)
-    # logger.addHandler(handler)
+@app.command()
+def main(configfile: str = typer.Option("", help="Database configuration file"),
+         action: Actions = typer.Option(Actions.list , help="Action"),
+         verbose: str = typer.Option("", help="Verbose output"),
+         date: str = typer.Option("", help="Date to use for restore (show with --action list)"),
+         dest_db :str = typer.Option(None, help="Name of the new restored database") 
+         ):
 
-    # FORMAT = "%(message)s"
-    # logging.basicConfig(
-    #     level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
-    # )
-
-    # logger = logging.getLogger("rich")
-    # logger.setLevel(logging.INFO)
-
-
+# LOGGER
     logger = logging.getLogger(__name__)
 
     # the handler determines where the logs go: stdout/file
@@ -310,18 +317,19 @@ def main():
     logger.addHandler(shell_handler)
     logger.addHandler(file_handler)
 
-    args_parser = argparse.ArgumentParser(description="Postgres database management")
-    args_parser.add_argument(
-        "--action", metavar="action", choices=["list", "list_dbs", "restore", "backup"], required=True
-    )
-    args_parser.add_argument("--date", metavar="YYYY-MM-dd", help="Date to use for restore (show with --action list)")
-    args_parser.add_argument("--dest-db", metavar="dest_db", default=None, help="Name of the new restored database")
-    args_parser.add_argument("--verbose", default=False, help="Verbose output")
-    args_parser.add_argument("--configfile", required=True, help="Database configuration file")
-    args = args_parser.parse_args()
+# PATHS 
+    # args_parser = argparse.ArgumentParser(description="Postgres database management")
+    # args_parser.add_argument(
+    #     "--action", metavar="action", choices=["list", "list_dbs", "restore", "backup"], required=True
+    # )
+    # args_parser.add_argument("--date", metavar="YYYY-MM-dd", help="Date to use for restore (show with --action list)")
+    # args_parser.add_argument("--dest-db", metavar="dest_db", default=None, help="Name of the new restored database")
+    # args_parser.add_argument("--verbose", default=False, help="Verbose output")
+    # args_parser.add_argument("--configfile", required=True, help="Database configuration file")
+    # args = args_parser.parse_args()
 
     config = configparser.ConfigParser()
-    config.read(args.configfile)
+    config.read(configfile)
 
     postgres_host = config.get("postgresql", "host")
     postgres_port = config.get("postgresql", "port")
@@ -352,12 +360,12 @@ def main():
     local_file_path = f"{manager_config.get('BACKUP_PATH')}{filename}"
 
     # list task
-    if args.action == "list":
+    if action == "list":
         backup_objects = sorted(list_available_backups(storage_engine, manager_config), reverse=True)
         for key in backup_objects:
             logger.info(f"Key : {key}")
     # list databases task
-    elif args.action == "list_dbs":
+    elif action == "list_dbs":
         result = list_postgres_databases(postgres_host, postgres_db, postgres_port, postgres_user, postgres_password)
         # for line in result.decode('utf-8').splitlines():
         #     logger.info(line)
@@ -378,12 +386,12 @@ def main():
         console = Console()
         console.print(table)    
     # backup task
-    elif args.action == "backup":
+    elif action == "backup":
         logger.info(f"Backing up {postgres_db} database to {local_file_path}")
         result = backup_postgres_db(
-            postgres_host, postgres_db, postgres_port, postgres_user, postgres_password, local_file_path, args.verbose
+            postgres_host, postgres_db, postgres_port, postgres_user, postgres_password, local_file_path, verbose
         )
-        if args.verbose:
+        if verbose:
             for line in result.splitlines():
                 logger.info(line)
 
@@ -399,8 +407,8 @@ def main():
             upload_to_s3(comp_file, filename_compressed, manager_config)
             logger.info(f"Uploaded to {filename_compressed}")
     # restore task
-    elif args.action == "restore":
-        if not args.date:
+    elif action == "restore":
+        if not date:
             logger.warning(
                 'No date was chosen for restore. Run again with the "list" ' "action to see available restore dates"
             )
@@ -410,11 +418,11 @@ def main():
             except Exception as e:
                 logger.info(e)
             all_backup_keys = list_available_backups(storage_engine, manager_config)
-            backup_match = [s for s in all_backup_keys if args.date in s]
+            backup_match = [s for s in all_backup_keys if date in s]
             if backup_match:
                 logger.info(f"Found the following backup : {backup_match}")
             else:
-                logger.error(f"No match found for backups with date : {args.date}")
+                logger.error(f"No match found for backups with date : {date}")
                 logger.info(f"Available keys : {[s for s in all_backup_keys]}")
                 exit(1)
 
@@ -442,14 +450,14 @@ def main():
                 postgres_user,
                 postgres_password,
                 restore_uncompressed,
-                args.verbose,
+                verbose,
             )
-            if args.verbose:
+            if verbose:
                 for line in result.splitlines():
                     logger.info(line)
             logger.info("Restore complete")
-            if args.dest_db is not None:
-                restored_db_name = args.dest_db
+            if dest_db is not None:
+                restored_db_name = dest_db
                 logger.info(
                     f"Switching restored database with new one : {postgres_restore} > {restored_db_name}"
                 )
@@ -465,8 +473,10 @@ def main():
             logger.info("Database restored and active.")
     else:
         logger.warning("No valid argument was given.")
-        logger.warning(args)
+        # logger.warning(args)
 
 
 if __name__ == "__main__":
-    main()
+    app()
+    # typer.run(main)
+    # main()
