@@ -59,8 +59,8 @@ def list_available_backups(storage_engine, manager_config):
     elif storage_engine == "S3":
         # logger.info('Listing S3 bucket s3://{}/{} content :'.format(aws_bucket_name, aws_bucket_path))
         s3_client = boto3.client("s3")
-        s3_objects = s3_client.list_objects_v2(
-            Bucket=manager_config.get("AWS_BUCKET_NAME"), Prefix=manager_config.get("AWS_BUCKET_PATH")
+        s3_objects = s3_client.list_objects_v2(Bucket=manager_config.get("AWS_BUCKET_NAME"), 
+                                               Prefix=manager_config.get("AWS_BUCKET_PATH")
         )
         backup_list = [s3_content["Key"] for s3_content in s3_objects["Contents"]]
 
