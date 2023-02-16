@@ -33,30 +33,208 @@ def upgrade() -> None:
     op.bulk_insert(
         permissions,
         [
+        # USERS
+            {
+                "uuid": uuid4(),
+                "name": "USER_VIEW",
+                "title": "Show Users section in menu",
+                "description": "User has acces to Users section",
+                "group": "users"
+            },
             {
                 "uuid": uuid4(),
                 "name": "USER_ADD",
                 "title": "Adding users",
                 "description": "User can create new user accounts",
+                "group": "users"
             },
             {
                 "uuid": uuid4(),
                 "name": "USER_EDIT",
                 "title": "Modifying users",
                 "description": "User can edit other users accounts",
+                "group": "users"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "USER_EDIT_SELF",
+                "title": "Modifying ourself",
+                "description": "User can edit his account",
+                "group": "users"
             },
             {
                 "uuid": uuid4(),
                 "name": "USER_DELETE",
                 "title": "Removing users",
                 "description": "User can delete other users accounts",
+                "group": "users"
             },
-            # {
-            #     "uuid": uuid4(),
-            #     "name": "USER_DELETE_FORCE",
-            #     "title": "Removing users (also included in groups)",
-            #     "description": "User can delete other users accounts (even if used)",
-            # },
+            {
+                "uuid": uuid4(),
+                "name": "USER_IMPORT",
+                "title": "Importing users",
+                "description": "User can import  users data from CSV file",
+                "group": "users"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "USER_EXPORT",
+                "title": "Exporting users",
+                "description": "User can export users data to CSV",
+                "group": "users"
+            },
+# ISSUES
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_VIEW",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "ISSUE_ADD",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "ISSUE_EDIT",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "ISSUE_DELETE",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "ISSUE_EXCLUDE",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_USER_ASSIGN",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_WORK_CONTROLS",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_SHOw_HISTORY",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_COMMENTS",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_REPLACED_PARTS",
+                "title": "",
+                "description": "",
+                "group": "issues"
+            },
+# ITEMS
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_VIEW",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_ADD",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_EDIT",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_HIDE",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_SHOW_QR",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_SHOw_HISTORY",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_COMMENTS",
+                "title": "",
+                "description": "",
+                "group": "items"
+            },
+
+# TAGS
+            {
+                "uuid": uuid4(),
+                "name": "TAG_ADD",
+                "title": "",
+                "description": "",
+                "group": "tags"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "TAG_EDIT",
+                "title": "",
+                "description": "",
+                "group": "tags"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "TAG_HIDE",
+                "title": "",
+                "description": "",
+                "group": "tags"
+            },
+                        {
+                "uuid": uuid4(),
+                "name": "TAG_DELETE",
+                "title": "",
+                "description": "",
+                "group": "tags"
+            },
+# SETTINGS 
             {
                 "uuid": uuid4(),
                 "name": "SETTINGS_IDEAS",

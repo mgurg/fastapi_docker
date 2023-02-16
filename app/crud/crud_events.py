@@ -128,9 +128,7 @@ def get_events_user_issue_summary(db: Session, resource: str, resource_uuid: UUI
     return events_with_date
 
 
-def get_events_by_thread(
-    db: Session, resource_uuid: UUID, resource: str = None, date_from=None, date_to=None
-) -> Event:
+def get_events_by_thread(db: Session, resource_uuid: UUID, resource: str = None, date_from=None, date_to=None) -> Event:
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 
