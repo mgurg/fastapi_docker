@@ -8,13 +8,7 @@ autoflake --recursive --in-place  \
         --remove-unused-variables \
         --remove-all-unused-imports  \
         --ignore-init-module-imports \
-        app
-
-autoflake --recursive --in-place  \
-        --remove-unused-variables \
-        --remove-all-unused-imports  \
-        --ignore-init-module-imports \
-        commands        
+        app    
 echo "autoflake TESTS"
 autoflake --recursive --in-place  \
         --remove-unused-variables \
@@ -22,7 +16,6 @@ autoflake --recursive --in-place  \
         --ignore-init-module-imports \
         tests        
 echo "black"
-black --line-length 120 commands
 black --line-length 120 app
 black --line-length 120 tests
 echo "isort"
@@ -32,7 +25,6 @@ isort commands
 # flake8 app --count --statistics --max-line-length 120
 echo "ruff"
 ruff app --line-length=120
-ruff commands --line-length=120
 echo "truncate log file"
 : > $DIR/app/logs/logs.log
 echo "OK"
