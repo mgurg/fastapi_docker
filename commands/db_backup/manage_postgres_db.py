@@ -213,6 +213,8 @@ def restore_postgres_db(db_host, db, port, user, password, backup_file, verbose)
             "--dbname=postgresql://{}:{}@{}:{}/{}".format(user, password, db_host, port, db),
         ]
 
+# pg_restore -a -t your_table /path/to/dump.sql
+
         if verbose:
             subprocess_params.append("-v")
 
