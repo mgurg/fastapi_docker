@@ -190,12 +190,17 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
     notify_users(list_of_sms_notifications, list_of_email_notifications, new_issue)
 
-    event.create_new_item_event(
-        db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
-    )
+    event.create_new_basic_event(db, db_user, new_issue, "issue_add")
     if db_item is not None:
-        event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
-        event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
+        event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
+        event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
+
+    # event.create_new_item_event(
+    #     db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
+    # )
+    # if db_item is not None:
+    #     event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
+    #     event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
 
     return new_issue
 
@@ -224,13 +229,13 @@ def issue_change_status(
     status = None
 
     match issue.status:
-        case "issue_add":
-            if "issue_add" in actions_list:
-                raise HTTPException(status_code=400, detail="Action Exists!")
+        # case "issue_add":
+        #     if "issue_add" in actions_list:
+        #         raise HTTPException(status_code=400, detail="Action Exists!")
 
-            event.create_new_basic_event(db, db_user, db_issue, "issue_add")
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
+        #     event.create_new_basic_event(db, db_user, db_issue, "issue_add")
+        #     event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+        #     event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
 
         case "issue_accept":
             if "issue_accept" in actions_list:

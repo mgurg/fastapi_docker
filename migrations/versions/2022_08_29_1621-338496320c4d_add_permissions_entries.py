@@ -87,121 +87,121 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_VIEW",
-                "title": "",
-                "description": "",
+                "title": "Show Issues section",
+                "description": "Show Issues section",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_ADD",
-                "title": "",
-                "description": "",
+                "title": "Add issue",
+                "description": "Report faults and failures",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_EDIT",
-                "title": "",
-                "description": "",
+                "title": "Edit issues",
+                "description": "Edit reported faults and failures",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_DELETE",
-                "title": "",
-                "description": "",
+                "title": "Issue delete",
+                "description": "Delete Issues",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_EXCLUDE",
-                "title": "",
-                "description": "",
+                "title": "Exclude Issues from statistics",
+                "description": "Exclude Issues from statistics",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_USER_ASSIGN",
-                "title": "",
-                "description": "",
+                "title": "Allow User to Assign Other Users",
+                "description": "Allow User to Assign Other Users",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_WORK_CONTROLS",
-                "title": "",
-                "description": "",
+                "title": "Manage Work",
+                "description": "Start/Stop/End",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_SHOw_HISTORY",
-                "title": "",
-                "description": "",
+                "title": "Show Issue Timeline",
+                "description": "Show Issue Timeline",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_COMMENTS",
-                "title": "",
-                "description": "",
+                "title": "Show Issue Comments",
+                "description": "Show Issue Timeline",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_REPLACED_PARTS",
-                "title": "",
-                "description": "",
+                "title": "Show Replaced parts",
+                "description": "Show Replaced parts",
                 "group": "issues"
             },
 # ITEMS
             {
                 "uuid": uuid4(),
                 "name": "ITEM_VIEW",
-                "title": "",
-                "description": "",
+                "title": "Show Items Section",
+                "description": "Show Items Section",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_ADD",
-                "title": "",
-                "description": "",
+                "title": "Add new Item",
+                "description": "Allow to Add new Item",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_EDIT",
-                "title": "",
-                "description": "",
+                "title": "Edit Item",
+                "description": "Allow to edit Item",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_HIDE",
-                "title": "",
-                "description": "",
+                "title": "Hide Item",
+                "description": "Hide Item",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_SHOW_QR",
-                "title": "",
-                "description": "",
+                "title": "Show QR in Item",
+                "description": "Show QR in Item",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_SHOw_HISTORY",
-                "title": "",
-                "description": "",
+                "title": "Show Item history",
+                "description": "Show Item history",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_COMMENTS",
-                "title": "",
-                "description": "",
+                "title": "Show Item comments",
+                "description": "Show Item comments",
                 "group": "items"
             },
 
@@ -209,29 +209,29 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "TAG_ADD",
-                "title": "",
-                "description": "",
+                "title": "Add tag",
+                "description": "Add tag",
                 "group": "tags"
             },
             {
                 "uuid": uuid4(),
                 "name": "TAG_EDIT",
-                "title": "",
-                "description": "",
+                "title": "Edit tag",
+                "description": "Add tag",
                 "group": "tags"
             },
             {
                 "uuid": uuid4(),
                 "name": "TAG_HIDE",
-                "title": "",
-                "description": "",
+                "title": "Hide tag",
+                "description": "Hide tag",
                 "group": "tags"
             },
             {
                 "uuid": uuid4(),
                 "name": "TAG_DELETE",
-                "title": "",
-                "description": "",
+                "title": "Delete tag",
+                "description": "Delete tag",
                 "group": "tags"
             },
 # SETTINGS 

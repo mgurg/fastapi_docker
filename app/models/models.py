@@ -318,7 +318,7 @@ class Event(Base):
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    title = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    # title = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     internal_value = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     resource = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)

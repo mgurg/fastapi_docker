@@ -24,6 +24,7 @@ def upgrade() -> None:
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=512), unique=False, nullable=False),
+        sa.Column("symbol", sa.VARCHAR(length=32), unique=False, nullable=False),
         sa.Column("summary", sa.VARCHAR(length=1024), unique=False, nullable=False),
         sa.Column("text", postgresql.TEXT, autoincrement=False, nullable=True),
         sa.Column("text_json", postgresql.JSONB, autoincrement=False, nullable=True),

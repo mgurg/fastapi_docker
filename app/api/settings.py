@@ -2,13 +2,14 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from langcodes import standardize_tag
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
-from app.crud import crud_settings
+from app.crud import crud_settings, crud_users
 from app.db import get_db
-from app.schemas.requests import SettingGeneralIn, SettingNotificationIn
-from app.schemas.responses import SettingNotificationResponse
+from app.schemas.requests import SettingGeneralIn, SettingNotificationIn, SettingUserLanguage
+from app.schemas.responses import SettingNotificationResponse, StandardResponse
 from app.service.bearer_auth import has_token
 from app.service.default_settings import allowed_settings
 
@@ -104,3 +105,18 @@ def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingN
     crud_settings.update_notification_setting(db, db_settings, setting.dict(exclude_unset=False))
 
     return db_settings
+
+
+# LANG
+@setting_router.post("/user_lang/", response_model=StandardResponse, name="settings:notifications")
+def setting_user_lang(*, db: Session = Depends(get_db), lang: SettingUserLanguage, auth=Depends(has_token)):
+    if lang.code not in ["de", "en-US", "fr", "pl"]:
+        raise HTTPException(status_code=404, detail="Language code setting invalid")
+
+    db_user = crud_users.get_user_by_id(db, auth["user_id"])
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    crud_users.update_user(db, db_user, {"lang": standardize_tag(lang.code)})
+
+    return {"ok": True}

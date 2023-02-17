@@ -181,6 +181,10 @@ class SettingNotificationIn(BaseRequest):
     email_notification_level: str | None
 
 
+class SettingUserLanguage(BaseRequest):
+    code: str
+
+
 class SettingGeneralIn(BaseRequest):
     name: str
     value: str

@@ -53,7 +53,7 @@ def create_new_basic_event(
         "resource_id": resource_id,
         "resource_uuid": resource_uuid,
         "action": action,
-        "title": title,
+        # "title": title,
         "description": description,
         "internal_value": internal_value,
         "created_at": datetime.now(timezone.utc),
