@@ -70,7 +70,7 @@ def item_get_timeline_history(
 def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depends(has_token)):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
-    if not db_issue or db_issue.status != "resolved":
+    if not db_issue or db_issue.status != "done":
         raise HTTPException(status_code=400, detail="Issue not found!")
 
     events_info = crud_events.get_events_for_issue_summary(db, "issue", issue_uuid)

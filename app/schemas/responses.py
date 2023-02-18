@@ -115,7 +115,7 @@ class IssueSummaryResponse(BaseResponse):
     assigned: int
     in_progress: int
     paused: int
-    resolved: int
+    done: int
 
 
 class RoleSummaryResponse(BaseResponse):
@@ -330,4 +330,4 @@ class StatsIssuesCounterResponse(BaseResponse):
     assigned: int
     in_progress: int
     paused: int
-    resolved: int
+    done: int

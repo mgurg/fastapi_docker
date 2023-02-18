@@ -78,7 +78,7 @@ graph TD
 	E -->|Start| F[in_progress]
 	F -->|Pause| G[paused]
 	G -->|Resume| H[in_progress]
-	H -->|Resolve| I[resolved]
+	H -->|Resolve| I[done]
 ```
 
  ### QR CODES

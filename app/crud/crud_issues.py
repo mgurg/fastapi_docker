@@ -31,10 +31,10 @@ def get_issues(
 
     match status:
         case "active":
-            query = query.where(not_(Issue.status.in_(["resolved", "rejected"])))
+            query = query.where(not_(Issue.status.in_(["done", "rejected"])))
         case "inactive":
-            query = query.where(Issue.status.in_(["resolved", "rejected"]))
-        case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "resolved" as issue_status:
+            query = query.where(Issue.status.in_(["done", "rejected"]))
+        case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "done" as issue_status:
             query = query.where(Issue.status == issue_status)
 
     match priority:
