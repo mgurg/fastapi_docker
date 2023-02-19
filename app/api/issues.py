@@ -199,14 +199,6 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     event.create_new_basic_event(db, db_user, new_issue, "issue_add")
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
-    # if db_item is not None:
-
-    # event.create_new_item_event(
-    #     db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
-    # )
-    # if db_item is not None:
-    #     event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
-    #     event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
 
     return new_issue
 

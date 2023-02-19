@@ -90,6 +90,13 @@ def role_edit(*, db: Session = Depends(get_db), role_uuid: UUID, role: RoleEditI
         role_data["permission"] = permissions
         del role_data["permissions"]
 
+    role_data["role_name"] = role.title
+    role_data["role_title"] = role.title
+    role_data["role_description"] =  role.description
+
+    del role_data["title"]
+    del role_data["description"]
+
     new_role = crud_permission.update_role(db, db_role, role_data)
 
     return new_role

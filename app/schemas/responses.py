@@ -237,6 +237,7 @@ class ItemNameResponse(BaseResponse):
 
 class IssueIndexResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str | None
     text: str | None
     text_json: dict | None
@@ -250,6 +251,7 @@ class IssueIndexResponse(BaseResponse):
 
 class IssueResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str | None
     text: str | None
     text_json: dict | None
