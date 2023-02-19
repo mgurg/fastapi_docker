@@ -153,6 +153,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
         "uuid": item_uuid,
         "author_id": auth["user_id"],
         "name": item.name,
+        "symbol": item.symbol,
         "summary": item.summary,
         "text": description,
         "text_json": item.text_json,

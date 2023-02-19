@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("author_name", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("item_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
-        sa.Column("symbol", sa.VARCHAR(length=32), unique=False, nullable=False),
+        sa.Column("symbol", sa.VARCHAR(length=32), unique=False, nullable=False unique=True),
         sa.Column("summary", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("text", sa.TEXT, autoincrement=False, nullable=True),
         sa.Column("text_json", postgresql.JSONB, autoincrement=False, nullable=True),

@@ -160,11 +160,17 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     if issue.text_html is not None:
         description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
 
+    last_issue_id = crud_issues.get_last_issue_id(db)
+    if not last_issue_id:
+        last_issue_id = 1
+    last_issue_id += 1
+
     issue_data = {
         "uuid": issue_uuid,
         "author_id": auth["user_id"],
         "author_name": author_name,
         "item_id": item_id,
+        "symbol": f"PR-{last_issue_id}",
         "name": issue.name,
         "summary": issue.summary,
         "text": description,
@@ -194,7 +200,6 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
     # if db_item is not None:
-
 
     # event.create_new_item_event(
     #     db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text

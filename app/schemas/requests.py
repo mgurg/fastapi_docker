@@ -107,6 +107,7 @@ class GroupEditIn(BaseRequest):
 
 class ItemAddIn(BaseRequest):
     name: str
+    symbol: str | None
     summary: str | None
     text_html: str | None
     text_json: dict | None

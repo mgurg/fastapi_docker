@@ -64,6 +64,13 @@ def get_issues(
     return result.scalars().all()
 
 
+def get_last_issue_id(db):
+    query = select(Issue.id).order_by(Issue.id.desc()).limit(1)
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
+
+
 def get_issue_by_uuid(db: Session, uuid: UUID) -> Issue:
     query = select(Issue).where(Issue.uuid == uuid)
 
