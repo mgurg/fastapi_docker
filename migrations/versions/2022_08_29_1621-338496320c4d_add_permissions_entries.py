@@ -37,8 +37,8 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "USER_VIEW",
-                "title": "Show Users section in menu",
-                "description": "User has acces to Users section",
+                "title": "Show users list",
+                "description": "User can view list of other users",
                 "group": "users"
             },
             {
@@ -51,22 +51,22 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "USER_EDIT",
-                "title": "Modifying users",
+                "title": "Users editing",
                 "description": "User can edit other users accounts",
                 "group": "users"
             },
                         {
                 "uuid": uuid4(),
                 "name": "USER_EDIT_SELF",
-                "title": "Modifying ourself",
-                "description": "User can edit his account",
+                "title": "Account editing",
+                "description": "Allow to edit my user account",
                 "group": "users"
             },
             {
                 "uuid": uuid4(),
                 "name": "USER_DELETE",
                 "title": "Removing users",
-                "description": "User can delete other users accounts",
+                "description": "User can delete others users accounts",
                 "group": "users"
             },
             {
@@ -87,71 +87,71 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_VIEW",
-                "title": "Show Issues section",
-                "description": "Show Issues section",
+                "title": "Show issues list",
+                "description": "User can view list of issues",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_ADD",
-                "title": "Add issue",
-                "description": "Report faults and failures",
+                "title": "Adding issues",
+                "description": "User can create new issues",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_EDIT",
-                "title": "Edit issues",
-                "description": "Edit reported faults and failures",
+                "title": "Issue editing",
+                "description": "User can edit other users accounts",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_DELETE",
-                "title": "Issue delete",
-                "description": "Delete Issues",
+                "title": "Removing issues",
+                "description": "User can delete existing issues",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_EXCLUDE",
-                "title": "Exclude Issues from statistics",
-                "description": "Exclude Issues from statistics",
+                "title": "Exclude issues",
+                "description": "Exclude issues from statistics",
                 "group": "issues"
             },
             {
                 "uuid": uuid4(),
-                "name": "ISSUE_USER_ASSIGN",
-                "title": "Allow User to Assign Other Users",
-                "description": "Allow User to Assign Other Users",
+                "name": "ISSUE_MANAGE",
+                "title": "Manage work",
+                "description": "Allow to Start, Pause and Finish  work",
                 "group": "issues"
             },
-            {
-                "uuid": uuid4(),
-                "name": "ISSUE_WORK_CONTROLS",
-                "title": "Manage Work",
-                "description": "Start/Stop/End",
-                "group": "issues"
-            },
+            # {
+            #     "uuid": uuid4(),
+            #     "name": "ISSUE_WORK_CONTROLS",
+            #     "title": "Manage work",
+            #     "description": "Pozwól, aby rozpocząć, zatrzymać i zakończyć pracę",
+            #     "group": "issues"
+            # },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_SHOw_HISTORY",
-                "title": "Show Issue Timeline",
-                "description": "Show Issue Timeline",
+                "title": "Show issue history",
+                "description": "Show issue history graph",
                 "group": "issues"
             },
-            {
-                "uuid": uuid4(),
-                "name": "ISSUE_COMMENTS",
-                "title": "Show Issue Comments",
-                "description": "Show Issue Timeline",
-                "group": "issues"
-            },
+            # {
+            #     "uuid": uuid4(),
+            #     "name": "ISSUE_COMMENTS",
+            #     "title": "Show Issue Comments",
+            #     "description": "Show Issue Timeline",
+            #     "group": "issues"
+            # },
             {
                 "uuid": uuid4(),
                 "name": "ISSUE_REPLACED_PARTS",
-                "title": "Show Replaced parts",
-                "description": "Show Replaced parts",
+                "title": "Show replaced parts",
+                "description": "Allow to show, add, remove list of replaced parts",
                 "group": "issues"
             },
 # ITEMS
