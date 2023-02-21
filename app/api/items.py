@@ -78,38 +78,41 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_issues_uuid = crud_issues.get_item_issues_uuids(db, db_item.id)
+    db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
+    # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
 
-    # print(db_issues_uuid)
-    # db_events = crud_events.get_event_time_statistics_by_item(db, item_uuid)
+    issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id])
+    issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
+
+    issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id])
+    issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
+
+    issues_status = crud_issues.get_item_issues_status(db, [db_item.id])
+    issues_status_dict = dict((y, x) for y, x in issues_status)
+
+    issues_avg_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
+    issues_avg_repair_time_list = [str(round(x, 2)) for x in issues_avg_repair_time[0]]
+
+    issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
+    issue_assigned_users_list = [x for x in issue_assigned_users[0]]
+
+    users = {}
+    for user_uuid in issue_assigned_users_list:
+        user_details = crud_users.get_user_by_uuid(db, user_uuid)
+        users["name"] = user_details.first_name + " " + user_details.last_name
+        # events_users_info_dict
+
+    # średni czas potrzebny na podjęcie zgłoszenia
 
     data = {}
-    data["failuresCount"] = len(db_issues_uuid)
+    data["issuesCount"] = len(db_issues_uuid)
+    data["issuesPerDay"] = issues_per_day_dict
+    data["issuesPerHour"] = issues_per_hour_dict
+    data["issuesStatus"] = issues_status_dict
+    data["issueAvgRepairTime"] = issues_avg_repair_time_list[1]
+    data["issueMaxRepairTime"] = issues_avg_repair_time_list[0]
+    data["users"] = users
 
-    for issue_uuid in db_issues_uuid:
-        events_info = crud_events.get_events_for_issue_summary(db, "issue", issue_uuid)
-
-        events_dict_keys = ("action", "duration", "counter")
-        events_info_dict = [dict(zip(events_dict_keys, l)) for l in events_info]
-
-        users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", issue_uuid, "issueUserActivity")
-
-        events_users_info = crud_events.get_events_user_issue_summary(db, "issue", issue_uuid, users_uuids)
-
-        events_users_info_keys = ("user_uuid", "duration", "counter")
-        events_users_info_dict = [dict(zip(events_users_info_keys, l)) for l in events_users_info]
-
-        for user in events_users_info_dict:
-            user_details = crud_users.get_user_by_uuid(db, user["user_uuid"])
-            user["name"] = user_details.first_name + " " + user_details.last_name
-            del user["user_uuid"]
-            # events_users_info_dict
-
-        result = {}
-        result["events"] = events_info_dict
-        result["users"] = events_users_info_dict
-        data[issue_uuid] = result
-   
     return data
 
 
