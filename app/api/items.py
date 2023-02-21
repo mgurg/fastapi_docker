@@ -122,7 +122,7 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
         data["issuesPerHour"] = issues_per_hour_dict
     if issues_status_dict:
         data["issuesStatus"] = issues_status_dict
-    if issues_avg_repair_time_list:
+    if issues_avg_repair_time_list and len(issues_avg_repair_time_list) > 0:
         data["issueAvgRepairTime"] = issues_avg_repair_time_list[1]
         data["issueMaxRepairTime"] = issues_avg_repair_time_list[0]
     if users:
