@@ -91,7 +91,7 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
     issues_status_dict = dict((y, x) for y, x in issues_status)
 
     issues_avg_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
-    issues_avg_repair_time_list = [str(round(x, 2)) for x in issues_avg_repair_time[0]]
+    issues_avg_repair_time_list = [x for x in issues_avg_repair_time[0]]
 
     issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
     issue_assigned_users_list = [x for x in issue_assigned_users[0]]
