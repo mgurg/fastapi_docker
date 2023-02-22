@@ -85,7 +85,7 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
     issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
 
     issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id])
-    issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
+    issues_per_hour_dict = dict((int(y), x) for y, x in issues_per_hour)
 
     issues_status = crud_issues.get_item_issues_status(db, [db_item.id])
     issues_status_dict = dict((y, x) for y, x in issues_status)
