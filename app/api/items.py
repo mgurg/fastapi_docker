@@ -90,17 +90,20 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
     issues_status = crud_issues.get_item_issues_status(db, [db_item.id])
     issues_status_dict = dict((y, x) for y, x in issues_status)
 
-    # issues_avg_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
-    # issues_avg_repair_time_list = [x for x in issues_avg_repair_time[0]]
+    issues_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
+    issues_repair_time_list = [item for tpl in issues_repair_time for item in tpl]
 
-    # issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
-    # issue_assigned_users_list = [x for x in issue_assigned_users[0]]
+    issues_total_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueTotalTime")
+    issues_total_time_list = [item for tpl in issues_total_time for item in tpl]
 
-    # users = {}
-    # for user_uuid in issue_assigned_users_list:
-    #     user_details = crud_users.get_user_by_uuid(db, user_uuid)
-    #     users["name"] = user_details.first_name + " " + user_details.last_name
+    issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
+    issue_assigned_users_list = [item for tpl in issue_assigned_users for item in tpl]
+    issue_assigned_users_list = list(set(issue_assigned_users_list))
 
+    users = {}
+    for user_uuid in issue_assigned_users_list:
+        user_details = crud_users.get_user_by_uuid(db, user_uuid)
+        users["name"] = user_details.first_name + " " + user_details.last_name
 
     # średni czas potrzebny na podjęcie zgłoszenia
 
@@ -109,24 +112,25 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
         "issuesPerDay": None,
         "issuesPerHour": None,
         "issuesStatus": None,
-        "issueAvgRepairTime": None,
-        "issueMaxRepairTime": None,
+        "repairTime": None,
         "users": None,
     }
 
     if db_issues_uuid:
         data["issuesCount"] = len(db_issues_uuid)
+
     if issues_per_day_dict:
         data["issuesPerDay"] = issues_per_day_dict
     if issues_per_hour_dict:
         data["issuesPerHour"] = issues_per_hour_dict
     if issues_status_dict:
         data["issuesStatus"] = issues_status_dict
-    # if issues_avg_repair_time_list and len(issues_avg_repair_time_list) > 0:
-    #     data["issueAvgRepairTime"] = issues_avg_repair_time_list[1]
-    #     data["issueMaxRepairTime"] = issues_avg_repair_time_list[0]
-    # if users:
-    #     data["users"] = users
+    if issues_total_time_list and len(issues_total_time_list) > 0:
+        data["totalTime"] = {"max": issues_total_time_list[0], "avg": issues_total_time_list[1]}
+    if issues_repair_time_list and len(issues_repair_time_list) > 0:
+        data["repairTime"] = {"max": issues_repair_time_list[0], "avg": issues_repair_time_list[1]}
+    if users:
+        data["users"] = users
 
     return data
 

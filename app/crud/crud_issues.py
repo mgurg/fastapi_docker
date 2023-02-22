@@ -143,7 +143,7 @@ def get_mode_action_time(db, issues_uuids: list[UUID], action: str):
         select(func.max(EventSummary.duration), func.avg(EventSummary.duration), func.min(EventSummary.duration))
         .where(EventSummary.resource_uuid.in_(issues_uuids))
         .where(EventSummary.resource == "issue")
-        .where(EventSummary.action == "issueRepairTime")
+        .where(EventSummary.action == action)
     )
 
     result = db.execute(query)  # await db.execute(query)

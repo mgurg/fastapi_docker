@@ -30,9 +30,7 @@ def upgrade() -> None:
         sa.Column("group", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
     )
 
-    op.bulk_insert(
-        permissions,
-        [
+    permissions_dict =  [
         # USERS
             {
                 "uuid": uuid4(),
@@ -55,7 +53,7 @@ def upgrade() -> None:
                 "description": "User can edit other users accounts",
                 "group": "users"
             },
-                        {
+            {
                 "uuid": uuid4(),
                 "name": "USER_EDIT_SELF",
                 "title": "Account editing",
@@ -102,7 +100,7 @@ def upgrade() -> None:
                 "uuid": uuid4(),
                 "name": "ISSUE_EDIT",
                 "title": "Issue editing",
-                "description": "User can edit other users accounts",
+                "description": "User can edit issue",
                 "group": "issues"
             },
             {
@@ -128,9 +126,9 @@ def upgrade() -> None:
             },
             # {
             #     "uuid": uuid4(),
-            #     "name": "ISSUE_WORK_CONTROLS",
-            #     "title": "Manage work",
-            #     "description": "Pozwól, aby rozpocząć, zatrzymać i zakończyć pracę",
+            #     "name": "ISSUE_SHOw_SUMMARY",
+            #     "title": "Show work summary",
+            #     "description": "Show work summary for finished tasks",
             #     "group": "issues"
             # },
             {
@@ -154,33 +152,47 @@ def upgrade() -> None:
                 "description": "Allow to show, add, remove list of replaced parts",
                 "group": "issues"
             },
+            {
+                "uuid": uuid4(),
+                "name": "ISSUE_EXPORT",
+                "title": "Exporting users",
+                "description": "User can export users data to CSV",
+                "group": "issues"
+            },
 # ITEMS
             {
                 "uuid": uuid4(),
                 "name": "ITEM_VIEW",
-                "title": "Show Items Section",
-                "description": "Show Items Section",
+                "title": "Show items list",
+                "description": "User can view list of items",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_ADD",
-                "title": "Add new Item",
-                "description": "Allow to Add new Item",
+                "title": "Adding items",
+                "description": "User can create new items",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_EDIT",
-                "title": "Edit Item",
-                "description": "Allow to edit Item",
+                "title": "Item editing",
+                "description": "User can edit item",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
                 "name": "ITEM_HIDE",
-                "title": "Hide Item",
-                "description": "Hide Item",
+                "title": "Hide items",
+                "description": "User can hide existing item",
+                "group": "items"
+            },
+            {
+                "uuid": uuid4(),
+                "name": "ITEM_DELETE",
+                "title": "Removing items",
+                "description": "User can delete existing item",
                 "group": "items"
             },
             {
@@ -193,17 +205,31 @@ def upgrade() -> None:
             {
                 "uuid": uuid4(),
                 "name": "ITEM_SHOw_HISTORY",
-                "title": "Show Item history",
-                "description": "Show Item history",
+                "title": "Show item history",
+                "description": "Show item history graph",
+                "group": "items"
+            },
+                                    {
+                "uuid": uuid4(),
+                "name": "ITEM_IMPORT",
+                "title": "Importing items",
+                "description": "User can import items data from CSV file",
                 "group": "items"
             },
             {
                 "uuid": uuid4(),
-                "name": "ITEM_COMMENTS",
-                "title": "Show Item comments",
-                "description": "Show Item comments",
+                "name": "ITEM_EXPORT",
+                "title": "Exporting items",
+                "description": "User can export items data to CSV",
                 "group": "items"
             },
+            # {
+            #     "uuid": uuid4(),
+            #     "name": "ITEM_COMMENTS",
+            #     "title": "Show Item comments",
+            #     "description": "Show Item comments",
+            #     "group": "items"
+            # },
 
 # TAGS
             {
@@ -217,7 +243,7 @@ def upgrade() -> None:
                 "uuid": uuid4(),
                 "name": "TAG_EDIT",
                 "title": "Edit tag",
-                "description": "Add tag",
+                "description": "Edit tag",
                 "group": "tags"
             },
             {
@@ -237,27 +263,28 @@ def upgrade() -> None:
 # SETTINGS 
             {
                 "uuid": uuid4(),
-                "name": "SETTINGS_IDEAS",
-                "title": "Acces to Idea's Settings",
-                "description": "User can change Idea related settings",
+                "name": "SETTINGS_ACCOUNT",
+                "title": "Acces to Account Settings",
+                "description": "User can change account related settings",
                 "group": "settings"
             },
             {
                 "uuid": uuid4(),
-                "name": "SETTINGS_ROLES",
-                "title": "Acces to Role's Settings",
-                "description": "User can change Roles related settings",
+                "name": "SETTINGS_TAGS",
+                "title": "Acces to Tags Settings",
+                "description": "User can change Tags related settings",
                 "group": "settings"
             },
             {
                 "uuid": uuid4(),
-                "name": "SETTINGS_GROUPS",
-                "title": "Acces to Groups's Settings",
-                "description": "User can change Groups related settings",
+                "name": "SETTINGS_PERMISSION",
+                "title": "Acces to Permissions Settings",
+                "description": "User can change Permission related settings",
                 "group": "settings"
             },
         ],
-    )
+
+    op.bulk_insert(permissions, permissions_dict )
 
     roles = table(
         "roles",
@@ -300,43 +327,32 @@ def upgrade() -> None:
         ),
     )
 
-    op.bulk_insert(
-        roles_permissions_link,
-        [
-            {
-                "role_id": 1,
-                "permission_id": 1,
-            },
-            {
-                "role_id": 1,
-                "permission_id": 2,
-            },
-            {
-                "role_id": 1,
-                "permission_id": 3,
-            },
-            {
-                "role_id": 1,
-                "permission_id": 4,
-            },
-            {
-                "role_id": 1,
-                "permission_id": 5,
-            },
-            {
-                "role_id": 1,
-                "permission_id": 6,
-            },
-            {
-                "role_id": 2,
-                "permission_id": 1,
-            },
-            {
-                "role_id": 2,
-                "permission_id": 2,
-            },
-        ],
-    )
+    # op.bulk_insert(
+    #     roles_permissions_link,
+    #     [
+    #         {"role_id": 1, "permission_id": 1},
+    #         {"role_id": 1, "permission_id": 2},
+    #         {"role_id": 1, "permission_id": 3},
+    #         {"role_id": 1, "permission_id": 4},
+    #         {"role_id": 1, "permission_id": 5},
+    #         {"role_id": 1, "permission_id": 6},
+    #         {"role_id": 2, "permission_id": 1},
+    #         {"role_id": 2, "permission_id": 2},
+    #     ]
+    # )
+
+    role_permission_rel = {1: list(range(1, len(permissions_dict))), 2:[4,6,8]}
+
+
+    role_permission_rel_dict = []
+    for key, values in role_permission_rel.items():
+        print(key, '->', values)
+        
+        for value in values:
+            role_permission_rel_dict.append({"role_id" : key, "permission_id": value})
+        
+    print(role_permission_rel_dict)
+    op.bulk_insert(roles_permissions_link,role_permission_rel_dict)
 
 
 def downgrade() -> None:

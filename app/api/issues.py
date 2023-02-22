@@ -76,14 +76,14 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
     events_info = crud_events.get_events_for_issue_summary(db, "issue", issue_uuid)
 
     events_dict_keys = ("action", "duration", "counter")
-    events_info_dict = [dict(zip(events_dict_keys, l)) for l in events_info]
+    events_info_dict = [dict(zip(events_dict_keys, values)) for values in events_info]
 
     users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
 
     events_users_info = crud_events.get_events_user_issue_summary(db, "issue", issue_uuid, users_uuids)
 
     events_users_info_keys = ("user_uuid", "duration", "counter")
-    events_users_info_dict = [dict(zip(events_users_info_keys, l)) for l in events_users_info]
+    events_users_info_dict = [dict(zip(events_users_info_keys, values)) for values in events_users_info]
 
     for user in events_users_info_dict:
         user_details = crud_users.get_user_by_uuid(db, user["user_uuid"])
