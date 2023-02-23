@@ -11,8 +11,8 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
-revision = 'cd7a995ecaf6'
-down_revision = '80d733751484'
+revision = "cd7a995ecaf6"
+down_revision = "80d733751484"
 branch_labels = None
 depends_on = None
 
@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("color", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("icon", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column("is_hidden",sa.BOOLEAN(), autoincrement=False, nullable=True),
+        sa.Column("is_hidden", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="tags_pkey"),
@@ -43,6 +43,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("issue_id", "tag_id", name="tags_issues_link_pkey"),
         schema=None,
     )
+
 
 def downgrade() -> None:
     op.drop_constraint("tags_issues_link_fk", "tags_issues_link")

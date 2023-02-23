@@ -61,6 +61,7 @@ DROP SCHEMA IF EXISTS "fake_tenant_company_for_test_0000000000000000000000000000
 
 To run tests locally in VS Code export environment variable first:
 ```bash
+export PYTHONPATH=$PWD
 export DB_HOST=localhost DB_PORT=5432 DB_DATABASE=pg_db DB_USERNAME=postgres DB_PASSWORD=postgres
 ``` 
 
@@ -75,14 +76,6 @@ coverage html
 ```
 
 ### WIP: SQLAlchemy 2.0
-Running outside docker: 
-```
-export PYTHONPATH=$PWD
-export DB_HOST=database.url
-export DB_USERNAME=postgres
-(...rest of DB env)
-
-
 SQLALCHEMY_WARN_20=1 python -W always::DeprecationWarning ./app/main.py
 ```
 

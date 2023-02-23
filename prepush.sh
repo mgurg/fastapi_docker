@@ -18,6 +18,7 @@ autoflake --recursive --in-place  \
 echo "black"
 black --line-length 120 app
 black --line-length 120 tests
+black --line-length 120 migrations/versions
 echo "isort"
 isort app
 isort commands
