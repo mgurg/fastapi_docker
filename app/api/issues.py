@@ -241,7 +241,7 @@ def issue_change_status(
 
             event.create_new_basic_event(db, db_user, db_issue, "issue_accept")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "accepyToStartTime")
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "acceptToStartTime")
             # event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
 
             status = "accepted"
@@ -278,7 +278,7 @@ def issue_change_status(
         case "issue_start_progress":
             event.create_new_basic_event(db, db_user, db_issue, "issue_start_progress")
             event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "accepyToStartTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "acceptToStartTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
 
             status = "in_progress"
