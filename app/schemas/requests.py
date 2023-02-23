@@ -107,6 +107,7 @@ class GroupEditIn(BaseRequest):
 
 class ItemAddIn(BaseRequest):
     name: str
+    symbol: str | None
     summary: str | None
     text_html: str | None
     text_json: dict | None
@@ -171,13 +172,18 @@ class IssueEditIn(BaseRequest):
 class IssueChangeStatus(BaseRequest):
     status: str
     name: str | None
+    title: str | None
     description: str | None
-    value: str | None
+    internal_value: str | None
 
 
 class SettingNotificationIn(BaseRequest):
     sms_notification_level: str | None
     email_notification_level: str | None
+
+
+class SettingUserLanguage(BaseRequest):
+    code: str
 
 
 class SettingGeneralIn(BaseRequest):

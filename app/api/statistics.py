@@ -17,11 +17,11 @@ statistics_router = APIRouter()
 def stats_issues_counter(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     issues_counter_summary = crud_statistics.get_issues_counter_summary(db)
     if not issues_counter_summary:
-        return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "resolved": 0}
+        return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "done": 0}
 
     issues_counter = dict(issues_counter_summary)
 
-    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "resolved"]:
+    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
         issues_counter.setdefault(status, 0)
 
     return issues_counter
@@ -36,7 +36,7 @@ def stats_first_steps(*, db: Session = Depends(get_db), auth=Depends(has_token))
     items = dict(items)
 
     active = ["new", "accepted", "assigned", "in_progress", "paused"]
-    inactive = ["rejected", "resolved"]
+    inactive = ["rejected", "done"]
 
     issues_active = crud_statistics.get_issues_counter_by_status(db, active)
     issues_active = dict(issues_active)

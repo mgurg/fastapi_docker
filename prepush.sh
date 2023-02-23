@@ -8,7 +8,7 @@ autoflake --recursive --in-place  \
         --remove-unused-variables \
         --remove-all-unused-imports  \
         --ignore-init-module-imports \
-        app
+        app    
 echo "autoflake TESTS"
 autoflake --recursive --in-place  \
         --remove-unused-variables \
@@ -20,6 +20,7 @@ black --line-length 120 app
 black --line-length 120 tests
 echo "isort"
 isort app
+isort commands
 # echo "flake8"
 # flake8 app --count --statistics --max-line-length 120
 echo "ruff"

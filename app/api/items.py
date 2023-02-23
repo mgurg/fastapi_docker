@@ -7,7 +7,7 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_auth, crud_events, crud_files, crud_items, crud_qr, crud_users
+from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import EventTimelineResponse, ItemIndexResponse, ItemResponse, StandardResponse
@@ -78,8 +78,61 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_events = crud_events.get_event_time_statistics_by_item(db, item_uuid)
-    return db_events
+    db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
+    # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
+
+    issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id])
+    issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
+
+    issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id])
+    issues_per_hour_dict = dict((int(y), x) for y, x in issues_per_hour)
+
+    issues_status = crud_issues.get_item_issues_status(db, [db_item.id])
+    issues_status_dict = dict((y, x) for y, x in issues_status)
+
+    issues_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
+    issues_repair_time_list = [item for tpl in issues_repair_time for item in tpl]
+
+    issues_total_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueTotalTime")
+    issues_total_time_list = [item for tpl in issues_total_time for item in tpl]
+
+    issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
+    issue_assigned_users_list = [item for tpl in issue_assigned_users for item in tpl]
+    issue_assigned_users_list = list(set(issue_assigned_users_list))
+
+    users = {}
+    for user_uuid in issue_assigned_users_list:
+        user_details = crud_users.get_user_by_uuid(db, user_uuid)
+        users["name"] = user_details.first_name + " " + user_details.last_name
+
+    # średni czas potrzebny na podjęcie zgłoszenia
+
+    data = {
+        "issuesCount": None,
+        "issuesPerDay": None,
+        "issuesPerHour": None,
+        "issuesStatus": None,
+        "repairTime": None,
+        "users": None,
+    }
+
+    if db_issues_uuid:
+        data["issuesCount"] = len(db_issues_uuid)
+
+    if issues_per_day_dict:
+        data["issuesPerDay"] = issues_per_day_dict
+    if issues_per_hour_dict:
+        data["issuesPerHour"] = issues_per_hour_dict
+    if issues_status_dict:
+        data["issuesStatus"] = issues_status_dict
+    if issues_total_time_list and len(issues_total_time_list) > 0:
+        data["totalTime"] = {"max": issues_total_time_list[0], "avg": issues_total_time_list[1]}
+    if issues_repair_time_list and len(issues_repair_time_list) > 0:
+        data["repairTime"] = {"max": issues_repair_time_list[0], "avg": issues_repair_time_list[1]}
+    if users:
+        data["users"] = users
+
+    return data
 
 
 @item_router.post("/favourites", response_model=StandardResponse)
@@ -150,6 +203,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
         "uuid": item_uuid,
         "author_id": auth["user_id"],
         "name": item.name,
+        "symbol": item.symbol,
         "summary": item.summary,
         "text": description,
         "text_json": item.text_json,

@@ -115,7 +115,7 @@ class IssueSummaryResponse(BaseResponse):
     assigned: int
     in_progress: int
     paused: int
-    resolved: int
+    done: int
 
 
 class RoleSummaryResponse(BaseResponse):
@@ -210,13 +210,13 @@ class EventTimelineResponse(BaseResponse):
     author_name: str | None
     author_uuid: UUID | None
     action: str | None
-    name: str | None
+    title: str | None
     description: str | None
-    value: str | None
-    resource: str | None
-    resource_uuid: UUID | None
-    thread_resource: str | None
-    thread_uuid: UUID | None
+    # value: str | None
+    # resource: str | None
+    # resource_uuid: UUID | None
+    # thread_resource: str | None
+    # thread_uuid: UUID | None
 
 
 class ItemResponse(BaseResponse):
@@ -237,6 +237,7 @@ class ItemNameResponse(BaseResponse):
 
 class IssueIndexResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str | None
     text: str | None
     text_json: dict | None
@@ -250,6 +251,7 @@ class IssueIndexResponse(BaseResponse):
 
 class IssueResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str | None
     text: str | None
     text_json: dict | None
@@ -330,4 +332,4 @@ class StatsIssuesCounterResponse(BaseResponse):
     assigned: int
     in_progress: int
     paused: int
-    resolved: int
+    done: int

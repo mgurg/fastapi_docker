@@ -88,4 +88,40 @@ class EmailNotification:
             "Name": "Mailjet Template Errors",
         }
 
+    def mail_new_registration(message_data: dict) -> None:
+        data = {
+            "Messages": [
+                {
+                    "From": {"Email": "awaria@remontmaszyn.pl", "Name": "remontmaszyn.pl"},
+                    "To": [{"Email": "passenger1@example.com", "Name": "passenger 1"}],
+                    "TemplateID": 4561351,
+                    "TemplateLanguage": True,
+                    "Subject": "Dziękuję za rejestrację",
+                    "Variables": {
+                        "product_name": "",
+                        "activation_url": "",
+                        "login_url": "",
+                        "user_name": "",
+                        "sender_name": "Michal",
+                    },
+                }
+            ]
+        }
+
+    def make_admin_user_validation_email(user: str, token: str) -> dict:
+        return {
+            "FromName": "pass Culture admin",
+            "Subject": "[pass Culture admin] Validation de votre adresse email pour le pass Culture",
+            "MJ-TemplateID": 1660341,
+            "MJ-TemplateLanguage": True,
+            "Vars": {"lien_validation_mail": f"{settings.PRO_URL}/creation-de-mot-de-passe/{token}"},
+        }
+
+    def send_admin_user_validation_email(self, user: str, token: str) -> None:
+        self.make_admin_user_validation_email(user, token)
+        # mails.send(recipients=[user.email], data=data)
+
+    def mail_new_registration_with_password(message_data: dict) -> None:
+        ...
+
         # https://github.com/pass-culture/pass-culture-api/blob/b24db94a2fb2dd6473705c3bde97c9e28fac3390/api/src/pcapi/utils/mailing.py#L195

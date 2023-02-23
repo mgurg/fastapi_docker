@@ -1,3 +1,4 @@
+from collections import Counter
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
@@ -61,7 +62,7 @@ def item_get_timeline_history(
     # if not db_item:
     #     raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_events = crud_events.get_events_by_thread(db, issue_uuid, thread_resource)
+    db_events = crud_events.get_events_by_thread(db, issue_uuid, "issue")
     return db_events
 
 
@@ -69,13 +70,32 @@ def item_get_timeline_history(
 def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depends(has_token)):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
-    if not db_issue or db_issue.status != "resolved":
+    if not db_issue or db_issue.status != "done":
         raise HTTPException(status_code=400, detail="Issue not found!")
 
-    result = crud_events.get_events_for_issue_summary(db, issue_uuid)
+    events_info = crud_events.get_events_for_issue_summary(db, "issue", issue_uuid)
 
-    print(dict(result))
-    return "result"
+    events_dict_keys = ("action", "duration", "counter")
+    events_info_dict = [dict(zip(events_dict_keys, values)) for values in events_info]
+
+    users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
+
+    events_users_info = crud_events.get_events_user_issue_summary(db, "issue", issue_uuid, users_uuids)
+
+    events_users_info_keys = ("user_uuid", "duration", "counter")
+    events_users_info_dict = [dict(zip(events_users_info_keys, values)) for values in events_users_info]
+
+    for user in events_users_info_dict:
+        user_details = crud_users.get_user_by_uuid(db, user["user_uuid"])
+        user["name"] = user_details.first_name + " " + user_details.last_name
+        del user["user_uuid"]
+        # events_users_info_dict
+
+    result = {}
+    result["events"] = events_info_dict
+    result["users"] = events_users_info_dict
+
+    return result
 
 
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
@@ -140,11 +160,17 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     if issue.text_html is not None:
         description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
 
+    last_issue_id = crud_issues.get_last_issue_id(db)
+    if not last_issue_id:
+        last_issue_id = 1
+    last_issue_id += 1
+
     issue_data = {
         "uuid": issue_uuid,
         "author_id": auth["user_id"],
         "author_name": author_name,
         "item_id": item_id,
+        "symbol": f"PR-{last_issue_id}",
         "name": issue.name,
         "summary": issue.summary,
         "text": description,
@@ -170,12 +196,9 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
     notify_users(list_of_sms_notifications, list_of_email_notifications, new_issue)
 
-    event.create_new_item_event(
-        db, db_user, db_item, new_issue, "issue_add", "Issue added", new_issue.name, new_issue.text
-    )
-    if db_item is not None:
-        event.create_new_item_event_statistic(db, db_item, new_issue, "issueStartTime")
-        event.create_new_item_event_statistic(db, db_item, new_issue, "issueTotalTime")
+    event.create_new_basic_event(db, db_user, new_issue, "issue_add")
+    event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
+    event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
 
     return new_issue
 
@@ -188,11 +211,7 @@ def issue_change_status(
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
 
-    db_item = crud_items.get_item_by_id(db, db_issue.item_id)
-    # if not db_item:
-    #     raise HTTPException(status_code=400, detail="Item not found!")
-
-    db_issue.status
+    # db_item = crud_items.get_item_by_id(db, db_issue.item_id)
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
     if not db_user:
@@ -200,65 +219,113 @@ def issue_change_status(
     if db_user:
         f"{db_user.first_name} {db_user.last_name}"
 
+    actions_list = crud_events.get_event_status_list(db, "issue", issue_uuid)
+
+    actions_counter = Counter(actions_list)
+    # internal_value = "284728ef-7c96-44ee-ab52-f3bb506bccb1"
+    internal_value = issue.internal_value
     status = None
+
     match issue.status:
+        # case "issue_add":
+        #     if "issue_add" in actions_list:
+        #         raise HTTPException(status_code=400, detail="Action Exists!")
+
+        #     event.create_new_basic_event(db, db_user, db_issue, "issue_add")
+        #     event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+        #     event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
+
         case "issue_accept":
-            event.create_new_item_event(
-                db, db_user, db_item, db_issue, "issue_accept", issue.name, issue.description, issue.value
-            )
-            event.close_event_statistics(db, db_issue, "issueStartTime")
+            if "issue_accept" in actions_list:
+                raise HTTPException(status_code=400, detail="Action Exists!")
+
+            event.create_new_basic_event(db, db_user, db_issue, "issue_accept")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "accepyToStartTime")
+            # event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+
             status = "accepted"
 
         case "issue_reject":
-            event.create_new_item_event(
-                db, db_user, db_item, db_issue, "issue_reject", issue.name, issue.description, issue.value
-            )
-            event.close_event_statistics(db, db_issue, "issueStartTime")
-            event.close_event_statistics(db, db_issue, "issueTotalTime")
+            if ("issue_reject" in actions_list) or ("issue_accept" in actions_list):
+                raise HTTPException(status_code=400, detail="Action Exists!")
+
+            event.create_new_basic_event(db, db_user, db_issue, "issue_reject")
+
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+
+            users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
+            for user_uuid in users_uuids:
+                event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
+
             status = "rejected"
 
-        case "issue_change_assigned_person":
-            event.create_new_item_event(
-                db,
-                db_user,
-                db_item,
-                db_issue,
-                "issue_change_assigned_person",
-                issue.name,
-                issue.description,
-                issue.value,
-            )
+        case "issue_add_person":
+            event.create_new_basic_event(db, db_user, db_issue, "issue_add_person", internal_value=internal_value)
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", internal_value=internal_value)
+
+            # TODO: now only frontend is checking if users is not added twice in row, add backend validation
             status = "assigned"
 
+        case "issue_remove_person":
+            if "issue_add_person" not in actions_list:
+                raise HTTPException(status_code=400, detail="No user to remove!")
+
+            event.create_new_basic_event(db, db_user, db_issue, "issue_remove_person", internal_value=internal_value)
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", internal_value)
+
         case "issue_start_progress":
-            event.create_new_item_event(db, db_user, db_item, db_issue, "issue_start_progress", issue.name)
-            event.create_new_item_event_statistic(db, db_item, db_issue, "issueRepairTime")
+            event.create_new_basic_event(db, db_user, db_issue, "issue_start_progress")
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "accepyToStartTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+
             status = "in_progress"
 
         case "issue_pause":
-            event.create_new_item_event(
-                db, db_user, db_item, db_issue, "issue_pause", issue.name, issue.description, issue.value
-            )
-            event.close_event_statistics(db, db_issue, "issueRepairTime")
-            event.create_new_item_event_statistic(db, db_item, db_issue, "issueRepairPauseTime")
+            if ("issue_start_progress" not in actions_list) and (
+                (actions_counter.get("issue_start_progress") % 2) != 0
+            ):
+                raise HTTPException(status_code=400, detail="No started task!")
+
+            event.create_new_basic_event(db, db_user, db_issue, "issue_pause")
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+
             status = "paused"
 
         case "issue_resume":
-            event.create_new_item_event(db, db_user, db_item, db_issue, "issue_resume", issue.name)
-            event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
-            event.create_new_item_event_statistic(db, db_item, db_issue, "issueRepairTime")
+            event.create_new_basic_event(db, db_user, db_issue, "issue_resume")
+            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+
             status = "in_progress"
 
-        case "issue_resolve":
-            event.create_new_item_event(
-                db, db_user, db_item, db_issue, "issue_resolve", issue.name, issue.description, issue.value
-            )
-            event.close_event_statistics(db, db_issue, "issueRepairPauseTime")
-            event.close_event_statistics(db, db_issue, "issueRepairTime")
-            event.close_event_statistics(db, db_issue, "issueTotalTime")
-            status = "resolved"
+        case "issue_done":
+            if "issue_done" in actions_list:
+                raise HTTPException(status_code=400, detail="Task already finished!")
 
-    if status in ["accepted", "rejected", "in_progress", "paused", "resolved"]:
+            event.create_new_basic_event(db, db_user, db_issue, "issue_done")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+
+            users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
+            for user_uuid in users_uuids:
+                event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
+
+            status = "done"
+
+        case "issue_approve":
+            if "issue_done" not in actions_list:
+                raise HTTPException(status_code=400, detail="Issue not finished")
+
+        case "issue_decline":
+            if "issue_done" not in actions_list:
+                raise HTTPException(status_code=400, detail="Issue not finished")
+
+    if status in ["accepted", "rejected", "in_progress", "paused", "done"]:
         issue_update = {"status": status, "updated_at": datetime.now(timezone.utc)}
         crud_issues.update_issue(db, db_issue, issue_update)
 

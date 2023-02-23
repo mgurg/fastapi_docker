@@ -38,7 +38,7 @@ def get_role_by_name(db: Session, name: str) -> Role:
 
 
 def get_permissions(db: Session) -> Permission:
-    return db.execute(select(Permission).order_by(Permission.group)).scalars().all()
+    return db.execute(select(Permission).order_by(Permission.group.asc(), Permission.id.asc())).scalars().all()
 
 
 def create_role_with_permissions(db: Session, data: dict) -> Role:
