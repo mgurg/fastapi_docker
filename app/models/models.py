@@ -53,6 +53,7 @@ class Permission(Base):
     name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=False)
     group = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
 
     # PrimaryKeyConstraint("id", name="permissions_pkey"),

@@ -36,18 +36,14 @@ def add_noise_to_qr(qr_code: str) -> str:
     noise = ["2", "3", "4", "5", "6", "7", "8", "9"]
     return "".join(f"{x}{random.choice(noise) if random.randint(0, 1) else ''}" for x in qr_code)
 
+
 def generate_company_qr_id(db: Session) -> str:
     company_ids = db.execute(select(PublicCompany.qr_id)).scalars().all()
     allowed_chars = "abcdefghijkmnopqrstuvwxyz"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
     return generate_custom_unique_id(allowed_chars, company_ids)
 
+
 def generate_item_qr_id(db: Session) -> str:
     items_ids = db.execute(select(QrCode.qr_code_id)).scalars().all()
     allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
     return generate_custom_unique_id(allowed_chars, items_ids)
-
-
-
-
-
-
