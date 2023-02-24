@@ -66,6 +66,7 @@ def upgrade() -> None:
         sa.Column("name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True, default=True),
         sa.Column("group", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="permissions_pkey"),
         sa.UniqueConstraint("uuid", name="permissions_uuid_key"),

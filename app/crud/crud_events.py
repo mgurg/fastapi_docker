@@ -28,7 +28,7 @@ def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, statu
         select(EventSummary)
         .where(EventSummary.issue_uuid == issue_uuid)
         .where(EventSummary.action == status)
-        .where(EventSummary.date_to == None)
+        .where(EventSummary.date_to.is_(None))
     )
     return db.execute(query).scalar_one_or_none()
 
@@ -41,7 +41,7 @@ def get_event_summary_by_resource_uuid_and_status(
         .where(EventSummary.resource == resource)
         .where(EventSummary.resource_uuid == resource_uuid)
         .where(EventSummary.action == status)
-        .where(EventSummary.date_to == None)
+        .where(EventSummary.date_to.is_(None))
     )
 
     if internal_value is not None:

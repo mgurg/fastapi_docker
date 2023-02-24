@@ -28,16 +28,26 @@ def upgrade() -> None:
         sa.Column("title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("group", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True),
     )
 
     permissions_dict = [
         # USERS
         {
             "uuid": uuid4(),
+            "name": "OWNER_ACCESS",
+            "title": "Master permission",
+            "description": "Master permission",
+            "group": "service",
+            "is_visible": False,
+        },
+        {
+            "uuid": uuid4(),
             "name": "USER_VIEW",
             "title": "Show users list",
             "description": "User can view list of other users",
             "group": "users",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -45,6 +55,7 @@ def upgrade() -> None:
             "title": "Adding users",
             "description": "User can create new user accounts",
             "group": "users",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -52,6 +63,7 @@ def upgrade() -> None:
             "title": "Users editing",
             "description": "User can edit other users accounts",
             "group": "users",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -59,6 +71,7 @@ def upgrade() -> None:
             "title": "Account editing",
             "description": "Allow to edit my user account",
             "group": "users",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -66,6 +79,7 @@ def upgrade() -> None:
             "title": "Removing users",
             "description": "User can delete others users accounts",
             "group": "users",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -73,6 +87,7 @@ def upgrade() -> None:
             "title": "Importing users",
             "description": "User can import  users data from CSV file",
             "group": "users",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -80,6 +95,7 @@ def upgrade() -> None:
             "title": "Exporting users",
             "description": "User can export users data to CSV",
             "group": "users",
+            "is_visible": True,
         },
         # ISSUES
         {
@@ -88,6 +104,7 @@ def upgrade() -> None:
             "title": "Show issues list",
             "description": "User can view list of issues",
             "group": "issues",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -95,6 +112,7 @@ def upgrade() -> None:
             "title": "Adding issues",
             "description": "User can create new issues",
             "group": "issues",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -102,6 +120,7 @@ def upgrade() -> None:
             "title": "Issue editing",
             "description": "User can edit issue",
             "group": "issues",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -109,6 +128,7 @@ def upgrade() -> None:
             "title": "Removing issues",
             "description": "User can delete existing issues",
             "group": "issues",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -116,6 +136,7 @@ def upgrade() -> None:
             "title": "Exclude issues",
             "description": "Exclude issues from statistics",
             "group": "issues",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -123,6 +144,7 @@ def upgrade() -> None:
             "title": "Manage work",
             "description": "Allow to Start, Pause and Finish  work",
             "group": "issues",
+            "is_visible": True,
         },
         # {
         #     "uuid": uuid4(),
@@ -137,6 +159,7 @@ def upgrade() -> None:
             "title": "Show issue history",
             "description": "Show issue history graph",
             "group": "issues",
+            "is_visible": True,
         },
         # {
         #     "uuid": uuid4(),
@@ -151,6 +174,7 @@ def upgrade() -> None:
             "title": "Show replaced parts",
             "description": "Allow to show, add, remove list of replaced parts",
             "group": "issues",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -158,6 +182,7 @@ def upgrade() -> None:
             "title": "Exporting users",
             "description": "User can export users data to CSV",
             "group": "issues",
+            "is_visible": True,
         },
         # ITEMS
         {
@@ -166,6 +191,7 @@ def upgrade() -> None:
             "title": "Show items list",
             "description": "User can view list of items",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -173,6 +199,7 @@ def upgrade() -> None:
             "title": "Adding items",
             "description": "User can create new items",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -180,6 +207,7 @@ def upgrade() -> None:
             "title": "Item editing",
             "description": "User can edit item",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -187,6 +215,7 @@ def upgrade() -> None:
             "title": "Hide items",
             "description": "User can hide existing item",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -194,6 +223,7 @@ def upgrade() -> None:
             "title": "Removing items",
             "description": "User can delete existing item",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -201,6 +231,7 @@ def upgrade() -> None:
             "title": "Show QR in Item",
             "description": "Show QR in Item",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -208,6 +239,7 @@ def upgrade() -> None:
             "title": "Show item history",
             "description": "Show item history graph",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -215,6 +247,7 @@ def upgrade() -> None:
             "title": "Importing items",
             "description": "User can import items data from CSV file",
             "group": "items",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -222,6 +255,7 @@ def upgrade() -> None:
             "title": "Exporting items",
             "description": "User can export items data to CSV",
             "group": "items",
+            "is_visible": True,
         },
         # {
         #     "uuid": uuid4(),
@@ -231,10 +265,38 @@ def upgrade() -> None:
         #     "group": "items"
         # },
         # TAGS
-        {"uuid": uuid4(), "name": "TAG_ADD", "title": "Add tag", "description": "Add tag", "group": "tags"},
-        {"uuid": uuid4(), "name": "TAG_EDIT", "title": "Edit tag", "description": "Edit tag", "group": "tags"},
-        {"uuid": uuid4(), "name": "TAG_HIDE", "title": "Hide tag", "description": "Hide tag", "group": "tags"},
-        {"uuid": uuid4(), "name": "TAG_DELETE", "title": "Delete tag", "description": "Delete tag", "group": "tags"},
+        {
+            "uuid": uuid4(),
+            "name": "TAG_ADD",
+            "title": "Add tag",
+            "description": "Add tag",
+            "group": "tags",
+            "is_visible": True,
+        },
+        {
+            "uuid": uuid4(),
+            "name": "TAG_EDIT",
+            "title": "Edit tag",
+            "description": "Edit tag",
+            "group": "tags",
+            "is_visible": True,
+        },
+        {
+            "uuid": uuid4(),
+            "name": "TAG_HIDE",
+            "title": "Hide tag",
+            "description": "Hide tag",
+            "group": "tags",
+            "is_visible": True,
+        },
+        {
+            "uuid": uuid4(),
+            "name": "TAG_DELETE",
+            "title": "Delete tag",
+            "description": "Delete tag",
+            "group": "tags",
+            "is_visible": True,
+        },
         # SETTINGS
         {
             "uuid": uuid4(),
@@ -242,6 +304,7 @@ def upgrade() -> None:
             "title": "Acces to Account Settings",
             "description": "User can change account related settings",
             "group": "settings",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -249,6 +312,7 @@ def upgrade() -> None:
             "title": "Acces to Tags Settings",
             "description": "User can change Tags related settings",
             "group": "settings",
+            "is_visible": True,
         },
         {
             "uuid": uuid4(),
@@ -256,6 +320,7 @@ def upgrade() -> None:
             "title": "Acces to Permissions Settings",
             "description": "User can change Permission related settings",
             "group": "settings",
+            "is_visible": True,
         },
     ]
 
@@ -316,8 +381,9 @@ def upgrade() -> None:
     #     ],
     # )
 
-    admin_permissions: list[int] = list(range(1, len(permissions_dict)))  # ALL: 1 ..32
-    role_permission_rel: dict = {1: admin_permissions, 2: [4, 6, 8]}
+    admin_master_permissions: list[int] = list(range(1, len(permissions_dict)))  # ALL: 1 ..32
+    admin_permissions: list[int] = list(range(2, len(permissions_dict)))
+    role_permission_rel: dict = {1: admin_master_permissions, 2: admin_permissions}
 
     role_permission_rel_dict = []
     for key, values in role_permission_rel.items():

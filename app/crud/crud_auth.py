@@ -18,7 +18,7 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
     return db.execute(
         select(PublicUser)
         .where(PublicUser.service_token == token)
-        .where(PublicUser.is_active == False)
+        .where(PublicUser.is_active == False)  # noqa: E712
         .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
     ).scalar_one_or_none()
 
@@ -120,7 +120,7 @@ def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
         db_tenant_user = db.execute(
             select(User)
             .where(User.auth_token == token)
-            .where(User.is_active == True)
+            .where(User.is_active == True)  # noqa: E712
             .where(User.auth_token_valid_to > datetime.now(timezone.utc))
         ).scalar_one_or_none()
         return db_tenant_user

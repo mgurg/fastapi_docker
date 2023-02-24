@@ -9,7 +9,7 @@ from app.models.models import Tag
 def get_tags(db: Session, sort_column: str, sort_order: str, is_hidden: bool | None = None) -> Tag:
     query = select(Tag).where(Tag.deleted_at.is_(None))
 
-    if is_hidden == True:
+    if is_hidden is True:
         query = query.where(not_(Tag.is_hidden.is_(True)))
 
     query = query.order_by(text(f"{sort_column} {sort_order}"))
