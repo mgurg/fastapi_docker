@@ -79,7 +79,6 @@ class User(Base):
     tos = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tz = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True)
     lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
-    lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
     tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
