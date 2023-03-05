@@ -1,3 +1,5 @@
+import csv
+import io
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
@@ -6,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
+from starlette.responses import StreamingResponse
 
 from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
@@ -40,6 +43,46 @@ def item_get_all(
 
     db_items = crud_items.get_items(db, search, user_id, field, order)
     return paginate(db_items, params)
+
+
+@item_router.get("/export")
+def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+    db_users = crud_items.get_items(db, None, "name", "asc")
+
+    f = io.StringIO()
+    csv_file = csv.writer(f, delimiter=";")
+    csv_file.writerow(["Name", "Description", "Symbol"])
+    for u in db_users:
+        csv_file.writerow([u.name, u.summary, u.symbol])
+
+    f.seek(0)
+    response = StreamingResponse(f, media_type="text/csv")
+    filename = f"items_{datetime.today().strftime('%Y-%m-%d')}.csv"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
+
+
+# @item_router.post("/import")
+# def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None = None, auth=Depends(has_token)):
+#     if not file:
+#         raise HTTPException(status_code=400, detail="No file sent")
+
+#     csvReader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
+#     data = {}
+#     for idx, rows in enumerate(csvReader):
+#         key = idx  # Assuming a column named 'Id' to be the primary key
+#         data[key] = rows
+#         data[key]["uuid"] = str(uuid4())
+#         data[key]["is_active"] = True
+#         data[key]["is_verified"] = True
+#         data[key]["tz"] = "Europe/Warsaw"
+#         data[key]["lang"] = "pl"
+#         data[key]["phone"] = None
+#         # print(rows)
+
+#     file.file.close()
+
+#     return data
 
 
 @item_router.get("/{item_uuid}", response_model=ItemResponse)
