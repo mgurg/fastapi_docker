@@ -29,6 +29,18 @@ def get_user_by_uuid(db: Session, uuid: UUID) -> User:
     return result.scalar_one_or_none()
 
 
+def get_users_by_role_id(db: Session, id: int):
+    query = (
+        select(User.uuid, User.first_name, User.last_name)
+        .where(User.user_role_id == id)
+        .where(User.deleted_at.is_(None))
+    )
+
+    result = db.execute(query)
+
+    return result.all()
+
+
 def get_user_by_id(db: Session, id: int) -> User:
     query = select(User).where(User.id == id)
 
