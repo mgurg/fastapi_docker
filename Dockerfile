@@ -118,6 +118,6 @@ CMD ["uvicorn", "app.main:app","--no-server-header","--no-proxy-headers", "--hos
 # ENTRYPOINT ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", ":5000", "app.main:app"]
 
 
-HEALTHCHECK --interval=21s --timeout=3s --start-period=10s CMD curl --fail http://localhost:5000/health || exit 1
+# HEALTHCHECK --interval=21s --timeout=3s --start-period=10s CMD curl --fail http://localhost:5000/health || exit 1
 
 # EXPOSE 5432
