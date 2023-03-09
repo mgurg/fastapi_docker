@@ -91,9 +91,7 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
         del user["user_uuid"]
         # events_users_info_dict
 
-    result = {}
-    result["events"] = events_info_dict
-    result["users"] = events_users_info_dict
+    result = {"events": events_info_dict, "users": events_users_info_dict}
 
     return result
 
@@ -162,7 +160,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     last_issue_id = crud_issues.get_last_issue_id(db)
     if not last_issue_id:
-        last_issue_id = 1
+        last_issue_id = 0
     last_issue_id += 1
 
     issue_data = {
