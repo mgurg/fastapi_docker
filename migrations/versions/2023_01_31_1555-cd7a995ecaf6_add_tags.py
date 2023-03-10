@@ -30,6 +30,7 @@ def upgrade() -> None:
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="tags_pkey"),
+        sa.UniqueConstraint("name", "deleted_at", name="tag_name_key"),
         schema=None,
     )
 
