@@ -31,7 +31,6 @@ def tags_get_all(
 
 @tag_router.post("/", response_model=TagResponse)
 def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depends(has_token)):
-
     db_tag = crud_tags.get_tag_by_name(db, tag.name)
 
     if db_tag:
