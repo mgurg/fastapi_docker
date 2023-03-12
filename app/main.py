@@ -98,7 +98,6 @@ def welcome_message(text: str):
     print("Waiting for first request ...")
 
 
-
 start_scheduler(app)
 job = scheduler.add_job(welcome_message, args=["Everything OK, application is running correctly"])
 # scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
