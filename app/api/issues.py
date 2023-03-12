@@ -287,7 +287,7 @@ def issue_change_status(
             ):
                 raise HTTPException(status_code=400, detail="No started task!")
 
-            event.create_new_basic_event(db, db_user, db_issue, "issue_pause")
+            event.create_new_basic_event(db, db_user, db_issue, "issue_pause", description=issue.description)
             event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
 
@@ -304,7 +304,7 @@ def issue_change_status(
             if "issue_done" in actions_list:
                 raise HTTPException(status_code=400, detail="Task already finished!")
 
-            event.create_new_basic_event(db, db_user, db_issue, "issue_done")
+            event.create_new_basic_event(db, db_user, db_issue, "issue_done", description=issue.description)
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
