@@ -100,7 +100,6 @@ def welcome_message(text: str):
 
 start_scheduler(app)
 job = scheduler.add_job(welcome_message, args=["Everything OK, application is running correctly"])
-# scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
 
 
 @app.on_event("shutdown")

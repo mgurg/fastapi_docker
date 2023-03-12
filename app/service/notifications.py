@@ -1,24 +1,25 @@
 from uuid import UUID
 
 from app.config import get_settings
-from app.models.models import Issue
+from app.models.models import Issue, User
 
 settings = get_settings()
 
 
-def notify_users(sms_list: list[dict], email_list: list[dict], issue: Issue = None):
-    phones = []
-    emails = []
-    for sms in sms_list:
-        if sms["phone"] is not None:
-            phones.append(sms["phone"])
+def notify_users(sms_list: list[User], email_list: list[User], issue: Issue = None):
+    # phones = []
+    # emails = []
+    # for sms in sms_list:
+    #     if sms["phone"] is not None:
+    #         phones.append(sms["phone"])
+    #
+    # for email in email_list:
+    #     if email["email"] is not None:
+    #         emails.append(email["email"])
 
-    for email in email_list:
-        if email["email"] is not None:
-            emails.append(email["email"])
-
-    print(phones)
-    print(emails)
+    print(">>> bulk_notification")
+    # print(phones)
+    # print(emails)
 
     # bulk_email_send(emails, issue.name, issue.text, issue.uuid)
 

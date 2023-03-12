@@ -1,5 +1,6 @@
 import base64
 import os
+from uuid import UUID
 
 from loguru import logger
 
@@ -84,6 +85,27 @@ class EmailNotification:
                 "activation_url": self.base_url + activation_url,
                 "login_url": self.base_url,
                 "user_name": user.email,
+            },
+        )
+
+        if debug:
+            self.add_template_debugging(message_dict)
+
+        return {"Messages": [message_dict]}
+
+    def get_template_failure(
+        self, user: User, issue_name: str, issue_description: str, issue_uuid: UUID, debug: bool = False
+    ):
+        message_dict = dict(
+            From=self.message_from_field(),
+            To=self.message_to_field(user),
+            TemplateID=4534065,
+            TemplateLanguage=True,
+            Subject="Dziękuję za rejestrację",
+            Variables={
+                "issue_name": issue_name,
+                "issue_description": issue_description,
+                "issue_url": f"{self.base_url}/issues/{issue_uuid}",
             },
         )
 

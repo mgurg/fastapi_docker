@@ -74,6 +74,19 @@ def get_users_for_email_notification(db: Session, notification_level: str):
     return result.all()
 
 
+def get_users_list_for_email_notification(db: Session, notification_level: str) -> list[User]:
+    query = (
+        select(User.id, User.email, User.first_name, User.last_name)
+        .select_from(SettingNotification)
+        .where(SettingNotification.email_notification_level == notification_level)
+        .outerjoin(User, User.id == SettingNotification.user_id)
+    )
+
+    result = db.execute(query)
+
+    return result.all()
+
+
 def create_notification_setting(db: Session, data: dict) -> SettingNotification:
     new_setting_notification = SettingNotification(**data)
     db.add(new_setting_notification)
