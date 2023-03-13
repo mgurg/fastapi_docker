@@ -85,9 +85,9 @@ if settings.ENVIRONMENT == "PRD":
 
 
 @app.on_event("startup")
-def startup():
+async def startup():
     logger.info("🚀 [Starting up] Initializing DB data...")
-    alembic_upgrade_head("public", "d6ba8c13303e")
+    await alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🎽 [Job] Running test Job")
 
 

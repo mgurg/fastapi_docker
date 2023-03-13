@@ -1,10 +1,15 @@
-import time
-from contextlib import contextmanager
+from contextlib import contextmanager, asynccontextmanager
 from functools import lru_cache
+import time
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from loguru import logger
+from sqlalchemy import create_engine, select
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, declarative_base
@@ -46,7 +51,6 @@ if sql_performance_monitoring is True:
         logger.debug("Query Complete!")
         logger.debug("Total Time: %f" % total)
 
-
 SQLALCHEMY_DATABASE_URL = (
     f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 )
@@ -55,7 +59,9 @@ if settings.ENVIRONMENT != "PRD":
     print(SQLALCHEMY_DATABASE_URL)
     echo = False
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
+# for async support
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # print(SQLALCHEMY_DATABASE_URL)
 
@@ -63,14 +69,17 @@ metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
 
+
+
 class TenantNotFoundError(Exception):
     def __init__(self, id):
         self.message = "Tenant %s not found!" % str(id)
         super().__init__(self.message)
 
-
+# for async support
+# added async
 @lru_cache()
-def get_tenant(request: Request) -> PublicCompany | None:
+async def get_tenant(request: Request) -> PublicCompany:
     try:
         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
         host_without_port = request.headers.get("tenant")  # based on tenant header: abc
@@ -78,7 +87,7 @@ def get_tenant(request: Request) -> PublicCompany | None:
         if host_without_port is None:
             return None
 
-        with with_db(None) as db:
+        async with with_db(None) as db:
             tenant = db.execute(
                 select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
             ).scalar_one_or_none()
@@ -90,23 +99,26 @@ def get_tenant(request: Request) -> PublicCompany | None:
         print(e)
     return tenant
 
-
-def get_db(tenant: PublicCompany = Depends(get_tenant)):
+# for async support
+# added async
+async def get_db(tenant: PublicCompany = Depends(get_tenant)):
     if tenant is None:
         yield None
 
-    with with_db(tenant.tenant_id) as db:
+    async with with_db(tenant.tenant_id) as db:
         yield db
 
-
-def get_public_db():
-    with with_db("public") as db:
+# for async support
+# added async
+async def get_public_db():
+    async with with_db("public") as db:
         yield db
     # --------------------
 
 
-@contextmanager
-def with_db(tenant_schema: str | None):
+# for async support
+@asynccontextmanager
+async def with_db(tenant_schema: str | None):
     if tenant_schema:
         schema_translate_map = dict(tenant=tenant_schema)
     else:
@@ -114,10 +126,11 @@ def with_db(tenant_schema: str | None):
 
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     try:
-        db = Session(autocommit=False, autoflush=False, bind=connectable)
-        yield db
+        async with async_session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
     except Exception as e:
         logger.error(e)
+        await session.rollback()
         print("ERRRR: " + tenant_schema)
     finally:
-        db.close()
+        await session.close()

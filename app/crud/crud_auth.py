@@ -23,8 +23,9 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
     ).scalar_one_or_none()
 
 
-def get_public_company_count(db: Session) -> int:
-    return db.execute(select(func.count(PublicCompany.id))).scalar_one_or_none()
+async def get_public_company_count(db: Session) -> int:
+    limit = await db.execute(select(func.count(PublicCompany.id)))
+    return limit.scalar_one_or_none()
 
 
 def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
