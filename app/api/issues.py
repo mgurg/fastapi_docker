@@ -268,6 +268,16 @@ def issue_change_status(
             # TODO: now only frontend is checking if users is not added twice in row, add backend validation
             status = "assigned"
 
+            user_db_id = None
+            if internal_value:
+                user_db_id = crud_users.get_user_by_uuid(db, internal_value)
+            if user_db_id:
+                email_users = crud_settings.get_users_list_for_email_notification(db, "assigned_to_me", user_db_id.id)
+
+
+            sms_notifications = []
+            notify_users(sms_notifications, email_users, db_issue)
+
         case "issue_remove_person":
             if "issue_add_person" not in actions_list:
                 raise HTTPException(status_code=400, detail="No user to remove!")

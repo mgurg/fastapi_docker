@@ -16,6 +16,7 @@ class EmailNotification:
         self.app_key = settings.email_mailjet_app_key
         self.secret_key = settings.email_mailjet_secret_key
         self.auth_header = self.generate_basic_auth(self.app_key, self.secret_key)
+        self.debug = False
 
         self.sender = settings.email_sender
         self.base_url = settings.base_app_url
@@ -73,7 +74,7 @@ class EmailNotification:
         to_field = [{"Email": email, "Name": f"{user.first_name} {user.last_name}"}]
         return to_field
 
-    def get_template_admin_registration(self, user: User, activation_url: str, debug: bool = False):
+    def get_template_admin_registration(self, user: User, activation_url: str):
         message_dict = dict(
             From=self.message_from_field(),
             To=self.message_to_field(user),
@@ -88,35 +89,41 @@ class EmailNotification:
             },
         )
 
-        if debug:
+        if self.debug:
             self.add_template_debugging(message_dict)
 
         return {"Messages": [message_dict]}
 
-    def get_template_failure(
-        self, user: User, issue_name: str, issue_description: str, issue_uuid: UUID, debug: bool = False
-    ):
-        message_dict = dict(
-            From=self.message_from_field(),
-            To=self.message_to_field(user),
-            TemplateID=4534065,
-            TemplateLanguage=True,
-            Subject="Dziękuję za rejestrację",
-            Variables={
-                "issue_name": issue_name,
-                "issue_description": issue_description,
-                "issue_url": f"{self.base_url}/issues/{issue_uuid}",
-            },
-        )
+    def get_template_failure(self, users: list[User], name: str, description: str, uuid: UUID):
+        messages_list = []
+        for user in users:
+            message_dict = dict(
+                From=self.message_from_field(),
+                To=self.message_to_field(user),
+                TemplateID=4534065,
+                TemplateLanguage=True,
+                Subject="Nowa awaria",
+                Variables={
+                    "issue_name": name,
+                    "issue_description": description,
+                    "issue_url": f"{self.base_url}/issues/{uuid}",
+                },
+            )
 
-        if debug:
-            self.add_template_debugging(message_dict)
+            messages_list.append(message_dict)
 
-        return {"Messages": [message_dict]}
+        if self.debug:
+            self.add_template_debugging(messages_list)
+
+        return {"Messages": messages_list}
 
     def add_template_debugging(self, message_dict):
         message_dict["TemplateErrorReporting"] = {"Email": "m@m.pl", "Name": "Mailjet Template Errors"}
 
     def send_admin_registration(self, user: User | PublicUser, activation_url: str) -> None:
-        data = self.get_template_admin_registration(user, activation_url, True)
+        data = self.get_template_admin_registration(user, activation_url)
+        self.send_by_mailjet(data)
+
+    def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
+        data = self.get_template_failure(users, name, description, uuid)
         self.send_by_mailjet(data)
