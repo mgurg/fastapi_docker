@@ -274,7 +274,6 @@ def issue_change_status(
             if user_db_id:
                 email_users = crud_settings.get_users_list_for_email_notification(db, "assigned_to_me", user_db_id.id)
 
-
             sms_notifications = []
             notify_users(sms_notifications, email_users, db_issue)
 

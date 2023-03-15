@@ -74,7 +74,9 @@ def get_users_for_sms_notification(db: Session, notification_level: str):
 #     return result.all()
 
 
-def get_users_list_for_email_notification(db: Session, notification_level: str, user_id : int | None = None) -> list[User]:
+def get_users_list_for_email_notification(
+    db: Session, notification_level: str, user_id: int | None = None
+) -> list[User]:
     query = (
         select(User.id, User.email, User.first_name, User.last_name)
         .select_from(SettingNotification)

@@ -49,7 +49,6 @@ def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
 
 @auth_router.post("/company_info")
 def auth_company_info(*, public_db: Session = Depends(get_public_db), company: CompanyInfoRegisterIn):
-
     db_public_company = crud_auth.get_public_company_by_nip(public_db, company.company_tax_id)
     if db_public_company:
         raise HTTPException(status_code=400, detail="Company already registered")
