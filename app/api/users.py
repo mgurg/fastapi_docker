@@ -171,12 +171,11 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
 
 @user_router.patch("/{user_uuid}", response_model=StandardResponse)
 def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreateIn, auth=Depends(has_token)):
-
     if user.email:
         email_db_user = crud_users.get_user_by_email(db, user.email)
-        if email_db_user:
+        if email_db_user and email_db_user != user.email:
             raise HTTPException(status_code=400, detail="Email is assigned to other user")
-    
+
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
