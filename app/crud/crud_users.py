@@ -50,7 +50,7 @@ def get_user_by_id(db: Session, id: int) -> User:
 
 
 def get_user_by_email(db: Session, email: EmailStr) -> User:
-    query = select(User).where(User.email == email)
+    query = select(User).where(User.email == email).where(User.deleted_at.is_(None))
 
     result = db.execute(query)
 
