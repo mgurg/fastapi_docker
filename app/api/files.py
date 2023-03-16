@@ -22,6 +22,13 @@ settings = get_settings()
 file_router = APIRouter()
 
 
+@file_router.get("/used_space")
+def file_get_used_space(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+    db_file_size = crud_files.get_files_size_in_db(db)
+
+    return db_file_size
+
+
 @file_router.get("/", response_model=list[FileResponse])
 def file_get_info_all(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     if db is None:
@@ -53,13 +60,6 @@ def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth=Depe
     # file["url"] = "https://placeimg.com/500/300/nature?t=" + file["file_name"]
 
     return db_file
-
-
-@file_router.get("/used_space")
-def file_get_used_space(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_file_size = crud_files.get_files_size_in_db(db)
-
-    return db_file_size
 
 
 @file_router.post("/", response_model=FileResponse)

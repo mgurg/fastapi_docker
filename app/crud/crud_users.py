@@ -58,7 +58,7 @@ def get_user_by_email(db: Session, email: EmailStr) -> User:
 
 
 def get_user_count(db: Session) -> int:
-    query = select(func.count(User.id)).where(User.deleted_at.is_(None))
+    query = select(func.count(User.id)).where(User.deleted_at.is_(None)).where(User.is_verified.is_(True))
 
     result = db.execute(query)
 
