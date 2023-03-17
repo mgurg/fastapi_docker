@@ -1,6 +1,6 @@
 import csv
 import io
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
@@ -115,6 +115,41 @@ def item_get_timeline_history(
     return db_events
 
 
+@item_router.get("/statistics/all")  #
+def item_get_statistics(*, db: Session = Depends(get_db), date_from=None, date_to=None, auth=Depends(has_token)):
+    issues_per_day = crud_issues.get_issues_by_day(db, None, None)
+    issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
+
+    issues_per_hour = crud_issues.get_issues_by_hour(db, None, None)
+    issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
+
+    for hours in [time(i).strftime('%H') for i in range(24)]:
+        issues_per_hour_dict.setdefault(hours, 0)
+
+    issues_status = crud_issues.get_issues_status(db, None, None)
+    issues_status_dict = dict((y, x) for y, x in issues_status)
+
+    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
+        issues_status_dict.setdefault(status, 0)
+
+    data = {
+        "issuesCount": None,
+        "issuesPerDay": None,
+        "issuesPerHour": None,
+        "issuesStatus": None,
+        "repairTime": None,
+        "users": None,
+    }
+
+    if issues_per_day_dict:
+        data["issuesPerDay"] = issues_per_day_dict
+    if issues_per_hour_dict:
+        data["issuesPerHour"] = issues_per_hour_dict
+    if issues_status_dict:
+        data["issuesStatus"] = issues_status_dict
+    return data
+
+
 @item_router.get("/statistics/{item_uuid}")  #
 def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(has_token)):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
@@ -132,6 +167,8 @@ def item_get_statistics(*, db: Session = Depends(get_db), item_uuid: UUID, auth=
 
     issues_status = crud_issues.get_item_issues_status(db, [db_item.id])
     issues_status_dict = dict((y, x) for y, x in issues_status)
+    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
+        issues_status_dict.setdefault(status, 0)
 
     issues_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
     issues_repair_time_list = [item for tpl in issues_repair_time for item in tpl]

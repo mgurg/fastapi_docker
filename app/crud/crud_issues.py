@@ -114,6 +114,22 @@ def get_item_issues_by_day(db, item_ids: list[int]):
     return result.all()
 
 
+def get_issues_by_day(db, date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.created_at.cast(Date).label("date"), func.count(distinct(Issue.id)))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("date")
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
+
+
 def get_item_issues_by_hour(db, item_ids: list[int]):
     query = (
         select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
@@ -126,12 +142,44 @@ def get_item_issues_by_hour(db, item_ids: list[int]):
     return result.all()
 
 
+def get_issues_by_hour(db, date_from: datetime = None, date_to: datetime = None):
+    query = select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("hour")
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
+
+
 def get_item_issues_status(db, item_ids: list[int]):
     query = (
         select(Issue.status.label("status"), func.count(distinct(Issue.id)))
         .where(Issue.item_id.in_(item_ids))
         .group_by("status")
     )
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
+
+
+def get_issues_status(db, date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.status.label("status"), func.count(distinct(Issue.id)))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("status")
 
     result = db.execute(query)  # await db.execute(query)
 

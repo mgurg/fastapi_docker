@@ -258,18 +258,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.92"
+version = "1.26.93"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.92-py3-none-any.whl", hash = "sha256:49bef90c0ccd6cd87a304d8563958d2d00f2361e02ec953fc3c8bde87cf21112"},
-    {file = "boto3-1.26.92.tar.gz", hash = "sha256:401088934097260597495ae3c1842a59a701712a2d0e89443f8ede9161cd3806"},
+    {file = "boto3-1.26.93-py3-none-any.whl", hash = "sha256:1e543a27a7f0cddef298492d70bf7ea67db02960ec704c1af26d2b543cdefb43"},
+    {file = "boto3-1.26.93.tar.gz", hash = "sha256:df541c06ff1018675097e102f2f2aa2abc31ea5d197c7fc229afbe30950ba131"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.92,<1.30.0"
+botocore = ">=1.29.93,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -278,14 +278,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.92"
+version = "1.29.93"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.92-py3-none-any.whl", hash = "sha256:71a67c1f896db0204b97a8e199aa1188541d139ce3130ba52261ccd19b6e17db"},
-    {file = "botocore-1.29.92.tar.gz", hash = "sha256:0bb40ca410ad26c5e9821ab1ab52ea894759ed2188afd99152261c5e895d8c9c"},
+    {file = "botocore-1.29.93-py3-none-any.whl", hash = "sha256:39c2ad2d44c7e1ef25a98e957b63fa760b87bcf32423a033dceeb359976c37d7"},
+    {file = "botocore-1.29.93.tar.gz", hash = "sha256:940201ae2f5edbf4ccbf1066e345cf7f5224568bd702fa9e80a92e5c479fa649"},
 ]
 
 [package.dependencies]
@@ -1943,14 +1943,14 @@ crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "1.16.0"
+version = "1.17.0"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.16.0.tar.gz", hash = "sha256:a900845bd78c263d49695d48ce78a4bce1030bbd917e0b6cc021fc000c901113"},
-    {file = "sentry_sdk-1.16.0-py2.py3-none-any.whl", hash = "sha256:633edefead34d976ff22e7edc367cdf57768e24bc714615ccae746d9d91795ae"},
+    {file = "sentry-sdk-1.17.0.tar.gz", hash = "sha256:ad40860325c94d1a656da70fba5a7c4dbb2f6809d3cc2d00f74ca0b608330f14"},
+    {file = "sentry_sdk-1.17.0-py2.py3-none-any.whl", hash = "sha256:3c4e898f7a3edf5a2042cd0dcab6ee124e2112189228c272c08ad15d3850c201"},
 ]
 
 [package.dependencies]
