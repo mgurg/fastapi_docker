@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.models import Item, User
 
 
-def get_items(db: Session, search: str, user_id: int, sort_column: str, sort_order: str) -> Item:
+def get_items(db: Session, search: str, user_id: int, sort_column: str, sort_order: str) -> list[Item]:
     query = select(Item)
 
     search_filters = []

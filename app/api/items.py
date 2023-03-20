@@ -1,6 +1,6 @@
 import csv
 import io
-from datetime import datetime, timezone, time
+from datetime import datetime, time, timezone
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
@@ -47,13 +47,13 @@ def item_get_all(
 
 @item_router.get("/export")
 def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_users = crud_items.get_items(db, None, "name", "asc")
+    db_items = crud_items.get_items(db, None, None, "name", "asc")
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
     csv_file.writerow(["Name", "Description", "Symbol"])
-    for u in db_users:
-        csv_file.writerow([u.name, u.summary, u.symbol])
+    for u in db_items:
+        csv_file.writerow([u.name, u.text, u.symbol])
 
     f.seek(0)
     response = StreamingResponse(f, media_type="text/csv")
@@ -116,14 +116,14 @@ def item_get_timeline_history(
 
 
 @item_router.get("/statistics/all")  #
-def item_get_statistics(*, db: Session = Depends(get_db), date_from=None, date_to=None, auth=Depends(has_token)):
+def item_get_statistics_all(*, db: Session = Depends(get_db), date_from=None, date_to=None, auth=Depends(has_token)):
     issues_per_day = crud_issues.get_issues_by_day(db, None, None)
     issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
 
     issues_per_hour = crud_issues.get_issues_by_hour(db, None, None)
     issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
 
-    for hours in [time(i).strftime('%H') for i in range(24)]:
+    for hours in [time(i).strftime("%H") for i in range(24)]:
         issues_per_hour_dict.setdefault(hours, 0)
 
     issues_status = crud_issues.get_issues_status(db, None, None)

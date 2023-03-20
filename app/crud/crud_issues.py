@@ -9,10 +9,10 @@ from app.models.models import EventSummary, Issue, Tag, User
 
 def get_issues(
     db: Session,
-    search: str,
-    status: str,
-    user_id: int,
-    priority: str,
+    search: str | None,
+    status: str | None,
+    user_id: int | None,
+    priority: str | None,
     sort_column: str,
     sort_order: str,
     date_from: datetime = None,
@@ -30,6 +30,8 @@ def get_issues(
         query = query.filter(or_(False, *search_filters))
 
     match status:
+        case "all":
+            ...
         case "active":
             query = query.where(not_(Issue.status.in_(["done", "rejected"])))
         case "inactive":
@@ -44,6 +46,8 @@ def get_issues(
             query = query.where(Issue.priority == "20")
         case "high":
             query = query.where(Issue.priority == "30")
+        case _:
+            ...
 
     if user_id is not None:
         query = query.filter(Issue.users_issue.any(User.id == user_id))
