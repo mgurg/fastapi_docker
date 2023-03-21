@@ -106,12 +106,17 @@ def get_item_issues_ids(db, item_id: int) -> list[int]:
     return result.scalars().all()
 
 
-def get_item_issues_by_day(db, item_ids: list[int]):
-    query = (
-        select(Issue.created_at.cast(Date).label("date"), func.count(distinct(Issue.id)))
-        .where(Issue.item_id.in_(item_ids))
-        .group_by("date")
-    )
+def get_item_issues_by_day(db, item_ids: list[int], date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.created_at.cast(Date).label("date"), func.count(distinct(Issue.id)))
+    query = query.where(Issue.item_id.in_(item_ids))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("date")
 
     result = db.execute(query)  # await db.execute(query)
 
@@ -134,12 +139,12 @@ def get_issues_by_day(db, date_from: datetime = None, date_to: datetime = None):
     return result.all()
 
 
-def get_item_issues_by_hour(db, item_ids: list[int]):
-    query = (
-        select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
-        .where(Issue.item_id.in_(item_ids))
-        .group_by("hour")
-    )
+def get_item_issues_by_hour(db, item_ids: list[int] | None, date_from: datetime = None, date_to: datetime = None):
+    query = select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
+
+    query = query.where(Issue.item_id.in_(item_ids))
+
+    query = query.group_by("hour")
 
     result = db.execute(query)  # await db.execute(query)
 
