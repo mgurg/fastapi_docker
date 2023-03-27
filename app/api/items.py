@@ -134,7 +134,7 @@ def item_get_statistics_all(
 
     issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
 
-    issues_status = crud_issues.get_issues_status(db, None, None)
+    issues_status = crud_issues.get_issues_status(db, date_from, date_to)
     issues_status_dict = dict((y, x) for y, x in issues_status)
 
     for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
@@ -176,17 +176,17 @@ def item_get_statistics(
     db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
     # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
 
-    issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id])
+    issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id], date_from, date_to)
     issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
 
-    issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id])
+    issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
     issues_per_hour_dict = dict((int(y), x) for y, x in issues_per_hour)
     for hours in [time(i).strftime("%H") for i in range(24)]:
         issues_per_hour_dict.setdefault(hours, 0)
 
     issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
 
-    issues_status = crud_issues.get_item_issues_status(db, [db_item.id])
+    issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
     issues_status_dict = dict((y, x) for y, x in issues_status)
     for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
         issues_status_dict.setdefault(status, 0)

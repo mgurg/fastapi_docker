@@ -167,16 +167,31 @@ def get_issues_by_hour(db, date_from: datetime = None, date_to: datetime = None)
     return result.all()
 
 
-def get_item_issues_status(db, item_ids: list[int]):
-    query = (
-        select(Issue.status.label("status"), func.count(distinct(Issue.id)))
-        .where(Issue.item_id.in_(item_ids))
-        .group_by("status")
-    )
+def get_item_issues_status(db, item_ids: list[int], date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.status.label("status"), func.count(distinct(Issue.id)))
+    query = query.where(Issue.item_id.in_(item_ids))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("status")
 
     result = db.execute(query)  # await db.execute(query)
 
     return result.all()
+
+    # query = (
+    #     select(Issue.status.label("status"), func.count(distinct(Issue.id)))
+    #     .where(Issue.item_id.in_(item_ids))
+    #     .group_by("status")
+    # )
+    #
+    # result = db.execute(query)  # await db.execute(query)
+    #
+    # return result.all()
 
 
 def get_issues_status(db, date_from: datetime = None, date_to: datetime = None):
