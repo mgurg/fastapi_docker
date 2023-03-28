@@ -1,3 +1,5 @@
+from datetime import datetime, time, timezone
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -5,7 +7,13 @@ from app.models.models import Event, Issue, Item, User
 
 
 def get_issues_counter_summary(db: Session):
+    # TODO: tylko dla dzisiaj
+
+    date_from = datetime.combine(datetime.now(timezone.utc), time.min)
+
     query = select(Issue.status, func.count(Issue.status)).group_by(Issue.status)
+    query = query.filter(func.DATE(Issue.created_at) >= date_from)
+    
     result = db.execute(query)  # await db.execute(query)
     return result.all()
 
