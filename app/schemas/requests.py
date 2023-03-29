@@ -116,6 +116,7 @@ class ItemAddIn(BaseRequest):
 
 class ItemEditIn(BaseRequest):
     name: str | None
+    symbol: str | None
     summary: str | None
     text_html: str | None
     text_json: dict | None

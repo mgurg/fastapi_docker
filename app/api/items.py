@@ -10,10 +10,10 @@ from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_qr, crud_users
+from app.crud import crud_auth, crud_files, crud_issues, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
-from app.schemas.responses import EventTimelineResponse, ItemIndexResponse, ItemResponse, StandardResponse
+from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
@@ -103,16 +103,16 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
     return db_item
 
 
-@item_router.get("/timeline/{item_uuid}", response_model=list[EventTimelineResponse])
-def item_get_timeline_history(
-    *, db: Session = Depends(get_db), item_uuid: UUID, action: str | None = None, auth=Depends(has_token)
-):
-    db_item = crud_items.get_item_by_uuid(db, item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
+# @item_router.get("/timeline/{item_uuid}", response_model=list[EventTimelineResponse])
+# def item_get_timeline_history(
+#     *, db: Session = Depends(get_db), item_uuid: UUID, action: str | None = None, auth=Depends(has_token)
+# ):
+#     db_item = crud_items.get_item_by_uuid(db, item_uuid)
+#     if not db_item:
+#         raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_events = crud_events.get_events_by_uuid_and_resource(db, item_uuid, action)
-    return db_events
+#     db_events = crud_events.get_events_by_uuid_and_resource(db, item_uuid, action)
+#     return db_events
 
 
 @item_router.get("/statistics/all")  #

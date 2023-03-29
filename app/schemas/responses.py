@@ -221,6 +221,7 @@ class EventTimelineResponse(BaseResponse):
 
 class ItemResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str | None
     text: str | None
     text_json: dict | None

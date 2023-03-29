@@ -13,7 +13,7 @@ def get_issues_counter_summary(db: Session):
 
     query = select(Issue.status, func.count(Issue.status)).group_by(Issue.status)
     query = query.filter(func.DATE(Issue.created_at) >= date_from)
-    
+
     result = db.execute(query)  # await db.execute(query)
     return result.all()
 
