@@ -1,6 +1,7 @@
 import csv
 import io
 from datetime import datetime, time, timezone
+import sys
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
@@ -169,44 +170,58 @@ def item_get_statistics(
     item_uuid: UUID,
     auth=Depends(has_token),
 ):
-    db_item = crud_items.get_item_by_uuid(db, item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
+    
+    issues_per_day_dict = None
+    issues_per_hour_dict = None
+    issues_status_dict = None
+    issues_total_time_list = None
+    issues_repair_time_list = None
+    users = None
+    
+    try:
+        db_item = crud_items.get_item_by_uuid(db, item_uuid)
+        if not db_item:
+            raise HTTPException(status_code=400, detail="Item not found!")
 
-    db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
-    # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
+        db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
+        # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
 
-    issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id], date_from, date_to)
-    issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
+        issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id], date_from, date_to)
+        issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
 
-    issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
-    issues_per_hour_dict = dict((int(y), x) for y, x in issues_per_hour)
-    for hours in [time(i).strftime("%H") for i in range(24)]:
-        issues_per_hour_dict.setdefault(hours, 0)
+        issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
+        issues_per_hour_dict = dict((int(y), x) for y, x in issues_per_hour)
+        for hours in [time(i).strftime("%H") for i in range(24)]:
+            issues_per_hour_dict.setdefault(hours, 0)
 
-    issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
+        issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
 
-    issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
-    issues_status_dict = dict((y, x) for y, x in issues_status)
-    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
-        issues_status_dict.setdefault(status, 0)
+        issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
+        issues_status_dict = dict((y, x) for y, x in issues_status)
+        for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
+            issues_status_dict.setdefault(status, 0)
 
-    issues_status_dict = dict(sorted(issues_status_dict.items()))
+        issues_status_dict = dict(sorted(issues_status_dict.items()))
 
-    issues_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
-    issues_repair_time_list = [item for tpl in issues_repair_time for item in tpl]
+        issues_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
+        issues_repair_time_list = [item for tpl in issues_repair_time for item in tpl]
 
-    issues_total_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueTotalTime")
-    issues_total_time_list = [item for tpl in issues_total_time for item in tpl]
+        issues_total_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueTotalTime")
+        issues_total_time_list = [item for tpl in issues_total_time for item in tpl]
 
-    issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
-    issue_assigned_users_list = [item for tpl in issue_assigned_users for item in tpl]
-    issue_assigned_users_list = list(set(issue_assigned_users_list))
+        issue_assigned_users = crud_issues.get_assigned_users(db, db_issues_uuid)
+        issue_assigned_users_list = [item for tpl in issue_assigned_users for item in tpl]
+        issue_assigned_users_list = list(set(issue_assigned_users_list))
 
-    users = {}
-    for user_uuid in issue_assigned_users_list:
-        user_details = crud_users.get_user_by_uuid(db, user_uuid)
-        users["name"] = user_details.first_name + " " + user_details.last_name
+        users = {}
+        for user_uuid in issue_assigned_users_list:
+            user_details = crud_users.get_user_by_uuid(db, user_uuid)
+            users["name"] = user_details.first_name + " " + user_details.last_name
+    
+    except Exception as e:
+        capture_exception(e)
+        capture_exception('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
 
     # średni czas potrzebny na podjęcie zgłoszenia
 
