@@ -28,8 +28,8 @@ def upgrade() -> None:
         sa.Column("name", sa.VARCHAR(length=512), unique=False, autoincrement=False, nullable=False),
         sa.Column("text", sa.TEXT, autoincrement=False, nullable=True),
         sa.Column("text_json", postgresql.JSONB, autoincrement=False, nullable=True),
-        sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
-        sa.Column("video_json", postgresql.JSONB, autoincrement=False, nullable=True),
+        # sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
+        # sa.Column("video_json", postgresql.JSONB, autoincrement=False, nullable=True),
         # sa.Column("is_use_guide", sa.BOOLEAN(), autoincrement=False, nullable=True),
         # sa.Column("is_service_guide", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("type", sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=False), # service_guide, use_guide

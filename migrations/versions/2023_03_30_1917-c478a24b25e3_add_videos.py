@@ -23,6 +23,7 @@ def upgrade() -> None:
         "videos",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("video_json", postgresql.JSONB, autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
