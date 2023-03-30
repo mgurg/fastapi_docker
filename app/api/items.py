@@ -133,8 +133,6 @@ def item_get_statistics_all(
     for hours in [time(i).strftime("%H") for i in range(24)]:
         issues_per_hour_dict.setdefault(hours, 0)
 
-    issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
-
     issues_status = crud_issues.get_issues_status(db, date_from, date_to)
     issues_status_dict = dict((y, x) for y, x in issues_status)
 
@@ -190,10 +188,9 @@ def item_get_statistics(
         issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
 
         issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
-        issues_per_hour_dict = dict((int(y), x) for y, x in issues_per_hour)
+        issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
         for hours in [time(i).strftime("%H") for i in range(24)]:
             issues_per_hour_dict.setdefault(hours, 0)
-
         issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
 
         issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
@@ -219,9 +216,13 @@ def item_get_statistics(
             users["name"] = user_details.first_name + " " + user_details.last_name
     
     except Exception as e:
-        capture_exception(e)
-        capture_exception('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
-        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+        line_no = sys.exc_info()[-1].tb_lineno
+        file_name = sys.exc_info()[-1].tb_frame.f_code.co_filename
+        type_name = type(e).__name__
+        error_message = f"Error on line: {line_no}, file: {file_name}, type: {type_name}, message: "+  str(e)
+        print(error_message)
+        # capture_exception(error_message)
+
 
     # średni czas potrzebny na podjęcie zgłoszenia
 
