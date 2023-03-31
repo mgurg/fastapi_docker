@@ -1,7 +1,7 @@
 import csv
 import io
-from datetime import datetime, time, timezone
 import sys
+from datetime import datetime, time, timezone
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
@@ -168,14 +168,13 @@ def item_get_statistics(
     item_uuid: UUID,
     auth=Depends(has_token),
 ):
-    
     issues_per_day_dict = None
     issues_per_hour_dict = None
     issues_status_dict = None
     issues_total_time_list = None
     issues_repair_time_list = None
     users = None
-    
+
     try:
         db_item = crud_items.get_item_by_uuid(db, item_uuid)
         if not db_item:
@@ -214,15 +213,14 @@ def item_get_statistics(
         for user_uuid in issue_assigned_users_list:
             user_details = crud_users.get_user_by_uuid(db, user_uuid)
             users["name"] = user_details.first_name + " " + user_details.last_name
-    
+
     except Exception as e:
         line_no = sys.exc_info()[-1].tb_lineno
         file_name = sys.exc_info()[-1].tb_frame.f_code.co_filename
         type_name = type(e).__name__
-        error_message = f"Error on line: {line_no}, file: {file_name}, type: {type_name}, message: "+  str(e)
+        error_message = f"Error on line: {line_no}, file: {file_name}, type: {type_name}, message: " + str(e)
         print(error_message)
         # capture_exception(error_message)
-
 
     # średni czas potrzebny na podjęcie zgłoszenia
 

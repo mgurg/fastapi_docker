@@ -32,7 +32,9 @@ def upgrade() -> None:
         # sa.Column("video_json", postgresql.JSONB, autoincrement=False, nullable=True),
         # sa.Column("is_use_guide", sa.BOOLEAN(), autoincrement=False, nullable=True),
         # sa.Column("is_service_guide", sa.BOOLEAN(), autoincrement=False, nullable=True),
-        sa.Column("type", sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=False), # service_guide, use_guide
+        sa.Column(
+            "type", sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=False
+        ),  # service_guide, use_guide
         sa.Column("is_public", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
