@@ -195,7 +195,7 @@ class GuideResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
-    video_id: str | None
+    # video_id: str | None
 
 
 class ItemIndexResponse(BaseResponse):
