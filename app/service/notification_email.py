@@ -1,127 +1,129 @@
 import base64
 import os
+from uuid import UUID
 
-from requests import request
+from loguru import logger
 
 from app.config import get_settings
+from app.models.models import User
+from app.models.shared_models import PublicUser
 
 settings = get_settings()
 
 
 class EmailNotification:
-    def __init__(self, app_key, secret_key):
-        self.app_key = app_key
-        self.secret_key = secret_key
+    def __init__(self):
+        self.app_key = settings.email_mailjet_app_key
+        self.secret_key = settings.email_mailjet_secret_key
         self.auth_header = self.generate_basic_auth(self.app_key, self.secret_key)
+        self.debug = False
 
         self.sender = settings.email_sender
+        self.base_url = settings.base_app_url
+        self.product_name = "INTIO"
 
     def generate_basic_auth(self, username: str, password: str):
         return base64.b64encode(f"{username}:{password}".encode())
 
-    def send(self, receiver: str, subject: str, template: str, vars: dict):
+    # def send_by_email_labs(self, receiver: str, subject: str, template: str, vars: dict):
+    #     url = "https://api.emaillabs.net.pl/api/sendmail_templates"
+    #     smtp = settings.email_smtp
+    #
+    #     receiver_data = {f"to[{receiver}]": ""}
+    #
+    #     for key, value in vars.items():
+    #         receiver_data[f"to[{receiver}][vars][{key}]"] = value
+    #
+    #     headers = {"Authorization": f"Basic {self.auth_header.decode()}"}
+    #     template_data = {"from": self.sender, "smtp_account": smtp, "subject": subject, "template_id": template}
+    #
+    #     payload = receiver_data | template_data
+    #     files = {}
+    #
+    #     response = request("POST", url, headers=headers, data=payload, files=files)
+    #     return response.text
+
+    def send_by_mailjet(self, payload: dict):
         if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            logger.info("Email test")
             return "TEST_EMAIL_NOTIFICATION"
 
-        if settings.ENVIRONMENT != "PRD":
-            receiver = settings.email_dev
-
-        # response = self.by_email_labs(receiver, subject, template, vars)
-        response = self.send_by_mailjet(receiver, subject, template, vars)
-
-        return response
-
-    def send_by_email_labs(self, receiver: str, subject: str, template: str, vars: dict):
-        url = "https://api.emaillabs.net.pl/api/sendmail_templates"
-        smtp = settings.email_smtp
-
-        receiver_data = {f"to[{receiver}]": ""}
-
-        for key, value in vars.items():
-            receiver_data[f"to[{receiver}][vars][{key}]"] = value
-
-        headers = {"Authorization": f"Basic {self.auth_header.decode()}"}
-        template_data = {"from": self.sender, "smtp_account": smtp, "subject": subject, "template_id": template}
-
-        payload = receiver_data | template_data
-        files = {}
-
-        response = request("POST", url, headers=headers, data=payload, files=files)
-        return response.text
-
-    def send_by_mailjet(self, receiver: str, subject: str, template: str, vars: dict):
         url = "https://api.mailjet.com/v3.1/send"
-
-        to_field = {"Email": f"{receiver}", "Name": "user"}
-        from_field = settings.email_mailjet_sender
-
-        payload = {
-            "Messages": [
-                {
-                    "From": {"Email": f"{from_field}", "Name": "rm.pl"},
-                    "To": [to_field],
-                    "TemplateID": 4534065,
-                    "TemplateLanguage": True,
-                    "Subject": "Nowa awaria",
-                    "Variables": {
-                        "issue_name": "Awaria",
-                        "issue_url": "www.onet.pl",
-                        "sender_name": "Michał",
-                        "product_name": "Intio",
-                    },
-                    "TemplateErrorReporting": {"Email": settings.email_dev, "Name": "Mailjet Template Errors"},
-                }
-            ]
-        }
-
         headers = {"Content-Type": "application/json", "Authorization": f"Basic {self.auth_header.decode()}"}
 
+        # pprint(payload)
         # response = request("POST", url, headers=headers, json=payload)
-
+        #
         # return response.text
 
         return "OK"
 
-    def _add_template_debugging(message_data: dict) -> None:
-        message_data["TemplateErrorReporting"] = {
-            "Email": settings.DEV_EMAIL_ADDRESS,
-            "Name": "Mailjet Template Errors",
-        }
+    # MAILJET TEMPLATES COMMON
 
-    def mail_new_registration(message_data: dict) -> None:
-        data = {
-            "Messages": [
-                {
-                    "From": {"Email": "awaria@remontmaszyn.pl", "Name": "remontmaszyn.pl"},
-                    "To": [{"Email": "passenger1@example.com", "Name": "passenger 1"}],
-                    "TemplateID": 4561351,
-                    "TemplateLanguage": True,
-                    "Subject": "Dziękuję za rejestrację",
-                    "Variables": {
-                        "product_name": "",
-                        "activation_url": "",
-                        "login_url": "",
-                        "user_name": "",
-                        "sender_name": "Michal",
-                    },
-                }
-            ]
-        }
+    def message_from_field(self):
+        from_field = {"Email": "awaria@remontmaszyn.pl", "Name": "remontmaszyn.pl"}
+        return from_field
 
-    def make_admin_user_validation_email(user: str, token: str) -> dict:
-        return {
-            "FromName": "pass Culture admin",
-            "Subject": "[pass Culture admin] Validation de votre adresse email pour le pass Culture",
-            "MJ-TemplateID": 1660341,
-            "MJ-TemplateLanguage": True,
-            "Vars": {"lien_validation_mail": f"{settings.PRO_URL}/creation-de-mot-de-passe/{token}"},
-        }
+    def message_to_field(self, user: User):
+        email = user.email
 
-    def send_admin_user_validation_email(self, user: str, token: str) -> None:
-        self.make_admin_user_validation_email(user, token)
-        # mails.send(recipients=[user.email], data=data)
+        if settings.ENVIRONMENT != "PRD":
+            email = settings.email_dev
 
-    def mail_new_registration_with_password(message_data: dict) -> None:
-        ...
+        # to_field = [{"Email": "mail@outlook.com", "Name": f"{user.first_name} {user.last_name}"}]
+        to_field = [{"Email": email, "Name": f"{user.first_name} {user.last_name}"}]
+        return to_field
 
-        # https://github.com/pass-culture/pass-culture-api/blob/b24db94a2fb2dd6473705c3bde97c9e28fac3390/api/src/pcapi/utils/mailing.py#L195
+    def get_template_admin_registration(self, user: User, activation_url: str):
+        message_dict = dict(
+            From=self.message_from_field(),
+            To=self.message_to_field(user),
+            TemplateID=4561351,
+            TemplateLanguage=True,
+            Subject="Dziękuję za rejestrację",
+            Variables={
+                "product_name": self.product_name,
+                "activation_url": self.base_url + activation_url,
+                "login_url": self.base_url,
+                "user_name": user.email,
+            },
+        )
+
+        if self.debug:
+            self.add_template_debugging(message_dict)
+
+        return {"Messages": [message_dict]}
+
+    def get_template_failure(self, users: list[User], name: str, description: str, uuid: UUID):
+        messages_list = []
+        for user in users:
+            message_dict = dict(
+                From=self.message_from_field(),
+                To=self.message_to_field(user),
+                TemplateID=4534065,
+                TemplateLanguage=True,
+                Subject="Nowa awaria",
+                Variables={
+                    "issue_name": name,
+                    "issue_description": description,
+                    "issue_url": f"{self.base_url}/issues/{uuid}",
+                },
+            )
+
+            messages_list.append(message_dict)
+
+        if self.debug:
+            self.add_template_debugging(messages_list)
+
+        return {"Messages": messages_list}
+
+    def add_template_debugging(self, message_dict):
+        message_dict["TemplateErrorReporting"] = {"Email": "m@m.pl", "Name": "Mailjet Template Errors"}
+
+    def send_admin_registration(self, user: User | PublicUser, activation_url: str) -> None:
+        data = self.get_template_admin_registration(user, activation_url)
+        self.send_by_mailjet(data)
+
+    def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
+        data = self.get_template_failure(users, name, description, uuid)
+        self.send_by_mailjet(data)

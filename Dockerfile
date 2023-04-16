@@ -1,8 +1,8 @@
 # pull official base image
-FROM python:3.10.10-slim-bullseye
+FROM python:3.10.11-slim-bullseye
 # FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
   curl \
   && rm -rf /var/lib/apt/lists/*
 
@@ -28,6 +28,7 @@ ARG AWS_S3_SECRET_ACCESS_KEY
 
 #APP
 ARG APP_ENV
+ARG APP_HOST
 
 # SENTRY DSN
 ARG SENTRY_DSN
@@ -61,6 +62,7 @@ ARG MAILJET_SMS_API_KEY
 ARG MAILJET_SMS_SENDER
 
 ENV APP_ENV $APP_ENV
+ENV APP_HOST $APP_HOST
 
 ENV AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY_ID
 ENV AWS_SECRET_ACCESS_KEY $AWS_SECRET_ACCESS_KEY

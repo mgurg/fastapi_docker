@@ -48,7 +48,11 @@ def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
 
 
 @auth_router.post("/company_info")
-def auth_company_info(company: CompanyInfoRegisterIn):
+def auth_company_info(*, public_db: Session = Depends(get_public_db), company: CompanyInfoRegisterIn):
+    db_public_company = crud_auth.get_public_company_by_nip(public_db, company.company_tax_id)
+    if db_public_company:
+        raise HTTPException(status_code=400, detail="Company already registered")
+
     company_details = None
     try:
         company = CompanyDetails(country=company.country, tax_id=company.company_tax_id)
@@ -58,7 +62,7 @@ def auth_company_info(company: CompanyInfoRegisterIn):
         capture_exception(e)
 
     if company_details is None:
-        raise HTTPException(status_code=400, detail="Information not found")
+        raise HTTPException(status_code=404, detail="Information not found")
     return company_details
 
 
@@ -140,17 +144,18 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification
-    email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
-    receiver = user["email"]
-
-    template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
-        "product_name": "Intio",
-        "login_url": "https://beta.remontmaszyn.pl/login",
-        "username": receiver,
-        "sender_name": "Michał",
-        "action_url": "https://beta.remontmaszyn.pl/activate/" + service_token,
-    }
-    email.send(receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
+    EmailNotification()
+    # email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
+    # receiver = user["email"]
+    #
+    # template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
+    #     "product_name": "Intio",
+    #     "login_url": "https://beta.remontmaszyn.pl/login",
+    #     "username": receiver,
+    #     "sender_name": "Michał",
+    #     "action_url": "https://beta.remontmaszyn.pl/activate/" + service_token,
+    # }
+    # email.send(receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
 
     return {"ok": True}
 

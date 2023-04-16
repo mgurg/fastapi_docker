@@ -9,10 +9,10 @@ from app.models.models import EventSummary, Issue, Tag, User
 
 def get_issues(
     db: Session,
-    search: str,
-    status: str,
-    user_id: int,
-    priority: str,
+    search: str | None,
+    status: str | None,
+    user_id: int | None,
+    priority: str | None,
     sort_column: str,
     sort_order: str,
     date_from: datetime = None,
@@ -30,6 +30,8 @@ def get_issues(
         query = query.filter(or_(False, *search_filters))
 
     match status:
+        case "all":
+            ...
         case "active":
             query = query.where(not_(Issue.status.in_(["done", "rejected"])))
         case "inactive":
@@ -44,6 +46,8 @@ def get_issues(
             query = query.where(Issue.priority == "20")
         case "high":
             query = query.where(Issue.priority == "30")
+        case _:
+            ...
 
     if user_id is not None:
         query = query.filter(Issue.users_issue.any(User.id == user_id))
@@ -102,36 +106,104 @@ def get_item_issues_ids(db, item_id: int) -> list[int]:
     return result.scalars().all()
 
 
-def get_item_issues_by_day(db, item_ids: list[int]):
-    query = (
-        select(Issue.created_at.cast(Date).label("date"), func.count(distinct(Issue.id)))
-        .where(Issue.item_id.in_(item_ids))
-        .group_by("date")
-    )
+def get_item_issues_by_day(db, item_ids: list[int], date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.created_at.cast(Date).label("date"), func.count(distinct(Issue.id)))
+    query = query.where(Issue.item_id.in_(item_ids))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("date")
 
     result = db.execute(query)  # await db.execute(query)
 
     return result.all()
 
 
-def get_item_issues_by_hour(db, item_ids: list[int]):
-    query = (
-        select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
-        .where(Issue.item_id.in_(item_ids))
-        .group_by("hour")
-    )
+def get_issues_by_day(db, date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.created_at.cast(Date).label("date"), func.count(distinct(Issue.id)))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("date")
 
     result = db.execute(query)  # await db.execute(query)
 
     return result.all()
 
 
-def get_item_issues_status(db, item_ids: list[int]):
-    query = (
-        select(Issue.status.label("status"), func.count(distinct(Issue.id)))
-        .where(Issue.item_id.in_(item_ids))
-        .group_by("status")
-    )
+def get_item_issues_by_hour(db, item_ids: list[int] | None, date_from: datetime = None, date_to: datetime = None):
+    query = select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
+
+    query = query.where(Issue.item_id.in_(item_ids))
+
+    query = query.group_by("hour")
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
+
+
+def get_issues_by_hour(db, date_from: datetime = None, date_to: datetime = None):
+    query = select(extract("hour", Issue.created_at).label("hour"), func.count(distinct(Issue.id)))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("hour")
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
+
+
+def get_item_issues_status(db, item_ids: list[int], date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.status.label("status"), func.count(distinct(Issue.id)))
+    query = query.where(Issue.item_id.in_(item_ids))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("status")
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.all()
+
+    # query = (
+    #     select(Issue.status.label("status"), func.count(distinct(Issue.id)))
+    #     .where(Issue.item_id.in_(item_ids))
+    #     .group_by("status")
+    # )
+    #
+    # result = db.execute(query)  # await db.execute(query)
+    #
+    # return result.all()
+
+
+def get_issues_status(db, date_from: datetime = None, date_to: datetime = None):
+    query = select(Issue.status.label("status"), func.count(distinct(Issue.id)))
+
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
+    query = query.group_by("status")
 
     result = db.execute(query)  # await db.execute(query)
 

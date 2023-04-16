@@ -91,17 +91,15 @@ def startup():
     logger.info("🎽 [Job] Running test Job")
 
 
-def myfunc(text: str):
+def welcome_message(text: str):
     logger.info("👍 Job Message: " + text)
     logger.info("Waiting for first request ...")
     print("👍 Job Message: " + text)
     print("Waiting for first request ...")
-    print()
 
 
 start_scheduler(app)
-job = scheduler.add_job(myfunc, args=["Everything OK, application is running correctly"])
-# scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
+job = scheduler.add_job(welcome_message, args=["Everything OK, application is running correctly"])
 
 
 @app.on_event("shutdown")

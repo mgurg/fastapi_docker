@@ -6,8 +6,8 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.92"
-SQLAlchemy = "2.0.4"
+fastapi = "^0.95"
+SQLAlchemy = "^2.0"
 alembic = "^1.9.1"
 uvicorn = "^0.18.2"
 gunicorn = "^20.1.0"
@@ -38,7 +38,7 @@ pyvieser = "^0.0.4"
 pyotp = "^2.7.0"
 httpx = "^0.23"
 psycopg = {extras = ["binary"], version = "^3.1"}
-pandas = "^1.5.3"
+pandas = "2.0.0"
 fastapi-babel = "^0.0.8"
 
 [tool.poetry.dev-dependencies]

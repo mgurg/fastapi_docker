@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 
-from app.crud import crud_permission
+from app.crud import crud_permission, crud_users
 from app.db import get_db
 from app.schemas.requests import RoleAddIn, RoleEditIn
 from app.schemas.responses import PermissionResponse, RolePermissionFull, RoleSummaryResponse, StandardResponse
@@ -108,6 +108,14 @@ def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, auth=Depends(
 
     if not db_role:
         raise HTTPException(status_code=404, detail="Role not found")
+
+    db_users = crud_users.get_users_by_role_id(db, db_role.id)
+    # fields = ['uuid', 'first_name', 'last_name']
+    # db_users_list = [dict(zip(fields, d)) for d in db_users]
+
+    if db_users:
+        error_message = {"message": "Permission assigned to One or more users", "count": len(db_users)}
+        raise HTTPException(status_code=400, detail=error_message)
 
     db.delete(db_role)
     db.commit()

@@ -1,3 +1,5 @@
+import csv
+import io
 from collections import Counter
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
@@ -7,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
+from starlette.responses import StreamingResponse
 
 from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
 from app.db import engine, get_db
@@ -52,6 +55,24 @@ def issue_get_all(
 
     db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order, dateFrom, dateTo, tag_ids)
     return paginate(db_issues, params)
+
+
+@issue_router.get("/export")
+def get_export_issues(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+    print("================")
+    db_issues = crud_issues.get_issues(db, None, "all", None, None, "name", "asc", None, None, None)
+
+    f = io.StringIO()
+    csv_file = csv.writer(f, delimiter=";")
+    csv_file.writerow(["Symbol", "Name", "Description", "Author", "Status", "Created at"])
+    for u in db_issues:
+        csv_file.writerow([u.symbol, u.name, u.text, u.author_name, u.status, u.created_at])
+
+    f.seek(0)
+    response = StreamingResponse(f, media_type="text/csv")
+    filename = f"issues_{datetime.today().strftime('%Y-%m-%d')}.csv"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
 
 
 @issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])
@@ -184,15 +205,17 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     new_issue = crud_issues.create_issue(db, issue_data)
 
     # Notification
-    email_notifications = crud_settings.get_users_for_email_notification(db, "all")
-    sms_notifications = crud_settings.get_users_for_sms_notification(db, "all")
-
-    keys = ("phone", "mode")
-    list_of_sms_notifications = [dict(zip(keys, values)) for values in sms_notifications]
-
-    keys = ("email", "mode")
-    list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
-    notify_users(list_of_sms_notifications, list_of_email_notifications, new_issue)
+    email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")
+    sms_notifications = []
+    notify_users(sms_notifications, email_users_list, new_issue)
+    # email_notifications = crud_settings.get_users_for_email_notification(db, "all")
+    # sms_notifications = crud_settings.get_users_for_sms_notification(db, "all")
+    #
+    # keys = ("phone", "mode")
+    # list_of_sms_notifications = [dict(zip(keys, values)) for values in sms_notifications]
+    #
+    # keys = ("email", "mode")
+    # list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
 
     event.create_new_basic_event(db, db_user, new_issue, "issue_add")
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
@@ -266,6 +289,15 @@ def issue_change_status(
             # TODO: now only frontend is checking if users is not added twice in row, add backend validation
             status = "assigned"
 
+            user_db_id = None
+            if internal_value:
+                user_db_id = crud_users.get_user_by_uuid(db, internal_value)
+            if user_db_id:
+                email_users = crud_settings.get_users_list_for_email_notification(db, "assigned_to_me", user_db_id.id)
+
+            sms_notifications = []
+            notify_users(sms_notifications, email_users, db_issue)
+
         case "issue_remove_person":
             if "issue_add_person" not in actions_list:
                 raise HTTPException(status_code=400, detail="No user to remove!")
@@ -287,7 +319,7 @@ def issue_change_status(
             ):
                 raise HTTPException(status_code=400, detail="No started task!")
 
-            event.create_new_basic_event(db, db_user, db_issue, "issue_pause")
+            event.create_new_basic_event(db, db_user, db_issue, "issue_pause", description=issue.description)
             event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
 
@@ -304,7 +336,7 @@ def issue_change_status(
             if "issue_done" in actions_list:
                 raise HTTPException(status_code=400, detail="Task already finished!")
 
-            event.create_new_basic_event(db, db_user, db_issue, "issue_done")
+            event.create_new_basic_event(db, db_user, db_issue, "issue_done", description=issue.description)
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
             event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")

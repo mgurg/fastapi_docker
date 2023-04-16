@@ -86,8 +86,8 @@ def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(
         "name": guide.name,
         "text": description,
         "text_json": guide.text_json,
-        "video_json": guide.video_json,
-        "video_id": guide.video_id,
+        # "video_json": guide.video_json,
+        # "video_id": guide.video_id,
         "files_guide": files,
         "created_at": datetime.now(timezone.utc),
     }

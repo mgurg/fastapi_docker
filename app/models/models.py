@@ -82,6 +82,7 @@ class User(Base):
     tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     role_FK = relationship("Role", back_populates="users_FK")
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
@@ -178,8 +179,8 @@ class Guide(Base):
     name = sa.Column("name", sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
-    video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    video_json = sa.Column("video_json", JSONB, autoincrement=False, nullable=True)
+    # video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    # video_json = sa.Column("video_json", JSONB, autoincrement=False, nullable=True)
     created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 

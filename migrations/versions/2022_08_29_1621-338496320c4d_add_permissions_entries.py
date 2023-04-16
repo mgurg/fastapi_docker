@@ -381,8 +381,8 @@ def upgrade() -> None:
     #     ],
     # )
 
-    admin_master_permissions: list[int] = list(range(1, len(permissions_dict)))  # ALL: 1 ..32
-    admin_permissions: list[int] = list(range(2, len(permissions_dict)))
+    admin_master_permissions: list[int] = list(range(1, len(permissions_dict) + 1))  # ALL: 1 ..32
+    admin_permissions: list[int] = list(range(2, len(permissions_dict) + 1))
     role_permission_rel: dict = {1: admin_master_permissions, 2: admin_permissions}
 
     role_permission_rel_dict = []
