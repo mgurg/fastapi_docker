@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.models.models import Permission, Role, User
 
 
-def get_roles_summary(db: Session, search: str, sortColumn: str, sortOrder: str):
+def get_roles_summary(db: Session, search: str, all: bool, sortColumn: str, sortOrder: str):
     query = (
         select(Role.uuid, Role.role_title, Role.role_description, Role.is_custom, func.count(User.id).label("count"))
         .outerjoin(User, User.user_role_id == Role.id)
@@ -19,6 +19,9 @@ def get_roles_summary(db: Session, search: str, sortColumn: str, sortOrder: str)
     if search is not None:
         all_filters.append(Role.role_title.ilike(f"%{search}%"))
         query = query.filter(*all_filters)
+
+    if (all is not None) and (all is False):
+        query = query.where(Role.is_system == False)  # noqa: E712 
 
     result = db.execute(query)  # await db.execute(query)
 

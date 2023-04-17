@@ -47,21 +47,21 @@ def get_buckets_list():
     return s3_buckets
 
 
-@s3_router.get("/list_files")
-@logger.catch()
-def get_files_list(*, session: Session = Depends(get_session)):
-    # https://realpython.com/python-boto3-aws-s3/#object-traversal
-    # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
-
-    files = []
-
-    # for obj in bucket.objects.all():
-    #     files.append({"name": obj.key})
-    #     print(obj.key)
-    # subsrc = obj.Object()
-    # print(obj.key, obj.storage_class, obj.last_modified, subsrc.version_id, subsrc.metadata)
-
-    return files
+# @s3_router.get("/list_files")
+# @logger.catch()
+# def get_files_list(*, session: Session = Depends(get_session)):
+#     # https://realpython.com/python-boto3-aws-s3/#object-traversal
+#     # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
+#
+#     files = []
+#
+#     # for obj in bucket.objects.all():
+#     #     files.append({"name": obj.key})
+#     #     print(obj.key)
+#     # subsrc = obj.Object()
+#     # print(obj.key, obj.storage_class, obj.last_modified, subsrc.version_id, subsrc.metadata)
+#
+#     return files
 
 
 # @s3_router.delete("/dlete_bucket/{bucket_name}")
@@ -78,11 +78,11 @@ def get_files_list(*, session: Session = Depends(get_session)):
 
 
 @s3_router.delete("/delete_file/")
-def remove_bucket(*, session: Session = Depends(get_session), objectName: str):
-    a = s3_resource.Object(settings.s3_bucket_name, objectName).delete()
+def remove_bucket(*, session: Session = Depends(get_session), object_name: str):
+    a = s3_resource.Object(settings.s3_bucket_name, object_name).delete()
     print(a)
 
-    db_task = session.exec(select(Files).where(Files.file_name == objectName)).one_or_none()
+    db_task = session.exec(select(Files).where(Files.file_name == object_name)).one_or_none()
     session.delete(db_task)
     session.commit()
 
@@ -156,11 +156,11 @@ def upload_aws_s3(*, session: Session = Depends(get_session), request: Request, 
 
 
 @s3_router.get("/upload_signed_url")
-def sign_s3_upload(objectName: str):
+def sign_s3_upload(object_name: str):
     try:
         url = s3_client.generate_presigned_url(
             "put_object",
-            Params={"Bucket": settings.s3_bucket_name, "Key": objectName},
+            Params={"Bucket": settings.s3_bucket_name, "Key": object_name},
             ExpiresIn=3600,
             HttpMethod="PUT",
         )

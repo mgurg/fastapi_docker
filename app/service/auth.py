@@ -21,12 +21,12 @@ def is_timezone_correct(tz):
     return tz in pytz.all_timezones_set
 
 
-def is_nip_correct(nipId):
-    re.sub("[^0-9]", "", nipId)
-    return nip.is_valid(nipId)
+def is_nip_correct(nip_id: str):
+    re.sub("[^0-9]", "", nip_id)
+    return nip.is_valid(nip_id)
 
 
-def get_ip_info(ip):
+def get_ip_info(ip:str):
     url = f"http://ipinfo.io/{ip}?token={settings.api_ipinfo}"
     response = "{'foo':'bar'}"
     if ip is not None:

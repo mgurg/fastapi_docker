@@ -19,13 +19,14 @@ def role_get_all(
     db: Session = Depends(get_db),
     params: Params = Depends(),
     search: str = None,
+    all: bool = True,
     sortOrder: str = "asc",
     sortColumn: str = "name",
     auth=Depends(has_token),
 ):
     sortTable = {"name": "role_title"}
 
-    db_roles = crud_permission.get_roles_summary(db, search, sortTable[sortColumn], sortOrder)
+    db_roles = crud_permission.get_roles_summary(db, search,all,sortTable[sortColumn], sortOrder)
     return paginate(db_roles, params)
 
 
