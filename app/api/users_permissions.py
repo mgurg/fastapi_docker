@@ -61,6 +61,7 @@ def role_add(*, db: Session = Depends(get_db), role: RoleAddIn, auth=Depends(has
         "uuid": str(uuid4()),
         "is_custom": True,
         "is_visible": True,
+        "is_system": False,
         "role_name": role.title,
         "role_title": role.title,
         "role_description": role.description,
