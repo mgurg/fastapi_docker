@@ -21,7 +21,7 @@ def get_roles_summary(db: Session, search: str, all: bool, sortColumn: str, sort
         query = query.filter(*all_filters)
 
     if (all is not None) and (all is False):
-        query = query.where(Role.is_system == False)  # noqa: E712 
+        query = query.where(Role.is_system == False)  # noqa: E712
 
     result = db.execute(query)  # await db.execute(query)
 

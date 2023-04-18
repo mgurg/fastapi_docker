@@ -26,7 +26,7 @@ def role_get_all(
 ):
     sortTable = {"name": "role_title"}
 
-    db_roles = crud_permission.get_roles_summary(db, search,all,sortTable[sortColumn], sortOrder)
+    db_roles = crud_permission.get_roles_summary(db, search, all, sortTable[sortColumn], sortOrder)
     return paginate(db_roles, params)
 
 

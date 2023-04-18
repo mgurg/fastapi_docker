@@ -26,7 +26,7 @@ def is_nip_correct(nip_id: str):
     return nip.is_valid(nip_id)
 
 
-def get_ip_info(ip:str):
+def get_ip_info(ip: str):
     url = f"http://ipinfo.io/{ip}?token={settings.api_ipinfo}"
     response = "{'foo':'bar'}"
     if ip is not None:
