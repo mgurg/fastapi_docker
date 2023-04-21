@@ -290,6 +290,9 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 
     return db_user
 
+@auth_router.get("/remind-password/{email}")
+def auth_remind_password(*, db: Session = Depends(get_db), token: str):
+    return "OK"
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
 def auth_verify_qr(*, public_db: Session = Depends(get_public_db), qr_code: str):
