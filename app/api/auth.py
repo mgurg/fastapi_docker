@@ -18,7 +18,7 @@ from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import CompanyInfoRegisterIn, UserFirstRunIn, UserLoginIn, UserRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
     ActivationResponse,
     CompanyInfoBasic,
@@ -290,9 +290,30 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 
     return db_user
 
+
 @auth_router.get("/remind-password/{email}")
-def auth_remind_password(*, db: Session = Depends(get_db), token: str):
+def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: str):
+    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, email)
+
+    if db_public_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
     return "OK"
+
+
+@auth_router.get("/reset-password")
+def auth_reset_password(*, public_db: Session = Depends(get_public_db), reset_data: ResetPassword):
+    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, reset_data.email)
+
+# https://postmarkapp.com/guides/password-reset-email-best-practices
+# https://www.checklist.design/flows/password
+# https://supertokens.com/blog/implementing-a-forgot-password-flow
+
+    if db_public_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return "OK"
+
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
 def auth_verify_qr(*, public_db: Session = Depends(get_public_db), qr_code: str):
