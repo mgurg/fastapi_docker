@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
 from loguru import logger
 from passlib.hash import argon2
+from pydantic import EmailStr
 from sentry_sdk import capture_exception
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -292,26 +293,35 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 
 
 @auth_router.get("/remind-password/{email}")
-def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: str):
+def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: EmailStr):
     db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, email)
 
     if db_public_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return "OK"
+    service_token = secrets.token_hex(32)
+
+    update_user = {
+        "service_token": service_token,
+        "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+        "updated_at": datetime.now(timezone.utc),
+    }
+
+    crud_auth.update_public_user(public_db, db_public_user, update_user)
+
+    return {"token": service_token}
 
 
-@auth_router.get("/reset-password")
-def auth_reset_password(*, public_db: Session = Depends(get_public_db), reset_data: ResetPassword):
-    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, reset_data.email)
-
-# https://postmarkapp.com/guides/password-reset-email-best-practices
-# https://www.checklist.design/flows/password
-# https://supertokens.com/blog/implementing-a-forgot-password-flow
+@auth_router.post("/reset-password/{token}")
+def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: str, reset_data: ResetPassword):
+    db_public_user: PublicUser = crud_auth.get_public_active_user_by_service_token(public_db, token)
 
     if db_public_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
+    connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
+    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+        pass
     return "OK"
 
 
