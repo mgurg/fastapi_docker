@@ -27,13 +27,12 @@ def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUs
     query = (
         select(PublicUser)
         .where(PublicUser.service_token == token)
-        .where(PublicUser.is_active == True) # noqa: E712
+        .where(PublicUser.is_active == True)  # noqa: E712
         .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
     )
 
     result = db.execute(query)  # await db.execute(query)
     return result.scalar_one_or_none()
-
 
 
 def get_public_company_count(db: Session) -> int:

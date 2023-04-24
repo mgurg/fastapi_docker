@@ -13,6 +13,7 @@ from sentry_sdk import capture_exception
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
+from user_agents import parse
 
 from app.config import get_settings
 from app.crud import crud_auth, crud_qr, crud_users
@@ -292,12 +293,18 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
     return db_user
 
 
-@auth_router.get("/remind-password/{email}")
-def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: EmailStr):
+@auth_router.get("/reset-password/{email}", response_model=StandardResponse)
+def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: EmailStr, req: Request):
+    user_agent = parse(req.headers["User-Agent"])
+    ua_os = user_agent.os.family
+    ua_browser = user_agent.browser.family
+
     db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, email)
 
     if db_public_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        logger.warning(f"reset password for nonexisting email {email} , OS: {ua_os}, browser: {ua_browser}")
+        return {"ok": True}
+        # raise HTTPException(status_code=404, detail="User not found")
 
     service_token = secrets.token_hex(32)
 
@@ -309,7 +316,10 @@ def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: 
 
     crud_auth.update_public_user(public_db, db_public_user, update_user)
 
-    return {"token": service_token}
+    emailNotification = EmailNotification()
+    emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+
+    return {"ok": True}
 
 
 @auth_router.post("/reset-password/{token}")
