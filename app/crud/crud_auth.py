@@ -84,17 +84,17 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
     return db_user
 
 
-def update_tenant_user(db: Session, db_user: User, update_data: dict) -> User:
-    try:
-        for key, value in update_data.items():
-            setattr(db_user, key, value)
+# def update_tenant_user(db: Session, db_user: User, update_data: dict) -> User:
+#     try:
+#         for key, value in update_data.items():
+#             setattr(db_user, key, value)
 
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-    except Exception as e:
-        print("#####", e)
-    return db_user
+#         db.add(db_user)
+#         db.commit()
+#         db.refresh(db_user)
+#     except Exception as e:
+#         print("#####", e)
+#     return db_user
 
 
 def create_tenant_user(db: Session, tenant_data) -> User:

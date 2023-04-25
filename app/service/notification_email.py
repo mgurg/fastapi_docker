@@ -143,7 +143,7 @@ class EmailNotification:
         message_dict["TemplateErrorReporting"] = {"Email": "m@m.pl", "Name": "Mailjet Template Errors"}
 
     def send_admin_registration(self, user: User | PublicUser, activation_url: str) -> None:
-        data = self.get_template_admin_registration(user, activation_url)
+        self.get_template_admin_registration(user, activation_url)
         # self.send_by_mailjet(data)
 
     def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, os: str) -> None:
@@ -153,5 +153,5 @@ class EmailNotification:
         self.send_by_mailjet(data)
 
     def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
-        data = self.get_template_failure(users, name, description, uuid)
+        self.get_template_failure(users, name, description, uuid)
         # self.send_by_mailjet(data)

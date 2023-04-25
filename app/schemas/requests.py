@@ -45,7 +45,6 @@ class UserLoginIn(BaseRequest):
 
 class ResetPassword(BaseRequest):
     password: str
-    token: str
 
 
 class UserCreateIn(BaseRequest):

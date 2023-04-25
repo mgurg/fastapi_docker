@@ -198,6 +198,9 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
 
         db_tenant_user = crud_auth.create_tenant_user(db, user_data)
 
+    empty_data = {"service_token": None, "service_token_valid_to": None, "password": None}
+    crud_auth.update_public_user(public_db, db_public_user, empty_data)
+
     return {
         "ok": True,
         "first_name": db_tenant_user.first_name,
@@ -245,7 +248,7 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
             "updated_at": datetime.now(timezone.utc),
         }
 
-        crud_auth.update_tenant_user(db, db_user, update_package)
+        crud_users.update_user(db, db_user, update_package)
 
         # Load with relations
         db_user = db.execute(
@@ -316,14 +319,19 @@ def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: 
 
     crud_auth.update_public_user(public_db, db_public_user, update_user)
 
-    emailNotification = EmailNotification()
-    emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+    # emailNotification = EmailNotification()
+    # emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
 
     return {"ok": True}
 
 
-@auth_router.post("/reset-password/{token}")
+@auth_router.post("/reset-password/{token}", response_model=StandardResponse)
 def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: str, reset_data: ResetPassword):
+    is_password_ok = Password(reset_data.password).compare(reset_data.password)
+
+    if is_password_ok is not True:
+        raise HTTPException(status_code=400, detail=is_password_ok)
+
     db_public_user: PublicUser = crud_auth.get_public_active_user_by_service_token(public_db, token)
 
     if db_public_user is None:
@@ -331,8 +339,15 @@ def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: s
 
     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        pass
-    return "OK"
+        db_user = crud_users.get_user_by_email(db, db_public_user.email)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found!")
+        update_package = {"password": argon2.hash(reset_data.password)}
+        crud_users.update_user(db, db_user, update_package)
+
+    crud_auth.update_public_user(public_db, db_public_user, {"service_token": None, "service_token_valid_to": None})
+
+    return  {"ok": True}
 
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
