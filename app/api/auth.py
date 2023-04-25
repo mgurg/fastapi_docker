@@ -347,7 +347,7 @@ def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: s
 
     crud_auth.update_public_user(public_db, db_public_user, {"service_token": None, "service_token_valid_to": None})
 
-    return  {"ok": True}
+    return {"ok": True}
 
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
