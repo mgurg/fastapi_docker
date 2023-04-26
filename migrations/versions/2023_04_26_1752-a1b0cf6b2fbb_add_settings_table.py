@@ -12,11 +12,10 @@ from sqlalchemy.sql import column, table
 
 
 # revision identifiers, used by Alembic.
-revision = 'a1b0cf6b2fbb'
-down_revision = '055684700394'
+revision = "a1b0cf6b2fbb"
+down_revision = "055684700394"
 branch_labels = None
 depends_on = None
-
 
 
 def upgrade() -> None:

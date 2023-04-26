@@ -11,10 +11,9 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import column, table
 
 
-
 # revision identifiers, used by Alembic.
-revision = '7283939d25ad'
-down_revision = '40bde431a56f'
+revision = "7283939d25ad"
+down_revision = "40bde431a56f"
 branch_labels = None
 depends_on = None
 
@@ -67,7 +66,5 @@ def downgrade() -> None:
     op.drop_constraint("items_guides_link_pkey", "items_guides_link")
     op.drop_table("items_guides_link", schema=None)
 
-
     op.drop_table("guides", schema=None)
     op.drop_table("files_guides_link", schema=None)
-

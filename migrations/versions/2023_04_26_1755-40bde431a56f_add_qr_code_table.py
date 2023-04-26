@@ -11,8 +11,8 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
-revision = '40bde431a56f'
-down_revision = '38e5957fa66f'
+revision = "40bde431a56f"
+down_revision = "38e5957fa66f"
 branch_labels = None
 depends_on = None
 
@@ -37,4 +37,3 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("qr_codes", schema=None)
-
