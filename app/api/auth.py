@@ -146,18 +146,8 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification
-    EmailNotification()
-    # email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
-    # receiver = user["email"]
-    #
-    # template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
-    #     "product_name": "Intio",
-    #     "login_url": "https://beta.remontmaszyn.pl/login",
-    #     "username": receiver,
-    #     "sender_name": "Michał",
-    #     "action_url": "https://beta.remontmaszyn.pl/activate/" + service_token,
-    # }
-    # email.send(receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
+    email = EmailNotification()
+    email.send_admin_registration(db_user, f"/activate/{service_token}")
 
     return {"ok": True}
 
