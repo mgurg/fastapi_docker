@@ -1,8 +1,8 @@
-"""Add Tags
+"""add_tags_table
 
-Revision ID: cd7a995ecaf6
-Revises: 80d733751484
-Create Date: 2023-01-31 15:55:59.929491
+Revision ID: 3e3981bb512d
+Revises: 8899525de86a
+Create Date: 2023-04-26 18:01:25.632291
 
 """
 import sqlalchemy as sa
@@ -10,11 +10,13 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import column, table
 
+
 # revision identifiers, used by Alembic.
-revision = "cd7a995ecaf6"
-down_revision = "80d733751484"
+revision = '3e3981bb512d'
+down_revision = '8899525de86a'
 branch_labels = None
 depends_on = None
+
 
 
 def upgrade() -> None:

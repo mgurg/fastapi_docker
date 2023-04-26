@@ -75,12 +75,6 @@ Test execution (with code coverage):
 coverage html
 ```
 
-### WIP: SQLAlchemy 2.0
-SQLALCHEMY_WARN_20=1 python -W always::DeprecationWarning ./app/main.py
-```
-
-
-
 ### 🏋️‍♂️Load test
 
 ```bash

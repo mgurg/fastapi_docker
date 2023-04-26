@@ -1,22 +1,22 @@
-"""add settings table
+"""add_settings_table
 
-Revision ID: 175c1d69bbc1
-Revises: 7d10cd2a559b
-Create Date: 2022-09-02 16:05:35.414367
+Revision ID: a1b0cf6b2fbb
+Revises: 055684700394
+Create Date: 2023-04-26 17:52:02.820335
 
 """
-from enum import unique
-
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import column, table
 
+
 # revision identifiers, used by Alembic.
-revision = "175c1d69bbc1"
-down_revision = "7d10cd2a559b"
+revision = 'a1b0cf6b2fbb'
+down_revision = '055684700394'
 branch_labels = None
 depends_on = None
+
 
 
 def upgrade() -> None:
