@@ -3,6 +3,7 @@ import os
 from uuid import UUID
 
 from loguru import logger
+from requests import request
 
 from app.config import get_settings
 from app.models.models import User
@@ -20,7 +21,7 @@ class EmailNotification:
 
         self.sender = settings.email_sender
         self.base_url = settings.base_app_url
-        self.product_name = "INTIO"
+        self.product_name = "Malgori"
 
     def generate_basic_auth(self, username: str, password: str):
         return base64.b64encode(f"{username}:{password}".encode())
@@ -52,11 +53,12 @@ class EmailNotification:
         headers = {"Content-Type": "application/json", "Authorization": f"Basic {self.auth_header.decode()}"}
 
         # pprint(payload)
-        # response = request("POST", url, headers=headers, json=payload)
-        #
-        # return response.text
+        response = request("POST", url, headers=headers, json=payload)
+        print("======")
+        print(response.text)
+        return response.text
 
-        return "OK"
+        # return "OK"
 
     # MAILJET TEMPLATES COMMON
 
@@ -80,12 +82,32 @@ class EmailNotification:
             To=self.message_to_field(user),
             TemplateID=4561351,
             TemplateLanguage=True,
-            Subject="Dziękuję za rejestrację",
+            Subject="[Malgori] Dziękuję za rejestrację",
             Variables={
                 "product_name": self.product_name,
                 "activation_url": self.base_url + activation_url,
                 "login_url": self.base_url,
                 "user_name": user.email,
+            },
+        )
+
+        if self.debug:
+            self.add_template_debugging(message_dict)
+
+        return {"Messages": [message_dict]}
+
+    def get_template_reset_password_request(self, user: User, reset_token: str, browser: str, os: str):
+        message_dict = dict(
+            From=self.message_from_field(),
+            To=self.message_to_field(user),
+            TemplateID=4561364,
+            TemplateLanguage=True,
+            Subject="[Malgori] Reset hasła",
+            Variables={
+                "product_name": self.product_name,
+                "reset_password_url": self.base_url + "/reset/" + reset_token,
+                "operating_system": os,
+                "browser_name": browser,
             },
         )
 
@@ -102,7 +124,7 @@ class EmailNotification:
                 To=self.message_to_field(user),
                 TemplateID=4534065,
                 TemplateLanguage=True,
-                Subject="Nowa awaria",
+                Subject="[Malgori] Nowa awaria",
                 Variables={
                     "issue_name": name,
                     "issue_description": description,
@@ -121,9 +143,15 @@ class EmailNotification:
         message_dict["TemplateErrorReporting"] = {"Email": "m@m.pl", "Name": "Mailjet Template Errors"}
 
     def send_admin_registration(self, user: User | PublicUser, activation_url: str) -> None:
-        data = self.get_template_admin_registration(user, activation_url)
+        self.get_template_admin_registration(user, activation_url)
+        # self.send_by_mailjet(data)
+
+    def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, os: str) -> None:
+        data = self.get_template_reset_password_request(user, reset_token, browser, os)
+
+        print(data)
         self.send_by_mailjet(data)
 
     def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
-        data = self.get_template_failure(users, name, description, uuid)
-        self.send_by_mailjet(data)
+        self.get_template_failure(users, name, description, uuid)
+        # self.send_by_mailjet(data)

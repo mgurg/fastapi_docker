@@ -43,6 +43,10 @@ class UserLoginIn(BaseRequest):
     permanent: bool
 
 
+class ResetPassword(BaseRequest):
+    password: str
+
+
 class UserCreateIn(BaseRequest):
     first_name: str | None
     last_name: str | None

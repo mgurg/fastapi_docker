@@ -42,6 +42,7 @@ class Role(Base):
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     is_custom = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    is_system = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 

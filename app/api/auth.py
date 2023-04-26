@@ -8,17 +8,19 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from langcodes import standardize_tag
 from loguru import logger
 from passlib.hash import argon2
+from pydantic import EmailStr
 from sentry_sdk import capture_exception
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
+from user_agents import parse
 
 from app.config import get_settings
 from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import CompanyInfoRegisterIn, UserFirstRunIn, UserLoginIn, UserRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
     ActivationResponse,
     CompanyInfoBasic,
@@ -196,6 +198,9 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
 
         db_tenant_user = crud_auth.create_tenant_user(db, user_data)
 
+    empty_data = {"service_token": None, "service_token_valid_to": None, "password": None}
+    crud_auth.update_public_user(public_db, db_public_user, empty_data)
+
     return {
         "ok": True,
         "first_name": db_tenant_user.first_name,
@@ -243,7 +248,7 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
             "updated_at": datetime.now(timezone.utc),
         }
 
-        crud_auth.update_tenant_user(db, db_user, update_package)
+        crud_users.update_user(db, db_user, update_package)
 
         # Load with relations
         db_user = db.execute(
@@ -289,6 +294,60 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
         raise HTTPException(status_code=401, detail="Strange error")
 
     return db_user
+
+
+@auth_router.get("/reset-password/{email}", response_model=StandardResponse)
+def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: EmailStr, req: Request):
+    user_agent = parse(req.headers["User-Agent"])
+    ua_os = user_agent.os.family
+    ua_browser = user_agent.browser.family
+
+    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, email)
+
+    if db_public_user is None:
+        logger.warning(f"reset password for nonexisting email {email} , OS: {ua_os}, browser: {ua_browser}")
+        return {"ok": True}
+        # raise HTTPException(status_code=404, detail="User not found")
+
+    service_token = secrets.token_hex(32)
+
+    update_user = {
+        "service_token": service_token,
+        "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+        "updated_at": datetime.now(timezone.utc),
+    }
+
+    crud_auth.update_public_user(public_db, db_public_user, update_user)
+
+    # emailNotification = EmailNotification()
+    # emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+
+    return {"ok": True}
+
+
+@auth_router.post("/reset-password/{token}", response_model=StandardResponse)
+def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: str, reset_data: ResetPassword):
+    is_password_ok = Password(reset_data.password).compare(reset_data.password)
+
+    if is_password_ok is not True:
+        raise HTTPException(status_code=400, detail=is_password_ok)
+
+    db_public_user: PublicUser = crud_auth.get_public_active_user_by_service_token(public_db, token)
+
+    if db_public_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
+    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+        db_user = crud_users.get_user_by_email(db, db_public_user.email)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found!")
+        update_package = {"password": argon2.hash(reset_data.password)}
+        crud_users.update_user(db, db_user, update_package)
+
+    crud_auth.update_public_user(public_db, db_public_user, {"service_token": None, "service_token_valid_to": None})
+
+    return {"ok": True}
 
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)

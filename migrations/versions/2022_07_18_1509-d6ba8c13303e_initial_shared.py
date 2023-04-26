@@ -38,6 +38,7 @@ def upgrade() -> None:
        first_name varchar(100),
        last_name varchar(100),
        email varchar(256) UNIQUE,
+       phone varchar(16) UNIQUE,
        password varchar(256),
        service_token varchar(256),
        service_token_valid_to TIMESTAMPTZ,
