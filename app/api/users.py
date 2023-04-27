@@ -129,8 +129,9 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     if tenant_id is None:
         raise HTTPException(status_code=400, detail="Invalid Tenant")
 
+    user_uuid = str(uuid4())
     user_data = {
-        "uuid": str(uuid4()),
+        "uuid": user_uuid,
         "email": user.email,
         "phone": user.phone,
         "password": password.hash(),
@@ -152,7 +153,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         public_user_data = {
-            "uuid": str(uuid4()),
+            "uuid": user_uuid,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,

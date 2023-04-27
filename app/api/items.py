@@ -366,12 +366,12 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditI
 
 @item_router.delete("/{item_uuid}", response_model=StandardResponse)
 def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(has_token)):
-    db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
+    crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
-    
+
     # TODO: Guides / Guides_Files
 
     print("DELETE files")
@@ -381,7 +381,7 @@ def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(
 
     print("DELETE guides")
     for guide in db_item.item_guides:
-        db_guide = crud_guides.get_guide_by_uuid(db, guide.uuid)
+        crud_guides.get_guide_by_uuid(db, guide.uuid)
 
     # db.delete(db_item)
     # db.delete(db_qr)

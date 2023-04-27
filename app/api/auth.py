@@ -146,8 +146,9 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification
-    email = EmailNotification()
-    email.send_admin_registration(db_user, f"/activate/{service_token}")
+    EmailNotification()
+    print(f"/activate/{service_token}")
+    # email.send_admin_registration(db_user, f"/activate/{service_token}")
 
     return {"ok": True}
 
@@ -171,6 +172,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             is_verified = True
 
         user_data = {
+            "uuid": db_public_user.uuid,
             "first_name": db_public_user.first_name,
             "last_name": db_public_user.last_name,
             "email": db_public_user.email,
