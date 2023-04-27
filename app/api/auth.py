@@ -146,9 +146,9 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
     # Notification
-    EmailNotification()
+    email = EmailNotification()
     print(f"/activate/{service_token}")
-    # email.send_admin_registration(db_user, f"/activate/{service_token}")
+    email.send_admin_registration(db_user, f"/activate/{service_token}")
 
     return {"ok": True}
 
@@ -311,8 +311,8 @@ def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: 
 
     crud_auth.update_public_user(public_db, db_public_user, update_user)
 
-    # emailNotification = EmailNotification()
-    # emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+    emailNotification = EmailNotification()
+    emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
 
     return {"ok": True}
 
