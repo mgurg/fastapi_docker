@@ -1,6 +1,5 @@
 import base64
 from datetime import datetime, timezone
-from uuid import uuid4
 
 from langcodes import standardize_tag
 from sqlalchemy import distinct, func, select
@@ -100,7 +99,7 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
 def create_tenant_user(db: Session, tenant_data) -> User:
     try:
         new_user = User(
-            uuid=str(uuid4()),
+            uuid=tenant_data["uuid"],
             first_name=tenant_data["first_name"],
             last_name=tenant_data["last_name"],
             email=tenant_data["email"],

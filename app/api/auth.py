@@ -147,17 +147,8 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
 
     # Notification
     EmailNotification()
-    # email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
-    # receiver = user["email"]
-    #
-    # template_data = {  # Template: 4b4653ba 	RegisterAdmin_PL
-    #     "product_name": "Intio",
-    #     "login_url": "https://beta.remontmaszyn.pl/login",
-    #     "username": receiver,
-    #     "sender_name": "Michał",
-    #     "action_url": "https://beta.remontmaszyn.pl/activate/" + service_token,
-    # }
-    # email.send(receiver, "[Intio] Poprawmy coś razem!", "4b4653ba", template_data)
+    print(f"/activate/{service_token}")
+    # email.send_admin_registration(db_user, f"/activate/{service_token}")
 
     return {"ok": True}
 
@@ -181,6 +172,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             is_verified = True
 
         user_data = {
+            "uuid": db_public_user.uuid,
             "first_name": db_public_user.first_name,
             "last_name": db_public_user.last_name,
             "email": db_public_user.email,

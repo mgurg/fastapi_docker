@@ -9,7 +9,6 @@ from app.api.auth import auth_router
 from app.api.cc import cc_router
 from app.api.files import file_router
 from app.api.guides import guide_router
-from app.api.ideas import idea_router
 from app.api.issues import issue_router
 from app.api.items import item_router
 from app.api.settings import setting_router
@@ -54,7 +53,6 @@ def create_application() -> FastAPI:
     app.include_router(item_router, prefix="/items", tags=["ITEM"])
     app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
     app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
-    app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
 
     app.include_router(file_router, prefix="/files", tags=["FILE"])
     app.include_router(tag_router, prefix="/tags", tags=["TAG"])
