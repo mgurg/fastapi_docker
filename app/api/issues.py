@@ -423,6 +423,11 @@ def issue_delete(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depend
     if not db_issue:
         raise HTTPException(status_code=404, detail="Issue not found")
 
+    print("DELETE files")
+    for file in db_issue.files_issue:
+        db_file = crud_files.get_file_by_uuid(db, file.uuid)
+        print(db_file.file_name)
+
     db.delete(db_issue)
     db.commit()
 

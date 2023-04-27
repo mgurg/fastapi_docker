@@ -1,19 +1,18 @@
-"""Add videos
+"""add_videos_table
 
-Revision ID: c478a24b25e3
-Revises: cd7a995ecaf6
-Create Date: 2023-03-30 19:17:44.735097
+Revision ID: debb10a33f57
+Revises: 3e3981bb512d
+Create Date: 2023-04-26 18:14:19.648514
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
 
 
 # revision identifiers, used by Alembic.
-revision = "c478a24b25e3"
-down_revision = "cd7a995ecaf6"
+revision = "debb10a33f57"
+down_revision = "3e3981bb512d"
 branch_labels = None
 depends_on = None
 
@@ -29,10 +28,6 @@ def upgrade() -> None:
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("duration", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.Column("size", sa.INTEGER(), autoincrement=False, nullable=False),
-        # sa.Column("color", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
-        # sa.Column("icon", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
-        # sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=False),
-        # sa.Column("is_hidden", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="videos_pkey"),

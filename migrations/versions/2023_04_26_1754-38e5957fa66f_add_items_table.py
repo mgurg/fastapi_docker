@@ -1,18 +1,18 @@
-"""Add items
+"""add_items_table
 
-Revision ID: f0ae7b9d9467
-Revises: 9e29c6b5f54f
-Create Date: 2022-11-03 16:30:24.274618
+Revision ID: 38e5957fa66f
+Revises: b2e42964ad3f
+Create Date: 2023-04-26 17:54:59.069712
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
-revision = "f0ae7b9d9467"
-down_revision = "9e29c6b5f54f"
+revision = "38e5957fa66f"
+down_revision = "b2e42964ad3f"
 branch_labels = None
 depends_on = None
 

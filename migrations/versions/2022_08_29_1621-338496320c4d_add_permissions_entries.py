@@ -10,7 +10,7 @@ from uuid import uuid4
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+from sqlalchemy.sql import table
 
 # revision identifiers, used by Alembic.
 revision = "338496320c4d"

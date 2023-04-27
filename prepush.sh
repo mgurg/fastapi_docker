@@ -26,6 +26,7 @@ black --line-length 120 migrations/versions
 # flake8 app --count --statistics --max-line-length 120
 echo "ruff"
 ruff app --fix
+ruff migrations/versions/ --fix
 echo "truncate log file"
 : > $DIR/app/logs/logs.log
 echo "OK"

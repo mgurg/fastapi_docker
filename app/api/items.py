@@ -11,7 +11,7 @@ from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-from app.crud import crud_auth, crud_files, crud_issues, crud_items, crud_qr, crud_users
+from app.crud import crud_auth, crud_files, crud_issues, crud_items, crud_qr, crud_users, crud_guides
 from app.db import engine, get_db
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
@@ -366,14 +366,25 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditI
 
 @item_router.delete("/{item_uuid}", response_model=StandardResponse)
 def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(has_token)):
-    db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
+    crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    db.delete(db_item)
-    db.delete(db_qr)
-    db.commit()
+    # TODO: Guides / Guides_Files
+
+    print("DELETE files")
+    for file in db_item.files_item:
+        db_file = crud_files.get_file_by_uuid(db, file.uuid)
+        print(db_file.file_name)
+
+    print("DELETE guides")
+    for guide in db_item.item_guides:
+        crud_guides.get_guide_by_uuid(db, guide.uuid)
+
+    # db.delete(db_item)
+    # db.delete(db_qr)
+    # db.commit()
 
     return {"ok": True}

@@ -1,18 +1,17 @@
-"""Add QR codes
+"""add_qr_code_table
 
-Revision ID: b6ec5354ff82
-Revises: f0ae7b9d9467
-Create Date: 2022-11-03 19:45:16.720097
+Revision ID: 40bde431a56f
+Revises: 38e5957fa66f
+Create Date: 2023-04-26 17:55:47.920796
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
-revision = "b6ec5354ff82"
-down_revision = "f0ae7b9d9467"
+revision = "40bde431a56f"
+down_revision = "38e5957fa66f"
 branch_labels = None
 depends_on = None
 
