@@ -67,12 +67,11 @@ class EmailNotification:
         return from_field
 
     def message_to_field(self, user: User | PublicUser):
-        email = user.email
+        
+        email = settings.email_dev
+        if settings.ENVIRONMENT == "PRD":
+            email = user.email
 
-        if settings.ENVIRONMENT != "PRD":
-            email = settings.email_dev
-
-        # to_field = [{"Email": "mail@outlook.com", "Name": f"{user.first_name} {user.last_name}"}]
         to_field = [{"Email": email, "Name": f"{user.first_name} {user.last_name}"}]
         return to_field
 
