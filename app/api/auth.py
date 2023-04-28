@@ -189,7 +189,13 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
 
         db_tenant_user = crud_auth.create_tenant_user(db, user_data)
 
-    empty_data = {"service_token": None, "service_token_valid_to": None, "password": None}
+    empty_data = {
+        "service_token": None,
+        "service_token_valid_to": None,
+        "password": None,
+        "is_active": True,
+        "is_verified": True,
+    }
     crud_auth.update_public_user(public_db, db_public_user, empty_data)
 
     return {
@@ -330,7 +336,7 @@ def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: s
 
     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        db_user = crud_users.get_user_by_email(db, db_public_user.email)
+        db_user = crud_users.get_user_by_uuid(db, db_public_user.uuid)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found!")
         update_package = {"password": argon2.hash(reset_data.password)}

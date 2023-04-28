@@ -73,11 +73,15 @@ def pytest_unconfigure():
     connection = engine.connect()
     trans = connection.begin()
     try:
-        connection.execute(text("DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';"))
-        connection.execute(text("DELETE FROM public.public_companies  WHERE city LIKE 'faker_000_%';"))
-        connection.execute(
-            text("DROP SCHEMA IF EXISTS fake_tenant_company_for_test_00000000000000000000000000000000 CASCADE;")
-        )
+        tenant_id = "fake_tenant_company_for_test_00000000000000000000000000000000"
+        connection.execute(text(f"DELETE FROM public.public_users WHERE tenant_id = '{tenant_id}';"))
+        connection.execute(text(f"DELETE FROM public.public_companies  WHERE tenant_id = '{tenant_id}';"))
+        connection.execute(text('DROP SCHEMA IF EXISTS "' + tenant_id + '" CASCADE;'))
+        # connection.execute(text("DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';"))
+        # connection.execute(text("DELETE FROM public.public_companies  WHERE city LIKE 'faker_000_%';"))
+        # connection.execute(
+        #     text("DROP SCHEMA IF EXISTS fake_tenant_company_for_test_00000000000000000000000000000000 CASCADE;")
+        # )
         trans.commit()
     except Exception as e:
         traceback.print_exc()

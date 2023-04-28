@@ -84,7 +84,7 @@ class EmailNotification:
             Variables={
                 "product_name": self.product_name,
                 "activation_url": f"{self.base_url}{activation_url}",
-                "login_url": self.base_url,
+                "login_url": f"{self.base_url}/login",
                 "user_name": user.email,
             },
         )
@@ -103,7 +103,7 @@ class EmailNotification:
             Subject="[Malgori] Reset hasła",
             Variables={
                 "product_name": self.product_name,
-                "reset_password_url": f"{self.base_url}/reset/{reset_token}",
+                "reset_password_url": f"{self.base_url}/set_password/{reset_token}",
                 "operating_system": os,
                 "browser_name": browser,
             },

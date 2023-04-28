@@ -93,16 +93,17 @@ Document Path:          /users/
 Document Length:        337 bytes
 
 Concurrency Level:      100
-Time taken for tests:   187.408 seconds
+Time taken for tests:   195.826 seconds
 Complete requests:      5000
-Failed requests:        16
-   (Connect: 0, Receive: 0, Length: 16, Exceptions: 0)
-Non-2xx responses:      16
+Failed requests:        0
 Keep-Alive requests:    0
-Total transferred:      4695700 bytes
-HTML transferred:       1900634 bytes
-Requests per second:    26.68 [#/sec] (mean)
-Time per request:       3748.151 [ms] (mean)
+Total transferred:      4480000 bytes
+HTML transferred:       1685000 bytes
+Requests per second:    25.53 [#/sec] (mean)
+Time per request:       3916.515 [ms] (mean)
+Time per request:       39.165 [ms] (mean, across all concurrent requests)
+Transfer rate:          22.34 [Kbytes/sec] received
+
 
 ```
 
