@@ -47,18 +47,6 @@ alembic downgrade -1
 ```
 ### 🧪 Tests
 
-Right now, manual clean-up is required after each test: 
-
-```sql
-DELETE FROM public.public_users 
-WHERE email LIKE 'faker_000_%';
-
-DELETE FROM public.public_companies  
-WHERE city  LIKE 'faker_000_%';
-
-DROP SCHEMA IF EXISTS "fake_tenant_company_for_test_00000000000000000000000000000000" CASCADE;
-```
-
 To run tests locally in VS Code export environment variable first:
 ```bash
 export PYTHONPATH=$PWD
@@ -73,6 +61,13 @@ Test execution (with code coverage):
 
 ```bash
 coverage html
+```
+
+Databese clean-up:
+```sql
+DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';
+DELETE FROM public.public_companies  WHERE city  LIKE 'faker_000_%';
+DROP SCHEMA IF EXISTS "fake_tenant_company_for_test_00000000000000000000000000000000" CASCADE;
 ```
 
 ### 🏋️‍♂️Load test
