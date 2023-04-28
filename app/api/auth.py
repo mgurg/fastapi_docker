@@ -133,7 +133,7 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         "lang": standardize_tag(user.lang),
         "created_at": datetime.now(timezone.utc),
     }
-    crud_auth.create_public_user(public_db, user)
+    new_db_user = crud_auth.create_public_user(public_db, user)
 
     if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
         # tenant_create("fake_tenant_company_for_test_00000000000000000000000000000000")
@@ -147,8 +147,7 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
 
     # Notification
     email = EmailNotification()
-    print(f"/activate/{service_token}")
-    email.send_admin_registration(db_user, f"/activate/{service_token}")
+    email.send_admin_registration(new_db_user, f"/activate/{service_token}")
 
     return {"ok": True}
 
