@@ -1,7 +1,10 @@
 import json
+import os
 import re
 from pathlib import Path
 from string import capwords
+import traceback
+from loguru import logger
 
 import requests
 from pyVies import api
@@ -23,16 +26,21 @@ class CompanyDetails:
         self.vat_eu = "".join([self.country, self.tax_id.upper()])
 
     def get_company_details(self):
+        data = None
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            logger.info("Company data test")
+            return self.rejestr_io()
+
         try:
-            data = self.vies()
             if data is None:
-                data = self.gus()
+                data = self.vies()
             if data is None:
                 data = self.gus()
             if data is None:
                 data = self.rejestr_io()
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return None
         return data
 
@@ -42,13 +50,13 @@ class CompanyDetails:
             result = vies.request(self.vat_eu, self.country, extended_info=True)
 
         except api.ViesValidationError as e:
-            print(e)
+            print("ViesValidationError", e)
             return None
         except api.ViesHTTPError as e:
-            print(e)
+            print("ViesHTTPError", e)
             return None
         except api.ViesError as e:
-            print(e)
+            print("ViesError", e)
             return None
 
         try:
@@ -57,9 +65,10 @@ class CompanyDetails:
                 "short_name": self.get_company_short_name(company_name=result["traderName"]),
             }
 
+            print(result["traderAddress"])
             addres = self.get_vies_parsed_address(address=result["traderAddress"])
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
             return None
         return name | addres
 
@@ -108,21 +117,21 @@ class CompanyDetails:
         return data
 
     def rejestr_io(self):
-        headers = {"Authorization": settings.REJESTR_IO_KEY}
-        url = "https://rejestr.io/api/v2/org?nip=" + self.tax_id
-        r = requests.get(url, headers=headers)
-        # print(response.text)
-        # if r.status_code != 200:
-        #     print("error")
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            logger.info("Company data test")
+            path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")
 
-        request_json = r.json()
-        # print("")
-        # print(request_json)
+            with path.open(encoding="UTF-8") as file:
+                request_json = json.load(file)
+            return "TEST_EMAIL_NOTIFICATION"
+        else:
+            headers = {"Authorization": settings.REJESTR_IO_KEY}
+            url = "https://rejestr.io/api/v2/org?nip=" + self.tax_id
+            r = requests.get(url, headers=headers)
+            # if r.status_code != 200:
+            #     print("error")
 
-        path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")
-
-        with path.open(encoding="UTF-8") as file:
-            request_json = json.load(file)
+            request_json = r.json()
 
         try:
             data = {
@@ -177,7 +186,7 @@ class CompanyDetails:
         if (newlines == 1) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
             address_split = address.split("\n")
             street = address_split[0]
-            postcode, city = address_split[1].split(" ", maxsplit=2)
+            postcode, city = address_split[1].split(" ", maxsplit=2)  # "58-500 JELENIA GÓRA"
             return {
                 "street": street.strip().capitalize(),
                 "postcode": postcode.strip(),
