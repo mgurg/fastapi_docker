@@ -66,7 +66,7 @@ class EmailNotification:
         from_field = {"Email": "awaria@remontmaszyn.pl", "Name": "remontmaszyn.pl"}
         return from_field
 
-    def message_to_field(self, user: User):
+    def message_to_field(self, user: User | PublicUser):
         email = user.email
 
         if settings.ENVIRONMENT != "PRD":
