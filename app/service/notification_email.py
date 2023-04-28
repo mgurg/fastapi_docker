@@ -83,7 +83,7 @@ class EmailNotification:
             Subject="[Malgori] Dziękuję za rejestrację",
             Variables={
                 "product_name": self.product_name,
-                "activation_url": self.base_url + activation_url,
+                "activation_url": f"{self.base_url}{activation_url}",
                 "login_url": self.base_url,
                 "user_name": user.email,
             },
@@ -103,7 +103,7 @@ class EmailNotification:
             Subject="[Malgori] Reset hasła",
             Variables={
                 "product_name": self.product_name,
-                "reset_password_url": self.base_url + "/reset/" + reset_token,
+                "reset_password_url": f"{self.base_url}/reset/{reset_token}",
                 "operating_system": os,
                 "browser_name": browser,
             },
@@ -141,8 +141,8 @@ class EmailNotification:
         message_dict["TemplateErrorReporting"] = {"Email": "m@m.pl", "Name": "Mailjet Template Errors"}
 
     def send_admin_registration(self, user: User | PublicUser, activation_url: str) -> None:
-        self.get_template_admin_registration(user, activation_url)
-        # self.send_by_mailjet(data)
+        data = self.get_template_admin_registration(user, activation_url)
+        self.send_by_mailjet(data)
 
     def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, os: str) -> None:
         data = self.get_template_reset_password_request(user, reset_token, browser, os)
