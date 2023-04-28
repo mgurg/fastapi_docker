@@ -67,13 +67,12 @@ class EmailNotification:
         return from_field
 
     def message_to_field(self, user: User | PublicUser):
-        
-        email = settings.email_dev
         if settings.ENVIRONMENT == "PRD":
-            email = user.email
+            return [{"Email": user.email, "Name": f"{user.first_name} {user.last_name}"}]
 
-        to_field = [{"Email": email, "Name": f"{user.first_name} {user.last_name}"}]
-        return to_field
+        first_name = "Groovy"
+        last_name = "Gorilla"
+        return [{"Email": settings.email_dev, "Name": f"{first_name} {last_name}"}]
 
     def get_template_admin_registration(self, user: User, activation_url: str):
         message_dict = dict(
