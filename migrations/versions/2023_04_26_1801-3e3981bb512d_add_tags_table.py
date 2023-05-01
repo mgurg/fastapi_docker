@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "tags",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("color", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("icon", sa.VARCHAR(length=512), autoincrement=False, nullable=True),

@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "issues",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("author_name", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("item_id", sa.INTEGER(), autoincrement=False, nullable=True),

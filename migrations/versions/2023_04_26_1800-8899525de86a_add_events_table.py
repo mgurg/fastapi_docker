@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "events",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("action", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("internal_value", sa.VARCHAR(length=512), autoincrement=False, nullable=True),

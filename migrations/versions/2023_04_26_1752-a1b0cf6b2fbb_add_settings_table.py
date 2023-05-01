@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "settings",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True),
+        sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True, index=True),
         sa.Column("value", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("value_type", sa.VARCHAR(length=64), autoincrement=False, nullable=True),
         sa.Column("prev_value", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
@@ -37,7 +37,7 @@ def upgrade() -> None:
         "settings_users",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.INTEGER(), autoincrement=False, nullable=True),
-        sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True),
+        sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True, index=True),
         sa.Column("value", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("value_type", sa.VARCHAR(length=64), autoincrement=False, nullable=True),
         sa.Column("prev_value", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
