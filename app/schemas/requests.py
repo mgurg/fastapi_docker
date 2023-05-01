@@ -43,6 +43,10 @@ class UserLoginIn(BaseRequest):
     permanent: bool
 
 
+class ResetPassword(BaseRequest):
+    password: str
+
+
 class UserCreateIn(BaseRequest):
     first_name: str | None
     last_name: str | None
@@ -116,6 +120,7 @@ class ItemAddIn(BaseRequest):
 
 class ItemEditIn(BaseRequest):
     name: str | None
+    symbol: str | None
     summary: str | None
     text_html: str | None
     text_json: dict | None
@@ -126,8 +131,8 @@ class GuideAddIn(BaseRequest):
     name: str
     text_html: str
     text_json: dict
-    video_id: str | None
-    video_json: dict | None
+    # video_id: str | None
+    # video_json: dict | None
     files: list[UUID] | None
     item_uuid: str | None
 
@@ -136,8 +141,8 @@ class GuideEditIn(BaseRequest):
     name: str | None
     text_html: str | None
     text_json: dict | None
-    video_id: str | None
-    video_json: dict | None
+    # video_id: str | None
+    # video_json: dict | None
     files: list[UUID] | None
 
 

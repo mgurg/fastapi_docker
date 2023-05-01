@@ -31,6 +31,11 @@ def tags_get_all(
 
 @tag_router.post("/", response_model=TagResponse)
 def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depends(has_token)):
+    db_tag = crud_tags.get_tag_by_name(db, tag.name)
+
+    if db_tag:
+        raise HTTPException(status_code=400, detail="Tag name already exists")
+
     tag_data = {
         "uuid": str(uuid4()),
         "name": tag.name,
@@ -49,8 +54,7 @@ def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depend
 def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, tag: TagEditIn, auth=Depends(has_token)):
     db_tag = crud_tags.get_tag_by_uuid(db, tag_uuid)
 
-    tag_data = {}
-    tag_data["is_hidden"] = tag.is_hidden
+    tag_data = {"is_hidden": tag.is_hidden}
     if tag.color is not None:
         tag_data["color"] = tag.color.as_hex()
 

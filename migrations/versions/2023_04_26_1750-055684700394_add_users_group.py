@@ -1,18 +1,18 @@
-"""Add Users Groups
+"""add_users_group
 
-Revision ID: 9e29c6b5f54f
-Revises: 175c1d69bbc1
-Create Date: 2022-09-29 18:32:45.219848
+Revision ID: 055684700394
+Revises: 338496320c4d
+Create Date: 2023-04-26 17:50:19.323100
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
-revision = "9e29c6b5f54f"
-down_revision = "175c1d69bbc1"
+revision = "055684700394"
+down_revision = "338496320c4d"
 branch_labels = None
 depends_on = None
 
@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "users_groups",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=False),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("symbol", sa.VARCHAR(length=64), autoincrement=False, nullable=True),

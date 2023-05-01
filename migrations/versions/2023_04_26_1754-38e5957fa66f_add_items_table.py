@@ -1,18 +1,18 @@
-"""Add items
+"""add_items_table
 
-Revision ID: f0ae7b9d9467
-Revises: 9e29c6b5f54f
-Create Date: 2022-11-03 16:30:24.274618
+Revision ID: 38e5957fa66f
+Revises: b2e42964ad3f
+Create Date: 2023-04-26 17:54:59.069712
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
-revision = "f0ae7b9d9467"
-down_revision = "9e29c6b5f54f"
+revision = "38e5957fa66f"
+down_revision = "b2e42964ad3f"
 branch_labels = None
 depends_on = None
 
@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "items",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=512), unique=False, nullable=False),
         sa.Column("symbol", sa.VARCHAR(length=64), unique=False, nullable=True),
@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.Column("text", postgresql.TEXT, autoincrement=False, nullable=True),
         sa.Column("text_json", postgresql.JSONB, autoincrement=False, nullable=True),
         sa.Column("qr_code_id", sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column("public_access", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         # sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),

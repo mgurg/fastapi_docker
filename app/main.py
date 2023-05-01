@@ -9,7 +9,6 @@ from app.api.auth import auth_router
 from app.api.cc import cc_router
 from app.api.files import file_router
 from app.api.guides import guide_router
-from app.api.ideas import idea_router
 from app.api.issues import issue_router
 from app.api.items import item_router
 from app.api.settings import setting_router
@@ -54,7 +53,6 @@ def create_application() -> FastAPI:
     app.include_router(item_router, prefix="/items", tags=["ITEM"])
     app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
     app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
-    app.include_router(idea_router, prefix="/ideas", tags=["IDEA"])
 
     app.include_router(file_router, prefix="/files", tags=["FILE"])
     app.include_router(tag_router, prefix="/tags", tags=["TAG"])
@@ -91,17 +89,15 @@ async def startup():
     logger.info("🎽 [Job] Running test Job")
 
 
-def myfunc(text: str):
+def welcome_message(text: str):
     logger.info("👍 Job Message: " + text)
     logger.info("Waiting for first request ...")
     print("👍 Job Message: " + text)
     print("Waiting for first request ...")
-    print()
 
 
 start_scheduler(app)
-job = scheduler.add_job(myfunc, args=["Everything OK, application is running correctly"])
-# scheduler.remove_job("e504b5a7bbc64df4a714105c919587bd")
+job = scheduler.add_job(welcome_message, args=["Everything OK, application is running correctly"])
 
 
 @app.on_event("shutdown")
@@ -112,12 +108,12 @@ def shutdown_event():
 
 
 @app.get("/", include_in_schema=False)
-def read_root(request: Request):
+async def read_root(request: Request):
     return {"Hello": "World", "tenant": request.headers.get("tenant", "public"), "env": settings.ENVIRONMENT}
 
 
 @app.get("/health")
-def health_check():
+async def health_check():
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     # try:
     #     response = run_healthcheck()

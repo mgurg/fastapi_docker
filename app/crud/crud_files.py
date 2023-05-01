@@ -36,7 +36,7 @@ def get_orphaned_files(db: Session) -> list[UUID]:
     return files_without_relations
 
 
-def get_files_size_in_db(db: Session) -> File:
+def get_files_size_in_db(db: Session) -> int:
     db_size = db.execute(select(func.sum(File.size))).scalar_one_or_none()
     if not db_size:
         return 0

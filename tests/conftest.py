@@ -1,6 +1,8 @@
 # project/tests/conftest.py
 
 import os
+import traceback
+from sqlalchemy import func, select, text
 
 # from starlette.testclient import TestClient
 import alembic
@@ -49,18 +51,6 @@ DEFAULT_DATABASE_PORT = os.getenv("DB_PORT")
 DEFAULT_DATABASE_DB = os.getenv("DB_DATABASE")
 URL = f"postgresql+psycopg://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5432/{DEFAULT_DATABASE_DB}"
 
-# engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
-# connection = engine.connect()
-# trans = connection.begin()
-# try:
-#     connection.execute("DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';")
-#     connection.execute("DELETE FROM public.public_companies  WHERE city LIKE 'faker_000_%';")
-#     connection.execute(
-#         "DROP SCHEMA IF EXISTS 'fake_tenant_company_for_test_00000000000000000000000000000000' CASCADE;"
-#     )
-#     trans.commit()
-# except:
-#     trans.rollback()
 
 os.environ["ENVIRONMENT"] = "PYTEST"
 os.environ["TESTING"] = str("1")
@@ -68,7 +58,7 @@ os.environ["SQLALCHEMY_WARN_20"] = "1"
 
 
 def pytest_configure():
-    print("Hello! 👋")
+    print("Test is running... 🧪")
     # logger.error("Database URL: " + URL)
     logger.error("Hello ENV: " + os.getenv("TESTING"))
     logger.error("Hello ENV: " + os.getenv("ENVIRONMENT"))
@@ -78,7 +68,25 @@ def pytest_configure():
 
 
 def pytest_unconfigure():
-    print("Bye! 🏁")
+    print("Cleaning DB 🧹")
+    engine = create_engine(URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+    connection = engine.connect()
+    trans = connection.begin()
+    try:
+        tenant_id = "fake_tenant_company_for_test_00000000000000000000000000000000"
+        connection.execute(text(f"DELETE FROM public.public_users WHERE tenant_id = '{tenant_id}';"))
+        connection.execute(text(f"DELETE FROM public.public_companies  WHERE tenant_id = '{tenant_id}';"))
+        connection.execute(text('DROP SCHEMA IF EXISTS "' + tenant_id + '" CASCADE;'))
+        # connection.execute(text("DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';"))
+        # connection.execute(text("DELETE FROM public.public_companies  WHERE city LIKE 'faker_000_%';"))
+        # connection.execute(
+        #     text("DROP SCHEMA IF EXISTS fake_tenant_company_for_test_00000000000000000000000000000000 CASCADE;")
+        # )
+        trans.commit()
+    except Exception as e:
+        traceback.print_exc()
+        trans.rollback()
+    print("Bye! 🫡")
 
 
 # @pytest.fixture(scope="module", autouse=True)

@@ -64,6 +64,17 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     raise HTTPException(status_code=401, detail="Incorrect auth token")
 
 
+def is_app_owner(credentials: HTTPBasicCredentials = Depends(security)):
+    token = credentials.credentials
+    if token is None:
+        raise HTTPException(status_code=401, detail="Missing auth token")
+
+    if token == "123":
+        return True
+
+    return False
+
+
 # def has_permission(*, session: Session = Depends(get_session), user_id, permission):
 #     fields = [Users.id, Users.user_role_id, Users.account_id]
 #     user_data = session.exec(

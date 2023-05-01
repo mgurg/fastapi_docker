@@ -25,7 +25,6 @@ def create_new_basic_event(
     author: User,
     issue: Issue,
     action: str,
-    title: str | None = None,
     description: str | None = None,
     internal_value: str | None = None,
 ) -> Event:
@@ -82,7 +81,7 @@ def open_new_basic_summary(
 
 
 def close_new_basic_summary(
-    db: Session, resource: str, resource_uuid: UUID, previous_event: str, internal_value: str | None = None
+    db: Session, resource: str, resource_uuid: UUID, previous_event: str, internal_value: str | UUID | None = None
 ):
     event = crud_events.get_event_summary_by_resource_uuid_and_status(
         db, resource, resource_uuid, previous_event, internal_value

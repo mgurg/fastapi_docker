@@ -129,8 +129,9 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     if tenant_id is None:
         raise HTTPException(status_code=400, detail="Invalid Tenant")
 
+    user_uuid = str(uuid4())
     user_data = {
-        "uuid": str(uuid4()),
+        "uuid": user_uuid,
         "email": user.email,
         "phone": user.phone,
         "password": password.hash(),
@@ -152,7 +153,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         public_user_data = {
-            "uuid": str(uuid4()),
+            "uuid": user_uuid,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
@@ -172,9 +173,16 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
 @user_router.patch("/{user_uuid}", response_model=StandardResponse)
 def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreateIn, auth=Depends(has_token)):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
-
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    current_email = db_user.email
+    print(current_email)
+
+    if user.email:
+        email_db_user = crud_users.get_user_by_email(db, user.email)
+        if (email_db_user is not None) and (email_db_user.id != db_user.id):
+            raise HTTPException(status_code=400, detail="Email is assigned to other user")
 
     user_data = user.dict(exclude_unset=True)
 
@@ -196,7 +204,18 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
         user_data["user_role_id"] = db_role.id
         user_data.pop("user_role_uuid", None)
 
+    # print(user_data)
     crud_users.update_user(db, db_user, user_data)
+
+    # UPDATE PUBLIC USER INFO
+    if ("email" in user_data.keys()) and (user_data["email"] is not None):
+        schema_translate_map = dict(tenant="public")
+        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
+            db_public_user = crud_auth.get_public_user_by_email(public_db, current_email)
+            # print(current_email, db_public_user.id)
+            # print({"email": user_data["email"]})
+            crud_auth.update_public_user(public_db, db_public_user, {"email": user_data["email"]})
 
     return {"ok": True}
 

@@ -1,18 +1,18 @@
-"""Add Tags
+"""add_tags_table
 
-Revision ID: cd7a995ecaf6
-Revises: 80d733751484
-Create Date: 2023-01-31 15:55:59.929491
+Revision ID: 3e3981bb512d
+Revises: 8899525de86a
+Create Date: 2023-04-26 18:01:25.632291
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
-revision = "cd7a995ecaf6"
-down_revision = "80d733751484"
+revision = "3e3981bb512d"
+down_revision = "8899525de86a"
 branch_labels = None
 depends_on = None
 
@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "tags",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("color", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("icon", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
@@ -30,6 +30,7 @@ def upgrade() -> None:
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="tags_pkey"),
+        sa.UniqueConstraint("name", "deleted_at", name="tag_name_key"),
         schema=None,
     )
 

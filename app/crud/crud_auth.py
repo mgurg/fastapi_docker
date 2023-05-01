@@ -1,6 +1,5 @@
 import base64
 from datetime import datetime, timezone
-from uuid import uuid4
 
 from langcodes import standardize_tag
 from sqlalchemy import distinct, func, select
@@ -22,6 +21,19 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
         .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
     ).scalar_one_or_none()
 
+
+
+
+def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUser | None:
+    query = (
+        select(PublicUser)
+        .where(PublicUser.service_token == token)
+        .where(PublicUser.is_active == True)  # noqa: E712
+        .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
+    )
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 async def get_public_company_count(db: Session) -> int:
     limit = await db.execute(select(func.count(PublicCompany.id)))
@@ -73,23 +85,23 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
     return db_user
 
 
-def update_tenant_user(db: Session, db_user: User, update_data: dict) -> User:
-    try:
-        for key, value in update_data.items():
-            setattr(db_user, key, value)
+# def update_tenant_user(db: Session, db_user: User, update_data: dict) -> User:
+#     try:
+#         for key, value in update_data.items():
+#             setattr(db_user, key, value)
 
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-    except Exception as e:
-        print("#####", e)
-    return db_user
+#         db.add(db_user)
+#         db.commit()
+#         db.refresh(db_user)
+#     except Exception as e:
+#         print("#####", e)
+#     return db_user
 
 
 def create_tenant_user(db: Session, tenant_data) -> User:
     try:
         new_user = User(
-            uuid=str(uuid4()),
+            uuid=tenant_data["uuid"],
             first_name=tenant_data["first_name"],
             last_name=tenant_data["last_name"],
             email=tenant_data["email"],

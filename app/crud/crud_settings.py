@@ -62,12 +62,30 @@ def get_users_for_sms_notification(db: Session, notification_level: str):
     return result.all()
 
 
-def get_users_for_email_notification(db: Session, notification_level: str):
+# def get_users_for_email_notification(db: Session, notification_level: str):
+#     query = (
+#         select(User.email, SettingNotification.email_notification_level)
+#         .where(SettingNotification.email_notification_level == notification_level)
+#         .outerjoin(User, User.id == SettingNotification.user_id)
+#     )
+#
+#     result = db.execute(query)
+#
+#     return result.all()
+
+
+def get_users_list_for_email_notification(
+    db: Session, notification_level: str, user_id: int | None = None
+) -> list[User]:
     query = (
-        select(User.email, SettingNotification.email_notification_level)
+        select(User.id, User.email, User.first_name, User.last_name)
+        .select_from(SettingNotification)
         .where(SettingNotification.email_notification_level == notification_level)
         .outerjoin(User, User.id == SettingNotification.user_id)
     )
+
+    if user_id:
+        query = query.where(User.id == user_id)
 
     result = db.execute(query)
 

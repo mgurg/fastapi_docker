@@ -11,6 +11,7 @@ APP_DIR = Path(__file__).parent.parent / "app"
 class Settings(BaseSettings):
     PROJECT_DIR = Path(__file__).parent.parent
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = os.getenv("APP_ENV")
+    base_app_url: str = os.getenv("APP_HOST", "http://frontend-host.com")
 
     s3_region: str = os.getenv("AWS_DEFAULT_REGION")
     s3_access_key: str = os.getenv("AWS_S3_ACCESS_KEY_ID")

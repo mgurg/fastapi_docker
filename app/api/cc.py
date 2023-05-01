@@ -1,11 +1,13 @@
+import traceback
 from fastapi import APIRouter, Depends
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.crud import cc_crud, crud_files
 from app.db import engine, get_public_db
 from app.schemas.responses import StandardResponse
-from app.service.notification_email import EmailNotification
+from app.service.bearer_auth import is_app_owner
 from app.service.scheduler import scheduler
 from app.service.tenants import alembic_upgrade_head
 
@@ -21,27 +23,6 @@ def read_item(schema: str):
     return {"schema": schema}
 
 
-@cc_router.get("/manual_test", name="")
-def cc_manual_test(*, db: Session = Depends(get_public_db)):
-    url = ""
-    receivers = ["mgurgul@telecube.pl"]
-
-    email = EmailNotification(settings.email_mailjet_app_key, settings.email_mailjet_secret_key)
-
-    template_data = {  # Template: b04fd986 	Failure_notification_PL
-        "issue_name": "name",
-        "issue_description": "description",
-        "issue_url": "https://onet.pl/" + url,
-        "action_url": "https://onet.pl/" + url,
-        "product_name": "Intio",
-        "sender_name": "Michał",
-        "login_url": "https://onet.pl",
-    }
-    email.send(receivers, "Nowe zgłoszenie", "b04fd986", template_data)
-
-    return {"ok": True}
-
-
 @cc_router.get("/check_revision")
 def check_revision(schema: str):
     # with with_db(schema) as db:
@@ -52,7 +33,7 @@ def check_revision(schema: str):
 
 
 @cc_router.post("/mark_orphan_files", name="files:MarkOrphans")
-def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db)):
+def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db), auth=Depends(is_app_owner)):
     db_companies = cc_crud.get_public_companies(public_db)
 
     processed = []
@@ -69,14 +50,14 @@ def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db)):
 
 
 @cc_router.get("/", name="companies:List")
-def cc_get_all(*, db: Session = Depends(get_public_db)):
+def cc_get_all(*, db: Session = Depends(get_public_db), auth=Depends(is_app_owner)):
     db_companies = cc_crud.get_public_companies(db)
 
     return db_companies
 
 
 @cc_router.post("/", name="migrate:All")
-def cc_migrate_all(*, db: Session = Depends(get_public_db)):
+def cc_migrate_all(*, db: Session = Depends(get_public_db), auth=Depends(is_app_owner)):
     db_companies = cc_crud.get_public_companies(db)
 
     processed = []
@@ -89,7 +70,26 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db)):
 
 
 @cc_router.post("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
-def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str):
+def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str, auth=Depends(is_app_owner)):
     scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
+
+    return {"ok": True}
+
+
+@cc_router.delete("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
+def cc_delete_one(*, db: Session = Depends(get_public_db), tenant_id: str, auth=Depends(is_app_owner)):
+    print("Cleaning DB 🧹")
+
+    connection = engine.connect()
+    trans = connection.begin()
+    try:
+        connection.execute(text(f"DELETE FROM public.public_users WHERE tenant_id = '{tenant_id}';"))
+        connection.execute(text(f"DELETE FROM public.public_companies  WHERE tenant_id = '{tenant_id}';"))
+        connection.execute(text('DROP SCHEMA IF EXISTS "' + tenant_id + '" CASCADE;'))
+        trans.commit()
+    except Exception:
+        traceback.print_exc()
+        trans.rollback()
+    print("Bye! 🫡")
 
     return {"ok": True}

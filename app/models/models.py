@@ -42,6 +42,7 @@ class Role(Base):
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     is_custom = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    is_system = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
@@ -82,6 +83,7 @@ class User(Base):
     tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     role_FK = relationship("Role", back_populates="users_FK")
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
@@ -89,35 +91,35 @@ class User(Base):
     item = relationship("Item", secondary=users_items_rel, back_populates="users_item")
 
 
-file_idea_rel = sa.Table(
-    "files_ideas_link",
-    Base.metadata,
-    sa.Column("idea_id", sa.ForeignKey("ideas.id"), autoincrement=False, nullable=False, primary_key=True),
-    sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
-    # ForeignKeyConstraint(["file_id"], ["files.id"], name="files_ideas_link_fk_1"),
-    # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="files_ideas_link_fk"),
-    # PrimaryKeyConstraint("idea_id", "file_id", name="files_ideas_link_pkey"),
-)
+# file_idea_rel = sa.Table(
+#     "files_ideas_link",
+#     Base.metadata,
+#     sa.Column("idea_id", sa.ForeignKey("ideas.id"), autoincrement=False, nullable=False, primary_key=True),
+#     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
+#     # ForeignKeyConstraint(["file_id"], ["files.id"], name="files_ideas_link_fk_1"),
+#     # ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="files_ideas_link_fk"),
+#     # PrimaryKeyConstraint("idea_id", "file_id", name="files_ideas_link_pkey"),
+# )
 
 
-class Idea(Base):
-    __tablename__ = "ideas"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    upvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
-    downvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
-    name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    summary = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
-    text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
-    text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
-    color = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True)
-    status = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+# class Idea(Base):
+#     __tablename__ = "ideas"
+#     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+#     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+#     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+#     upvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
+#     downvotes = sa.Column(sa.INTEGER(), default=0, autoincrement=False, nullable=True)
+#     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+#     summary = sa.Column(sa.TEXT(), autoincrement=False, nullable=True)
+#     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
+#     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
+#     color = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True)
+#     status = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
+#     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+#     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+#     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    files_idea = relationship("File", secondary=file_idea_rel, back_populates="idea")
+#     files_idea = relationship("File", secondary=file_idea_rel, back_populates="idea")
 
 
 file_item_rel = sa.Table(
@@ -178,8 +180,8 @@ class Guide(Base):
     name = sa.Column("name", sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
-    video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    video_json = sa.Column("video_json", JSONB, autoincrement=False, nullable=True)
+    # video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    # video_json = sa.Column("video_json", JSONB, autoincrement=False, nullable=True)
     created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
@@ -243,7 +245,7 @@ class File(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    idea = relationship("Idea", secondary=file_idea_rel, back_populates="files_idea")
+    # idea = relationship("Idea", secondary=file_idea_rel, back_populates="files_idea")
     item = relationship("Item", secondary=file_item_rel, back_populates="files_item")
     guide = relationship("Guide", secondary=file_guide_rel, back_populates="files_guide")
     issue = relationship("Issue", secondary=file_issue_rel, back_populates="files_issue")

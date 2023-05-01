@@ -5,7 +5,6 @@ Revises:
 Create Date: 2022-07-18 15:09:21.528588
 
 """
-import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -38,6 +37,7 @@ def upgrade() -> None:
        first_name varchar(100),
        last_name varchar(100),
        email varchar(256) UNIQUE,
+       phone varchar(16) UNIQUE,
        password varchar(256),
        service_token varchar(256),
        service_token_valid_to TIMESTAMPTZ,
@@ -52,6 +52,11 @@ def upgrade() -> None:
       );
     """
     op.execute(public_users)
+
+    public_users_index = """
+      CREATE INDEX public_users_tenant_id_idx ON public.public_users (tenant_id);
+    """
+    op.execute(public_users_index)
 
     public_companies = """
     CREATE TABLE IF NOT EXISTS public.public_companies (

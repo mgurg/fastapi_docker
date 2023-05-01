@@ -10,7 +10,7 @@ from uuid import uuid4
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+from sqlalchemy.sql import table
 
 # revision identifiers, used by Alembic.
 revision = "338496320c4d"
@@ -329,7 +329,7 @@ def upgrade() -> None:
     roles = table(
         "roles",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("is_custom", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("role_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
@@ -344,6 +344,7 @@ def upgrade() -> None:
                 "uuid": uuid4(),
                 "is_custom": False,
                 "is_visible": True,
+                "is_system": True,
                 "role_name": "ADMIN_MASTER",
                 "role_title": "Main admin",
                 "role_description": "Main admin role",
@@ -352,6 +353,7 @@ def upgrade() -> None:
                 "uuid": uuid4(),
                 "is_custom": False,
                 "is_visible": True,
+                "is_system": False,
                 "role_name": "ADMIN",
                 "role_title": "Admin",
                 "role_description": "Admin role",
@@ -381,8 +383,8 @@ def upgrade() -> None:
     #     ],
     # )
 
-    admin_master_permissions: list[int] = list(range(1, len(permissions_dict)))  # ALL: 1 ..32
-    admin_permissions: list[int] = list(range(2, len(permissions_dict)))
+    admin_master_permissions: list[int] = list(range(1, len(permissions_dict) + 1))  # ALL: 1 ..32
+    admin_permissions: list[int] = list(range(2, len(permissions_dict) + 1))
     role_permission_rel: dict = {1: admin_master_permissions, 2: admin_permissions}
 
     role_permission_rel_dict = []

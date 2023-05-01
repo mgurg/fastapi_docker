@@ -20,9 +20,10 @@ def upgrade() -> None:
     op.create_table(
         "roles",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("is_custom", sa.BOOLEAN(), autoincrement=False, nullable=True),
-        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True),
+        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True, default=True),
+        sa.Column("is_system", sa.BOOLEAN(), autoincrement=False, nullable=True, default=False),
         sa.Column("role_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True, unique=True),
         sa.Column("role_title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("role_description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
@@ -33,7 +34,7 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("email", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("phone", sa.VARCHAR(length=16), autoincrement=False, nullable=True),
         sa.Column("password", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
@@ -62,7 +63,7 @@ def upgrade() -> None:
     op.create_table(
         "permissions",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),

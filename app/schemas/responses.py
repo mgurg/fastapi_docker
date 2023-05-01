@@ -195,7 +195,7 @@ class GuideResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
-    video_id: str | None
+    # video_id: str | None
 
 
 class ItemIndexResponse(BaseResponse):
@@ -221,6 +221,7 @@ class EventTimelineResponse(BaseResponse):
 
 class ItemResponse(BaseResponse):
     uuid: UUID
+    symbol: str | None
     name: str | None
     text: str | None
     text_json: dict | None
@@ -285,8 +286,8 @@ class GuideIndexResponse(BaseResponse):
     name: str | None
     text: str | None
     text_json: dict | None
-    video_id: str | None
-    video_json: dict | None
+    # video_id: str | None
+    # video_json: dict | None
     files_guide: list[FileBasicInfo] | None
     item: list[BasicItems] | None
 

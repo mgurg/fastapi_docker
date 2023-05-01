@@ -1,18 +1,18 @@
-"""Add Issues Table
+"""add_issues_table
 
-Revision ID: 9eaef88ed3fd
-Revises: de539d00b411
-Create Date: 2022-12-27 11:43:51.613901
+Revision ID: 249aba91b072
+Revises: 7283939d25ad
+Create Date: 2023-04-26 17:59:32.188568
 
 """
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
-revision = "9eaef88ed3fd"
-down_revision = "de539d00b411"
+revision = "249aba91b072"
+down_revision = "7283939d25ad"
 branch_labels = None
 depends_on = None
 
@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "issues",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("author_name", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("item_id", sa.INTEGER(), autoincrement=False, nullable=True),
@@ -33,7 +33,6 @@ def upgrade() -> None:
         sa.Column("color", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("priority", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("status", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
-        # sa.Column("status", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
