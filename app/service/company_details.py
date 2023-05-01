@@ -186,7 +186,7 @@ class CompanyDetails:
         if (newlines == 1) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
             address_split = address.split("\n")
             street = address_split[0]
-            postcode, city = address_split[1].split(" ", maxsplit=2)  # "58-500 JELENIA GÓRA"
+            postcode, city = address_split[1].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
             return {
                 "street": street.strip().capitalize(),
                 "postcode": postcode.strip(),

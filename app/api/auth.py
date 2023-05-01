@@ -50,7 +50,7 @@ def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
 
 
 @auth_router.post("/company_info")
-def auth_company_info(*, public_db: Session = Depends(get_public_db), company: CompanyInfoRegisterIn):
+async def auth_company_info(*, public_db: Session = Depends(get_public_db), company: CompanyInfoRegisterIn):
     db_public_company = crud_auth.get_public_company_by_nip(public_db, company.company_tax_id)
     if db_public_company:
         raise HTTPException(status_code=400, detail="Company already registered")
@@ -64,6 +64,7 @@ def auth_company_info(*, public_db: Session = Depends(get_public_db), company: C
         capture_exception(e)
 
     if company_details is None:
+        capture_exception("NIP not found: " + company.company_tax_id)
         raise HTTPException(status_code=404, detail="Information not found")
     return company_details
 

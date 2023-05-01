@@ -108,12 +108,12 @@ def shutdown_event():
 
 
 @app.get("/", include_in_schema=False)
-def read_root(request: Request):
+async def read_root(request: Request):
     return {"Hello": "World", "tenant": request.headers.get("tenant", "public"), "env": settings.ENVIRONMENT}
 
 
 @app.get("/health")
-def health_check():
+async def health_check():
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
     # try:
     #     response = run_healthcheck()
