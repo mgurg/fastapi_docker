@@ -20,7 +20,7 @@ user_router = APIRouter()
 
 
 @user_router.get("/", response_model=Page[UserIndexResponse])
-def user_get_all(
+async def user_get_all(
     *,
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -32,7 +32,7 @@ def user_get_all(
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
-    db_users = crud_users.get_users(db, search, field, order)
+    db_users = await crud_users.get_users(db, search, field, order)
     return paginate(db_users, params)
 
 

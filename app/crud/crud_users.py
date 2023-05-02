@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.models import User
 
 
-def get_users(db: Session, search: str, sort_column: str, sort_order: str) -> User:
+async def get_users(db: Session, search: str, sort_column: str, sort_order: str) -> User:
     query = select(User).order_by(text(f"{sort_column} {sort_order}"))
 
     all_filters = []
@@ -16,7 +16,7 @@ def get_users(db: Session, search: str, sort_column: str, sort_order: str) -> Us
 
         query = query.filter(*all_filters)
 
-    result = db.execute(query)  # await db.execute(query)
+    result = await db.execute(query)  # await db.execute(query)
 
     return result.scalars().all()
 
@@ -49,10 +49,10 @@ def get_user_by_id(db: Session, id: int) -> User:
     return result.scalar_one_or_none()
 
 
-def get_user_by_email(db: Session, email: EmailStr) -> User:
+async def get_user_by_email(db: Session, email: EmailStr) -> User:
     query = select(User).where(User.email == email).where(User.deleted_at.is_(None))
 
-    result = db.execute(query)
+    result = await db.execute(query)
 
     return result.scalar_one_or_none()
 

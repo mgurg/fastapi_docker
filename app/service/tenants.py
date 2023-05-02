@@ -51,16 +51,18 @@ async def alembic_upgrade_head(tenant_name: str, revision="head", url: str = Non
         revision = revision
         sql = False
         tag = None
+
         # command.stamp(config, revision, sql=sql, tag=tag)
         def run_upgrade(connection, cfg, revision, sql, tag):
             cfg.attributes["connection"] = connection
             command.upgrade(cfg, revision, sql=sql, tag=tag)
+
         # upgrade command
         async_engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
         async with async_engine.begin() as conn:
-        #     if tenant_name != "public":
-        #         await conn.execute("set search_path to %s" % tenant_name)
-        #         conn.dialect.default_schema_name = tenant_name
+            #     if tenant_name != "public":
+            #         await conn.execute("set search_path to %s" % tenant_name)
+            #         conn.dialect.default_schema_name = tenant_name
             await conn.run_sync(run_upgrade, config, revision, sql, tag)
     except Exception as e:
         capture_exception(e)
@@ -69,6 +71,7 @@ async def alembic_upgrade_head(tenant_name: str, revision="head", url: str = Non
 
     logger.info("Schema upgrade START for: " + tenant_name + " to version: " + revision)
     print("Schema upgrade DONE for: " + tenant_name + " to version: " + revision)
+
 
 # for async support
 # added async and await
@@ -86,7 +89,6 @@ async def tenant_create(schema: str) -> None:
 
 
 def generate_tenant_id(name: str, uuid: UUID) -> str:
-
     company = re.sub("[^A-Za-z0-9 _]", "", unidecode(name))
     uuid = uuid.replace("-", "")
 

@@ -1,18 +1,18 @@
-from contextlib import contextmanager, asynccontextmanager
+from contextlib import asynccontextmanager
 from functools import lru_cache
 import time
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from loguru import logger
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy import create_engine, event, select
+from sqlalchemy import event, select
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, declarative_base
+from sqlalchemy.orm import declarative_base
 
 from app.config import get_settings
 from app.models.shared_models import PublicCompany
@@ -51,6 +51,7 @@ if sql_performance_monitoring is True:
         logger.debug("Query Complete!")
         logger.debug("Total Time: %f" % total)
 
+
 SQLALCHEMY_DATABASE_URL = (
     f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 )
@@ -69,12 +70,11 @@ metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
 
-
-
 class TenantNotFoundError(Exception):
     def __init__(self, id):
         self.message = "Tenant %s not found!" % str(id)
         super().__init__(self.message)
+
 
 # for async support
 # added async
@@ -88,9 +88,10 @@ async def get_tenant(request: Request) -> PublicCompany:
             return None
 
         async with with_db(None) as db:
-            tenant = db.execute(
-                select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
-            ).scalar_one_or_none()
+            query = select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
+            result = await db.execute(query)
+
+            tenant = result.scalar_one_or_none()
 
         if tenant is None:
             # raise TenantNotFoundError(host_without_port)
@@ -98,6 +99,7 @@ async def get_tenant(request: Request) -> PublicCompany:
     except Exception as e:
         print(e)
     return tenant
+
 
 # for async support
 # added async
@@ -107,6 +109,7 @@ async def get_db(tenant: PublicCompany = Depends(get_tenant)):
 
     async with with_db(tenant.tenant_id) as db:
         yield db
+
 
 # for async support
 # added async

@@ -9,8 +9,10 @@ from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
 
 
-def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
-    return db.execute(select(PublicUser).where(PublicUser.email == email)).scalar_one_or_none()
+async def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
+    query = select(PublicUser).where(PublicUser.email == email)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | None:
@@ -20,8 +22,6 @@ def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | No
         .where(PublicUser.is_active == False)  # noqa: E712
         .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
     ).scalar_one_or_none()
-
-
 
 
 def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUser | None:
@@ -34,6 +34,7 @@ def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUs
 
     result = db.execute(query)  # await db.execute(query)
     return result.scalar_one_or_none()
+
 
 async def get_public_company_count(db: Session) -> int:
     limit = await db.execute(select(func.count(PublicCompany.id)))
@@ -130,12 +131,16 @@ def create_tenant_user(db: Session, tenant_data) -> User:
 
 def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
     try:
-        db_tenant_user = db.execute(
+        query = (
             select(User)
             .where(User.auth_token == token)
-            .where(User.is_active == True)  # noqa: E712
+            .where(User.is_active is True)
             .where(User.auth_token_valid_to > datetime.now(timezone.utc))
-        ).scalar_one_or_none()
+        )
+        result = db.execute(query)  # noqa: E712
+
+        db_tenant_user = result.scalar_one_or_none()
+
         return db_tenant_user
     except Exception as e:
         print(e)

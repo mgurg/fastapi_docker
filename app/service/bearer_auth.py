@@ -30,7 +30,7 @@ def is_base64(sb: str) -> bool:
         return False
 
 
-def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)) -> dict:
+async def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)) -> dict:
     """
     Function that is used to validate the token in the case that it requires it
     """
@@ -41,7 +41,7 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     if token is None:
         raise HTTPException(status_code=401, detail="Missing auth token")
 
-    db_user_data = crud_auth.get_tenant_user_by_auth_token(db, token)
+    db_user_data = await crud_auth.get_tenant_user_by_auth_token(db, token)
 
     if db_user_data is not None:
         # user_id, account_id = db_user_data

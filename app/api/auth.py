@@ -15,6 +15,8 @@ from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
 from user_agents import parse
 
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
 from app.config import get_settings
 from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
@@ -212,18 +214,20 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
 
 
 @auth_router.post("/login", response_model=UserLoginOut)
-def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
+async def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
     print(req.headers["User-Agent"])
-    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
+    db_public_user: PublicUser = await crud_auth.get_public_user_by_email(public_db, user.email)
 
     if db_public_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     schema_translate_map = dict(tenant=db_public_user.tenant_id)
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    with Session(autocommit=False, autoflush=False, bind=connectable) as db:
-        db_user = crud_users.get_user_by_email(db, user.email)
+    async_session = async_sessionmaker(connectable, expire_on_commit=False)
 
+    async with async_session() as db:
+        # with AsyncSession(autocommit=False, autoflush=False, bind=connectable) as db:
+        db_user = await crud_users.get_user_by_email(db, user.email)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -249,9 +253,10 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
         crud_users.update_user(db, db_user, update_package)
 
         # Load with relations
-        db_user = db.execute(
-            select(User).where(User.email == user.email).options(selectinload("*"))
-        ).scalar_one_or_none()
+        query = select(User).where(User.email == user.email).options(selectinload("*"))
+        db_user_result = await db.execute(query)
+        db_public_user = db_user_result.scalar_one_or_none()
+
         db_user.tenant_id = db_public_user.tenant_id
 
         return db_user
