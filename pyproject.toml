@@ -85,3 +85,4 @@ flake8-quotes = {inline-quotes = 'double', multiline-quotes = 'double'}
 
 [tool.ruff.isort]
 combine-as-imports = true
+known-third-party = ["fastapi", "pydantic", "starlette"]

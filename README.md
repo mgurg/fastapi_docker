@@ -85,6 +85,7 @@ ab -k -c 100 -n 5000 -H "tenant:polski_koncern_naftowy_orlen_fc26bff5f7b540d9b8d
 
 ### AB Results:
 
+
 Python 3.10, Uvicorn (single instance)
 settings: `ab -k -c 100 -n 5000`
 
@@ -126,3 +127,25 @@ Time per request:       52.326 [ms] (mean, across all concurrent requests)
 Transfer rate:          37.82 [Kbytes/sec] received
 
 ```
+
+#### async branch:
+Test branch for async code:
+
+```
+Document Path:          /users/
+Document Length:        337 bytes
+
+Concurrency Level:      100
+Time taken for tests:   159.392 seconds
+Complete requests:      5000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      4480000 bytes
+HTML transferred:       1685000 bytes
+Requests per second:    31.37 [#/sec] (mean)
+Time per request:       3187.839 [ms] (mean)
+Time per request:       31.878 [ms] (mean, across all concurrent requests)
+Transfer rate:          27.45 [Kbytes/sec] received
+```
+
+Probably above `30` Requests per second comparing to `20` - `25` in sync version 
