@@ -10,16 +10,23 @@ from app.models.shared_models import PublicCompany, PublicUser
 
 
 def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
-    return db.execute(select(PublicUser).where(PublicUser.email == email)).scalar_one_or_none()
+    query = select(PublicUser).where(PublicUser.email == email)
+
+    result = db.execute(query)  # await db.execute(query)
+
+    return result.scalar_one_or_none()
 
 
 def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | None:
-    return db.execute(
+    query = (
         select(PublicUser)
         .where(PublicUser.service_token == token)
         .where(PublicUser.is_active == False)  # noqa: E712
         .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
-    ).scalar_one_or_none()
+    )
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUser | None:
@@ -35,23 +42,34 @@ def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUs
 
 
 def get_public_company_count(db: Session) -> int:
-    return db.execute(select(func.count(PublicCompany.id))).scalar_one_or_none()
+    query = select(func.count(PublicCompany.id))
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
+    query = select(PublicCompany).where(PublicCompany.nip == nip)
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_company_by_qr_id(db: Session, qr_id: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.qr_id == qr_id)).scalar_one_or_none()
+    query = select(PublicCompany).where(PublicCompany.qr_id == qr_id)
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_company_by_tenant_id(db: Session, tenant_id: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.tenant_id == tenant_id)).scalar_one_or_none()
+    query = select(PublicCompany).where(PublicCompany.tenant_id == tenant_id)
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_schemas_from_public_company(db: Session):
-    return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
+    query = select(distinct(PublicCompany.tenant_id))
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalars().all()
 
 
 def create_public_user(db: Session, public_user: dict) -> PublicUser:
@@ -128,12 +146,16 @@ def create_tenant_user(db: Session, tenant_data) -> User:
 
 def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
     try:
-        db_tenant_user = db.execute(
+        query = (
             select(User)
             .where(User.auth_token == token)
             .where(User.is_active == True)  # noqa: E712
             .where(User.auth_token_valid_to > datetime.now(timezone.utc))
-        ).scalar_one_or_none()
+        )
+
+        result = db.execute(query)  # await db.execute(query)
+        db_tenant_user = result.scalar_one_or_none()
+
         return db_tenant_user
     except Exception as e:
         print(e)
