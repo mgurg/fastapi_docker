@@ -129,15 +129,15 @@ def create_tenant_user(db: Session, tenant_data) -> User:
     return new_user
 
 
-def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
+async def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
     try:
         query = (
             select(User)
             .where(User.auth_token == token)
-            .where(User.is_active is True)
+            .where(User.is_active == True)  # noqa: E712
             .where(User.auth_token_valid_to > datetime.now(timezone.utc))
         )
-        result = db.execute(query)  # noqa: E712
+        result = await db.execute(query)
 
         db_tenant_user = result.scalar_one_or_none()
 

@@ -1,18 +1,16 @@
 from contextlib import asynccontextmanager
-from functools import lru_cache
 import time
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from loguru import logger
-from sqlalchemy import select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy import event, select
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import declarative_base
+
+# from sqlalchemy.orm import declarative_base
 
 from app.config import get_settings
 from app.models.shared_models import PublicCompany
@@ -78,7 +76,7 @@ class TenantNotFoundError(Exception):
 
 # for async support
 # added async
-@lru_cache()
+# @lru_cache()
 async def get_tenant(request: Request) -> PublicCompany:
     try:
         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com

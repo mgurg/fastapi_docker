@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import crud_auth, crud_permission, crud_users
 from app.db import engine, get_db
@@ -22,7 +23,7 @@ user_router = APIRouter()
 @user_router.get("/", response_model=Page[UserIndexResponse])
 async def user_get_all(
     *,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     params: Params = Depends(),
     search: str = None,
     field: str = "name",
@@ -33,6 +34,7 @@ async def user_get_all(
         field = "last_name"
 
     db_users = await crud_users.get_users(db, search, field, order)
+
     return paginate(db_users, params)
 
 

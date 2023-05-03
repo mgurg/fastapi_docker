@@ -2,8 +2,7 @@ from uuid import UUID
 
 from pydantic import EmailStr
 from sqlalchemy import func, select, text
-from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import Session, selectinload
 from app.models.models import User
 
 
@@ -16,7 +15,7 @@ async def get_users(db: Session, search: str, sort_column: str, sort_order: str)
 
         query = query.filter(*all_filters)
 
-    result = await db.execute(query)  # await db.execute(query)
+    result = await db.execute(query.options(selectinload(User.role_FK)))  # await db.execute(query)
 
     return result.scalars().all()
 
