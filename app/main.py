@@ -68,8 +68,8 @@ if settings.ENVIRONMENT == "PRD":
     # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
-        traces_sample_rate=1.0,
-        profiles_sample_rate=1.0,
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
         integrations=[SqlalchemyIntegration()],
     )
     app.add_middleware(SentryAsgiMiddleware)
