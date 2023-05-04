@@ -54,7 +54,7 @@ def upgrade() -> None:
     op.execute(public_users)
 
     public_users_index = """
-      CREATE INDEX public_users_tenant_id_idx ON public.public_users (tenant_id);
+      CREATE INDEX IF NOT EXISTS public_users_tenant_id_idx ON public.public_users (tenant_id);
     """
     op.execute(public_users_index)
 
