@@ -147,9 +147,10 @@ class EmailNotification:
     def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, os: str) -> None:
         data = self.get_template_reset_password_request(user, reset_token, browser, os)
 
-        print(data)
+        
         self.send_by_mailjet(data)
 
     def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
-        self.get_template_failure(users, name, description, uuid)
+        data = self.get_template_failure(users, name, description, uuid)
+        print(data)
         # self.send_by_mailjet(data)

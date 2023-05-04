@@ -44,7 +44,7 @@ auth_router = APIRouter()
 @auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
 def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
     db_companies_no = crud_auth.get_public_company_count(public_db)
-    limit = 20
+    limit = 120
 
     return {"accounts": db_companies_no, "limit": limit}
 
