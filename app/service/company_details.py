@@ -70,6 +70,8 @@ class CompanyDetails:
         except Exception:
             traceback.print_exc()
             return None
+        if addres is None:
+            return None
         return name | addres
 
     def gus(self):
@@ -167,7 +169,7 @@ class CompanyDetails:
     def get_vies_supported_countries(self):
         return ["SK", "NL", "BE", "FR", "PT", "IT", "FI", "RO", "SI", "AT", "PL", "HR", "EL", "DK", "EE", "CZ"]
 
-    def get_vies_parsed_address(self, address):
+    def get_vies_parsed_address(self, address) -> dict | None:
         self.vat_eu
         country_code = self.vat_eu[:2]
         newlines = address.count("\n")
@@ -187,9 +189,30 @@ class CompanyDetails:
             address_split = address.split("\n")
             street = address_split[0]
             postcode, city = address_split[1].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
+
             return {
                 "street": street.strip().capitalize(),
                 "postcode": postcode.strip(),
                 "city": city.strip().capitalize(),
                 "country_code": country_code.strip(),
             }
+
+        if (newlines == 2) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
+            """
+            KOZERY
+            UROCZA 54
+            05-825 GRODZISK MAZOWIECKI
+            """
+            address_split = address.split("\n")
+            street = address_split[1]
+            postcode, city = address_split[2].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
+            city = address_split[0]
+
+            return {
+                "street": street.strip().capitalize(),
+                "postcode": postcode.strip(),
+                "city": city.strip().capitalize(),
+                "country_code": country_code.strip(),
+            }
+
+        return None

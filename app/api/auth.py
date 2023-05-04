@@ -66,13 +66,14 @@ async def auth_company_info(*, public_db: Session = Depends(get_public_db), comp
     if company_details is None:
         capture_exception("NIP not found: " + company.company_tax_id)
         raise HTTPException(status_code=404, detail="Information not found")
+
     return company_details
 
 
 @auth_router.post("/register", response_model=StandardResponse)
 def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegisterIn):
     if auth.is_email_temporary(user.email):
-        raise HTTPException(status_code=400, detail="Temporary email not allowed")
+        raise HTTPException(status_code=403, detail="Temporary email not allowed")
 
     db_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
     if db_user:
