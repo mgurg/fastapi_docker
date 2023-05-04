@@ -166,6 +166,11 @@ class TagResponse(BaseResponse):
     is_hidden: bool | None
 
 
+class PartResponse(BaseResponse):
+    uuid: UUID
+    name: str
+
+
 class TagBasicInfo(BaseResponse):
     uuid: UUID
     name: str

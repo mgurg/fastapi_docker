@@ -207,3 +207,15 @@ class TagCreateIn(BaseRequest):
 class TagEditIn(BaseRequest):
     is_hidden: bool | None
     color: Color | None
+
+
+class PartCreateIn(BaseRequest):
+    name: str
+    color: str | None
+    icon: str | None
+    is_hidden: bool | None = False
+
+
+class PartEditIn(BaseRequest):
+    is_hidden: bool | None
+    color: Color | None
