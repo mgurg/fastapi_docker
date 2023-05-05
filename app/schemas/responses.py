@@ -171,7 +171,7 @@ class PartResponse(BaseResponse):
     name: str
     description: str | None
     price: condecimal(max_digits=10, decimal_places=2)
-    quantity: int
+    quantity: condecimal(max_digits=4, decimal_places=2)
     unit: str | None
     value: condecimal(max_digits=10, decimal_places=2)
 

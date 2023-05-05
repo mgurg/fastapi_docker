@@ -214,7 +214,7 @@ class PartCreateIn(BaseRequest):
     name: str
     description: str | None
     price: condecimal(max_digits=10, decimal_places=2)
-    quantity: int
+    quantity: condecimal(max_digits=4, decimal_places=2)
     unit: str | None
     value: condecimal(max_digits=10, decimal_places=2) | None
 
@@ -223,6 +223,6 @@ class PartEditIn(BaseRequest):
     name: str | None
     description: str | None
     price: condecimal(max_digits=10, decimal_places=2) | None
-    quantity: int | None
+    quantity: condecimal(max_digits=4, decimal_places=2) | None
     unit: str | None
     value: condecimal(max_digits=10, decimal_places=2) | None

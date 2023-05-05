@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("price", sa.DECIMAL(10, 2), autoincrement=False, nullable=True),
-        sa.Column("quantity", sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column("quantity", sa.DECIMAL(4, 2), autoincrement=False, nullable=True),
         sa.Column("unit", sa.VARCHAR(length=32), autoincrement=False, nullable=True),
         sa.Column("value", sa.DECIMAL(10, 2), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
