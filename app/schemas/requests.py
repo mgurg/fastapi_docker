@@ -1,7 +1,7 @@
 # from typing import list
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, condecimal
 from pydantic.color import Color
 
 
@@ -210,12 +210,19 @@ class TagEditIn(BaseRequest):
 
 
 class PartCreateIn(BaseRequest):
+    issue_uuid: UUID
     name: str
-    color: str | None
-    icon: str | None
-    is_hidden: bool | None = False
+    description: str | None
+    price: condecimal(max_digits=10, decimal_places=2)
+    quantity: int
+    unit: str | None
+    value: condecimal(max_digits=10, decimal_places=2) | None
 
 
 class PartEditIn(BaseRequest):
-    is_hidden: bool | None
-    color: Color | None
+    name: str | None
+    description: str | None
+    price: condecimal(max_digits=10, decimal_places=2) | None
+    quantity: int | None
+    unit: str | None
+    value: condecimal(max_digits=10, decimal_places=2) | None

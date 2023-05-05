@@ -203,6 +203,13 @@ tag_issue_rel = sa.Table(
     sa.Column("tag_id", sa.ForeignKey("tags.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+# part_used_issue_rel = sa.Table(
+#     "parts_used_issues_link",
+#     Base.metadata,
+#     sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
+#     sa.Column("part_used_id", sa.ForeignKey("parts_used.id"), autoincrement=False, nullable=False, primary_key=True),
+# )
+
 
 class Issue(Base):
     __tablename__ = "issues"
@@ -229,6 +236,28 @@ class Issue(Base):
     tags_issue = relationship("Tag", secondary=tag_issue_rel, back_populates="tag")
 
     item = relationship("Item", back_populates="issue_FK")
+    # part = relationship("PartUsed", secondary=part_used_issue_rel, back_populates="issue_part")
+
+
+class PartUsed(Base):
+    __tablename__ = "parts_used"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    item_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    issue_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    price = sa.Column(sa.DECIMAL(precision=10, scale=2), autoincrement=False, nullable=True)
+    quantity = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    unit = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
+    value = sa.Column(sa.DECIMAL(precision=10, scale=2), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    # issue_part = relationship("Issue", secondary=part_used_issue_rel, back_populates="part")
 
 
 class File(Base):

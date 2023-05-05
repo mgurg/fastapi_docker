@@ -147,6 +147,9 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(tenant_create, args=[db_company.tenant_id])
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
+    if user.email.strip().split("@")[1] == "example.com":
+        return {"ok": True}
+
     # Notification
     email = EmailNotification()
     email.send_admin_registration(new_db_user, f"/activate/{service_token}")
@@ -250,9 +253,8 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
         crud_users.update_user(db, db_user, update_package)
 
         # Load with relations
-        db_user = db.execute(
-            select(User).where(User.email == user.email).options(selectinload("*"))
-        ).scalar_one_or_none()
+        query = select(User).where(User.email == user.email).options(selectinload("*"))
+        db_user = db.execute(query).scalar_one_or_none()
         db_user.tenant_id = db_public_user.tenant_id
 
         return db_user

@@ -79,9 +79,10 @@ def get_tenant(request: Request) -> PublicCompany | None:
             return None
 
         with with_db(None) as db:
-            tenant = db.execute(
-                select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
-            ).scalar_one_or_none()
+            query = select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
+
+            result = db.execute(query)
+            tenant = result.scalar_one_or_none()
 
         if tenant is None:
             # raise TenantNotFoundError(host_without_port)

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, condecimal
 from pydantic.color import Color
 
 
@@ -169,6 +169,11 @@ class TagResponse(BaseResponse):
 class PartResponse(BaseResponse):
     uuid: UUID
     name: str
+    description: str | None
+    price: condecimal(max_digits=10, decimal_places=2)
+    quantity: int
+    unit: str | None
+    value: condecimal(max_digits=10, decimal_places=2)
 
 
 class TagBasicInfo(BaseResponse):
