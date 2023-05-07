@@ -26,6 +26,7 @@ def upgrade() -> None:
         sa.Column("issue_id", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
+        sa.Column("symbol", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("price", sa.DECIMAL(10, 2), autoincrement=False, nullable=True),
         sa.Column("quantity", sa.DECIMAL(4, 2), autoincrement=False, nullable=True),

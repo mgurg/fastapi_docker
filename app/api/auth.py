@@ -147,7 +147,7 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(tenant_create, args=[db_company.tenant_id])
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
-    if (user['email'].split("@")[1] == "example.com"):
+    if user["email"].split("@")[1] == "example.com":
         return {"ok": True}
 
     # Notification
