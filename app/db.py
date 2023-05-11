@@ -19,10 +19,10 @@ DEFAULT_DB_PASS = settings.DEFAULT_DATABASE_PASSWORD
 DEFAULT_DB_HOST = settings.DEFAULT_DATABASE_HOSTNAME
 DEFAULT_DB_PORT = settings.DEFAULT_DATABASE_PORT
 DEFAULT_DB = settings.DEFAULT_DATABASE_DB
-# SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
+# SQLALCHEMY_DB_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 
 
-# SQLALCHEMY_DATABASE_URL = PostgresDsn.build(
+# SQLALCHEMY_DB_URL = PostgresDsn.build(
 #     scheme="postgresql",
 #     user=settings.DEFAULT_DATABASE_USER,
 #     password=settings.DEFAULT_DATABASE_PASSWORD,
@@ -47,17 +47,16 @@ if sql_performance_monitoring is True:
         logger.debug("Total Time: %f" % total)
 
 
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
-)
+SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 echo = False
+
 if settings.ENVIRONMENT != "PRD":
-    print(SQLALCHEMY_DATABASE_URL)
+    print(SQLALCHEMY_DB_URL)
     echo = False
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
+engine = create_engine(SQLALCHEMY_DB_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
 
-# print(SQLALCHEMY_DATABASE_URL)
+# print(SQLALCHEMY_DB_URL)
 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)

@@ -1,3 +1,4 @@
+from typing import Any
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,11 +67,24 @@ def create_application() -> FastAPI:
 
 app = create_application()
 
+
+def traces_sampler(sampling_context: dict[str, Any]) -> float:
+    """Function to dynamically set Sentry sampling rates"""
+
+    if settings.ENVIRONMENT != "PRD":
+        return 0.0
+
+    request_path = sampling_context.get("asgi_scope", {}).get("path")
+    if request_path == "/health":
+        # Drop all /health requests
+        return 0.0
+    return 0.1
+
+
 if settings.ENVIRONMENT == "PRD":
-    # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
-        traces_sample_rate=0.1,
+        traces_sampler=traces_sampler,
         profiles_sample_rate=0.1,
         integrations=[SqlalchemyIntegration()],
     )

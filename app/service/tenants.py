@@ -10,7 +10,7 @@ from sentry_sdk import capture_exception
 from unidecode import unidecode
 
 from app.config import get_settings
-from app.db import SQLALCHEMY_DATABASE_URL, with_db
+from app.db import SQLALCHEMY_DB_URL, with_db
 from app.utils.decorators import timer
 
 settings = get_settings()
@@ -23,7 +23,7 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
     # set the paths values
 
     if url is None:
-        url = SQLALCHEMY_DATABASE_URL
+        url = SQLALCHEMY_DB_URL
     try:
         # create Alembic config and feed it with paths
         config = Config(str(settings.PROJECT_DIR / "alembic.ini"))
