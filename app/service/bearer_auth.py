@@ -36,7 +36,6 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     """
 
     if db is None:
-        print("OKKKKKKK")
         raise HTTPException(status_code=401, detail="General DB Error, missing tenant?")
 
     token = credentials.credentials
