@@ -332,6 +332,7 @@ def upgrade() -> None:
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
         sa.Column("is_custom", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True),
+        sa.Column("is_system", sa.BOOLEAN(), autoincrement=False, nullable=True, default=False),
         sa.Column("role_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("role_title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("role_description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
