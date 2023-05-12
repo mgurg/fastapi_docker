@@ -54,6 +54,7 @@ if settings.ENVIRONMENT != "PRD":
     print(SQLALCHEMY_DB_URL)
     echo = False
 
+# TODO: https://bitestreams.com/nl/blog/fastapi_sqlalchemy/
 engine = create_engine(SQLALCHEMY_DB_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
 
 # print(SQLALCHEMY_DB_URL)
