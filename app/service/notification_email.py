@@ -152,4 +152,4 @@ class EmailNotification:
     def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
         data = self.get_template_failure(users, name, description, uuid)
         print(data)
-        # self.send_by_mailjet(data)
+        self.send_by_mailjet(data)
