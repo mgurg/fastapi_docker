@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
@@ -18,7 +19,7 @@ def get_issues(
     date_from: datetime = None,
     date_to: datetime = None,
     tags: list[int] = None,
-) -> Issue:
+) -> Sequence[Issue]:
     search_filters = []
 
     query = select(Issue)

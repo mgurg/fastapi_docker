@@ -205,17 +205,10 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     new_issue = crud_issues.create_issue(db, issue_data)
 
     # Notification
-    email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")
-    sms_notifications = []
-    notify_users(sms_notifications, email_users_list, new_issue)
-    # email_notifications = crud_settings.get_users_for_email_notification(db, "all")
-    # sms_notifications = crud_settings.get_users_for_sms_notification(db, "all")
-    #
-    # keys = ("phone", "mode")
-    # list_of_sms_notifications = [dict(zip(keys, values)) for values in sms_notifications]
-    #
-    # keys = ("email", "mode")
-    # list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
+    email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")  # empty: []
+    sms_users_list = []
+    if email_users_list or sms_users_list:
+        notify_users(sms_users_list, email_users_list, new_issue)
 
     event.create_new_basic_event(db, db_user, new_issue, "issue_add")
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")

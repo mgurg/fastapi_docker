@@ -170,7 +170,6 @@ class CompanyDetails:
         return ["SK", "NL", "BE", "FR", "PT", "IT", "FI", "RO", "SI", "AT", "PL", "HR", "EL", "DK", "EE", "CZ"]
 
     def get_vies_parsed_address(self, address) -> dict | None:
-        self.vat_eu
         country_code = self.vat_eu[:2]
         newlines = address.count("\n")
 

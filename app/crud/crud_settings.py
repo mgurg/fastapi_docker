@@ -1,11 +1,13 @@
+from collections.abc import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.models import Setting, SettingNotification, SettingUser, User
+from app.models.models import SettingNotification, SettingUser, User
 
 
 # GENERAL
-def get_general_settings_by_names(db: Session, user_id: int, names: list[str]) -> SettingUser:
+def get_general_settings_by_names(db: Session, user_id: int, names: list[str]) -> Sequence[SettingUser]:
     query = select(SettingUser).where(SettingUser.user_id == user_id).where(SettingUser.name.in_(names))
 
     result = db.execute(query)
@@ -13,7 +15,7 @@ def get_general_settings_by_names(db: Session, user_id: int, names: list[str]) -
     return result.scalars().all()
 
 
-def get_user_general_setting_by_name(db: Session, user_id: int, name: str) -> Setting:
+def get_user_general_setting_by_name(db: Session, user_id: int, name: str) -> SettingUser:
     query = select(SettingUser).where(SettingUser.user_id == user_id).where(SettingUser.name == name)
 
     result = db.execute(query)

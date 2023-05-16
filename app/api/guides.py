@@ -65,6 +65,8 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 @guide_router.post("/", response_model=GuideResponse)
 def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
     related_item = None
+    db_item = None
+
     if guide.item_uuid is not None:
         db_item = crud_items.get_item_by_uuid(db, guide.item_uuid)
         if not db_item:
