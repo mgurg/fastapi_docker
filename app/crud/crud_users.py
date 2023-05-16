@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.models import User
 
 
-def get_users(db: Session, search: str, sort_column: str, sort_order: str) -> User:
+def get_users(db: Session, sort_column: str, sort_order: str, search: str | None = None) -> User:
     query = select(User).order_by(text(f"{sort_column} {sort_order}"))
 
     all_filters = []

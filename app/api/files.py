@@ -51,7 +51,7 @@ def file_get_info_all(*, db: Session = Depends(get_db), auth=Depends(has_token))
 
 @file_router.get("/{uuid}", response_model=FileResponse, name="file:GetInfoFromDB")
 def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth=Depends(has_token)):
-    db_file = crud_files.get_file_by_uuid()
+    db_file = crud_files.get_file_by_uuid(db, uuid)
 
     if not db_file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -151,6 +151,7 @@ def file_download(*, db: Session = Depends(get_db), request: Request, file_uuid:
         header = {"Content-Disposition": f'inline; filename="{db_file.file_name}"'}
     except Exception as e:
         print(e)
+        raise HTTPException(status_code=404, detail="File not found")
 
     return StreamingResponse(f, media_type=db_file.mimetype, headers=header)
 

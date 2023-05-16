@@ -180,8 +180,8 @@ class Guide(Base):
     name = sa.Column("name", sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
-    type = sa.Column(sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=True),
-    is_public = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True),
+    type = (sa.Column(sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=True),)
+    is_public = (sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True),)
     created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
@@ -247,12 +247,12 @@ class PartUsed(Base):
     issue_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    symbol = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     price = sa.Column(sa.DECIMAL(precision=10, scale=2), autoincrement=False, nullable=True)
     quantity = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     unit = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
     value = sa.Column(sa.DECIMAL(precision=10, scale=2), autoincrement=False, nullable=True)
-    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)

@@ -32,7 +32,7 @@ def user_get_all(
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
-    db_users = crud_users.get_users(db, search, field, order)
+    db_users = crud_users.get_users(db, field, order, search)
     return paginate(db_users, params)
 
 
@@ -45,7 +45,7 @@ def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
 @user_router.get("/export")
 def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_users = crud_users.get_users(db, None, "last_name", "asc")
+    db_users = crud_users.get_users(db, "last_name", "asc")
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")

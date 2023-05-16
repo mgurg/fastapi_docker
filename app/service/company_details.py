@@ -66,13 +66,13 @@ class CompanyDetails:
             }
 
             print(result["traderAddress"])
-            addres = self.get_vies_parsed_address(address=result["traderAddress"])
+            address = self.get_vies_parsed_address(address=result["traderAddress"])
         except Exception:
             traceback.print_exc()
             return None
-        if addres is None:
+        if address is None:
             return None
-        return name | addres
+        return name | address
 
     def gus(self):
         # Authentication
@@ -183,7 +183,7 @@ class CompanyDetails:
         # -EL additionaly gets transliterated to English characters (resulting in Greeklish)
 
         if country_code not in self.get_vies_supported_countries():
-            return False
+            return None
 
         if (newlines == 1) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
             address_split = address.split("\n")

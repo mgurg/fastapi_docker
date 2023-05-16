@@ -42,13 +42,13 @@ def item_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_items = crud_items.get_items(db, search, user_id, field, order)
+    db_items = crud_items.get_items(db, field, order, search, user_id)
     return paginate(db_items, params)
 
 
 @item_router.get("/export")
 def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_items = crud_items.get_items(db, None, None, "name", "asc")
+    db_items = crud_items.get_items(db, "name", "asc")
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
