@@ -166,6 +166,7 @@ class FavouritesAddIn(BaseRequest):
 
 class IssueEditIn(BaseRequest):
     name: str | None
+    priority: str | None
     summary: str | None
     text_html: str | None
     text_json: dict | None
