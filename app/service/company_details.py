@@ -118,7 +118,8 @@ class CompanyDetails:
 
         return data
 
-    def rejestr_io(self):
+    def rejestr_io(self) -> dict | None:
+        data = None
         if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
             logger.info("Company data test")
             path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")
@@ -150,7 +151,8 @@ class CompanyDetails:
 
         return data
 
-    def get_company_short_name(self, company_name):
+    @staticmethod
+    def get_company_short_name(company_name):
         company_name = company_name.upper()
 
         mapping = [
@@ -166,7 +168,8 @@ class CompanyDetails:
 
         return capwords(company_name, sep=None)
 
-    def get_vies_supported_countries(self):
+    @staticmethod
+    def get_vies_supported_countries():
         return ["SK", "NL", "BE", "FR", "PT", "IT", "FI", "RO", "SI", "AT", "PL", "HR", "EL", "DK", "EE", "CZ"]
 
     def get_vies_parsed_address(self, address) -> dict | None:

@@ -320,8 +320,8 @@ def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: 
 
     crud_auth.update_public_user(public_db, db_public_user, update_user)
 
-    emailNotification = EmailNotification()
-    emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+    email_notification = EmailNotification()
+    email_notification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
 
     return {"ok": True}
 

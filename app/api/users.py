@@ -24,7 +24,8 @@ def user_get_all(
     *,
     db: Session = Depends(get_db),
     params: Params = Depends(),
-    search: str = None,
+    search: str | None = None,
+    # search: Annotated[str | None, Query(max_length=50)] = None,
     field: str = "name",
     order: str = "asc",
     auth=Depends(has_token),
@@ -71,9 +72,9 @@ def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None =
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
 
-    csvReader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
+    csv_reader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
     data = {}
-    for idx, rows in enumerate(csvReader):
+    for idx, rows in enumerate(csv_reader):
         key = idx  # Assuming a column named 'Id' to be the primary key
         data[key] = rows
         data[key]["uuid"] = str(uuid4())
