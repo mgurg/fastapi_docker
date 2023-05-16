@@ -2,11 +2,11 @@ from uuid import UUID
 
 from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
-
+from collections.abc import Sequence
 from app.models.models import Guide, Item
 
 
-def get_guides(db: Session, search: str, item_id: int, sort_column: str, sort_order: str) -> Guide:
+def get_guides(db: Session, search: str, item_id: int, sort_column: str, sort_order: str) -> Sequence[Guide]:
     query = select(Guide)
 
     search_filters = []

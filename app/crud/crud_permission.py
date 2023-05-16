@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import func, select, text
@@ -28,20 +29,34 @@ def get_roles_summary(db: Session, search: str, all: bool, sortColumn: str, sort
     return result.all()
 
 
-def get_role_by_uuid(db: Session, uuid: UUID) -> Role:
-    return db.execute(select(Role).where(Role.uuid == uuid).options(selectinload("*"))).scalar_one_or_none()
+def get_role_by_uuid(db: Session, uuid: UUID) -> Role | None:
+    query = select(Role).where(Role.uuid == uuid).options(selectinload("*"))
+
+    result = db.execute(query)
+
+    return result.scalar_one_or_none()
 
 
-def get_permission_by_uuid(db: Session, uuid: UUID) -> Permission:
-    return db.execute(select(Permission).where(Permission.uuid == uuid)).scalar_one_or_none()
+def get_permission_by_uuid(db: Session, uuid: UUID) -> Permission | None:
+    query = select(Permission).where(Permission.uuid == uuid)
+
+    result = db.execute(query)
+
+    return result.scalar_one_or_none()
 
 
-def get_role_by_name(db: Session, name: str) -> Role:
-    return db.execute(select(Role).where(func.lower(Role.role_title) == name.lower())).scalar_one_or_none()
+def get_role_by_name(db: Session, name: str) -> Role | None:
+    query = select(Role).where(func.lower(Role.role_title) == name.lower())
+
+    result = db.execute(query)
+
+    return result.scalar_one_or_none()
 
 
-def get_permissions(db: Session) -> Permission:
-    return db.execute(select(Permission).order_by(Permission.group.asc(), Permission.id.asc())).scalars().all()
+def get_permissions(db: Session) -> Sequence[Permission]:
+    query = select(Permission).order_by(Permission.group.asc(), Permission.id.asc())
+    result = db.execute(query)
+    return result.scalars().all()
 
 
 def create_role_with_permissions(db: Session, data: dict) -> Role:

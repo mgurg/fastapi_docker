@@ -41,7 +41,7 @@ def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUs
     return result.scalar_one_or_none()
 
 
-def get_public_company_count(db: Session) -> int:
+def get_public_company_count(db: Session) -> int | None:
     query = select(func.count(PublicCompany.id))
 
     result = db.execute(query)  # await db.execute(query)

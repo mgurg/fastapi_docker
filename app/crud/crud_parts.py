@@ -1,11 +1,11 @@
 from uuid import UUID
 from sqlalchemy import not_, select
 from sqlalchemy.orm import Session
-
+from collections.abc import Sequence
 from app.models.models import PartUsed
 
 
-def get_parts(db: Session, issue_id: UUID | None = None, is_hidden: bool | None = None) -> PartUsed:
+def get_parts(db: Session, issue_id: UUID | None = None, is_hidden: bool | None = None) -> Sequence[PartUsed]:
     query = select(PartUsed).where(PartUsed.deleted_at.is_(None))
 
     if is_hidden is True:
@@ -21,7 +21,7 @@ def get_parts(db: Session, issue_id: UUID | None = None, is_hidden: bool | None 
     return result.scalars().all()
 
 
-def get_part_by_uuid(db: Session, uuid: UUID) -> PartUsed:
+def get_part_by_uuid(db: Session, uuid: UUID) -> PartUsed | None:
     query = select(PartUsed).where(PartUsed.uuid == uuid)
 
     result = db.execute(query)

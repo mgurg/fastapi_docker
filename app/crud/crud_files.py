@@ -11,8 +11,12 @@ def get_files(db: Session) -> File:
     return db.execute(select(File).where(File.deleted_at.is_(None))).scalars().all()
 
 
-def get_file_by_uuid(db: Session, uuid: UUID) -> File:
-    return db.execute(select(File).where(File.uuid == uuid).where(File.deleted_at.is_(None))).scalar_one_or_none()
+def get_file_by_uuid(db: Session, uuid: UUID) -> File | None:
+    query = select(File).where(File.uuid == uuid).where(File.deleted_at.is_(None))
+
+    result = db.execute(query)
+
+    return result.scalar_one_or_none()
 
 
 def get_file_by_id(db: Session, id: int) -> File:

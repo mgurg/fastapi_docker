@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
+from collections.abc import Sequence
 
 from app.models.models import Event, EventSummary
 
@@ -23,7 +24,7 @@ def get_event_time_statistics_by_issue(db: Session, issue_uuid: UUID):
     ).all()
 
 
-def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, status: str) -> EventSummary:
+def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, status: str) -> EventSummary | None:
     query = (
         select(EventSummary)
         .where(EventSummary.issue_uuid == issue_uuid)
@@ -35,7 +36,7 @@ def get_statistics_by_issue_uuid_and_status(db: Session, issue_uuid: UUID, statu
 
 def get_event_summary_by_resource_uuid_and_status(
     db: Session, resource: str, resource_uuid: UUID, status: str, internal_value: str | None = None
-) -> EventSummary:
+) -> EventSummary | None:
     query = (
         select(EventSummary)
         .where(EventSummary.resource == resource)
@@ -66,7 +67,7 @@ def get_basic_summary_users_uuids(db: Session, resource: str, resource_uuid: UUI
 
 def get_events_by_uuid_and_resource(
     db: Session, resource_uuid: UUID, action: str = None, date_from=None, date_to=None
-) -> Event:
+) -> Sequence[Event]:
     # .where(Event.created_at > date_from)
     # .where(Event.created_at < date_to)
 

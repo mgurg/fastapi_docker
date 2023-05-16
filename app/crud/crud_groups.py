@@ -2,11 +2,11 @@ from uuid import UUID
 
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
-
+from collections.abc import Sequence
 from app.models.models import UserGroup
 
 
-def get_user_groups(db: Session, search: str, sort_column: str, sort_order: str):
+def get_user_groups(db: Session, search: str, sort_column: str, sort_order: str) -> Sequence[UserGroup]:
     query = select(UserGroup)
 
     search_filters = []

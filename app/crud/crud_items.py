@@ -2,13 +2,13 @@ from uuid import UUID
 
 from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
-
+from collections.abc import Sequence
 from app.models.models import Item, User
 
 
 def get_items(
     db: Session, sort_column: str, sort_order: str, search: str | None = None, user_id: int | None = None
-) -> list[Item]:
+) -> Sequence[Item]:
     query = select(Item)
 
     search_filters = []
@@ -28,7 +28,7 @@ def get_items(
     return result.scalars().all()
 
 
-def get_item_by_uuid(db: Session, uuid: UUID) -> Item:
+def get_item_by_uuid(db: Session, uuid: UUID) -> Item | None:
     query = select(Item).where(Item.uuid == uuid)
 
     result = db.execute(query)  # await db.execute(query)
