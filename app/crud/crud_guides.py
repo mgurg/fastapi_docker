@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
-from collections.abc import Sequence
+
 from app.models.models import Guide, Item
 
 

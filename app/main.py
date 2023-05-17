@@ -1,4 +1,5 @@
 from typing import Any
+
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,10 +13,10 @@ from app.api.files import file_router
 from app.api.guides import guide_router
 from app.api.issues import issue_router
 from app.api.items import item_router
+from app.api.parts import part_router
 from app.api.settings import setting_router
 from app.api.statistics import statistics_router
 from app.api.tags import tag_router
-from app.api.parts import part_router
 from app.api.users import user_router
 from app.api.users_groups import group_router
 from app.api.users_permissions import permission_router

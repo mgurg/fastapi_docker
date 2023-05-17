@@ -69,7 +69,7 @@ class TenantNotFoundError(Exception):
         super().__init__(self.message)
 
 
-@lru_cache()
+@lru_cache
 def get_tenant(request: Request) -> PublicCompany | None:
     try:
         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com

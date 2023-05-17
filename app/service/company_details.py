@@ -1,12 +1,12 @@
 import json
 import os
 import re
+import traceback
 from pathlib import Path
 from string import capwords
-import traceback
-from loguru import logger
 
 import requests
+from loguru import logger
 from pyVies import api
 from RegonAPI import RegonAPI
 from RegonAPI.exceptions import ApiAuthenticationError

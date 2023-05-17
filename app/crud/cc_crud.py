@@ -1,6 +1,8 @@
+from collections.abc import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from collections.abc import Sequence
+
 from app.models.shared_models import PublicCompany
 
 

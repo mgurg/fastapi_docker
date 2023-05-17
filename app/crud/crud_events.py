@@ -1,8 +1,8 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
-from collections.abc import Sequence
 
 from app.models.models import Event, EventSummary
 

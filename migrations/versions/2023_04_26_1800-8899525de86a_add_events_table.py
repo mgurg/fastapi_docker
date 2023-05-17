@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers, used by Alembic.
 revision = "8899525de86a"
 down_revision = "249aba91b072"
@@ -32,6 +31,7 @@ def upgrade() -> None:
         sa.Column("author_uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("author_name", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(["author_id"], ["users.id"], name="event_user_link_fk"),
         sa.PrimaryKeyConstraint("id", name="events_pkey"),
         schema=None,
     )
@@ -54,5 +54,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_constraint("event_user_link_fk", "events")
     op.drop_table("events", schema=None)
     op.drop_table("events_summary", schema=None)

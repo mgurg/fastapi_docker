@@ -53,14 +53,14 @@ def issue_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order, dateFrom, dateTo, tag_ids)
+    db_issues = crud_issues.get_issues(db, field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
     return paginate(db_issues, params)
 
 
 @issue_router.get("/export")
 def get_export_issues(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     print("================")
-    db_issues = crud_issues.get_issues(db, None, "all", None, None, "name", "asc", None, None, None)
+    db_issues = crud_issues.get_issues(db, "name", "asc", None, "all", None, None, None, None, None)
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
@@ -167,8 +167,10 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
     author_name = "anonymous"
+    author_id = None
     if db_user:
         author_name = f"{db_user.first_name} {db_user.last_name}"
+        author_id = db_user.id
 
     db_item = crud_items.get_item_by_uuid(db, issue.item_uuid)
     item_id = None
@@ -186,7 +188,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     issue_data = {
         "uuid": issue_uuid,
-        "author_id": auth["user_id"],
+        "author_id": author_id,
         "author_name": author_name,
         "item_id": item_id,
         "symbol": f"PR-{last_issue_id}",

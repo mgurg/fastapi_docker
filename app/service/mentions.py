@@ -9,14 +9,14 @@ class Mention:
         if isinstance(obj, dict):
             for k, v in obj.items():
                 found_arr = [*sub_arr, k]
-                if isinstance(v, (dict, list)):
+                if isinstance(v, dict | list):
                     self.extract(v, found_arr, val)
                 elif v == val:
                     self.arr.append(found_arr)
         elif isinstance(obj, list):
             for item in obj:
                 found_arr = [*sub_arr, obj.index(item)]
-                if isinstance(item, (dict, list)):
+                if isinstance(item, dict | list):
                     self.extract(item, found_arr, val)
                 elif item == val:
                     self.arr.append(found_arr)

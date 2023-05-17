@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
-from collections.abc import Sequence
+
 from app.models.models import UserGroup
 
 
