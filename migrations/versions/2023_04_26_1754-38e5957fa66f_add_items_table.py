@@ -32,7 +32,7 @@ def upgrade() -> None:
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.ForeignKeyConstraint(["author_id"], ["users.id"], name="item_user_link_fk"),
-        sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),
+        # sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),
         sa.PrimaryKeyConstraint("id", name="items_pkey"),
         schema=None,
     )
@@ -59,7 +59,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_constraint("author_id", "items")
-    op.drop_constraint("qr_code_id", "items")
+    # op.drop_constraint("qr_code_id", "items")
 
     op.drop_constraint("files_items_link_fk", "files_items_link")
     op.drop_constraint("files_items_link_fk_1", "files_items_link")
