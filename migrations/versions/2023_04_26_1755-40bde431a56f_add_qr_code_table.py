@@ -33,7 +33,7 @@ def upgrade() -> None:
         schema=None,
     )
 
-    op.create_foreign_key('qr_code_fk',  'items', 'qr_codes', ["qr_code_id"], ["id"], schema=None)
+    op.create_foreign_key('qr_code_fk',  'items', 'qr_codes', ["qr_code_id"], ["id"])
 
 def downgrade() -> None:
 
