@@ -222,7 +222,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, force: bool = False, auth=Depends(has_token)):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
     if not db_user:
@@ -230,8 +230,11 @@ def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(
 
     email = db_user.email
 
-    db.delete(db_user)
-    db.commit()
+    if force is True:
+        db.delete(db_user)
+        db.commit()
+    else:
+        crud_users.update_user(db, db_user, {"deleted_at": datetime.now(timezone.utc)})
 
     schema_translate_map = dict(tenant="public")
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)

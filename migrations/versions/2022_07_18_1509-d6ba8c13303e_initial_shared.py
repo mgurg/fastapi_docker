@@ -48,7 +48,8 @@ def upgrade() -> None:
        tz varchar(64),
        lang varchar(8),
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-       updated_at TIMESTAMPTZ
+       updated_at TIMESTAMPTZ,
+       deleted_at TIMESTAMPTZ
       );
     """
     op.execute(public_users)
@@ -71,7 +72,8 @@ def upgrade() -> None:
        tenant_id varchar(64) UNIQUE,
        qr_id varchar(32) UNIQUE,
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-       updated_at TIMESTAMPTZ
+       updated_at TIMESTAMPTZ,
+       deleted_at TIMESTAMPTZ
       );
     """
     op.execute(public_companies)
