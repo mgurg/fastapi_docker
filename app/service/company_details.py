@@ -40,13 +40,13 @@ class CompanyDetails:
                 data = self.rejestr_io()
             if data is None:
                 data = {
-                "name": "Nie znaleziono - uzupelnij",
-                "short_name": "Nie znaleziono - uzupelnij",
-                "street": "",
-                "postcode": "",
-                "city": "",
-                "country_code": "PL",
-            }
+                    "name": "Nie znaleziono - uzupelnij",
+                    "short_name": "Nie znaleziono - uzupelnij",
+                    "street": "",
+                    "postcode": "",
+                    "city": "",
+                    "country_code": "PL",
+                }
         except Exception as e:
             print(e)
             traceback.print_exc()
@@ -68,10 +68,9 @@ class CompanyDetails:
             print("ViesError", e)
             return None
 
-
-        if result and (result["valid"] == False): # 5691805989
+        if result and (result["valid"] is False):  # 5691805989
             return None
-        
+
         try:
             name = {
                 "name": capwords(result["traderName"], sep=None),
