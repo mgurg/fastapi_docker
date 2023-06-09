@@ -37,7 +37,7 @@ def create_application() -> FastAPI:
     Returns:
         FastAPI: [description]
     """
-    app = FastAPI(debug=True)
+    app = FastAPI(debug=False, openapi_url=None)
 
     app.add_middleware(
         CORSMiddleware,
