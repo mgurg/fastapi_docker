@@ -70,6 +70,47 @@ DELETE FROM public.public_companies  WHERE city  LIKE 'faker_000_%';
 DROP SCHEMA IF EXISTS "fake_tenant_company_for_test_00000000000000000000000000000000" CASCADE;
 ```
 
+## 💾 Backup of DB (Work in Progress)
+
+Initial Code:
+``` bash
+export PYTHONPATH=$PWD
+cd ./commands/db_backup
+
+```
+
+### Usage
+
+- List databases on a postgresql server
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action list_dbs --verbose true
+```
+
+- Create database backup and store it (based on config file details)
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action backup --verbose true
+```
+
+- List previously created database backups available on storage engine
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action list --verbose true
+```
+- Restore previously created database backups available on storage engine (check available dates with _list_ action)
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action restore --date "YYYY-MM-dd" --verbose true
+```
+
+- Restore previously created database backups into a new destination database
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action restore --date "YYYY-MM-dd" --dest-db new_DB_name
+```
+
+
 ## 🏋️‍♂️Load test
 
 ```bash
