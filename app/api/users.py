@@ -150,7 +150,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
 
     crud_users.create_user(db, user_data)
 
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         public_user_data = {
@@ -210,7 +210,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
     # UPDATE PUBLIC USER INFO
     if ("email" in user_data.keys()) and (user_data["email"] is not None):
-        schema_translate_map = dict(tenant="public")
+        schema_translate_map = {"tenant": "public"}
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
             db_public_user = crud_auth.get_public_user_by_email(public_db, current_email)
@@ -236,7 +236,7 @@ def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, force: bool =
     else:
         crud_users.update_user(db, db_user, {"deleted_at": datetime.now(timezone.utc)})
 
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         db_public_user = crud_auth.get_public_user_by_email(db, email)

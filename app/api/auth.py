@@ -223,7 +223,7 @@ def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn
     if db_public_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    schema_translate_map = dict(tenant=db_public_user.tenant_id)
+    schema_translate_map = {"tenant": db_public_user.tenant_id}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         db_user = crud_users.get_user_by_email(db, user.email)

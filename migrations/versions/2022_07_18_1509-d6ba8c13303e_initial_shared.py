@@ -1,7 +1,7 @@
 """Initial public
 
 Revision ID: d6ba8c13303e
-Revises: 
+Revises:
 Create Date: 2022-07-18 15:09:21.528588
 
 """

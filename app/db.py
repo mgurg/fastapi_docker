@@ -109,7 +109,7 @@ def get_public_db():
 @contextmanager
 def with_db(tenant_schema: str | None):
     if tenant_schema:
-        schema_translate_map = dict(tenant=tenant_schema)
+        schema_translate_map = {"tenant": tenant_schema}
     else:
         schema_translate_map = None
 

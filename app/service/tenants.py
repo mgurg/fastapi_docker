@@ -35,14 +35,14 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
         x_arg = "".join(["tenant=", tenant_name])  # "dry_run=" + "True"
         if not hasattr(config.cmd_opts, "x"):
             if x_arg is not None:
-                setattr(config.cmd_opts, "x", [])
+                config.cmd_opts.x = []
                 if isinstance(x_arg, list) or isinstance(x_arg, tuple):
                     for x in x_arg:
                         config.cmd_opts.x.append(x)
                 else:
                     config.cmd_opts.x.append(x_arg)
             else:
-                setattr(config.cmd_opts, "x", None)
+                config.cmd_opts.x = None
 
         # prepare and run the command
         revision = revision

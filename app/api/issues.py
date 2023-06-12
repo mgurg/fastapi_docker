@@ -142,7 +142,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
         raise HTTPException(status_code=400, detail="Unknown Company!")
 
     company = None
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
         company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
