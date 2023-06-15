@@ -56,8 +56,8 @@ def upgrade() -> None:
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.ForeignKeyConstraint(["user_role_id"], ["roles.id"], name="role_fk"),
         sa.PrimaryKeyConstraint("id", name="users_pkey"),
-        sa.UniqueConstraint("email", "deleted_at", name="users_email_key"),
-        sa.UniqueConstraint("phone", "deleted_at", name="users_phone_key"),
+        sa.UniqueConstraint("email", "deleted_at", name="users_email_key", postgresql_nulls_not_distinct=True),
+        sa.UniqueConstraint("phone", "deleted_at", name="users_phone_key",postgresql_nulls_not_distinct=True),
         schema=None,
     )
     op.create_table(
