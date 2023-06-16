@@ -338,7 +338,7 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
 
     env_path = Path(settings.PROJECT_DIR, './app/.env')
 
-    if (env_path.is_file()):
+    if env_path.is_file():
         load_dotenv(dotenv_path=env_path)
 
     config = configparser.ConfigParser()
@@ -350,7 +350,7 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
     postgres_user: str = os.getenv("DB_USERNAME")
     postgres_password: str = os.getenv("DB_PASSWORD")
 
-    config.read(Path(settings.PROJECT_DIR ,"./commands/db_backup/" , configfile))
+    # config.read(Path(settings.PROJECT_DIR ,"./commands/db_backup/" , configfile))
 
     # postgres_host = config.get("postgresql", "host")
     # postgres_port = config.get("postgresql", "port")
@@ -358,9 +358,9 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
     # postgres_restore = f"{postgres_db}_restore"
     # postgres_user = config.get("postgresql", "user")
     # postgres_password = config.get("postgresql", "password")
-    aws_bucket_name = config.get("S3", "bucket_name")
-    aws_bucket_path = config.get("S3", "bucket_backup_path")
-    storage_engine = config.get("setup", "storage_engine")
+    # aws_bucket_name = config.get("S3", "bucket_name")
+    # aws_bucket_path = config.get("S3", "bucket_backup_path")
+    storage_engine = "LOCAL" # config.get("setup", "storage_engine")
     timestr = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     filename = f"backup-{timestr}-{postgres_db}.dump"
     filename_compressed = f"{filename}.gz"
@@ -368,14 +368,14 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
     restore_uncompressed = "/tmp/restore.dump"
     cwd = os.getcwd()
     print("CWD: " + cwd)
-    local_storage_path = os.path.join(cwd, config.get("local_storage", "path", fallback="./backups/"))
-    print("local_storage_path: " + local_storage_path)
+    local_storage_path = Path(settings.PROJECT_DIR ,"./commands/db_backup/backups/")
+    print("local_storage_path: " + str(local_storage_path))
 
     manager_config = {
-        "AWS_BUCKET_NAME": aws_bucket_name,
-        "AWS_BUCKET_PATH": aws_bucket_path,
+        "AWS_BUCKET_NAME": "aws_bucket_name",
+        "AWS_BUCKET_PATH": "aws_bucket_path",
         "BACKUP_PATH": "/tmp/",
-        "LOCAL_BACKUP_PATH": local_storage_path,
+        "LOCAL_BACKUP_PATH": str(local_storage_path),
     }
 
     local_file_path = f"{manager_config.get('BACKUP_PATH')}{filename}"

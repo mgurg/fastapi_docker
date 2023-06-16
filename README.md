@@ -22,7 +22,7 @@ There is a `/cc/` group of endpoints which allows to:
   - run migrations for all tenants 
 
 ⚠️ Important - after adding a new migration rebuild of docker image is required (to copy new migration)   
-### Alembic
+### ⚗️ Alembic
 
 Auto generating migrations (❌ - please, don't use it in this project!)
 ```bash
