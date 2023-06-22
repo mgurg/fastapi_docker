@@ -31,6 +31,7 @@ def upgrade() -> None:
         sa.Column("public_access", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.ForeignKeyConstraint(["author_id"], ["users.id"], name="item_user_link_fk"),
         # sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),
         sa.PrimaryKeyConstraint("id", name="items_pkey"),
