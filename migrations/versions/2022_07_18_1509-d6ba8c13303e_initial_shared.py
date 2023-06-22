@@ -49,7 +49,7 @@ def upgrade() -> None:
        lang varchar(8),
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
        updated_at TIMESTAMPTZ,
-       deleted_at TIMESTAMPTZ,
+       deleted_at TIMESTAMPTZ
       );
     """
     op.execute(public_users)
