@@ -9,7 +9,7 @@ from app.models.models import User
 
 
 def get_users(db: Session, sort_column: str, sort_order: str, search: str | None = None) -> Sequence[User]:
-    query = select(User).order_by(text(f"{sort_column} {sort_order}"))
+    query = select(User).where(User.deleted_at.is_(None)).order_by(text(f"{sort_column} {sort_order}"))
 
     all_filters = []
     if search is not None:
