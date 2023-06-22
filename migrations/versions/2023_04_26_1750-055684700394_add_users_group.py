@@ -20,7 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "users_groups",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("name", sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=False),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("symbol", sa.VARCHAR(length=64), autoincrement=False, nullable=True),

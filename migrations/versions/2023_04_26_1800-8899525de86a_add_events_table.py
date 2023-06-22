@@ -20,7 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "events",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("action", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("internal_value", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
@@ -39,7 +39,7 @@ def upgrade() -> None:
     op.create_table(
         "events_summary",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False),
         sa.Column("resource", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("resource_uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("action", sa.VARCHAR(length=512), autoincrement=False, nullable=True),

@@ -20,7 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "qr_codes",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("resource", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("resource_uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
         sa.Column("qr_code_id", sa.VARCHAR(length=512), autoincrement=False, nullable=True),

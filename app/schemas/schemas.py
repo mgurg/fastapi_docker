@@ -203,7 +203,7 @@
 #     value: str
 #     value_type: str
 #     prev_value: str
-#     descripton: str
+#     description: str
 #     updated_by: datetime
 #     created_at: datetime
 #     updated_at: datetime

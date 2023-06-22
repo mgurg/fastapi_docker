@@ -23,7 +23,7 @@ def upgrade() -> None:
     permissions = table(
         "permissions",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False),
         sa.Column("name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
         sa.Column("description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
@@ -329,7 +329,7 @@ def upgrade() -> None:
     roles = table(
         "roles",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("is_custom", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("is_system", sa.BOOLEAN(), autoincrement=False, nullable=True, default=False),
