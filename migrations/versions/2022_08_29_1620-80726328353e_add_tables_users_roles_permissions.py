@@ -36,7 +36,7 @@ def upgrade() -> None:
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("email", sa.VARCHAR(length=256), autoincrement=False, nullable=False),
-        sa.Column("phone", sa.VARCHAR(length=16), autoincrement=False, nullable=True),
+        sa.Column("phone", sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True),
         sa.Column("password", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("tos", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("first_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),

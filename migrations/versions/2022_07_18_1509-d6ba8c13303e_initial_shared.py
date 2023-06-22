@@ -37,7 +37,7 @@ def upgrade() -> None:
        first_name varchar(100),
        last_name varchar(100),
        email varchar(256),
-       phone varchar(16),
+       phone varchar(16) UNIQUE,
        password varchar(256),
        service_token varchar(256),
        service_token_valid_to TIMESTAMPTZ,
@@ -50,8 +50,7 @@ def upgrade() -> None:
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
        updated_at TIMESTAMPTZ,
        deleted_at TIMESTAMPTZ,
-       CONSTRAINT public_users_emails_key UNIQUE NULLS NOT DISTINCT (email, deleted_at),
-       CONSTRAINT public_users_phones_key UNIQUE NULLS NOT DISTINCT (phone, deleted_at)
+       CONSTRAINT public_users_emails_key UNIQUE NULLS NOT DISTINCT (email, deleted_at)
       );
     """
     op.execute(public_users)
