@@ -10,7 +10,7 @@ from app.models.models import Item, User
 def get_items(
     db: Session, sort_column: str, sort_order: str, search: str | None = None, user_id: int | None = None
 ) -> Sequence[Item]:
-    query = select(Item)
+    query = select(Item).where(Item.deleted_at.is_(None))
 
     search_filters = []
     if search is not None:
