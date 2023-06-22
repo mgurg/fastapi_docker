@@ -36,7 +36,7 @@ def upgrade() -> None:
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
         sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("email", sa.VARCHAR(length=256), autoincrement=False, nullable=False),
-        sa.Column("phone", sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True),
+        sa.Column("phone", sa.VARCHAR(length=16), autoincrement=False, nullable=True),
         sa.Column("password", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("tos", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("first_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
@@ -56,8 +56,6 @@ def upgrade() -> None:
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.ForeignKeyConstraint(["user_role_id"], ["roles.id"], name="role_fk"),
         sa.PrimaryKeyConstraint("id", name="users_pkey"),
-        sa.UniqueConstraint("email", "deleted_at", name="users_email_key", postgresql_nulls_not_distinct=True),
-        sa.UniqueConstraint("phone", "deleted_at", name="users_phone_key", postgresql_nulls_not_distinct=True),
         schema=None,
     )
     op.create_table(
