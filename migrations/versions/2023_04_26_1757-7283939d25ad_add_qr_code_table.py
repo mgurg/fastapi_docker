@@ -1,8 +1,8 @@
-"""add_qr_code_table
+"""add_guides_table
 
-Revision ID: 40bde431a56f
-Revises: 38e5957fa66f
-Create Date: 2023-04-26 17:55:47.920796
+Revision ID: 7283939d25ad
+Revises: 40bde431a56f
+Create Date: 2023-04-26 17:57:32.574715
 
 """
 import sqlalchemy as sa
@@ -10,11 +10,10 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "40bde431a56f"
-down_revision = "38e5957fa66f"
+revision = "7283939d25ad"
+down_revision = "40bde431a56f"
 branch_labels = None
 depends_on = None
-
 
 def upgrade() -> None:
     op.create_table(
@@ -33,7 +32,8 @@ def upgrade() -> None:
         schema=None,
     )
 
-    op.create_foreign_key("qr_code_fk", "items", "qr_codes", ["qr_code_id"], ["id"])
+    op.create_foreign_key("qr_code_items_fk", "items", "qr_codes", ["qr_code_id"], ["id"])
+    op.create_foreign_key("qr_code_guides_fk", "guides", "qr_codes", ["qr_code_id"], ["id"])
 
 
 def downgrade() -> None:

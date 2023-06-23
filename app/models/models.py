@@ -180,6 +180,7 @@ class Guide(Base):
     name = sa.Column(sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
+    qr_code_id = sa.Column(sa.INTEGER, sa.ForeignKey("qr_codes.id"), autoincrement=False, nullable=True)
     type = sa.Column(sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=True)
     is_public = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
