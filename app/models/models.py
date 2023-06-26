@@ -43,6 +43,9 @@ class Role(Base):
     is_custom = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_system = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 

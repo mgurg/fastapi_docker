@@ -124,6 +124,7 @@ class RoleSummaryResponse(BaseResponse):
     role_description: str
     is_custom: bool
     count: int
+    uncounted: int
 
 
 class PermissionResponse(BaseResponse):

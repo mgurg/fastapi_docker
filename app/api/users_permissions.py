@@ -9,6 +9,7 @@ from app.db import get_db
 from app.schemas.requests import RoleAddIn, RoleEditIn
 from app.schemas.responses import PermissionResponse, RolePermissionFull, RoleSummaryResponse, StandardResponse
 from app.service.bearer_auth import has_token
+from app.service.helpers import to_snake_case
 
 permission_router = APIRouter()
 
@@ -92,7 +93,7 @@ def role_edit(*, db: Session = Depends(get_db), role_uuid: UUID, role: RoleEditI
         role_data["permission"] = permissions
         del role_data["permissions"]
 
-    role_data["role_name"] = role.title
+    role_data["role_name"] = to_snake_case(role.title)
     role_data["role_title"] = role.title
     role_data["role_description"] = role.description
 
@@ -104,8 +105,9 @@ def role_edit(*, db: Session = Depends(get_db), role_uuid: UUID, role: RoleEditI
     return new_role
 
 
+
 @permission_router.delete("/{role_uuid}", response_model=StandardResponse)
-def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, auth=Depends(has_token)):
+def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, force: bool = False, auth=Depends(has_token)):
     db_role = crud_permission.get_role_by_uuid(db, role_uuid)
 
     if not db_role:
@@ -119,7 +121,13 @@ def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, auth=Depends(
         error_message = {"message": "Permission assigned to One or more users", "count": len(db_users)}
         raise HTTPException(status_code=400, detail=error_message)
 
-    db.delete(db_role)
-    db.commit()
+    if force is True:
+        db.delete(db_role)
+        db.commit()
+        return {"ok": True}
+
+    crud_permission.update_role(db, db_role, {"deleted_at": datetime.now(timezone.utc)})
+
+
 
     return {"ok": True}

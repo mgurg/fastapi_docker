@@ -85,7 +85,7 @@ class IdeaEditIn(BaseRequest):
 
 class RoleAddIn(BaseRequest):
     title: str
-    description: str
+    description: str | None
     permissions: list[UUID]
 
 

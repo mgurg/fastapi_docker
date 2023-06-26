@@ -15,6 +15,7 @@ down_revision = "40bde431a56f"
 branch_labels = None
 depends_on = None
 
+
 def upgrade() -> None:
     op.create_table(
         "qr_codes",

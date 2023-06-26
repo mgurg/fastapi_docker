@@ -9,8 +9,16 @@ from app.models.models import Permission, Role, User
 
 def get_roles_summary(db: Session, search: str, all: bool, sortColumn: str, sortOrder: str):
     query = (
-        select(Role.uuid, Role.role_title, Role.role_description, Role.is_custom, func.count(User.id).label("count"))
+        select(
+            Role.uuid,
+            Role.role_title,
+            Role.role_description,
+            Role.is_custom,
+            func.count(User.id).label("count"),
+            func.count(User.deleted_at).label("uncounted"),
+        )
         .outerjoin(User, User.user_role_id == Role.id)
+        .where(Role.deleted_at.is_(None))
         .group_by(Role.uuid, Role.role_title, Role.role_description, Role.is_custom)
         .order_by(text(f"{sortColumn} {sortOrder}"))
     )

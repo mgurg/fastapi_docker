@@ -16,7 +16,6 @@ branch_labels = None
 depends_on = None
 
 
-
 def upgrade() -> None:
     op.create_table(
         "guides",
@@ -72,5 +71,3 @@ def downgrade() -> None:
 
     op.drop_table("guides", schema=None)
     op.drop_table("files_guides_link", schema=None)
-
-
