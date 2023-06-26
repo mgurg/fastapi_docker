@@ -50,7 +50,7 @@ def upgrade() -> None:
         sa.Column("auth_token_valid_to", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("is_active", sa.BOOLEAN(), autoincrement=False, nullable=False),
         sa.Column("is_verified", sa.BOOLEAN(), autoincrement=False, nullable=False),
-        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=False, default=True),
+        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True, default=True),
         sa.Column("service_token", sa.VARCHAR(length=100), autoincrement=False, nullable=True, unique=True),
         sa.Column("service_token_valid_to", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("tz", sa.VARCHAR(length=64), autoincrement=False, nullable=False),
