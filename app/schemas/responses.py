@@ -163,7 +163,7 @@ class FileBasicInfo(BaseResponse):
 class TagResponse(BaseResponse):
     uuid: UUID
     name: str
-    color: Color | None = "#1976D2"
+    color: Color | None = "#66b3ff"
     is_hidden: bool | None
 
 
@@ -180,6 +180,7 @@ class PartResponse(BaseResponse):
 class TagBasicInfo(BaseResponse):
     uuid: UUID
     name: str
+    color: Color | None = "#66b3ff"
 
 
 class QRCodeItemResponse(BaseResponse):
@@ -201,11 +202,17 @@ class GuideBasicResponse(BaseResponse):
     text: str | None
 
 
+class ItemNameResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+
+
 class GuideResponse(BaseResponse):
     uuid: UUID
     name: str | None
     text: str | None
     text_json: dict | None
+    item: list[ItemNameResponse] | None
     # video_id: str | None
 
 
@@ -240,11 +247,6 @@ class ItemResponse(BaseResponse):
     item_guides: list[GuideBasicResponse] | None
     users_item: list[UserBasicResponse] | None
     qr_code: QRCodeItemResponse | None
-
-
-class ItemNameResponse(BaseResponse):
-    uuid: UUID
-    name: str | None
 
 
 class IssueIndexResponse(BaseResponse):
