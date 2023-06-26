@@ -121,7 +121,7 @@ class IssueSummaryResponse(BaseResponse):
 class RoleSummaryResponse(BaseResponse):
     uuid: UUID
     role_title: str
-    role_description: str
+    role_description: str | None
     is_custom: bool
     count: int
     uncounted: int
@@ -326,7 +326,7 @@ class PermissionsFull(BaseResponse):
 
 class RolePermissionFull(BaseResponse):
     role_name: str
-    role_description: str
+    role_description: str | None
     role_title: str
     is_custom: bool
     permission: list[PermissionsFull] | None
