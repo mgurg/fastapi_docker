@@ -79,6 +79,7 @@ def test_register(publicClient: TestClient):
         "company_city": "faker_000_" + fake.city(),
         "company_postcode": "string",
         "company_info_changed": True,
+        "is_visible": True,
         "tos": True,
         "tz": "Europe/Warsaw",
         "lang": "pl",

@@ -80,6 +80,7 @@ class User(Base):
     user_role_id = sa.Column(sa.INTEGER(), sa.ForeignKey("roles.id"), autoincrement=False, nullable=True)
     is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_verified = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=False)
     tos = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tz = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True)
     lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)

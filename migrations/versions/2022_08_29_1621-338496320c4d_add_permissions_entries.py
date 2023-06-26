@@ -384,9 +384,7 @@ def upgrade() -> None:
     #     ],
     # )
 
-    admin_master_permissions: list[int] = list(
-        range(1, len(permissions_dict) + 1)
-    )  # ALL: 1 curl 'https://claudeict.ccrm.pl/api/callHistory?page=0&pagination=25&dateFrom=2023-05-06+09%3A44%3A06&dateTo=2023-06-06+09%3A44%3A03' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/113.0' -H 'Accept: */*' -H 'Accept-Language: pl,en-US;q=0.7,en;q=0.3' -H 'Accept-Encoding: gzip, deflate, br' -H 'Authorization: Bearer b0460ed4c209d08dff2b5bf5fab1b11902af611706d1e48118bddeab9087aa9b692dbf1cc8a554b9f9ab23888118104a792998eea8726cd63d33e4465ecd8d0b' -H 'Connection: keep-alive' -H 'Referer: https://claudeict.ccrm.pl/billing' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' -H 'TE: trailers'..32
+    admin_master_permissions: list[int] = list(range(1, len(permissions_dict) + 1))
     admin_permissions: list[int] = list(range(2, len(permissions_dict) + 1))
     role_permission_rel: dict = {1: admin_master_permissions, 2: admin_permissions}
 
