@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -105,7 +106,6 @@ def role_edit(*, db: Session = Depends(get_db), role_uuid: UUID, role: RoleEditI
     return new_role
 
 
-
 @permission_router.delete("/{role_uuid}", response_model=StandardResponse)
 def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, force: bool = False, auth=Depends(has_token)):
     db_role = crud_permission.get_role_by_uuid(db, role_uuid)
@@ -127,7 +127,5 @@ def role_delete(*, db: Session = Depends(get_db), role_uuid: UUID, force: bool =
         return {"ok": True}
 
     crud_permission.update_role(db, db_role, {"deleted_at": datetime.now(timezone.utc)})
-
-
 
     return {"ok": True}
