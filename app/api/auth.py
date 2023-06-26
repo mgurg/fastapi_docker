@@ -168,7 +168,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
         db_user_cnt = crud_users.get_user_count(db)
-        user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+        user_role_id = 2  # ADMIN_MASTER[1] / ADMIN[2]
         is_verified = False
 
         if db_user_cnt == 0:
@@ -192,6 +192,25 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             "tenant_id": db_public_user.tenant_id,
         }
 
+        anonymous_user_data = {
+            "uuid": str(uuid4()),
+            "first_name": "Anonymous",
+            "last_name": "User",
+            "email": "anonymous@example.com",
+            "password": None,
+            "auth_token": secrets.token_hex(32),
+            "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+            "role_id": None,
+            "is_active": True,
+            "is_verified": True,
+            "is_visible": False,
+            "tos": True,
+            "lang": "pl",
+            "tz": "Europe/Warsaw",
+            "tenant_id": db_public_user.tenant_id,
+        }
+
+        crud_auth.create_tenant_user(db, anonymous_user_data)
         db_tenant_user = crud_auth.create_tenant_user(db, user_data)
 
     empty_data = {
