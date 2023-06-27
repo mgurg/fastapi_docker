@@ -19,7 +19,6 @@ def get_roles_summary(db: Session, search: str, all: bool, sortColumn: str, sort
         )
         .outerjoin(User, User.user_role_id == Role.id)
         .where(Role.deleted_at.is_(None))
-        .where(User.is_visible.is_(True))
         .group_by(Role.uuid, Role.role_title, Role.role_description, Role.is_custom)
         .order_by(text(f"{sortColumn} {sortOrder}"))
     )
