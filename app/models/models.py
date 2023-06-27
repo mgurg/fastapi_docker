@@ -193,6 +193,7 @@ class Guide(Base):
 
     files_guide = relationship("File", secondary=file_guide_rel, back_populates="guide")
     item = relationship("Item", secondary=item_guide_rel, back_populates="item_guides")
+    qr_code = relationship("QrCode", back_populates="guides_FK")
 
 
 file_issue_rel = sa.Table(
@@ -335,6 +336,7 @@ class QrCode(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     items_FK = relationship("Item", back_populates="qr_code")
+    guides_FK = relationship("Guide", back_populates="qr_code")
 
 
 class UserGroup(Base):

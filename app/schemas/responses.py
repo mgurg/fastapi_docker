@@ -303,6 +303,7 @@ class GuideIndexResponse(BaseResponse):
     # video_json: dict | None
     files_guide: list[FileBasicInfo] | None
     item: list[BasicItems] | None
+    qr_code: QRCodeItemResponse | None
 
 
 class IdeaIndexResponse(BaseResponse):

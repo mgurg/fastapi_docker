@@ -7,8 +7,8 @@ from fastapi_pagination import Page, Params, paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_files, crud_guides, crud_items
-from app.db import get_db
+from app.crud import crud_auth, crud_files, crud_guides, crud_items, crud_qr
+from app.db import engine, get_db
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideIndexResponse, GuideResponse, StandardResponse
 
@@ -63,7 +63,11 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 
 
 @guide_router.post("/", response_model=GuideResponse)
-def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(has_token)):
+def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAddIn, auth=Depends(has_token)):
+    tenant_id = request.headers.get("tenant", None)
+    if not tenant_id:
+        raise HTTPException(status_code=400, detail="Unknown Company!")
+
     related_item = None
     db_item = None
 
@@ -82,11 +86,37 @@ def guide_add(*, db: Session = Depends(get_db), guide: GuideAddIn, auth=Depends(
 
     description = BeautifulSoup(guide.text_html, "html.parser").get_text()
 
-    guide_data = {
+    company = None
+    schema_translate_map = {"tenant": "public"}
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
+        company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
+    if not company:
+        raise HTTPException(status_code=400, detail="Unknown Company!")
+
+    guide_uuid = str(uuid4())
+
+    qr_code_id = crud_qr.generate_item_qr_id(db)
+    qr_code_company = crud_qr.add_noise_to_qr(company.qr_id)
+
+    qr_code_data = {
         "uuid": str(uuid4()),
+        "resource": "guides",
+        "resource_uuid": guide_uuid,
+        "qr_code_id": qr_code_id,
+        "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
+        "ecc": "L",
+        "created_at": datetime.now(timezone.utc),
+    }
+
+    new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
+
+    guide_data = {
+        "uuid": guide_uuid,
         "author_id": auth["user_id"],
         "name": guide.name,
         "text": description,
+        "qr_code_id": new_qr_code.id,
         "text_json": guide.text_json,
         # "video_json": guide.video_json,
         # "video_id": guide.video_id,
