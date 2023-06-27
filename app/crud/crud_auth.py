@@ -1,7 +1,6 @@
 import base64
 from datetime import datetime, timezone
 
-from langcodes import standardize_tag
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
@@ -116,25 +115,27 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
 
 def create_tenant_user(db: Session, tenant_data) -> User:
     try:
-        new_user = User(
-            uuid=tenant_data["uuid"],
-            first_name=tenant_data["first_name"],
-            last_name=tenant_data["last_name"],
-            email=tenant_data["email"],
-            password=tenant_data["password"],
-            # service_token=secrets.token_hex(32),
-            # service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
-            auth_token=tenant_data["auth_token"],
-            auth_token_valid_to=tenant_data["auth_token_valid_to"],
-            user_role_id=tenant_data["role_id"],
-            is_active=tenant_data["is_active"],
-            is_verified=tenant_data["is_verified"],
-            tos=tenant_data["tos"],
-            tz=tenant_data["tz"],
-            tenant_id=tenant_data["tenant_id"],
-            lang=standardize_tag(tenant_data["lang"]),
-            created_at=datetime.now(timezone.utc),
-        )
+        # new_user = User(
+        #     uuid=tenant_data["uuid"],
+        #     first_name=tenant_data["first_name"],
+        #     last_name=tenant_data["last_name"],
+        #     email=tenant_data["email"],
+        #     password=tenant_data["password"],
+        #     # service_token=secrets.token_hex(32),
+        #     # service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
+        #     auth_token=tenant_data["auth_token"],
+        #     auth_token_valid_to=tenant_data["auth_token_valid_to"],
+        #     user_role_id=tenant_data["role_id"],
+        #     is_active=tenant_data["is_active"],
+        #     is_verified=tenant_data["is_verified"],
+        #     tos=tenant_data["tos"],
+        #     tz=tenant_data["tz"],
+        #     tenant_id=tenant_data["tenant_id"],
+        #     lang=standardize_tag(tenant_data["lang"]),
+        #     created_at=datetime.now(timezone.utc),
+        # )
+
+        new_user = User(**tenant_data)
 
         db.add(new_user)
         db.commit()

@@ -183,13 +183,15 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             "password": db_public_user.password,
             "auth_token": secrets.token_hex(32),
             "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-            "role_id": user_role_id,
+            "user_role_id": user_role_id,
             "is_active": True,
             "is_verified": is_verified,
+            "is_visible": True,
             "tos": db_public_user.tos,
             "lang": db_public_user.lang,
             "tz": db_public_user.tz,
             "tenant_id": db_public_user.tenant_id,
+            "created_at": datetime.now(timezone.utc),
         }
 
         anonymous_user_data = {
@@ -200,7 +202,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             "password": None,
             "auth_token": secrets.token_hex(32),
             "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-            "role_id": None,
+            "user_role_id": None,
             "is_active": True,
             "is_verified": True,
             "is_visible": False,
@@ -208,6 +210,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             "lang": "pl",
             "tz": "Europe/Warsaw",
             "tenant_id": db_public_user.tenant_id,
+            "created_at": datetime.now(timezone.utc),
         }
 
         crud_auth.create_tenant_user(db, anonymous_user_data)

@@ -2,6 +2,9 @@
 
 import os
 import traceback
+import warnings
+
+from fastapi_pagination.utils import FastAPIPaginationWarning
 from sqlalchemy import func, select, text
 
 # from starlette.testclient import TestClient
@@ -55,6 +58,7 @@ URL = f"postgresql+psycopg://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}
 os.environ["ENVIRONMENT"] = "PYTEST"
 os.environ["TESTING"] = str("1")
 os.environ["SQLALCHEMY_WARN_20"] = "1"
+warnings.simplefilter("ignore", FastAPIPaginationWarning)
 
 
 def pytest_configure():

@@ -142,6 +142,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
         "user_role_id": db_role.id,
         "is_active": True,
         "is_verified": True,
+        "is_visible": True,
         "tz": "Europe/Warsaw",
         "lang": "pl",
         "tenant_id": tenant_id,
