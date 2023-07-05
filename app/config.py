@@ -3,13 +3,14 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseSettings
+from pydantic import ConfigDict
+from pydantic_settings import BaseSettings
 
 APP_DIR = Path(__file__).parent.parent / "app"
 
 
 class Settings(BaseSettings):
-    PROJECT_DIR = Path(__file__).parent.parent
+    PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = os.getenv("APP_ENV")
     OPEN_API: str = os.getenv("APP_OPEN_API", "")
     base_app_url: str = os.getenv("APP_HOST", "https://frontend-host.com")
@@ -58,11 +59,7 @@ class Settings(BaseSettings):
     TEST_DATABASE_DB: str = "postgres"
     # TEST_SQLALCHEMY_DATABASE_URI: str = ""
     TEST_SQLALCHEMY_DATABASE_URI: str = os.getenv("TEST_SQLALCHEMY_DATABASE_URI")
-
-    class Config:
-        env_prefix = ""
-        env_file_encoding = "utf-8"
-        env_file = f"{APP_DIR}/.env"
+    model_config = ConfigDict(env_prefix="", env_file_encoding="utf-8", env_file=f"{APP_DIR}/.env", extra="allow")
 
 
 @lru_cache
