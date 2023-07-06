@@ -168,8 +168,31 @@ Time per request:       52.326 [ms] (mean, across all concurrent requests)
 Transfer rate:          37.82 [Kbytes/sec] received
 
 ```
+### Pydantic V2
+`ab -k -c 40 -n 5000`
+
+slower than previous?
+
+```
+Document Path:          /users/
+Document Length:        602 bytes
+
+Concurrency Level:      40
+Time taken for tests:   303.484 seconds
+Complete requests:      5000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      5685000 bytes
+HTML transferred:       3010000 bytes
+Requests per second:    16.48 [#/sec] (mean)
+Time per request:       2427.872 [ms] (mean)
+Time per request:       60.697 [ms] (mean, across all concurrent requests)
+Transfer rate:          18.29 [Kbytes/sec] received
+
+```
 
 #### async branch:
+
 Test branch for async code:
 
 ```
