@@ -3,8 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import ConfigDict
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 APP_DIR = Path(__file__).parent.parent / "app"
 
@@ -60,7 +59,9 @@ class Settings(BaseSettings):
     # TEST_SQLALCHEMY_DATABASE_URI: str = ""
     # TEST_SQLALCHEMY_DATABASE_URI: str = os.getenv("TEST_SQLALCHEMY_DATABASE_URI")
 
-    model_config = ConfigDict(env_prefix="", env_file_encoding="utf-8", env_file=f"{APP_DIR}/.env", extra="allow")
+    model_config = SettingsConfigDict(
+        env_prefix="", env_file_encoding="utf-8", env_file=f"{APP_DIR}/.env", extra="allow"
+    )
 
 
 @lru_cache
