@@ -21,18 +21,19 @@ from app.service.bearer_auth import has_token
 guide_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @guide_router.get("/", response_model=Page[GuideResponse])  #
 def guide_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str = None,
     item_uuid: UUID | None = None,
     order: str = "asc",
     field: str = "name",
-    auth_user: CurrentUser,
 ):
     if field not in ["name"]:
         field = "name"
@@ -49,7 +50,7 @@ def guide_get_all(
 
 
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
-def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth_user: CurrentUser):
+def guide_get_one(*, db: UserDB, guide_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:
@@ -67,7 +68,7 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 
 
 @guide_router.post("/", response_model=GuideResponse)
-def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAddIn, auth_user: CurrentUser):
+def guide_add(*, db: UserDB, request: Request, guide: GuideAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -137,7 +138,7 @@ def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAd
 
 
 @guide_router.patch("/{guide_uuid}", response_model=GuideResponse)
-def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth_user: CurrentUser):
+def guide_edit(*, db: UserDB, guide_uuid: UUID, guide: GuideEditIn, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
     if not db_guide:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -167,7 +168,7 @@ def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideE
 
 
 @guide_router.delete("/{guide_uuid}", response_model=StandardResponse)
-def guide_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth_user: CurrentUser):
+def guide_delete(*, db: UserDB, guide_uuid: UUID, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:

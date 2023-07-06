@@ -16,10 +16,11 @@ from app.service.bearer_auth import has_token
 statistics_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @statistics_router.get("/issues_counter", response_model=StatsIssuesCounterResponse)
-def stats_issues_counter(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def stats_issues_counter(*, db: UserDB, auth_user: CurrentUser):
     issues_counter_summary = crud_statistics.get_issues_counter_summary(db)
     if not issues_counter_summary:
         return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "done": 0}
@@ -33,7 +34,7 @@ def stats_issues_counter(*, db: Session = Depends(get_db), auth_user: CurrentUse
 
 
 @statistics_router.get("/first_steps")
-def stats_first_steps(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def stats_first_steps(*, db: UserDB, auth_user: CurrentUser):
     user_id = auth_user.id
     response: dict = {}
 
@@ -59,12 +60,12 @@ def stats_first_steps(*, db: Session = Depends(get_db), auth_user: CurrentUser):
 
 
 @statistics_router.get("/all_items_failures")
-def stats_all_items_failures(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def stats_all_items_failures(*, db: UserDB, auth_user: CurrentUser):
     pass
 
 
 @statistics_router.get("/events")
-def stats_events_to_pd(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def stats_events_to_pd(*, db: UserDB, auth_user: CurrentUser):
     events = crud_statistics.get_events(db)
 
     columns = ["id", "action", "author_id"]

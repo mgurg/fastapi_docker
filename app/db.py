@@ -1,6 +1,7 @@
 import time
 from contextlib import contextmanager
 from functools import lru_cache
+from typing import Annotated
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
@@ -92,7 +93,7 @@ def get_tenant(request: Request) -> PublicCompany | None:
     return tenant
 
 
-def get_db(tenant: PublicCompany = Depends(get_tenant)):
+def get_db(tenant: Annotated[PublicCompany, Depends(get_tenant)]):
     if tenant is None:
         yield None
 

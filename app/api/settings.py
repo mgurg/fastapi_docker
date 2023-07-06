@@ -18,11 +18,12 @@ from app.service.default_settings import allowed_settings
 setting_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 # GENERAL
 @setting_router.get("/", name="setting:read")
-def setting_get_all(*, db: Session = Depends(get_db), settings: list[str] = Query(None), auth_user: CurrentUser):
+def setting_get_all(*, db: UserDB, auth_user: CurrentUser, settings: Annotated[list[str], Query()] = None):
     user_id = auth_user.id
 
     if user_id == 0:
@@ -45,7 +46,7 @@ def setting_get_all(*, db: Session = Depends(get_db), settings: list[str] = Quer
 
 
 @setting_router.post("/", name="setting:add")
-def setting_set_one(*, db: Session = Depends(get_db), setting: SettingGeneralIn, auth_user: CurrentUser):
+def setting_set_one(*, db: UserDB, setting: SettingGeneralIn, auth_user: CurrentUser):
     user_id = auth_user.id
 
     db_setting = crud_settings.get_user_general_setting_by_name(db, user_id, setting.name)
@@ -78,7 +79,7 @@ def setting_set_one(*, db: Session = Depends(get_db), setting: SettingGeneralIn,
 
 # Notifications
 @setting_router.get("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
-def setting_notification_get(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def setting_notification_get(*, db: UserDB, auth_user: CurrentUser):
     user_id = auth_user.id
 
     db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
@@ -90,7 +91,7 @@ def setting_notification_get(*, db: Session = Depends(get_db), auth_user: Curren
 
 
 @setting_router.post("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
-def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingNotificationIn, auth_user: CurrentUser):
+def setting_notification_set(*, db: UserDB, setting: SettingNotificationIn, auth_user: CurrentUser):
     user_id = auth_user.id
 
     db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
@@ -113,7 +114,7 @@ def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingN
 
 # LANG
 @setting_router.post("/user_lang/", response_model=StandardResponse, name="settings:notifications")
-def setting_user_lang(*, db: Session = Depends(get_db), lang: SettingUserLanguage, auth_user: CurrentUser):
+def setting_user_lang(*, db: UserDB, lang: SettingUserLanguage, auth_user: CurrentUser):
     if lang.code not in ["de", "en-US", "fr", "pl"]:
         raise HTTPException(status_code=404, detail="Language code setting invalid")
 

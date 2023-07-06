@@ -21,18 +21,19 @@ from app.service.password import Password
 user_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @user_router.get("/", response_model=Page[UserIndexResponse])
 def user_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
-    search: str | None = None,
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     # search: Annotated[str | None, Query(max_length=50)] = None,
+    search: str | None = None,
     field: str = "name",
     order: str = "asc",
-    auth_user: CurrentUser,
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
@@ -42,14 +43,14 @@ def user_get_all(
 
 
 @user_router.get("/count")
-def get_users_count(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def get_users_count(*, db: UserDB, auth_user: CurrentUser):
     db_user_cnt = crud_users.get_user_count(db)
 
     return db_user_cnt
 
 
 @user_router.get("/export")
-def get_export_users(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def get_export_users(*, db: UserDB, auth_user: CurrentUser):
     db_users = crud_users.get_users(db, "last_name", "asc")
 
     f = io.StringIO()
@@ -72,7 +73,7 @@ def get_export_users(*, db: Session = Depends(get_db), auth_user: CurrentUser):
 
 
 @user_router.post("/import")
-def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None = None, auth_user: CurrentUser):
+def get_import_users(*, db: UserDB, auth_user: CurrentUser, file: UploadFile | None = None):
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
 
@@ -101,7 +102,7 @@ def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None =
 
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
-def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth_user: CurrentUser):
+def user_get_one(*, db: UserDB, user_uuid: UUID, auth_user: CurrentUser):
     user = crud_users.get_user_by_uuid(db, user_uuid)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -109,7 +110,7 @@ def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth_user: C
 
 
 @user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth_user: CurrentUser
-def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Request, auth_user: CurrentUser):
+def user_add(*, db: UserDB, user: UserCreateIn, request: Request, auth_user: CurrentUser):
     db_user = crud_users.get_user_by_email(db, user.email)
     if db_user is not None:
         raise HTTPException(status_code=400, detail="User already exists")
@@ -177,7 +178,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
 
 
 @user_router.patch("/{user_uuid}", response_model=StandardResponse)
-def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser):
+def user_edit(*, db: UserDB, user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -227,7 +228,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, force: bool = False, auth_user: CurrentUser):
+def user_delete(*, db: UserDB, user_uuid: UUID, auth_user: CurrentUser, force: bool = False):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
     if not db_user:

@@ -1,4 +1,5 @@
 import base64
+from typing import Annotated
 
 import pendulum
 from fastapi import Depends, HTTPException
@@ -12,6 +13,8 @@ from app.models.models import User
 
 settings = get_settings()
 security = HTTPBearer()
+
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 def is_base64(sb: str) -> bool:
@@ -31,7 +34,7 @@ def is_base64(sb: str) -> bool:
         return False
 
 
-def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)) -> User:
+def has_token(*, db: UserDB, credentials: Annotated[HTTPBasicCredentials, Depends(security)]) -> User:
     """
     Function that is used to validate the token in the case that it requires it
     """
@@ -67,7 +70,7 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
     raise HTTPException(status_code=401, detail="Incorrect auth token")
 
 
-def is_app_owner(credentials: HTTPBasicCredentials = Depends(security)):
+def is_app_owner(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
     token = credentials.credentials
     if token is None:
         raise HTTPException(status_code=401, detail="Missing auth token")

@@ -24,17 +24,19 @@ settings = get_settings()
 file_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
+# UserDB = Annotated[Session, Depends(get_db)]
 
 
 @file_router.get("/used_space")
-def file_get_used_space(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def file_get_used_space(*, db: UserDB, auth_user: CurrentUser):
     db_file_size = crud_files.get_files_size_in_db(db)
 
     return db_file_size
 
 
 @file_router.get("/", response_model=list[FileResponse])
-def file_get_info_all(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def file_get_info_all(*, db: UserDB, auth_user: CurrentUser):
     if db is None:
         raise HTTPException(status_code=500, detail="General Error")
 
@@ -54,7 +56,7 @@ def file_get_info_all(*, db: Session = Depends(get_db), auth_user: CurrentUser):
 
 
 @file_router.get("/{uuid}", response_model=FileResponse, name="file:GetInfoFromDB")
-def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth_user: CurrentUser):
+def file_get_info_single(*, db: UserDB, uuid: UUID, auth_user: CurrentUser):
     db_file = crud_files.get_file_by_uuid(db, uuid)
 
     if not db_file:
@@ -69,11 +71,11 @@ def file_get_info_single(*, db: Session = Depends(get_db), uuid: UUID, auth_user
 @file_router.post("/", response_model=FileResponse)
 def file_add(
     *,
-    db: Session = Depends(get_db),
+    db: UserDB,
     request: Request,
+    auth_user: CurrentUser,
     file: UploadFile | None = None,
     uuid: UUID | None = Form(None),
-    auth_user: CurrentUser,
 ):
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
@@ -117,7 +119,7 @@ def file_add(
 
 
 @file_router.delete("/{file_uuid}", response_model=StandardResponse)
-def remove_bucket(*, db: Session = Depends(get_db), request: Request, file_uuid: UUID, auth_user: CurrentUser):
+def remove_bucket(*, db: UserDB, request: Request, file_uuid: UUID, auth_user: CurrentUser):
     db_file = crud_files.get_file_by_uuid(db, file_uuid)
 
     if not db_file:
@@ -138,7 +140,7 @@ def remove_bucket(*, db: Session = Depends(get_db), request: Request, file_uuid:
 
 
 @file_router.get("/download/{file_uuid}", name="file:Download")
-def file_download(*, db: Session = Depends(get_db), request: Request, file_uuid: UUID):
+def file_download(*, db: UserDB, request: Request, file_uuid: UUID):
     db_file = crud_files.get_file_by_uuid(db, file_uuid)
 
     if not db_file:

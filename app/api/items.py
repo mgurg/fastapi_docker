@@ -22,18 +22,19 @@ from app.service.bearer_auth import has_token
 
 item_router = APIRouter()
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @item_router.get("/", response_model=Page[ItemIndexResponse])
 def item_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str | None = None,
     user_uuid: UUID | None = None,
     field: str = "name",
     order: str = "asc",
-    auth_user: CurrentUser,
 ):
     if field not in ["name", "created_at"]:
         field = "name"
@@ -50,7 +51,7 @@ def item_get_all(
 
 
 @item_router.get("/export")
-def get_export_items(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def get_export_items(*, db: UserDB, auth_user: CurrentUser):
     db_items = crud_items.get_items(db, "name", "asc")
 
     f = io.StringIO()
@@ -90,7 +91,7 @@ def get_export_items(*, db: Session = Depends(get_db), auth_user: CurrentUser):
 
 
 @item_router.get("/{item_uuid}", response_model=ItemResponse)
-def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Request, auth_user: CurrentUser):
+def item_get_one(*, db: UserDB, item_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
     if not db_item:
@@ -121,11 +122,7 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
 
 @item_router.get("/statistics/all")  #
 def item_get_statistics_all(
-    *,
-    db: Session = Depends(get_db),
-    date_from: datetime | None = None,
-    date_to: datetime | None = None,
-    auth_user: CurrentUser,
+    *, db: UserDB, auth_user: CurrentUser, date_from: datetime | None = None, date_to: datetime | None = None
 ):
     issues_per_day = crud_issues.get_issues_by_day(db, date_from, date_to)
     issues_per_day_dict = {y.strftime("%Y-%m-%d"): x for y, x in issues_per_day}
@@ -165,11 +162,11 @@ def item_get_statistics_all(
 @item_router.get("/statistics/{item_uuid}")  #
 def item_get_statistics(
     *,
-    db: Session = Depends(get_db),
-    date_from: datetime | None = None,
-    date_to: datetime | None = None,
+    db: UserDB,
     item_uuid: UUID,
     auth_user: CurrentUser,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
 ):
     issues_per_day_dict = None
     issues_per_hour_dict = None
@@ -256,7 +253,7 @@ def item_get_statistics(
 
 
 @item_router.post("/favourites", response_model=StandardResponse)
-def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: FavouritesAddIn, auth_user: CurrentUser):
+def item_add_to_favourites(*, db: UserDB, favourites: FavouritesAddIn, auth_user: CurrentUser):
     db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -280,7 +277,7 @@ def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: Favouri
 
 
 @item_router.post("/", response_model=ItemIndexResponse)
-def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn, auth_user: CurrentUser):
+def item_add(*, db: UserDB, request: Request, item: ItemAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -338,7 +335,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
 
 
 @item_router.patch("/{item_uuid}", response_model=ItemIndexResponse)
-def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditIn, auth_user: CurrentUser):
+def item_edit(*, db: UserDB, item_uuid: UUID, item: ItemEditIn, auth_user: CurrentUser):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -368,7 +365,7 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditI
 
 
 @item_router.delete("/{item_uuid}", response_model=StandardResponse)
-def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, force: bool = False, auth_user: CurrentUser):
+def item_delete(*, db: UserDB, item_uuid: UUID, auth_user: CurrentUser, force: bool = False):
     db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 

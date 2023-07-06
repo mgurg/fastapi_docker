@@ -25,23 +25,24 @@ from app.service.notifications import notify_users
 issue_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @issue_router.get("/", response_model=Page[IssueIndexResponse])
 def issue_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str | None = None,
     status: str = "active",
     user_uuid: UUID | None = None,
     priority: str | None = None,
     dateFrom: datetime | None = None,
     dateTo: datetime | None = None,
-    tag: list[UUID] | None = Query(default=None),
+    tag: Annotated[list[UUID] | None, Query()] = None,
     field: str = "created_at",
     order: str = "asc",
-    auth_user: CurrentUser,
 ):
     if field not in ["created_at", "name", "priority", "status"]:
         field = "created_at"
@@ -62,7 +63,7 @@ def issue_get_all(
 
 
 @issue_router.get("/export")
-def get_export_issues(*, db: Session = Depends(get_db), auth_user: CurrentUser):
+def get_export_issues(*, db: UserDB, auth_user: CurrentUser):
     print("================")
     db_issues = crud_issues.get_issues(db, "name", "asc", None, "all", None, None, None, None, None)
 
@@ -81,7 +82,7 @@ def get_export_issues(*, db: Session = Depends(get_db), auth_user: CurrentUser):
 
 @issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])
 def item_get_timeline_history(
-    *, db: Session = Depends(get_db), issue_uuid: UUID, thread_resource: str | None = None, auth_user: CurrentUser
+    *, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser, thread_resource: str | None = None
 ):
     # db_item = crud_items.get_item_by_uuid(db, issue_uuid)
     # if not db_item:
@@ -92,7 +93,7 @@ def item_get_timeline_history(
 
 
 @issue_router.get("/summary/{issue_uuid}")
-def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, auth_user: CurrentUser):
+def item_get_issue_summary(*, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue or db_issue.status != "done":
@@ -122,7 +123,7 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
 
 
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
-def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: Request, auth_user: CurrentUser):
+def issue_get_one(*, db: UserDB, issue_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue:
@@ -140,7 +141,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
 
 
 @issue_router.post("/", response_model=IssueResponse)  #
-def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAddIn, auth_user: CurrentUser):
+def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -224,9 +225,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
 
 @issue_router.post("/status/{issue_uuid}")
-def issue_change_status(
-    *, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueChangeStatus, auth_user: CurrentUser
-):
+def issue_change_status(*, db: UserDB, issue_uuid: UUID, issue: IssueChangeStatus, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
@@ -362,7 +361,7 @@ def issue_change_status(
 
 
 @issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
-def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
+def issue_edit(*, db: UserDB, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
@@ -416,7 +415,7 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
 
 
 @issue_router.delete("/{issue_uuid}", response_model=StandardResponse)
-def issue_delete(*, db: Session = Depends(get_db), issue_uuid: UUID, auth_user: CurrentUser):
+def issue_delete(*, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue:

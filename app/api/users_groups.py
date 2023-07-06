@@ -16,17 +16,18 @@ from app.service.bearer_auth import has_token
 group_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @group_router.get("/", response_model=Page[GroupSummaryResponse])
 def group_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str = None,
     field: str = "name",
     order: str = "asc",
-    auth_user: CurrentUser,
 ):
     if field not in ["name", "created_at"]:
         field = "name"
@@ -36,14 +37,14 @@ def group_get_all(
 
 
 @group_router.get("/{group_uuid}", response_model=GroupResponse)
-def group_get_one(*, db: Session = Depends(get_db), group_uuid: UUID, auth_user: CurrentUser):
+def group_get_one(*, db: UserDB, group_uuid: UUID, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
     return db_user_group
 
 
 @group_router.post("/", response_model=GroupResponse)
-def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth_user: CurrentUser):
+def group_add(*, db: UserDB, group: GroupAddIn, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_name(db, group.name)
     if db_user_group:
         raise HTTPException(status_code=400, detail="Group already exists!")
@@ -70,7 +71,7 @@ def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth_user: Cu
 
 
 @group_router.patch("/{group_uuid}", response_model=GroupResponse)
-def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEditIn, auth_user: CurrentUser):
+def group_edit(*, db: UserDB, group_uuid: UUID, role: GroupEditIn, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
     if not db_user_group:
         raise HTTPException(status_code=400, detail="Group not found exists!")
@@ -95,7 +96,7 @@ def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEd
 
 
 @group_router.delete("/{group_uuid}", response_model=StandardResponse)
-def group_delete(*, db: Session = Depends(get_db), group_uuid: UUID, auth_user: CurrentUser):
+def group_delete(*, db: UserDB, group_uuid: UUID, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
     if not db_user_group:
