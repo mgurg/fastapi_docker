@@ -50,6 +50,7 @@ alembic downgrade -1
 To run tests locally in VS Code export environment variable first:
 ```bash
 export PYTHONPATH=$PWD
+set -a; source ./app/.env; set +a
 export DB_HOST=localhost DB_PORT=5432 DB_DATABASE=pg_db DB_USERNAME=postgres DB_PASSWORD=postgres
 ``` 
 

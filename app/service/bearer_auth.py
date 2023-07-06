@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.crud import crud_auth
 from app.db import get_db
+from app.models.models import User
 
 settings = get_settings()
 security = HTTPBearer()
@@ -30,7 +31,7 @@ def is_base64(sb: str) -> bool:
         return False
 
 
-def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)) -> dict:
+def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)) -> User:
     """
     Function that is used to validate the token in the case that it requires it
     """
@@ -46,7 +47,8 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
 
     if db_user_data is not None:
         # user_id, account_id = db_user_data
-        return {"user_id": db_user_data.id}
+        # return {"user_id": db_user_data.id}
+        return db_user_data
 
     if is_base64(token) and (db_user_data is None):
         base64_message = token
@@ -60,7 +62,7 @@ def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCredential
         if dt.diff(pendulum.now("UTC")).in_seconds() < 1:
             raise HTTPException(status_code=401, detail="Anonymous token expired")
 
-        return {"user_id": 0}
+        return crud_auth.get_anonymous_user(db)
 
     raise HTTPException(status_code=401, detail="Incorrect auth token")
 

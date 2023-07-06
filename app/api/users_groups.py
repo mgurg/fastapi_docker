@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -7,11 +8,14 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_groups, crud_users
 from app.db import get_db
+from app.models.models import User
 from app.schemas.requests import GroupAddIn, GroupEditIn
 from app.schemas.responses import GroupResponse, GroupSummaryResponse, StandardResponse
 from app.service.bearer_auth import has_token
 
 group_router = APIRouter()
+
+CurrentUser = Annotated[User, Depends(has_token)]
 
 
 @group_router.get("/", response_model=Page[GroupSummaryResponse])
@@ -22,7 +26,7 @@ def group_get_all(
     search: str = None,
     field: str = "name",
     order: str = "asc",
-    auth=Depends(has_token),
+    auth_user: CurrentUser,
 ):
     if field not in ["name", "created_at"]:
         field = "name"
@@ -32,14 +36,14 @@ def group_get_all(
 
 
 @group_router.get("/{group_uuid}", response_model=GroupResponse)
-def group_get_one(*, db: Session = Depends(get_db), group_uuid: UUID, auth=Depends(has_token)):
+def group_get_one(*, db: Session = Depends(get_db), group_uuid: UUID, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
     return db_user_group
 
 
 @group_router.post("/", response_model=GroupResponse)
-def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth=Depends(has_token)):
+def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_name(db, group.name)
     if db_user_group:
         raise HTTPException(status_code=400, detail="Group already exists!")
@@ -66,7 +70,7 @@ def group_add(*, db: Session = Depends(get_db), group: GroupAddIn, auth=Depends(
 
 
 @group_router.patch("/{group_uuid}", response_model=GroupResponse)
-def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEditIn, auth=Depends(has_token)):
+def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEditIn, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
     if not db_user_group:
         raise HTTPException(status_code=400, detail="Group not found exists!")
@@ -91,7 +95,7 @@ def group_edit(*, db: Session = Depends(get_db), group_uuid: UUID, role: GroupEd
 
 
 @group_router.delete("/{group_uuid}", response_model=StandardResponse)
-def group_delete(*, db: Session = Depends(get_db), group_uuid: UUID, auth=Depends(has_token)):
+def group_delete(*, db: Session = Depends(get_db), group_uuid: UUID, auth_user: CurrentUser):
     db_user_group = crud_groups.get_user_group_by_uuid(db, group_uuid)
 
     if not db_user_group:

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
@@ -9,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_auth, crud_files, crud_guides, crud_items, crud_qr
 from app.db import engine, get_db
+from app.models.models import User
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideIndexResponse, GuideResponse, StandardResponse
 
@@ -17,6 +19,8 @@ from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
 guide_router = APIRouter()
+
+CurrentUser = Annotated[User, Depends(has_token)]
 
 
 @guide_router.get("/", response_model=Page[GuideResponse])  #
@@ -28,7 +32,7 @@ def guide_get_all(
     item_uuid: UUID | None = None,
     order: str = "asc",
     field: str = "name",
-    auth=Depends(has_token),
+    auth_user: CurrentUser,
 ):
     if field not in ["name"]:
         field = "name"
@@ -45,7 +49,7 @@ def guide_get_all(
 
 
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
-def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth=Depends(has_token)):
+def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:
@@ -63,7 +67,7 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 
 
 @guide_router.post("/", response_model=GuideResponse)
-def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAddIn, auth=Depends(has_token)):
+def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -113,7 +117,7 @@ def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAd
 
     guide_data = {
         "uuid": guide_uuid,
-        "author_id": auth["user_id"],
+        "author_id": auth_user.id,
         "name": guide.name,
         "text": description,
         "qr_code_id": new_qr_code.id,
@@ -133,7 +137,7 @@ def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAd
 
 
 @guide_router.patch("/{guide_uuid}", response_model=GuideResponse)
-def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth=Depends(has_token)):
+def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
     if not db_guide:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -163,7 +167,7 @@ def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideE
 
 
 @guide_router.delete("/{guide_uuid}", response_model=StandardResponse)
-def guide_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
+def guide_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:
