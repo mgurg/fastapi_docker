@@ -150,7 +150,7 @@ class IssueAddIn(BaseRequest):
     item_uuid: UUID | None = None
     name: str
     color: str | None = None
-    priority: str | None = None
+    priority: int | None = None
     status: str | None = None
     summary: str | None = None
     text_html: str | None = None
@@ -166,7 +166,7 @@ class FavouritesAddIn(BaseRequest):
 
 class IssueEditIn(BaseRequest):
     name: str | None = None
-    priority: str | None = None
+    priority: int | None = None
     summary: str | None = None
     text_html: str | None = None
     text_json: dict | None = None
