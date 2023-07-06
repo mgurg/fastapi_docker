@@ -58,15 +58,16 @@ def issue_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_issues = crud_issues.get_issues(db, field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
-    return paginate(db_issues, params)
+    db_issues_query = crud_issues.get_issues(field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
+    return paginate(db, db_issues_query)
 
 
 @issue_router.get("/export")
 def get_export_issues(*, db: UserDB, auth_user: CurrentUser):
-    print("================")
-    db_issues = crud_issues.get_issues(db, "name", "asc", None, "all", None, None, None, None, None)
+    db_issues_query = crud_issues.get_issues("name", "asc", None, "all", None, None, None, None, None)
+    result = db.execute(db_issues_query)  # await db.execute(query)
 
+    db_issues = result.scalars().all()
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
     csv_file.writerow(["Symbol", "Name", "Description", "Author", "Status", "Created at"])

@@ -4,7 +4,8 @@ from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
@@ -45,8 +46,12 @@ def guide_get_all(
             raise HTTPException(status_code=401, detail="Item not found")
         item_id = db_item.id
 
-    db_guides = crud_guides.get_guides(db, search, item_id, field, order)
-    return paginate(db_guides, params)
+    db_guides_query = crud_guides.get_guides(search, item_id, field, order)
+
+    # result = db.execute(db_guides_query)  # await db.execute(query)
+    # db_guides = result.scalars().all()
+
+    return paginate(db, db_guides_query)
 
 
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]

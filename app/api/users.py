@@ -6,7 +6,8 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
@@ -38,8 +39,12 @@ def user_get_all(
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
-    db_users = crud_users.get_users(db, field, order, search)
-    return paginate(db_users, params)
+    db_users_query = crud_users.get_users(field, order, search)
+
+    # result = db.execute(db_users_query)  # await db.execute(query)
+    # db_users = result.scalars().all()
+
+    return paginate(db, db_users_query)
 
 
 @user_router.get("/count")
@@ -51,7 +56,9 @@ def get_users_count(*, db: UserDB, auth_user: CurrentUser):
 
 @user_router.get("/export")
 def get_export_users(*, db: UserDB, auth_user: CurrentUser):
-    db_users = crud_users.get_users(db, "last_name", "asc")
+    db_users_query = crud_users.get_users("last_name", "asc")
+    result = db.execute(db_users_query)  # await db.execute(query)
+    db_users = result.scalars().all()
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")

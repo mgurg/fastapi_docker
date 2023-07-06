@@ -7,7 +7,8 @@ from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
@@ -46,13 +47,15 @@ def item_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_items = crud_items.get_items(db, field, order, search, user_id)
-    return paginate(db_items, params)
+    db_items_query = crud_items.get_items(field, order, search, user_id)
+    return paginate(db, db_items_query)
 
 
 @item_router.get("/export")
 def get_export_items(*, db: UserDB, auth_user: CurrentUser):
-    db_items = crud_items.get_items(db, "name", "asc")
+    db_items_query = crud_items.get_items("name", "asc")
+    result = db.execute(db_items_query)  # await db.execute(query)
+    db_items = result.scalars().all()
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
