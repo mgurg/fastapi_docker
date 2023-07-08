@@ -8,13 +8,12 @@ from alembic import command
 from alembic.config import Config
 from loguru import logger
 from sentry_sdk import capture_exception
+from sqlalchemy.ext.asyncio import create_async_engine
 from unidecode import unidecode
 
 from app.config import get_settings
-from app.db import SQLALCHEMY_DATABASE_URL, with_db
+from app.db import SQLALCHEMY_DB_URL, with_db
 from app.utils.decorators import timer
-
-from sqlalchemy.ext.asyncio import create_async_engine
 
 settings = get_settings()
 
@@ -26,7 +25,7 @@ async def alembic_upgrade_head(tenant_name: str, revision="head", url: str = Non
     # set the paths values
 
     if url is None:
-        url = SQLALCHEMY_DATABASE_URL
+        url = SQLALCHEMY_DB_URL
     try:
         # create Alembic config and feed it with paths
         config = Config(str(settings.PROJECT_DIR / "alembic.ini"))
@@ -38,14 +37,14 @@ async def alembic_upgrade_head(tenant_name: str, revision="head", url: str = Non
         x_arg = "".join(["tenant=", tenant_name])  # "dry_run=" + "True"
         if not hasattr(config.cmd_opts, "x"):
             if x_arg is not None:
-                setattr(config.cmd_opts, "x", [])
+                config.cmd_opts.x = []
                 if isinstance(x_arg, list) or isinstance(x_arg, tuple):
                     for x in x_arg:
                         config.cmd_opts.x.append(x)
                 else:
                     config.cmd_opts.x.append(x_arg)
             else:
-                setattr(config.cmd_opts, "x", None)
+                config.cmd_opts.x = None
 
         # prepare and run the command
         revision = revision
@@ -58,7 +57,7 @@ async def alembic_upgrade_head(tenant_name: str, revision="head", url: str = Non
             command.upgrade(cfg, revision, sql=sql, tag=tag)
 
         # upgrade command
-        async_engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
+        async_engine = create_async_engine(SQLALCHEMY_DB_URL, echo=False, pool_pre_ping=True, pool_recycle=280)
         async with async_engine.begin() as conn:
             #     if tenant_name != "public":
             #         await conn.execute("set search_path to %s" % tenant_name)

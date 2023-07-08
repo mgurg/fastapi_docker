@@ -6,9 +6,9 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from fastapi_pagination import Page, Params, paginate
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import crud_auth, crud_permission, crud_users
 from app.db import engine, get_db
@@ -25,7 +25,8 @@ async def user_get_all(
     *,
     db: AsyncSession = Depends(get_db),
     params: Params = Depends(),
-    search: str = None,
+    search: str | None = None,
+    # search: Annotated[str | None, Query(max_length=50)] = None,
     field: str = "name",
     order: str = "asc",
     auth=Depends(has_token),
@@ -47,7 +48,7 @@ def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
 @user_router.get("/export")
 def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_users = crud_users.get_users(db, None, "last_name", "asc")
+    db_users = crud_users.get_users(db, "last_name", "asc")
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
@@ -73,9 +74,9 @@ def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None =
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
 
-    csvReader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
+    csv_reader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
     data = {}
-    for idx, rows in enumerate(csvReader):
+    for idx, rows in enumerate(csv_reader):
         key = idx  # Assuming a column named 'Id' to be the primary key
         data[key] = rows
         data[key]["uuid"] = str(uuid4())
@@ -143,6 +144,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
         "user_role_id": db_role.id,
         "is_active": True,
         "is_verified": True,
+        "is_visible": True,
         "tz": "Europe/Warsaw",
         "lang": "pl",
         "tenant_id": tenant_id,
@@ -151,7 +153,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
 
     crud_users.create_user(db, user_data)
 
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         public_user_data = {
@@ -211,7 +213,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
     # UPDATE PUBLIC USER INFO
     if ("email" in user_data.keys()) and (user_data["email"] is not None):
-        schema_translate_map = dict(tenant="public")
+        schema_translate_map = {"tenant": "public"}
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
             db_public_user = crud_auth.get_public_user_by_email(public_db, current_email)
@@ -223,7 +225,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, force: bool = False, auth=Depends(has_token)):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
     if not db_user:
@@ -231,10 +233,13 @@ def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(
 
     email = db_user.email
 
-    db.delete(db_user)
-    db.commit()
+    if force is True:
+        db.delete(db_user)
+        db.commit()
+    else:
+        crud_users.update_user(db, db_user, {"deleted_at": datetime.now(timezone.utc)})
 
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
         db_public_user = crud_auth.get_public_user_by_email(db, email)

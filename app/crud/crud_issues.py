@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
@@ -9,16 +10,16 @@ from app.models.models import EventSummary, Issue, Tag, User
 
 def get_issues(
     db: Session,
+    sort_column: str,
+    sort_order: str,
     search: str | None,
     status: str | None,
     user_id: int | None,
     priority: str | None,
-    sort_column: str,
-    sort_order: str,
     date_from: datetime = None,
     date_to: datetime = None,
     tags: list[int] = None,
-) -> Issue:
+) -> Sequence[Issue]:
     search_filters = []
 
     query = select(Issue)
@@ -59,7 +60,7 @@ def get_issues(
         query = query.filter(func.DATE(Issue.created_at) <= date_to)
 
     if tags is not None:
-        query = query.where((Issue.tags_issue.any(Tag.id.in_(tags))))
+        query = query.where(Issue.tags_issue.any(Tag.id.in_(tags)))
 
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 

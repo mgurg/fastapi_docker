@@ -1,12 +1,12 @@
 import json
 import os
 import re
+import traceback
 from pathlib import Path
 from string import capwords
-import traceback
-from loguru import logger
 
 import requests
+from loguru import logger
 from pyVies import api
 from RegonAPI import RegonAPI
 from RegonAPI.exceptions import ApiAuthenticationError
@@ -38,6 +38,15 @@ class CompanyDetails:
                 data = self.gus()
             if data is None:
                 data = self.rejestr_io()
+            if data is None:
+                data = {
+                    "name": "Nie znaleziono - uzupelnij",
+                    "short_name": "Nie znaleziono - uzupelnij",
+                    "street": "",
+                    "postcode": "",
+                    "city": "",
+                    "country_code": "PL",
+                }
         except Exception as e:
             print(e)
             traceback.print_exc()
@@ -59,6 +68,9 @@ class CompanyDetails:
             print("ViesError", e)
             return None
 
+        if result and (result["valid"] is False):  # 5691805989
+            return None
+
         try:
             name = {
                 "name": capwords(result["traderName"], sep=None),
@@ -66,11 +78,13 @@ class CompanyDetails:
             }
 
             print(result["traderAddress"])
-            addres = self.get_vies_parsed_address(address=result["traderAddress"])
+            address = self.get_vies_parsed_address(address=result["traderAddress"])
         except Exception:
             traceback.print_exc()
             return None
-        return name | addres
+        if address is None:
+            return None
+        return name | address
 
     def gus(self):
         # Authentication
@@ -116,7 +130,8 @@ class CompanyDetails:
 
         return data
 
-    def rejestr_io(self):
+    def rejestr_io(self) -> dict | None:
+        data = None
         if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
             logger.info("Company data test")
             path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")
@@ -148,7 +163,8 @@ class CompanyDetails:
 
         return data
 
-    def get_company_short_name(self, company_name):
+    @staticmethod
+    def get_company_short_name(company_name):
         company_name = company_name.upper()
 
         mapping = [
@@ -164,11 +180,11 @@ class CompanyDetails:
 
         return capwords(company_name, sep=None)
 
-    def get_vies_supported_countries(self):
+    @staticmethod
+    def get_vies_supported_countries():
         return ["SK", "NL", "BE", "FR", "PT", "IT", "FI", "RO", "SI", "AT", "PL", "HR", "EL", "DK", "EE", "CZ"]
 
-    def get_vies_parsed_address(self, address):
-        self.vat_eu
+    def get_vies_parsed_address(self, address) -> dict | None:
         country_code = self.vat_eu[:2]
         newlines = address.count("\n")
 
@@ -181,15 +197,36 @@ class CompanyDetails:
         # -EL additionaly gets transliterated to English characters (resulting in Greeklish)
 
         if country_code not in self.get_vies_supported_countries():
-            return False
+            return None
 
         if (newlines == 1) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
             address_split = address.split("\n")
             street = address_split[0]
             postcode, city = address_split[1].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
+
             return {
                 "street": street.strip().capitalize(),
                 "postcode": postcode.strip(),
                 "city": city.strip().capitalize(),
                 "country_code": country_code.strip(),
             }
+
+        if (newlines == 2) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
+            """
+            KOZERY
+            UROCZA 54
+            05-825 GRODZISK MAZOWIECKI
+            """
+            address_split = address.split("\n")
+            street = address_split[1]
+            postcode, city = address_split[2].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
+            city = address_split[0]
+
+            return {
+                "street": street.strip().capitalize(),
+                "postcode": postcode.strip(),
+                "city": city.strip().capitalize(),
+                "country_code": country_code.strip(),
+            }
+
+        return None

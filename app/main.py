@@ -1,6 +1,10 @@
+import warnings
+from typing import Any
+
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_pagination.utils import FastAPIPaginationWarning
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -11,6 +15,7 @@ from app.api.files import file_router
 from app.api.guides import guide_router
 from app.api.issues import issue_router
 from app.api.items import item_router
+from app.api.parts import part_router
 from app.api.settings import setting_router
 from app.api.statistics import statistics_router
 from app.api.tags import tag_router
@@ -23,6 +28,7 @@ from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
 
 settings = get_settings()
+warnings.simplefilter("ignore", FastAPIPaginationWarning)
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
@@ -34,7 +40,7 @@ def create_application() -> FastAPI:
     Returns:
         FastAPI: [description]
     """
-    app = FastAPI(debug=True)
+    app = FastAPI(debug=False, openapi_url=settings.OPEN_API)
 
     app.add_middleware(
         CORSMiddleware,
@@ -53,6 +59,7 @@ def create_application() -> FastAPI:
     app.include_router(item_router, prefix="/items", tags=["ITEM"])
     app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
     app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
+    app.include_router(part_router, prefix="/parts", tags=["PART"])
 
     app.include_router(file_router, prefix="/files", tags=["FILE"])
     app.include_router(tag_router, prefix="/tags", tags=["TAG"])
@@ -64,9 +71,27 @@ def create_application() -> FastAPI:
 
 app = create_application()
 
+
+def traces_sampler(sampling_context: dict[str, Any]) -> float:
+    """Function to dynamically set Sentry sampling rates"""
+
+    if settings.ENVIRONMENT != "PRD":
+        return 0.0
+
+    request_path = sampling_context.get("asgi_scope", {}).get("path")
+    if request_path == "/health":
+        # Drop all /health requests
+        return 0.0
+    return 0.1
+
+
 if settings.ENVIRONMENT == "PRD":
-    # TODO: SentryFastapi Integration blocked by: https://github.com/getsentry/sentry-python/issues/1573
-    sentry_sdk.init(dsn=settings.sentry_dsn, integrations=[SqlalchemyIntegration()])
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sampler=traces_sampler,
+        profiles_sample_rate=0.1,
+        integrations=[SqlalchemyIntegration()],
+    )
     app.add_middleware(SentryAsgiMiddleware)
 
 # if settings.ENVIRONMENT != "PRD":

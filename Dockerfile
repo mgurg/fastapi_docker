@@ -1,9 +1,9 @@
 # pull official base image
-FROM python:3.10.11-slim-bullseye
-# FROM pypy:3.9-slim-buster https://tonybaloney.github.io/posts/pypy-in-production.html
+FROM python:3.10.12-slim-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   curl \
+  postgresql-client \
   && rm -rf /var/lib/apt/lists/*
 
 
@@ -102,6 +102,7 @@ RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 # EXPOSE 80
 
 #USER alex
+COPY --chown=alex:alex ./commands /src/commands
 COPY --chown=alex:alex ./migrations /src/migrations
 COPY --chown=alex:alex ./alembic.ini /src/alembic.ini
 COPY --chown=alex:alex ./app /src/app

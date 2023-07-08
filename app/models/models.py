@@ -43,6 +43,9 @@ class Role(Base):
     is_custom = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_system = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
@@ -77,6 +80,7 @@ class User(Base):
     user_role_id = sa.Column(sa.INTEGER(), sa.ForeignKey("roles.id"), autoincrement=False, nullable=True)
     is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_verified = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    is_visible = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=False)
     tos = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tz = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True)
     lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
@@ -151,7 +155,7 @@ class Item(Base):
     qr_code_id = sa.Column(sa.INTEGER, sa.ForeignKey("qr_codes.id"), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    # deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     files_item = relationship("File", secondary=file_item_rel, back_populates="item")
     item_guides = relationship("Guide", secondary=item_guide_rel, back_populates="item")
@@ -177,16 +181,19 @@ class Guide(Base):
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    name = sa.Column("name", sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
+    name = sa.Column(sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
     text = sa.Column(sa.TEXT, autoincrement=False, nullable=True)
     text_json = sa.Column(JSONB, autoincrement=False, nullable=True)
-    # video_id = sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    # video_json = sa.Column("video_json", JSONB, autoincrement=False, nullable=True)
-    created_at = sa.Column("created_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    updated_at = sa.Column("updated_at", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    qr_code_id = sa.Column(sa.INTEGER, sa.ForeignKey("qr_codes.id"), autoincrement=False, nullable=True)
+    type = sa.Column(sa.VARCHAR(length=32), unique=False, autoincrement=False, nullable=True)
+    is_public = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     files_guide = relationship("File", secondary=file_guide_rel, back_populates="guide")
     item = relationship("Item", secondary=item_guide_rel, back_populates="item_guides")
+    qr_code = relationship("QrCode", back_populates="guides_FK")
 
 
 file_issue_rel = sa.Table(
@@ -202,6 +209,13 @@ tag_issue_rel = sa.Table(
     sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
     sa.Column("tag_id", sa.ForeignKey("tags.id"), autoincrement=False, nullable=False, primary_key=True),
 )
+
+# part_used_issue_rel = sa.Table(
+#     "parts_used_issues_link",
+#     Base.metadata,
+#     sa.Column("issue_id", sa.ForeignKey("issues.id"), autoincrement=False, nullable=False, primary_key=True),
+#     sa.Column("part_used_id", sa.ForeignKey("parts_used.id"), autoincrement=False, nullable=False, primary_key=True),
+# )
 
 
 class Issue(Base):
@@ -229,6 +243,28 @@ class Issue(Base):
     tags_issue = relationship("Tag", secondary=tag_issue_rel, back_populates="tag")
 
     item = relationship("Item", back_populates="issue_FK")
+    # part = relationship("PartUsed", secondary=part_used_issue_rel, back_populates="issue_part")
+
+
+class PartUsed(Base):
+    __tablename__ = "parts_used"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    item_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    issue_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    symbol = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    price = sa.Column(sa.DECIMAL(precision=10, scale=2), autoincrement=False, nullable=True)
+    quantity = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    unit = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
+    value = sa.Column(sa.DECIMAL(precision=10, scale=2), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    deleted_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    # issue_part = relationship("Issue", secondary=part_used_issue_rel, back_populates="part")
 
 
 class File(Base):
@@ -258,7 +294,7 @@ class Setting(Base):
     value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     prev_value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
-    descripton = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
@@ -300,6 +336,7 @@ class QrCode(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
     items_FK = relationship("Item", back_populates="qr_code")
+    guides_FK = relationship("Guide", back_populates="qr_code")
 
 
 class UserGroup(Base):

@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers, used by Alembic.
 revision = "debb10a33f57"
 down_revision = "3e3981bb512d"
@@ -21,13 +20,15 @@ def upgrade() -> None:
     op.create_table(
         "videos",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.Column("video_id", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("video_json", postgresql.JSONB, autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
-        sa.Column("duration", sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column("size", sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column("duration", sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column("size", sa.INTEGER(), autoincrement=False, nullable=True),
+        sa.Column("source", sa.VARCHAR(length=64), autoincrement=False, nullable=True),
+        sa.Column("url", sa.VARCHAR(length=512), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.PrimaryKeyConstraint("id", name="videos_pkey"),

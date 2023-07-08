@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers, used by Alembic.
 revision = "a1b0cf6b2fbb"
 down_revision = "055684700394"
@@ -25,7 +24,7 @@ def upgrade() -> None:
         sa.Column("value", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("value_type", sa.VARCHAR(length=64), autoincrement=False, nullable=True),
         sa.Column("prev_value", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
-        sa.Column("descripton", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
+        sa.Column("description", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("updated_by", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),

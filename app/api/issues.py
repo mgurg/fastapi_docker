@@ -53,14 +53,14 @@ def issue_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_issues = crud_issues.get_issues(db, search, status, user_id, priority, field, order, dateFrom, dateTo, tag_ids)
+    db_issues = crud_issues.get_issues(db, field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
     return paginate(db_issues, params)
 
 
 @issue_router.get("/export")
 def get_export_issues(*, db: Session = Depends(get_db), auth=Depends(has_token)):
     print("================")
-    db_issues = crud_issues.get_issues(db, None, "all", None, None, "name", "asc", None, None, None)
+    db_issues = crud_issues.get_issues(db, "name", "asc", None, "all", None, None, None, None, None)
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
@@ -142,7 +142,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
         raise HTTPException(status_code=400, detail="Unknown Company!")
 
     company = None
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
         company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
@@ -167,8 +167,10 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     db_user = crud_users.get_user_by_id(db, auth["user_id"])
     author_name = "anonymous"
+    author_id = None
     if db_user:
         author_name = f"{db_user.first_name} {db_user.last_name}"
+        author_id = db_user.id
 
     db_item = crud_items.get_item_by_uuid(db, issue.item_uuid)
     item_id = None
@@ -186,7 +188,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     issue_data = {
         "uuid": issue_uuid,
-        "author_id": auth["user_id"],
+        "author_id": author_id,
         "author_name": author_name,
         "item_id": item_id,
         "symbol": f"PR-{last_issue_id}",
@@ -205,17 +207,10 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
     new_issue = crud_issues.create_issue(db, issue_data)
 
     # Notification
-    email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")
-    sms_notifications = []
-    notify_users(sms_notifications, email_users_list, new_issue)
-    # email_notifications = crud_settings.get_users_for_email_notification(db, "all")
-    # sms_notifications = crud_settings.get_users_for_sms_notification(db, "all")
-    #
-    # keys = ("phone", "mode")
-    # list_of_sms_notifications = [dict(zip(keys, values)) for values in sms_notifications]
-    #
-    # keys = ("email", "mode")
-    # list_of_email_notifications = [dict(zip(keys, values)) for values in email_notifications]
+    email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")  # empty: []
+    sms_users_list = []
+    if email_users_list or sms_users_list:
+        notify_users(sms_users_list, email_users_list, new_issue)
 
     event.create_new_basic_event(db, db_user, new_issue, "issue_add")
     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")

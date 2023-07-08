@@ -1,7 +1,6 @@
 import base64
 from datetime import datetime, timezone
 
-from langcodes import standardize_tag
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
@@ -16,12 +15,15 @@ async def get_public_user_by_email(db: Session, email: str) -> PublicUser | None
 
 
 def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | None:
-    return db.execute(
+    query = (
         select(PublicUser)
         .where(PublicUser.service_token == token)
         .where(PublicUser.is_active == False)  # noqa: E712
         .where(PublicUser.service_token_valid_to > datetime.now(timezone.utc))
-    ).scalar_one_or_none()
+    )
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_active_user_by_service_token(db: Session, token: str) -> PublicUser | None:
@@ -42,19 +44,27 @@ async def get_public_company_count(db: Session) -> int:
 
 
 def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
+    query = select(PublicCompany).where(PublicCompany.nip == nip)
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_company_by_qr_id(db: Session, qr_id: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.qr_id == qr_id)).scalar_one_or_none()
+    query = select(PublicCompany).where(PublicCompany.qr_id == qr_id)
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_public_company_by_tenant_id(db: Session, tenant_id: str) -> PublicCompany | None:
-    return db.execute(select(PublicCompany).where(PublicCompany.tenant_id == tenant_id)).scalar_one_or_none()
+    query = select(PublicCompany).where(PublicCompany.tenant_id == tenant_id)
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
 
 
 def get_schemas_from_public_company(db: Session):
-    return db.execute(select(distinct(PublicCompany.tenant_id))).scalars().all()
+    query = select(distinct(PublicCompany.tenant_id))
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalars().all()
 
 
 def create_public_user(db: Session, public_user: dict) -> PublicUser:
@@ -101,25 +111,27 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
 
 def create_tenant_user(db: Session, tenant_data) -> User:
     try:
-        new_user = User(
-            uuid=tenant_data["uuid"],
-            first_name=tenant_data["first_name"],
-            last_name=tenant_data["last_name"],
-            email=tenant_data["email"],
-            password=tenant_data["password"],
-            # service_token=secrets.token_hex(32),
-            # service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
-            auth_token=tenant_data["auth_token"],
-            auth_token_valid_to=tenant_data["auth_token_valid_to"],
-            user_role_id=tenant_data["role_id"],
-            is_active=tenant_data["is_active"],
-            is_verified=tenant_data["is_verified"],
-            tos=tenant_data["tos"],
-            tz=tenant_data["tz"],
-            tenant_id=tenant_data["tenant_id"],
-            lang=standardize_tag(tenant_data["lang"]),
-            created_at=datetime.now(timezone.utc),
-        )
+        # new_user = User(
+        #     uuid=tenant_data["uuid"],
+        #     first_name=tenant_data["first_name"],
+        #     last_name=tenant_data["last_name"],
+        #     email=tenant_data["email"],
+        #     password=tenant_data["password"],
+        #     # service_token=secrets.token_hex(32),
+        #     # service_token_valid_to=datetime.now(timezone.utc) + timedelta(days=1),
+        #     auth_token=tenant_data["auth_token"],
+        #     auth_token_valid_to=tenant_data["auth_token_valid_to"],
+        #     user_role_id=tenant_data["role_id"],
+        #     is_active=tenant_data["is_active"],
+        #     is_verified=tenant_data["is_verified"],
+        #     tos=tenant_data["tos"],
+        #     tz=tenant_data["tz"],
+        #     tenant_id=tenant_data["tenant_id"],
+        #     lang=standardize_tag(tenant_data["lang"]),
+        #     created_at=datetime.now(timezone.utc),
+        # )
+
+        new_user = User(**tenant_data)
 
         db.add(new_user)
         db.commit()

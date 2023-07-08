@@ -11,7 +11,7 @@ from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-from app.crud import crud_auth, crud_files, crud_issues, crud_items, crud_qr, crud_users, crud_guides
+from app.crud import crud_auth, crud_files, crud_guides, crud_issues, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
@@ -42,13 +42,13 @@ def item_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_items = crud_items.get_items(db, search, user_id, field, order)
+    db_items = crud_items.get_items(db, field, order, search, user_id)
     return paginate(db_items, params)
 
 
 @item_router.get("/export")
 def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_items = crud_items.get_items(db, None, None, "name", "asc")
+    db_items = crud_items.get_items(db, "name", "asc")
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
@@ -125,16 +125,16 @@ def item_get_statistics_all(
     auth=Depends(has_token),
 ):
     issues_per_day = crud_issues.get_issues_by_day(db, date_from, date_to)
-    issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
+    issues_per_day_dict = {y.strftime("%Y-%m-%d"): x for y, x in issues_per_day}
 
     issues_per_hour = crud_issues.get_issues_by_hour(db, None, None)
-    issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
+    issues_per_hour_dict = {str(y): x for y, x in issues_per_hour}
 
     for hours in [time(i).strftime("%H") for i in range(24)]:
         issues_per_hour_dict.setdefault(hours, 0)
 
     issues_status = crud_issues.get_issues_status(db, date_from, date_to)
-    issues_status_dict = dict((y, x) for y, x in issues_status)
+    issues_status_dict = dict(issues_status)
 
     for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
         issues_status_dict.setdefault(status, 0)
@@ -184,16 +184,16 @@ def item_get_statistics(
         # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
 
         issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id], date_from, date_to)
-        issues_per_day_dict = dict((y.strftime("%Y-%m-%d"), x) for y, x in issues_per_day)
+        issues_per_day_dict = {y.strftime("%Y-%m-%d"): x for y, x in issues_per_day}
 
         issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
-        issues_per_hour_dict = dict((str(y), x) for y, x in issues_per_hour)
+        issues_per_hour_dict = {str(y): x for y, x in issues_per_hour}
         for hours in [time(i).strftime("%H") for i in range(24)]:
             issues_per_hour_dict.setdefault(hours, 0)
         issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
 
         issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
-        issues_status_dict = dict((y, x) for y, x in issues_status)
+        issues_status_dict = dict(issues_status)
         for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
             issues_status_dict.setdefault(status, 0)
 
@@ -283,7 +283,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
         raise HTTPException(status_code=400, detail="Unknown Company!")
 
     company = None
-    schema_translate_map = dict(tenant="public")
+    schema_translate_map = {"tenant": "public"}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
         company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
@@ -365,12 +365,16 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditI
 
 
 @item_router.delete("/{item_uuid}", response_model=StandardResponse)
-def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(has_token)):
-    crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
+def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, force: bool = False, auth=Depends(has_token)):
+    db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
+
+    if force is False:
+        crud_items.update_item(db, db_item, {"deleted_at": datetime.now(timezone.utc)})
+        return {"ok": True}
 
     # TODO: Guides / Guides_Files
 
@@ -383,8 +387,8 @@ def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, auth=Depends(
     for guide in db_item.item_guides:
         crud_guides.get_guide_by_uuid(db, guide.uuid)
 
-    # db.delete(db_item)
-    # db.delete(db_qr)
-    # db.commit()
+    db.delete(db_item)
+    db.delete(db_qr)
+    db.commit()
 
     return {"ok": True}

@@ -22,7 +22,7 @@ There is a `/cc/` group of endpoints which allows to:
   - run migrations for all tenants 
 
 ⚠️ Important - after adding a new migration rebuild of docker image is required (to copy new migration)   
-### Alembic
+### ⚗️ Alembic
 
 Auto generating migrations (❌ - please, don't use it in this project!)
 ```bash
@@ -70,6 +70,47 @@ DELETE FROM public.public_companies  WHERE city  LIKE 'faker_000_%';
 DROP SCHEMA IF EXISTS "fake_tenant_company_for_test_00000000000000000000000000000000" CASCADE;
 ```
 
+## 💾 Backup of DB (Work in Progress)
+
+Initial Code:
+``` bash
+export PYTHONPATH=$PWD
+cd ./commands/db_backup
+
+```
+
+### Usage
+
+- List databases on a postgresql server
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action list_dbs --verbose true
+```
+
+- Create database backup and store it (based on config file details)
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action backup --verbose true
+```
+
+- List previously created database backups available on storage engine
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action list --verbose true
+```
+- Restore previously created database backups available on storage engine (check available dates with _list_ action)
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action restore --date "YYYY-MM-dd" --verbose true
+```
+
+- Restore previously created database backups into a new destination database
+
+```bash
+python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --action restore --date "YYYY-MM-dd" --dest-db new_DB_name
+```
+
+
 ## 🏋️‍♂️Load test
 
 ```bash
@@ -84,6 +125,7 @@ ab -k -c 100 -n 5000 -H "tenant:polski_koncern_naftowy_orlen_fc26bff5f7b540d9b8d
 
 
 ### AB Results:
+
 
 Python 3.10, Uvicorn (single instance)
 settings: `ab -k -c 100 -n 5000`
@@ -126,3 +168,25 @@ Time per request:       52.326 [ms] (mean, across all concurrent requests)
 Transfer rate:          37.82 [Kbytes/sec] received
 
 ```
+
+#### async branch:
+Test branch for async code:
+
+```
+Document Path:          /users/
+Document Length:        337 bytes
+
+Concurrency Level:      100
+Time taken for tests:   159.392 seconds
+Complete requests:      5000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      4480000 bytes
+HTML transferred:       1685000 bytes
+Requests per second:    31.37 [#/sec] (mean)
+Time per request:       3187.839 [ms] (mean)
+Time per request:       31.878 [ms] (mean, across all concurrent requests)
+Transfer rate:          27.45 [Kbytes/sec] received
+```
+
+Probably above `30` Requests per second comparing to `20` - `25` in sync version 

@@ -3,11 +3,17 @@ from uuid import UUID
 from pydantic import EmailStr
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
+
 from app.models.models import User
 
 
 async def get_users(db: Session, search: str, sort_column: str, sort_order: str) -> User:
-    query = select(User).order_by(text(f"{sort_column} {sort_order}"))
+    query = (
+        select(User)
+        .where(User.deleted_at.is_(None))
+        .where(User.is_visible.is_(True))
+        .order_by(text(f"{sort_column} {sort_order}"))
+    )
 
     all_filters = []
     if search is not None:

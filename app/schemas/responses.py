@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, condecimal
 from pydantic.color import Color
 
 
@@ -121,9 +121,10 @@ class IssueSummaryResponse(BaseResponse):
 class RoleSummaryResponse(BaseResponse):
     uuid: UUID
     role_title: str
-    role_description: str
+    role_description: str | None
     is_custom: bool
     count: int
+    uncounted: int
 
 
 class PermissionResponse(BaseResponse):
@@ -162,13 +163,24 @@ class FileBasicInfo(BaseResponse):
 class TagResponse(BaseResponse):
     uuid: UUID
     name: str
-    color: Color | None = "#1976D2"
+    color: Color | None = "#66b3ff"
     is_hidden: bool | None
+
+
+class PartResponse(BaseResponse):
+    uuid: UUID
+    name: str
+    description: str | None
+    price: condecimal(max_digits=10, decimal_places=2)
+    quantity: condecimal(max_digits=4, decimal_places=2)
+    unit: str | None
+    value: condecimal(max_digits=10, decimal_places=2)
 
 
 class TagBasicInfo(BaseResponse):
     uuid: UUID
     name: str
+    color: Color | None = "#66b3ff"
 
 
 class QRCodeItemResponse(BaseResponse):
@@ -190,11 +202,17 @@ class GuideBasicResponse(BaseResponse):
     text: str | None
 
 
+class ItemNameResponse(BaseResponse):
+    uuid: UUID
+    name: str | None
+
+
 class GuideResponse(BaseResponse):
     uuid: UUID
     name: str | None
     text: str | None
     text_json: dict | None
+    item: list[ItemNameResponse] | None
     # video_id: str | None
 
 
@@ -229,11 +247,6 @@ class ItemResponse(BaseResponse):
     item_guides: list[GuideBasicResponse] | None
     users_item: list[UserBasicResponse] | None
     qr_code: QRCodeItemResponse | None
-
-
-class ItemNameResponse(BaseResponse):
-    uuid: UUID
-    name: str | None
 
 
 class IssueIndexResponse(BaseResponse):
@@ -290,6 +303,7 @@ class GuideIndexResponse(BaseResponse):
     # video_json: dict | None
     files_guide: list[FileBasicInfo] | None
     item: list[BasicItems] | None
+    qr_code: QRCodeItemResponse | None
 
 
 class IdeaIndexResponse(BaseResponse):
@@ -315,7 +329,7 @@ class PermissionsFull(BaseResponse):
 
 class RolePermissionFull(BaseResponse):
     role_name: str
-    role_description: str
+    role_description: str | None
     role_title: str
     is_custom: bool
     permission: list[PermissionsFull] | None

@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers, used by Alembic.
 revision = "38e5957fa66f"
 down_revision = "b2e42964ad3f"
@@ -21,7 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "items",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("name", sa.VARCHAR(length=512), unique=False, nullable=False),
         sa.Column("symbol", sa.VARCHAR(length=64), unique=False, nullable=True),
@@ -32,6 +31,8 @@ def upgrade() -> None:
         sa.Column("public_access", sa.BOOLEAN(), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(["author_id"], ["users.id"], name="item_user_link_fk"),
         # sa.ForeignKeyConstraint(["qr_code_id"], ["qr_codes.id"], name="qr_code_fk"),
         sa.PrimaryKeyConstraint("id", name="items_pkey"),
         schema=None,
@@ -58,6 +59,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_constraint("author_id", "items")
+    # op.drop_constraint("qr_code_id", "items")
+
     op.drop_constraint("files_items_link_fk", "files_items_link")
     op.drop_constraint("files_items_link_fk_1", "files_items_link")
     op.drop_constraint("files_items_link_pkey", "files_items_link")

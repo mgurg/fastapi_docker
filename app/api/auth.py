@@ -11,11 +11,10 @@ from passlib.hash import argon2
 from pydantic import EmailStr
 from sentry_sdk import capture_exception
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
 from user_agents import parse
-
-from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.config import get_settings
 from app.crud import crud_auth, crud_qr, crud_users
@@ -68,13 +67,14 @@ async def auth_company_info(*, public_db: Session = Depends(get_public_db), comp
     if company_details is None:
         capture_exception("NIP not found: " + company.company_tax_id)
         raise HTTPException(status_code=404, detail="Information not found")
+
     return company_details
 
 
 @auth_router.post("/register", response_model=StandardResponse)
 def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegisterIn):
     if auth.is_email_temporary(user.email):
-        raise HTTPException(status_code=400, detail="Temporary email not allowed")
+        raise HTTPException(status_code=403, detail="Temporary email not allowed")
 
     db_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
     if db_user:
@@ -148,6 +148,9 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
         scheduler.add_job(tenant_create, args=[db_company.tenant_id])
         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
 
+    if user["email"].split("@")[1] == "example.com":
+        return {"ok": True}
+
     # Notification
     email = EmailNotification()
     email.send_admin_registration(new_db_user, f"/activate/{service_token}")
@@ -166,7 +169,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
         db_user_cnt = crud_users.get_user_count(db)
-        user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+        user_role_id = 2  # ADMIN_MASTER[1] / ADMIN[2]
         is_verified = False
 
         if db_user_cnt == 0:
@@ -181,15 +184,37 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
             "password": db_public_user.password,
             "auth_token": secrets.token_hex(32),
             "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-            "role_id": user_role_id,
+            "user_role_id": user_role_id,
             "is_active": True,
             "is_verified": is_verified,
+            "is_visible": True,
             "tos": db_public_user.tos,
             "lang": db_public_user.lang,
             "tz": db_public_user.tz,
             "tenant_id": db_public_user.tenant_id,
+            "created_at": datetime.now(timezone.utc),
         }
 
+        anonymous_user_data = {
+            "uuid": str(uuid4()),
+            "first_name": "Anonymous",
+            "last_name": "User",
+            "email": "anonymous@example.com",
+            "password": None,
+            "auth_token": secrets.token_hex(32),
+            "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+            "user_role_id": None,
+            "is_active": True,
+            "is_verified": True,
+            "is_visible": False,
+            "tos": True,
+            "lang": "pl",
+            "tz": "Europe/Warsaw",
+            "tenant_id": db_public_user.tenant_id,
+            "created_at": datetime.now(timezone.utc),
+        }
+
+        crud_auth.create_tenant_user(db, anonymous_user_data)
         db_tenant_user = crud_auth.create_tenant_user(db, user_data)
 
     empty_data = {
@@ -221,7 +246,7 @@ async def auth_login(*, public_db: Session = Depends(get_public_db), user: UserL
     if db_public_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    schema_translate_map = dict(tenant=db_public_user.tenant_id)
+    schema_translate_map = {"tenant": db_public_user.tenant_id}
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     async_session = async_sessionmaker(connectable, expire_on_commit=False)
 
@@ -322,8 +347,8 @@ def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: 
 
     crud_auth.update_public_user(public_db, db_public_user, update_user)
 
-    emailNotification = EmailNotification()
-    emailNotification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+    email_notification = EmailNotification()
+    email_notification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
 
     return {"ok": True}
 

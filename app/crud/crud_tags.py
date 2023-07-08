@@ -19,7 +19,7 @@ def get_tags(db: Session, sort_column: str, sort_order: str, is_hidden: bool | N
     return result.scalars().all()
 
 
-def get_tag_by_uuid(db: Session, uuid: UUID) -> Tag:
+def get_tag_by_uuid(db: Session, uuid: UUID) -> Tag | None:
     query = select(Tag).where(Tag.uuid == uuid)
 
     result = db.execute(query)
@@ -27,7 +27,7 @@ def get_tag_by_uuid(db: Session, uuid: UUID) -> Tag:
     return result.scalar_one_or_none()
 
 
-def get_tag_by_name(db: Session, name: str) -> Tag:
+def get_tag_by_name(db: Session, name: str) -> Tag | None:
     query = select(Tag).where(Tag.name == name).where(Tag.deleted_at.is_(None))
 
     result = db.execute(query)

@@ -1,17 +1,16 @@
-from contextlib import asynccontextmanager
 import time
+from contextlib import asynccontextmanager
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from loguru import logger
+from sqlalchemy import event, select
+from sqlalchemy.engine import Engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy import event, select
 
 # from sqlalchemy.orm import declarative_base
-
 from app.config import get_settings
 from app.models.shared_models import PublicCompany
 
@@ -22,10 +21,10 @@ DEFAULT_DB_PASS = settings.DEFAULT_DATABASE_PASSWORD
 DEFAULT_DB_HOST = settings.DEFAULT_DATABASE_HOSTNAME
 DEFAULT_DB_PORT = settings.DEFAULT_DATABASE_PORT
 DEFAULT_DB = settings.DEFAULT_DATABASE_DB
-# SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
+# SQLALCHEMY_DB_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 
 
-# SQLALCHEMY_DATABASE_URL = PostgresDsn.build(
+# SQLALCHEMY_DB_URL = PostgresDsn.build(
 #     scheme="postgresql",
 #     user=settings.DEFAULT_DATABASE_USER,
 #     password=settings.DEFAULT_DATABASE_PASSWORD,
@@ -50,19 +49,18 @@ if sql_performance_monitoring is True:
         logger.debug("Total Time: %f" % total)
 
 
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
-)
+SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 echo = False
+
 if settings.ENVIRONMENT != "PRD":
-    print(SQLALCHEMY_DATABASE_URL)
+    print(SQLALCHEMY_DB_URL)
     echo = False
 
 # for async support
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
+engine = create_async_engine(SQLALCHEMY_DB_URL, echo=echo, pool_pre_ping=True, pool_recycle=280)
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-# print(SQLALCHEMY_DATABASE_URL)
+# print(SQLALCHEMY_DB_URL)
 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
@@ -121,7 +119,7 @@ async def get_public_db():
 @asynccontextmanager
 async def with_db(tenant_schema: str | None):
     if tenant_schema:
-        schema_translate_map = dict(tenant=tenant_schema)
+        schema_translate_map = {"tenant": tenant_schema}
     else:
         schema_translate_map = None
 

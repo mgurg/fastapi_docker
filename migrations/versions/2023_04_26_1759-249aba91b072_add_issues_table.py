@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers, used by Alembic.
 revision = "249aba91b072"
 down_revision = "7283939d25ad"
@@ -21,7 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "issues",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("author_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("author_name", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("item_id", sa.INTEGER(), autoincrement=False, nullable=True),
@@ -36,6 +35,8 @@ def upgrade() -> None:
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
+        sa.ForeignKeyConstraint(["item_id"], ["items.id"], name="issue_item_link_fk"),
+        sa.ForeignKeyConstraint(["author_id"], ["users.id"], name="issue_user_link_fk_1"),
         sa.PrimaryKeyConstraint("id", name="issues_pkey"),
         schema=None,
     )
@@ -62,6 +63,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_constraint("issue_item_link_fk", "issues")
+    op.drop_constraint("issue_user_link_fk_1", "issues")
+
     op.drop_constraint("users_issues_link_fk", "users_issues_link")
     op.drop_constraint("users_issues_link_fk_1", "users_issues_link")
     op.drop_constraint("users_issues_link_pkey", "users_issues_link")

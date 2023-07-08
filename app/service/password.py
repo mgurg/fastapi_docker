@@ -1,5 +1,3 @@
-from typing import Union
-
 from passlib.hash import argon2
 
 
@@ -7,7 +5,7 @@ class Password:
     def __init__(self, password: str):
         self.password = password
 
-    def validate(self) -> Union[str, bool]:
+    def validate(self) -> str | bool:
         vals = {
             # "Password must contain an uppercase letter.": lambda s: any(x.isupper() for x in s),
             "Password must contain a lowercase letter.": lambda s: any(x.islower() for x in s),
@@ -22,7 +20,7 @@ class Password:
                 return n
         return valid
 
-    def compare(self, password_confirmation: str) -> Union[str, bool]:
+    def compare(self, password_confirmation: str) -> str | bool:
         is_valid = self.validate()
 
         if is_valid is not True:

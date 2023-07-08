@@ -75,19 +75,19 @@ class EmailNotification:
         return [{"Email": settings.email_dev, "Name": f"{first_name} {last_name}"}]
 
     def get_template_admin_registration(self, user: User, activation_url: str):
-        message_dict = dict(
-            From=self.message_from_field(),
-            To=self.message_to_field(user),
-            TemplateID=4561351,
-            TemplateLanguage=True,
-            Subject="[Malgori] Dziękuję za rejestrację",
-            Variables={
+        message_dict = {
+            "From": self.message_from_field(),
+            "To": self.message_to_field(user),
+            "TemplateID": 4561351,
+            "TemplateLanguage": True,
+            "Subject": "[Malgori] Dziękuję za rejestrację",
+            "Variables": {
                 "product_name": self.product_name,
                 "activation_url": f"{self.base_url}{activation_url}",
                 "login_url": f"{self.base_url}/login",
                 "user_name": user.email,
             },
-        )
+        }
 
         if self.debug:
             self.add_template_debugging(message_dict)
@@ -95,19 +95,19 @@ class EmailNotification:
         return {"Messages": [message_dict]}
 
     def get_template_reset_password_request(self, user: User, reset_token: str, browser: str, os: str):
-        message_dict = dict(
-            From=self.message_from_field(),
-            To=self.message_to_field(user),
-            TemplateID=4561364,
-            TemplateLanguage=True,
-            Subject="[Malgori] Reset hasła",
-            Variables={
+        message_dict = {
+            "From": self.message_from_field(),
+            "To": self.message_to_field(user),
+            "TemplateID": 4561364,
+            "TemplateLanguage": True,
+            "Subject": "[Malgori] Reset hasła",
+            "Variables": {
                 "product_name": self.product_name,
                 "reset_password_url": f"{self.base_url}/set_password/{reset_token}",
                 "operating_system": os,
                 "browser_name": browser,
             },
-        )
+        }
 
         if self.debug:
             self.add_template_debugging(message_dict)
@@ -117,18 +117,18 @@ class EmailNotification:
     def get_template_failure(self, users: list[User], name: str, description: str, uuid: UUID):
         messages_list = []
         for user in users:
-            message_dict = dict(
-                From=self.message_from_field(),
-                To=self.message_to_field(user),
-                TemplateID=4534065,
-                TemplateLanguage=True,
-                Subject="[Malgori] Nowa awaria",
-                Variables={
+            message_dict = {
+                "From": self.message_from_field(),
+                "To": self.message_to_field(user),
+                "TemplateID": 4534065,
+                "TemplateLanguage": True,
+                "Subject": "[Malgori] Nowa awaria",
+                "Variables": {
                     "issue_name": name,
                     "issue_description": description,
                     "issue_url": f"{self.base_url}/issues/{uuid}",
                 },
-            )
+            }
 
             messages_list.append(message_dict)
 
@@ -147,9 +147,9 @@ class EmailNotification:
     def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, os: str) -> None:
         data = self.get_template_reset_password_request(user, reset_token, browser, os)
 
-        print(data)
         self.send_by_mailjet(data)
 
     def send_failure_notification(self, users: list[User], name: str, description: str, uuid: UUID):
-        self.get_template_failure(users, name, description, uuid)
-        # self.send_by_mailjet(data)
+        data = self.get_template_failure(users, name, description, uuid)
+        print(data)
+        self.send_by_mailjet(data)

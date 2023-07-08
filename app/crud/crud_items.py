@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import or_, select, text
@@ -6,8 +7,10 @@ from sqlalchemy.orm import Session
 from app.models.models import Item, User
 
 
-def get_items(db: Session, search: str, user_id: int, sort_column: str, sort_order: str) -> list[Item]:
-    query = select(Item)
+def get_items(
+    db: Session, sort_column: str, sort_order: str, search: str | None = None, user_id: int | None = None
+) -> Sequence[Item]:
+    query = select(Item).where(Item.deleted_at.is_(None))
 
     search_filters = []
     if search is not None:
@@ -26,7 +29,7 @@ def get_items(db: Session, search: str, user_id: int, sort_column: str, sort_ord
     return result.scalars().all()
 
 
-def get_item_by_uuid(db: Session, uuid: UUID) -> Item:
+def get_item_by_uuid(db: Session, uuid: UUID) -> Item | None:
     query = select(Item).where(Item.uuid == uuid)
 
     result = db.execute(query)  # await db.execute(query)

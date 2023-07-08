@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers, used by Alembic.
 revision = "b2e42964ad3f"
 down_revision = "a1b0cf6b2fbb"
@@ -21,7 +20,7 @@ def upgrade() -> None:
     op.create_table(
         "files",
         sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
-        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True, index=True),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=False, index=True),
         sa.Column("owner_id", sa.INTEGER(), autoincrement=False, nullable=True),
         sa.Column("file_name", sa.VARCHAR(length=256), autoincrement=False, nullable=True),
         sa.Column("file_description", sa.VARCHAR(length=256), autoincrement=False, nullable=True),

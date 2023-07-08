@@ -34,8 +34,9 @@ async def has_token(*, db: Session = Depends(get_db), credentials: HTTPBasicCred
     """
     Function that is used to validate the token in the case that it requires it
     """
+
     if db is None:
-        raise HTTPException(status_code=401, detail="General DB Error")
+        raise HTTPException(status_code=401, detail="General DB Error, missing tenant?")
 
     token = credentials.credentials
     if token is None:

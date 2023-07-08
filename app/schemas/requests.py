@@ -1,7 +1,7 @@
 # from typing import list
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, condecimal
 from pydantic.color import Color
 
 
@@ -85,7 +85,7 @@ class IdeaEditIn(BaseRequest):
 
 class RoleAddIn(BaseRequest):
     title: str
-    description: str
+    description: str | None
     permissions: list[UUID]
 
 
@@ -134,7 +134,7 @@ class GuideAddIn(BaseRequest):
     # video_id: str | None
     # video_json: dict | None
     files: list[UUID] | None
-    item_uuid: str | None
+    item_uuid: UUID | None
 
 
 class GuideEditIn(BaseRequest):
@@ -166,6 +166,7 @@ class FavouritesAddIn(BaseRequest):
 
 class IssueEditIn(BaseRequest):
     name: str | None
+    priority: str | None
     summary: str | None
     text_html: str | None
     text_json: dict | None
@@ -207,3 +208,22 @@ class TagCreateIn(BaseRequest):
 class TagEditIn(BaseRequest):
     is_hidden: bool | None
     color: Color | None
+
+
+class PartCreateIn(BaseRequest):
+    issue_uuid: UUID
+    name: str
+    description: str | None
+    price: condecimal(max_digits=10, decimal_places=2)
+    quantity: condecimal(max_digits=4, decimal_places=2)
+    unit: str | None
+    value: condecimal(max_digits=10, decimal_places=2) | None
+
+
+class PartEditIn(BaseRequest):
+    name: str | None
+    description: str | None
+    price: condecimal(max_digits=10, decimal_places=2) | None
+    quantity: condecimal(max_digits=4, decimal_places=2) | None
+    unit: str | None
+    value: condecimal(max_digits=10, decimal_places=2) | None
