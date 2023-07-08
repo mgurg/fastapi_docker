@@ -1,5 +1,5 @@
 # fastapi_docker
-**Hobby project** - backend for simple TODO list app hosted on AWS cloud
+**Hobby project** - backend for simple TODO list app hosted on [Render.com](render.com)
 
 ## 🗂️ Multitenancy
 
@@ -50,6 +50,7 @@ alembic downgrade -1
 To run tests locally in VS Code export environment variable first:
 ```bash
 export PYTHONPATH=$PWD
+set -a; source ./app/.env; set +a
 export DB_HOST=localhost DB_PORT=5432 DB_DATABASE=pg_db DB_USERNAME=postgres DB_PASSWORD=postgres
 ``` 
 
@@ -111,7 +112,7 @@ python3 commands/db_backup/manage_postgres_db.py --configfile sample.config --ac
 ```
 
 
-## 🏋️‍♂️Load test
+## 🏋️‍♂️ Load test
 
 ```bash
 siege --concurrent=20 --reps=5 --header="tenant:bakery_ad094154c48" --header="Authorization:Bearer 123456" https://url.com/users/
@@ -128,48 +129,51 @@ ab -k -c 100 -n 5000 -H "tenant:polski_koncern_naftowy_orlen_fc26bff5f7b540d9b8d
 
 
 Python 3.10, Uvicorn (single instance)
-settings: `ab -k -c 100 -n 5000`
+settings: `ab -k -c 40 -n 5000`
 
 ```
 Document Path:          /users/
-Document Length:        337 bytes
+Document Length:        602 bytes
 
-Concurrency Level:      100
-Time taken for tests:   195.826 seconds
+Concurrency Level:      40
+Time taken for tests:   343.097 seconds
 Complete requests:      5000
 Failed requests:        0
 Keep-Alive requests:    0
-Total transferred:      4480000 bytes
-HTML transferred:       1685000 bytes
-Requests per second:    25.53 [#/sec] (mean)
-Time per request:       3916.515 [ms] (mean)
-Time per request:       39.165 [ms] (mean, across all concurrent requests)
-Transfer rate:          22.34 [Kbytes/sec] received
-
+Total transferred:      5685000 bytes
+HTML transferred:       3010000 bytes
+Requests per second:    14.57 [#/sec] (mean)
+Time per request:       2744.776 [ms] (mean)
+Time per request:       68.619 [ms] (mean, across all concurrent requests)
+Transfer rate:          16.18 [Kbytes/sec] received
 
 ```
+
+### Pydantic V2
+`ab -k -c 40 -n 5000`
+
+slower than previous?
 
 ```
 Document Path:          /users/
-Document Length:        337 bytes
+Document Length:        602 bytes
 
-Concurrency Level:      100
-Time taken for tests:   261.628 seconds
+Concurrency Level:      40
+Time taken for tests:   303.484 seconds
 Complete requests:      5000
-Failed requests:        382
-   (Connect: 0, Receive: 0, Length: 382, Exceptions: 0)
-Non-2xx responses:      382
+Failed requests:        0
 Keep-Alive requests:    0
-Total transferred:      10132516 bytes
-HTML transferred:       7336924 bytes
-Requests per second:    19.11 [#/sec] (mean)
-Time per request:       5232.569 [ms] (mean)
-Time per request:       52.326 [ms] (mean, across all concurrent requests)
-Transfer rate:          37.82 [Kbytes/sec] received
+Total transferred:      5685000 bytes
+HTML transferred:       3010000 bytes
+Requests per second:    16.48 [#/sec] (mean)
+Time per request:       2427.872 [ms] (mean)
+Time per request:       60.697 [ms] (mean, across all concurrent requests)
+Transfer rate:          18.29 [Kbytes/sec] received
 
 ```
 
 #### async branch:
+
 Test branch for async code:
 
 ```

@@ -3,7 +3,9 @@
 import os
 import traceback
 import warnings
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi_pagination.utils import FastAPIPaginationWarning
 from sqlalchemy import func, select, text
 
@@ -22,6 +24,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db, get_public_db
 from app.main import app
+from app.models.models import User
 from app.service.bearer_auth import has_token
 
 # def get_settings_override():
@@ -44,9 +47,9 @@ from app.service.bearer_auth import has_token
 #     os.environ["AWS_SECURITY_TOKEN"] = "testing"
 #     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
-# ENV_PATH = Path(__file__).parent.parent / "app" / ".env.testing"
+ENV_PATH = Path(__file__).parent.parent / "app" / ".env"
 
-# load_dotenv("/home/mgur/Git/fastapi_docker/app/.env.testing")
+load_dotenv(ENV_PATH)
 DEFAULT_DATABASE_USER = os.getenv("DB_USERNAME")
 DEFAULT_DATABASE_PASSWORD = os.getenv("DB_PASSWORD")
 DEFAULT_DATABASE_HOSTNAME = os.getenv("DB_HOST")
@@ -56,6 +59,7 @@ URL = f"postgresql+psycopg://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}
 
 
 os.environ["ENVIRONMENT"] = "PYTEST"
+os.environ["APP_ENV"] = "PYTEST"
 os.environ["TESTING"] = str("1")
 os.environ["SQLALCHEMY_WARN_20"] = "1"
 warnings.simplefilter("ignore", FastAPIPaginationWarning)
@@ -120,7 +124,7 @@ def client_fixture(session: Session):
         return session
 
     def get_auth_override():
-        return {"user_id": 1}
+        return User(id=1)
 
     app.dependency_overrides[get_db] = get_session_override
     app.dependency_overrides[has_token] = get_auth_override

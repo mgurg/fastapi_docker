@@ -1,13 +1,12 @@
-from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import or_, select, text
+from sqlalchemy import Select, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import Guide, Item
 
 
-def get_guides(db: Session, search: str, item_id: int, sort_column: str, sort_order: str) -> Sequence[Guide]:
+def get_guides(search: str, item_id: int, sort_column: str, sort_order: str) -> Select[tuple[Guide]]:
     query = select(Guide)
 
     search_filters = []
@@ -22,9 +21,11 @@ def get_guides(db: Session, search: str, item_id: int, sort_column: str, sort_or
 
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 
-    result = db.execute(query)  # await db.execute(query)
+    return query
 
-    return result.scalars().all()
+    # result = db.execute(query)  # await db.execute(query)
+    #
+    # return result.scalars().all()
 
 
 def get_guide_by_uuid(db: Session, uuid: UUID) -> Guide:

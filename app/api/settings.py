@@ -1,5 +1,6 @@
 # from typing import list
 from datetime import datetime, timezone
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from langcodes import standardize_tag
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_settings, crud_users
 from app.db import get_db
+from app.models.models import User
 from app.schemas.requests import SettingGeneralIn, SettingNotificationIn, SettingUserLanguage
 from app.schemas.responses import SettingNotificationResponse, StandardResponse
 from app.service.bearer_auth import has_token
@@ -15,11 +17,14 @@ from app.service.default_settings import allowed_settings
 
 setting_router = APIRouter()
 
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
+
 
 # GENERAL
 @setting_router.get("/", name="setting:read")
-def setting_get_all(*, db: Session = Depends(get_db), settings: list[str] = Query(None), auth=Depends(has_token)):
-    user_id = auth["user_id"]
+def setting_get_all(*, db: UserDB, auth_user: CurrentUser, settings: Annotated[list[str], Query()] = None):
+    user_id = auth_user.id
 
     if user_id == 0:
         raise HTTPException(status_code=404, detail="Setting for anonymous user not exists!")
@@ -41,8 +46,8 @@ def setting_get_all(*, db: Session = Depends(get_db), settings: list[str] = Quer
 
 
 @setting_router.post("/", name="setting:add")
-def setting_set_one(*, db: Session = Depends(get_db), setting: SettingGeneralIn, auth=Depends(has_token)):
-    user_id = auth["user_id"]
+def setting_set_one(*, db: UserDB, setting: SettingGeneralIn, auth_user: CurrentUser):
+    user_id = auth_user.id
 
     db_setting = crud_settings.get_user_general_setting_by_name(db, user_id, setting.name)
 
@@ -74,8 +79,8 @@ def setting_set_one(*, db: Session = Depends(get_db), setting: SettingGeneralIn,
 
 # Notifications
 @setting_router.get("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
-def setting_notification_get(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    user_id = auth["user_id"]
+def setting_notification_get(*, db: UserDB, auth_user: CurrentUser):
+    user_id = auth_user.id
 
     db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
 
@@ -86,8 +91,8 @@ def setting_notification_get(*, db: Session = Depends(get_db), auth=Depends(has_
 
 
 @setting_router.post("/notifications/", response_model=SettingNotificationResponse, name="settings:notifications")
-def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingNotificationIn, auth=Depends(has_token)):
-    user_id = auth["user_id"]
+def setting_notification_set(*, db: UserDB, setting: SettingNotificationIn, auth_user: CurrentUser):
+    user_id = auth_user.id
 
     db_settings = crud_settings.get_notification_settings_by_user_id(db, user_id)
 
@@ -109,11 +114,11 @@ def setting_notification_set(*, db: Session = Depends(get_db), setting: SettingN
 
 # LANG
 @setting_router.post("/user_lang/", response_model=StandardResponse, name="settings:notifications")
-def setting_user_lang(*, db: Session = Depends(get_db), lang: SettingUserLanguage, auth=Depends(has_token)):
+def setting_user_lang(*, db: UserDB, lang: SettingUserLanguage, auth_user: CurrentUser):
     if lang.code not in ["de", "en-US", "fr", "pl"]:
         raise HTTPException(status_code=404, detail="Language code setting invalid")
 
-    db_user = crud_users.get_user_by_id(db, auth["user_id"])
+    db_user = crud_users.get_user_by_id(db, auth_user.id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 

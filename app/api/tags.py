@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,21 +7,20 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_issues, crud_tags
 from app.db import get_db
+from app.models.models import User
 from app.schemas.requests import TagCreateIn, TagEditIn
 from app.schemas.responses import StandardResponse, TagResponse
 from app.service.bearer_auth import has_token
 
 tag_router = APIRouter()
 
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
+
 
 @tag_router.get("/", response_model=list[TagResponse])
 def tags_get_all(
-    *,
-    db: Session = Depends(get_db),
-    field: str = "name",
-    order: str = "asc",
-    is_hidden: bool | None = None,
-    auth=Depends(has_token),
+    *, db: UserDB, auth_user: CurrentUser, field: str = "name", order: str = "asc", is_hidden: bool | None = None
 ):
     if field not in ["name"]:
         field = "name"
@@ -30,7 +30,7 @@ def tags_get_all(
 
 
 @tag_router.post("/", response_model=TagResponse)
-def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depends(has_token)):
+def tags_add_one(*, db: UserDB, tag: TagCreateIn, auth_user: CurrentUser):
     db_tag = crud_tags.get_tag_by_name(db, tag.name)
 
     if db_tag:
@@ -41,7 +41,7 @@ def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depend
         "name": tag.name,
         "color": tag.color,
         "icon": tag.icon,
-        "author_id": auth["user_id"],
+        "author_id": auth_user.id,
         "created_at": datetime.now(timezone.utc),
     }
 
@@ -51,7 +51,7 @@ def tags_add_one(*, db: Session = Depends(get_db), tag: TagCreateIn, auth=Depend
 
 
 @tag_router.patch("/{tag_uuid}", response_model=TagResponse)
-def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, tag: TagEditIn, auth=Depends(has_token)):
+def tags_edit_one(*, db: UserDB, tag_uuid: UUID, tag: TagEditIn, auth_user: CurrentUser):
     db_tag = crud_tags.get_tag_by_uuid(db, tag_uuid)
 
     tag_data = {"is_hidden": tag.is_hidden}
@@ -63,9 +63,7 @@ def tags_edit_one(*, db: Session = Depends(get_db), tag_uuid: UUID, tag: TagEdit
 
 
 @tag_router.delete("/{tag_uuid}", response_model=StandardResponse)
-def tags_delete_one(
-    *, db: Session = Depends(get_db), tag_uuid: UUID, force_delete: bool = False, auth=Depends(has_token)
-):
+def tags_delete_one(*, db: UserDB, tag_uuid: UUID, auth_user: CurrentUser, force_delete: bool = False):
     db_tag = crud_tags.get_tag_by_uuid(db, tag_uuid)
 
     if not db_tag:

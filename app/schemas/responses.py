@@ -1,14 +1,12 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, condecimal
-from pydantic.color import Color
+from pydantic import BaseModel, ConfigDict, condecimal
+from pydantic_extra_types.color import Color
 
 
 class BaseResponse(BaseModel):
-    # may define additional fields or config shared across responses
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class StandardResponse(BaseResponse):
@@ -55,13 +53,13 @@ class UserLoginOut(BaseResponse):
     lang: str
     uuid: UUID
     role_FK: RoleLoginBasic
-    tenant_id: str | None
+    tenant_id: str | None = None
 
 
 class CompanyInfoBasic(BaseResponse):
     name: str
-    street: str | None
-    city: str | None
+    street: str | None = None
+    city: str | None = None
     nip: str
 
 
@@ -75,7 +73,7 @@ class UserIndexResponse(BaseResponse):
     first_name: str
     last_name: str
     email: str
-    phone: str | None
+    phone: str | None = None
     uuid: UUID
     is_active: bool
     is_verified: bool
@@ -88,7 +86,7 @@ class FileResponse(BaseResponse):
     extension: str
     mimetype: str
     size: int
-    url: str | None
+    url: str | None = None
 
 
 class SettingBase(BaseResponse):
@@ -97,8 +95,8 @@ class SettingBase(BaseResponse):
     entity: str
     value: str
     value_type: str
-    created_at: datetime | None
-    updated_at: datetime | None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class IdeaSummaryResponse(BaseResponse):
@@ -121,7 +119,7 @@ class IssueSummaryResponse(BaseResponse):
 class RoleSummaryResponse(BaseResponse):
     uuid: UUID
     role_title: str
-    role_description: str | None
+    role_description: str | None = None
     is_custom: bool
     count: int
     uncounted: int
@@ -137,17 +135,17 @@ class PermissionResponse(BaseResponse):
 
 class GroupSummaryResponse(BaseResponse):
     uuid: UUID
-    symbol: str | None
+    symbol: str | None = None
     name: str
-    description: str | None
+    description: str | None = None
     # count: int
 
 
 class GroupResponse(BaseResponse):
     uuid: UUID
-    symbol: str | None
-    name: str | None
-    description: str | None
+    symbol: str | None = None
+    name: str | None = None
+    description: str | None = None
     users: list[UserBasicResponse]
 
 
@@ -157,23 +155,23 @@ class FileBasicInfo(BaseResponse):
     extension: str
     mimetype: str
     size: int
-    url: str | None
+    url: str | None = None
 
 
 class TagResponse(BaseResponse):
     uuid: UUID
     name: str
     color: Color | None = "#66b3ff"
-    is_hidden: bool | None
+    is_hidden: bool | None = None
 
 
 class PartResponse(BaseResponse):
     uuid: UUID
     name: str
-    description: str | None
+    description: str | None = None
     price: condecimal(max_digits=10, decimal_places=2)
     quantity: condecimal(max_digits=4, decimal_places=2)
-    unit: str | None
+    unit: str | None = None
     value: condecimal(max_digits=10, decimal_places=2)
 
 
@@ -198,38 +196,38 @@ class UserQrToken(BaseResponse):
 
 class GuideBasicResponse(BaseResponse):
     uuid: UUID
-    name: str | None
-    text: str | None
+    name: str | None = None
+    text: str | None = None
 
 
 class ItemNameResponse(BaseResponse):
     uuid: UUID
-    name: str | None
+    name: str | None = None
 
 
 class GuideResponse(BaseResponse):
     uuid: UUID
-    name: str | None
-    text: str | None
-    text_json: dict | None
-    item: list[ItemNameResponse] | None
+    name: str | None = None
+    text: str | None = None
+    text_json: dict | None = None
+    item: list[ItemNameResponse] | None = None
     # video_id: str | None
 
 
 class ItemIndexResponse(BaseResponse):
     uuid: UUID
-    name: str | None
-    text: str | None
-    text_json: dict | None
+    name: str | None = None
+    text: str | None = None
+    text_json: dict | None = None
 
 
 class EventTimelineResponse(BaseResponse):
     created_at: datetime
-    author_name: str | None
-    author_uuid: UUID | None
-    action: str | None
-    title: str | None
-    description: str | None
+    author_name: str | None = None
+    author_uuid: UUID | None = None
+    action: str | None = None
+    title: str | None = None
+    description: str | None = None
     # value: str | None
     # resource: str | None
     # resource_uuid: UUID | None
@@ -239,43 +237,43 @@ class EventTimelineResponse(BaseResponse):
 
 class ItemResponse(BaseResponse):
     uuid: UUID
-    symbol: str | None
-    name: str | None
-    text: str | None
-    text_json: dict | None
-    files_item: list[FileBasicInfo] | None
-    item_guides: list[GuideBasicResponse] | None
-    users_item: list[UserBasicResponse] | None
-    qr_code: QRCodeItemResponse | None
+    symbol: str | None = None
+    name: str | None = None
+    text: str | None = None
+    text_json: dict | None = None
+    files_item: list[FileBasicInfo] | None = None
+    item_guides: list[GuideBasicResponse] | None = None
+    users_item: list[UserBasicResponse] | None = None
+    qr_code: QRCodeItemResponse | None = None
 
 
 class IssueIndexResponse(BaseResponse):
     uuid: UUID
-    symbol: str | None
-    name: str | None
-    text: str | None
-    text_json: dict | None
-    item: ItemNameResponse | None
-    status: str | None
-    priority: str | None
-    color: str | None
-    users_issue: list[UserBasicResponse] | None
+    symbol: str | None = None
+    name: str | None = None
+    text: str | None = None
+    text_json: dict | None = None
+    item: ItemNameResponse | None = None
+    status: str | None = None
+    priority: str | None = None
+    color: str | None = None
+    users_issue: list[UserBasicResponse] | None = None
     created_at: datetime
 
 
 class IssueResponse(BaseResponse):
     uuid: UUID
-    symbol: str | None
-    name: str | None
-    text: str | None
-    text_json: dict | None
-    item: ItemNameResponse | None
-    status: str | None
-    priority: str | None
-    color: str | None
-    users_issue: list[UserBasicResponse] | None
-    files_issue: list[FileBasicInfo] | None
-    tags_issue: list[TagBasicInfo] | None
+    symbol: str | None = None
+    name: str | None = None
+    text: str | None = None
+    text_json: dict | None = None
+    item: ItemNameResponse | None = None
+    status: str | None = None
+    priority: str | None = None
+    color: str | None = None
+    users_issue: list[UserBasicResponse] | None = None
+    files_issue: list[FileBasicInfo] | None = None
+    tags_issue: list[TagBasicInfo] | None = None
     # item_guides: list[GuideBasicResponse] | None
 
 
@@ -291,19 +289,19 @@ class UserVerifyToken(BaseResponse):
 
 class BasicItems(BaseResponse):
     uuid: UUID
-    name: str | None
+    name: str | None = None
 
 
 class GuideIndexResponse(BaseResponse):
     uuid: UUID
-    name: str | None
-    text: str | None
-    text_json: dict | None
+    name: str | None = None
+    text: str | None = None
+    text_json: dict | None = None
     # video_id: str | None
     # video_json: dict | None
-    files_guide: list[FileBasicInfo] | None
-    item: list[BasicItems] | None
-    qr_code: QRCodeItemResponse | None
+    files_guide: list[FileBasicInfo] | None = None
+    item: list[BasicItems] | None = None
+    qr_code: QRCodeItemResponse | None = None
 
 
 class IdeaIndexResponse(BaseResponse):
@@ -311,12 +309,12 @@ class IdeaIndexResponse(BaseResponse):
     color: str
     name: str
     text: str
-    text_json: dict | None
-    upvotes: int | None
-    downvotes: int | None
-    status: str | None
+    text_json: dict | None = None
+    upvotes: int | None = None
+    downvotes: int | None = None
+    status: str | None = None
     created_at: datetime
-    files_idea: list[FileBasicInfo] | None
+    files_idea: list[FileBasicInfo] | None = None
 
 
 class PermissionsFull(BaseResponse):
@@ -324,20 +322,20 @@ class PermissionsFull(BaseResponse):
     name: str
     title: str
     description: str
-    group: str | None
+    group: str | None = None
 
 
 class RolePermissionFull(BaseResponse):
     role_name: str
-    role_description: str | None
+    role_description: str | None = None
     role_title: str
     is_custom: bool
-    permission: list[PermissionsFull] | None
+    permission: list[PermissionsFull] | None = None
 
 
 class SettingNotificationResponse(BaseResponse):
-    sms_notification_level: str | None
-    email_notification_level: str | None
+    sms_notification_level: str | None = None
+    email_notification_level: str | None = None
 
 
 class StatsIssuesCounterResponse(BaseResponse):
