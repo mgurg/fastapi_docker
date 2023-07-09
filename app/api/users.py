@@ -2,16 +2,19 @@ import codecs
 import csv
 import io
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.crud import crud_auth, crud_permission, crud_users
 from app.db import engine, get_db
+from app.models.models import User
 from app.schemas.requests import UserCreateIn
 from app.schemas.responses import StandardResponse, UserIndexResponse
 from app.service.bearer_auth import has_token
@@ -19,36 +22,44 @@ from app.service.password import Password
 
 user_router = APIRouter()
 
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[AsyncSession, Depends(get_db)]
+
 
 @user_router.get("/", response_model=Page[UserIndexResponse])
 async def user_get_all(
     *,
-    db: AsyncSession = Depends(get_db),
-    params: Params = Depends(),
-    search: str | None = None,
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     # search: Annotated[str | None, Query(max_length=50)] = None,
+    search: str | None = None,
     field: str = "name",
     order: str = "asc",
-    auth=Depends(has_token),
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
-    db_users = await crud_users.get_users(db, search, field, order)
+    db_users_query = crud_users.get_users(field, order, search)
 
-    return paginate(db_users, params)
+    # result = db.execute(db_users_query)  # await db.execute(query)
+    # db_users = result.scalars().all()
+
+    return paginate(db, db_users_query)
 
 
 @user_router.get("/count")
-def get_users_count(*, db: Session = Depends(get_db), auth=Depends(has_token)):
+def get_users_count(*, db: UserDB, auth_user: CurrentUser):
     db_user_cnt = crud_users.get_user_count(db)
 
     return db_user_cnt
 
 
 @user_router.get("/export")
-def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_users = crud_users.get_users(db, "last_name", "asc")
+def get_export_users(*, db: UserDB, auth_user: CurrentUser):
+    db_users_query = crud_users.get_users("last_name", "asc")
+    result = db.execute(db_users_query)  # await db.execute(query)
+    db_users = result.scalars().all()
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
@@ -70,7 +81,7 @@ def get_export_users(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
 
 @user_router.post("/import")
-def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None = None, auth=Depends(has_token)):
+def get_import_users(*, db: UserDB, auth_user: CurrentUser, file: UploadFile | None = None):
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
 
@@ -99,15 +110,15 @@ def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None =
 
 
 @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
-def user_get_one(*, db: Session = Depends(get_db), user_uuid: UUID, auth=Depends(has_token)):
+def user_get_one(*, db: UserDB, user_uuid: UUID, auth_user: CurrentUser):
     user = crud_users.get_user_by_uuid(db, user_uuid)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth=Depends(has_token)
-def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Request, auth=Depends(has_token)):
+@user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth_user: CurrentUser
+def user_add(*, db: UserDB, user: UserCreateIn, request: Request, auth_user: CurrentUser):
     db_user = crud_users.get_user_by_email(db, user.email)
     if db_user is not None:
         raise HTTPException(status_code=400, detail="User already exists")
@@ -175,7 +186,7 @@ def user_add(*, db: Session = Depends(get_db), user: UserCreateIn, request: Requ
 
 
 @user_router.patch("/{user_uuid}", response_model=StandardResponse)
-def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreateIn, auth=Depends(has_token)):
+def user_edit(*, db: UserDB, user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -225,7 +236,7 @@ def user_edit(*, db: Session = Depends(get_db), user_uuid: UUID, user: UserCreat
 
 
 @user_router.delete("/{user_uuid}", response_model=StandardResponse)
-def user_delete(*, db: Session = Depends(get_db), user_uuid: UUID, force: bool = False, auth=Depends(has_token)):
+def user_delete(*, db: UserDB, user_uuid: UUID, auth_user: CurrentUser, force: bool = False):
     db_user = crud_users.get_user_by_uuid(db, user_uuid)
 
     if not db_user:

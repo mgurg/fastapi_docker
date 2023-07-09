@@ -1,14 +1,17 @@
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
 from app.crud import crud_auth, crud_files, crud_guides, crud_items, crud_qr
 from app.db import engine, get_db
+from app.models.models import User
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideIndexResponse, GuideResponse, StandardResponse
 
@@ -18,17 +21,20 @@ from app.service.bearer_auth import has_token
 
 guide_router = APIRouter()
 
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
+
 
 @guide_router.get("/", response_model=Page[GuideResponse])  #
 def guide_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str = None,
     item_uuid: UUID | None = None,
     order: str = "asc",
     field: str = "name",
-    auth=Depends(has_token),
 ):
     if field not in ["name"]:
         field = "name"
@@ -40,12 +46,16 @@ def guide_get_all(
             raise HTTPException(status_code=401, detail="Item not found")
         item_id = db_item.id
 
-    db_guides = crud_guides.get_guides(db, search, item_id, field, order)
-    return paginate(db_guides, params)
+    db_guides_query = crud_guides.get_guides(search, item_id, field, order)
+
+    # result = db.execute(db_guides_query)  # await db.execute(query)
+    # db_guides = result.scalars().all()
+
+    return paginate(db, db_guides_query)
 
 
 @guide_router.get("/{guide_uuid}", response_model=GuideIndexResponse)  # , response_model=Page[UserIndexResponse]
-def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: Request, auth=Depends(has_token)):
+def guide_get_one(*, db: UserDB, guide_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:
@@ -63,7 +73,7 @@ def guide_get_one(*, db: Session = Depends(get_db), guide_uuid: UUID, request: R
 
 
 @guide_router.post("/", response_model=GuideResponse)
-def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAddIn, auth=Depends(has_token)):
+def guide_add(*, db: UserDB, request: Request, guide: GuideAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -113,7 +123,7 @@ def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAd
 
     guide_data = {
         "uuid": guide_uuid,
-        "author_id": auth["user_id"],
+        "author_id": auth_user.id,
         "name": guide.name,
         "text": description,
         "qr_code_id": new_qr_code.id,
@@ -133,7 +143,7 @@ def guide_add(*, db: Session = Depends(get_db), request: Request, guide: GuideAd
 
 
 @guide_router.patch("/{guide_uuid}", response_model=GuideResponse)
-def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideEditIn, auth=Depends(has_token)):
+def guide_edit(*, db: UserDB, guide_uuid: UUID, guide: GuideEditIn, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
     if not db_guide:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -163,7 +173,7 @@ def guide_edit(*, db: Session = Depends(get_db), guide_uuid: UUID, guide: GuideE
 
 
 @guide_router.delete("/{guide_uuid}", response_model=StandardResponse)
-def guide_delete(*, db: Session = Depends(get_db), guide_uuid: UUID, auth=Depends(has_token)):
+def guide_delete(*, db: UserDB, guide_uuid: UUID, auth_user: CurrentUser):
     db_guide = crud_guides.get_guide_by_uuid(db, guide_uuid)
 
     if not db_guide:

@@ -2,7 +2,7 @@
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, condecimal
-from pydantic.color import Color
+from pydantic_extra_types.color import Color
 
 
 class BaseRequest(BaseModel):
@@ -48,23 +48,23 @@ class ResetPassword(BaseRequest):
 
 
 class UserCreateIn(BaseRequest):
-    first_name: str | None
-    last_name: str | None
-    email: EmailStr | None
-    phone: str | None
-    password: str | None
-    password_confirmation: str | None
-    is_verified: bool | None
-    user_role_uuid: UUID | None
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    password: str | None = None
+    password_confirmation: str | None = None
+    is_verified: bool | None = None
+    user_role_uuid: UUID | None = None
 
 
 class IdeaAddIn(BaseRequest):
     name: str
-    summary: str | None
+    summary: str | None = None
     text_json: dict
     text_html: str
     color: str = "green"
-    files: list[UUID] | None
+    files: list[UUID] | None = None
 
 
 class IdeasVotesIn(BaseRequest):
@@ -73,58 +73,58 @@ class IdeasVotesIn(BaseRequest):
 
 
 class IdeaEditIn(BaseRequest):
-    name: str | None
-    summary: str | None
-    text_json: dict | None
-    text_html: str | None
-    color: str | None
-    status: str | None
-    vote: str | None
-    files: list[UUID] | None
+    name: str | None = None
+    summary: str | None = None
+    text_json: dict | None = None
+    text_html: str | None = None
+    color: str | None = None
+    status: str | None = None
+    vote: str | None = None
+    files: list[UUID] | None = None
 
 
 class RoleAddIn(BaseRequest):
     title: str
-    description: str | None
+    description: str | None = None
     permissions: list[UUID]
 
 
 class RoleEditIn(BaseRequest):
-    title: str | None
-    description: str | None
-    permissions: list[UUID] | None
+    title: str | None = None
+    description: str | None = None
+    permissions: list[UUID] | None = None
 
 
 class GroupAddIn(BaseRequest):
     name: str
-    symbol: str | None
-    description: str | None
-    users: list[UUID] | None
+    symbol: str | None = None
+    description: str | None = None
+    users: list[UUID] | None = None
 
 
 class GroupEditIn(BaseRequest):
-    name: str | None
-    symbol: str | None
-    description: str | None
-    users: list[UUID] | None
+    name: str | None = None
+    symbol: str | None = None
+    description: str | None = None
+    users: list[UUID] | None = None
 
 
 class ItemAddIn(BaseRequest):
     name: str
-    symbol: str | None
-    summary: str | None
-    text_html: str | None
-    text_json: dict | None
-    files: list[UUID] | None
+    symbol: str | None = None
+    summary: str | None = None
+    text_html: str | None = None
+    text_json: dict | None = None
+    files: list[UUID] | None = None
 
 
 class ItemEditIn(BaseRequest):
-    name: str | None
-    symbol: str | None
-    summary: str | None
-    text_html: str | None
-    text_json: dict | None
-    files: list[UUID] | None
+    name: str | None = None
+    symbol: str | None = None
+    summary: str | None = None
+    text_html: str | None = None
+    text_json: dict | None = None
+    files: list[UUID] | None = None
 
 
 class GuideAddIn(BaseRequest):
@@ -133,59 +133,59 @@ class GuideAddIn(BaseRequest):
     text_json: dict
     # video_id: str | None
     # video_json: dict | None
-    files: list[UUID] | None
-    item_uuid: UUID | None
+    files: list[UUID] | None = None
+    item_uuid: UUID | None = None
 
 
 class GuideEditIn(BaseRequest):
-    name: str | None
-    text_html: str | None
-    text_json: dict | None
+    name: str | None = None
+    text_html: str | None = None
+    text_json: dict | None = None
     # video_id: str | None
     # video_json: dict | None
-    files: list[UUID] | None
+    files: list[UUID] | None = None
 
 
 class IssueAddIn(BaseRequest):
-    item_uuid: UUID | None
+    item_uuid: UUID | None = None
     name: str
-    color: str | None
-    priority: str | None
-    status: str | None
-    summary: str | None
-    text_html: str | None
-    text_json: dict | None
-    files: list[UUID] | None
-    tags: list[UUID] | None
+    color: str | None = None
+    priority: int | None = None
+    status: str | None = None
+    summary: str | None = None
+    text_html: str | None = None
+    text_json: dict | None = None
+    files: list[UUID] | None = None
+    tags: list[UUID] | None = None
 
 
 class FavouritesAddIn(BaseRequest):
-    item_uuid: UUID | None
-    user_uuid: UUID | None
+    item_uuid: UUID | None = None
+    user_uuid: UUID | None = None
 
 
 class IssueEditIn(BaseRequest):
-    name: str | None
-    priority: str | None
-    summary: str | None
-    text_html: str | None
-    text_json: dict | None
-    files: list[UUID] | None
-    tags: list[UUID] | None
-    users: list[UUID] | None
+    name: str | None = None
+    priority: int | None = None
+    summary: str | None = None
+    text_html: str | None = None
+    text_json: dict | None = None
+    files: list[UUID] | None = None
+    tags: list[UUID] | None = None
+    users: list[UUID] | None = None
 
 
 class IssueChangeStatus(BaseRequest):
     status: str
-    name: str | None
-    title: str | None
-    description: str | None
-    internal_value: str | None
+    name: str | None = None
+    title: str | None = None
+    description: str | None = None
+    internal_value: str | None = None
 
 
 class SettingNotificationIn(BaseRequest):
-    sms_notification_level: str | None
-    email_notification_level: str | None
+    sms_notification_level: str | None = None
+    email_notification_level: str | None = None
 
 
 class SettingUserLanguage(BaseRequest):
@@ -200,30 +200,30 @@ class SettingGeneralIn(BaseRequest):
 
 class TagCreateIn(BaseRequest):
     name: str
-    color: str | None
-    icon: str | None
+    color: str | None = None
+    icon: str | None = None
     is_hidden: bool | None = False
 
 
 class TagEditIn(BaseRequest):
-    is_hidden: bool | None
-    color: Color | None
+    is_hidden: bool | None = None
+    color: Color | None = None
 
 
 class PartCreateIn(BaseRequest):
     issue_uuid: UUID
     name: str
-    description: str | None
+    description: str | None = None
     price: condecimal(max_digits=10, decimal_places=2)
     quantity: condecimal(max_digits=4, decimal_places=2)
-    unit: str | None
-    value: condecimal(max_digits=10, decimal_places=2) | None
+    unit: str | None = None
+    value: condecimal(max_digits=10, decimal_places=2) | None = None
 
 
 class PartEditIn(BaseRequest):
-    name: str | None
-    description: str | None
-    price: condecimal(max_digits=10, decimal_places=2) | None
-    quantity: condecimal(max_digits=4, decimal_places=2) | None
-    unit: str | None
-    value: condecimal(max_digits=10, decimal_places=2) | None
+    name: str | None = None
+    description: str | None = None
+    price: condecimal(max_digits=10, decimal_places=2) | None = None
+    quantity: condecimal(max_digits=4, decimal_places=2) | None = None
+    unit: str | None = None
+    value: condecimal(max_digits=10, decimal_places=2) | None = None

@@ -1,4 +1,5 @@
 import io
+from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Request, UploadFile
@@ -77,7 +78,7 @@ def get_buckets_list():
 
 
 @s3_router.delete("/delete_file/")
-def remove_bucket(*, session: Session = Depends(get_session), object_name: str):
+def remove_bucket(*, session: Annotated[Session, Depends(get_session)], object_name: str):
     a = s3_resource.Object(settings.s3_bucket_name, object_name).delete()
     print(a)
 
@@ -112,7 +113,9 @@ def get_s3(s3_obj: str):
 
 @s3_router.post("/upload/")
 @logger.catch()
-def upload_aws_s3(*, session: Session = Depends(get_session), request: Request, file: UploadFile | None = None):
+def upload_aws_s3(
+    *, session: Annotated[Session, Depends(get_session)], request: Request, file: UploadFile | None = None
+):
     if not file:
         return {"message": "No file sent"}
 

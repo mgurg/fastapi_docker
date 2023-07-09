@@ -1,5 +1,6 @@
 import time
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 import sqlalchemy as sa
 from fastapi import Depends, Request
@@ -99,7 +100,7 @@ async def get_tenant(request: Request) -> PublicCompany:
 
 # for async support
 # added async
-async def get_db(tenant: PublicCompany = Depends(get_tenant)):
+async def get_db(tenant: Annotated[PublicCompany, Depends(get_tenant)]):
     if tenant is None:
         yield None
 

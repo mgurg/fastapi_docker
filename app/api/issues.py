@@ -2,17 +2,20 @@ import csv
 import io
 from collections import Counter
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
 from app.db import engine, get_db
+from app.models.models import User
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import EventTimelineResponse, IssueIndexResponse, IssueResponse, StandardResponse
 from app.service import event
@@ -22,22 +25,25 @@ from app.service.notifications import notify_users
 
 issue_router = APIRouter()
 
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
+
 
 @issue_router.get("/", response_model=Page[IssueIndexResponse])
 def issue_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str | None = None,
     status: str = "active",
     user_uuid: UUID | None = None,
     priority: str | None = None,
     dateFrom: datetime | None = None,
     dateTo: datetime | None = None,
-    tag: list[UUID] | None = Query(default=None),
+    tag: Annotated[list[UUID] | None, Query()] = None,
     field: str = "created_at",
     order: str = "asc",
-    auth=Depends(has_token),
 ):
     if field not in ["created_at", "name", "priority", "status"]:
         field = "created_at"
@@ -53,15 +59,16 @@ def issue_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_issues = crud_issues.get_issues(db, field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
-    return paginate(db_issues, params)
+    db_issues_query = crud_issues.get_issues(field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
+    return paginate(db, db_issues_query)
 
 
 @issue_router.get("/export")
-def get_export_issues(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    print("================")
-    db_issues = crud_issues.get_issues(db, "name", "asc", None, "all", None, None, None, None, None)
+def get_export_issues(*, db: UserDB, auth_user: CurrentUser):
+    db_issues_query = crud_issues.get_issues("name", "asc", None, "all", None, None, None, None, None)
+    result = db.execute(db_issues_query)  # await db.execute(query)
 
+    db_issues = result.scalars().all()
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
     csv_file.writerow(["Symbol", "Name", "Description", "Author", "Status", "Created at"])
@@ -77,7 +84,7 @@ def get_export_issues(*, db: Session = Depends(get_db), auth=Depends(has_token))
 
 @issue_router.get("/timeline/{issue_uuid}", response_model=list[EventTimelineResponse])
 def item_get_timeline_history(
-    *, db: Session = Depends(get_db), issue_uuid: UUID, thread_resource: str | None = None, auth=Depends(has_token)
+    *, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser, thread_resource: str | None = None
 ):
     # db_item = crud_items.get_item_by_uuid(db, issue_uuid)
     # if not db_item:
@@ -88,7 +95,7 @@ def item_get_timeline_history(
 
 
 @issue_router.get("/summary/{issue_uuid}")
-def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depends(has_token)):
+def item_get_issue_summary(*, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue or db_issue.status != "done":
@@ -118,7 +125,7 @@ def item_get_issue_summary(*, db: Session = Depends(get_db), issue_uuid: UUID, a
 
 
 @issue_router.get("/{issue_uuid}", response_model=IssueResponse)  # , response_model=Page[UserIndexResponse]
-def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: Request, auth=Depends(has_token)):
+def issue_get_one(*, db: UserDB, issue_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue:
@@ -136,7 +143,7 @@ def issue_get_one(*, db: Session = Depends(get_db), issue_uuid: UUID, request: R
 
 
 @issue_router.post("/", response_model=IssueResponse)  #
-def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAddIn, auth=Depends(has_token)):
+def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -165,7 +172,7 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
     issue_uuid = str(uuid4())
 
-    db_user = crud_users.get_user_by_id(db, auth["user_id"])
+    db_user = crud_users.get_user_by_id(db, auth_user.id)
     author_name = "anonymous"
     author_id = None
     if db_user:
@@ -220,16 +227,14 @@ def issue_add(*, db: Session = Depends(get_db), request: Request, issue: IssueAd
 
 
 @issue_router.post("/status/{issue_uuid}")
-def issue_change_status(
-    *, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueChangeStatus, auth=Depends(has_token)
-):
+def issue_change_status(*, db: UserDB, issue_uuid: UUID, issue: IssueChangeStatus, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
 
     # db_item = crud_items.get_item_by_id(db, db_issue.item_id)
 
-    db_user = crud_users.get_user_by_id(db, auth["user_id"])
+    db_user = crud_users.get_user_by_id(db, auth_user.id)
     if not db_user:
         raise HTTPException(status_code=400, detail="User not found!")
     if db_user:
@@ -358,7 +363,7 @@ def issue_change_status(
 
 
 @issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
-def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueEditIn, auth=Depends(has_token)):
+def issue_edit(*, db: UserDB, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
@@ -412,7 +417,7 @@ def issue_edit(*, db: Session = Depends(get_db), issue_uuid: UUID, issue: IssueE
 
 
 @issue_router.delete("/{issue_uuid}", response_model=StandardResponse)
-def issue_delete(*, db: Session = Depends(get_db), issue_uuid: UUID, auth=Depends(has_token)):
+def issue_delete(*, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
 
     if not db_issue:

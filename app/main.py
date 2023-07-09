@@ -1,10 +1,9 @@
-import warnings
 from typing import Any
 
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_pagination.utils import FastAPIPaginationWarning
+from fastapi_pagination import add_pagination
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -28,7 +27,7 @@ from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
 
 settings = get_settings()
-warnings.simplefilter("ignore", FastAPIPaginationWarning)
+
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
 origins = ["http://localhost", "http://localhost:8080", "*"]
@@ -70,6 +69,7 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
+add_pagination(app)
 
 
 def traces_sampler(sampling_context: dict[str, Any]) -> float:

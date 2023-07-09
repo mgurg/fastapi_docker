@@ -2,35 +2,40 @@ import csv
 import io
 import sys
 from datetime import datetime, time, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.crud import crud_auth, crud_files, crud_guides, crud_issues, crud_items, crud_qr, crud_users
 from app.db import engine, get_db
+from app.models.models import User
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 
 item_router = APIRouter()
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @item_router.get("/", response_model=Page[ItemIndexResponse])
 def item_get_all(
     *,
-    db: Session = Depends(get_db),
-    params: Params = Depends(),
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
     search: str | None = None,
     user_uuid: UUID | None = None,
     field: str = "name",
     order: str = "asc",
-    auth=Depends(has_token),
 ):
     if field not in ["name", "created_at"]:
         field = "name"
@@ -42,13 +47,15 @@ def item_get_all(
             raise HTTPException(status_code=401, detail="User not found")
         user_id = db_user.id
 
-    db_items = crud_items.get_items(db, field, order, search, user_id)
-    return paginate(db_items, params)
+    db_items_query = crud_items.get_items(field, order, search, user_id)
+    return paginate(db, db_items_query)
 
 
 @item_router.get("/export")
-def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
-    db_items = crud_items.get_items(db, "name", "asc")
+def get_export_items(*, db: UserDB, auth_user: CurrentUser):
+    db_items_query = crud_items.get_items("name", "asc")
+    result = db.execute(db_items_query)  # await db.execute(query)
+    db_items = result.scalars().all()
 
     f = io.StringIO()
     csv_file = csv.writer(f, delimiter=";")
@@ -64,7 +71,7 @@ def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
 
 # @item_router.post("/import")
-# def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None = None, auth=Depends(has_token)):
+# def get_import_users(*, db: Session = Depends(get_db), file: UploadFile | None = None, auth_user: CurrentUser):
 #     if not file:
 #         raise HTTPException(status_code=400, detail="No file sent")
 
@@ -87,7 +94,7 @@ def get_export_items(*, db: Session = Depends(get_db), auth=Depends(has_token)):
 
 
 @item_router.get("/{item_uuid}", response_model=ItemResponse)
-def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Request, auth=Depends(has_token)):
+def item_get_one(*, db: UserDB, item_uuid: UUID, request: Request, auth_user: CurrentUser):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 
     if not db_item:
@@ -106,7 +113,7 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
 
 # @item_router.get("/timeline/{item_uuid}", response_model=list[EventTimelineResponse])
 # def item_get_timeline_history(
-#     *, db: Session = Depends(get_db), item_uuid: UUID, action: str | None = None, auth=Depends(has_token)
+#     *, db: Session = Depends(get_db), item_uuid: UUID, action: str | None = None, auth_user: CurrentUser
 # ):
 #     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 #     if not db_item:
@@ -118,11 +125,7 @@ def item_get_one(*, db: Session = Depends(get_db), item_uuid: UUID, request: Req
 
 @item_router.get("/statistics/all")  #
 def item_get_statistics_all(
-    *,
-    db: Session = Depends(get_db),
-    date_from: datetime | None = None,
-    date_to: datetime | None = None,
-    auth=Depends(has_token),
+    *, db: UserDB, auth_user: CurrentUser, date_from: datetime | None = None, date_to: datetime | None = None
 ):
     issues_per_day = crud_issues.get_issues_by_day(db, date_from, date_to)
     issues_per_day_dict = {y.strftime("%Y-%m-%d"): x for y, x in issues_per_day}
@@ -162,11 +165,11 @@ def item_get_statistics_all(
 @item_router.get("/statistics/{item_uuid}")  #
 def item_get_statistics(
     *,
-    db: Session = Depends(get_db),
+    db: UserDB,
+    item_uuid: UUID,
+    auth_user: CurrentUser,
     date_from: datetime | None = None,
     date_to: datetime | None = None,
-    item_uuid: UUID,
-    auth=Depends(has_token),
 ):
     issues_per_day_dict = None
     issues_per_hour_dict = None
@@ -253,7 +256,7 @@ def item_get_statistics(
 
 
 @item_router.post("/favourites", response_model=StandardResponse)
-def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: FavouritesAddIn, auth=Depends(has_token)):
+def item_add_to_favourites(*, db: UserDB, favourites: FavouritesAddIn, auth_user: CurrentUser):
     db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -277,7 +280,7 @@ def item_add_to_favourites(*, db: Session = Depends(get_db), favourites: Favouri
 
 
 @item_router.post("/", response_model=ItemIndexResponse)
-def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn, auth=Depends(has_token)):
+def item_add(*, db: UserDB, request: Request, item: ItemAddIn, auth_user: CurrentUser):
     tenant_id = request.headers.get("tenant", None)
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
@@ -318,7 +321,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
 
     item_data = {
         "uuid": item_uuid,
-        "author_id": auth["user_id"],
+        "author_id": auth_user.id,
         "name": item.name,
         "symbol": item.symbol,
         "summary": item.summary,
@@ -335,7 +338,7 @@ def item_add(*, db: Session = Depends(get_db), request: Request, item: ItemAddIn
 
 
 @item_router.patch("/{item_uuid}", response_model=ItemIndexResponse)
-def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditIn, auth=Depends(has_token)):
+def item_edit(*, db: UserDB, item_uuid: UUID, item: ItemEditIn, auth_user: CurrentUser):
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
@@ -365,7 +368,7 @@ def item_edit(*, db: Session = Depends(get_db), item_uuid: UUID, item: ItemEditI
 
 
 @item_router.delete("/{item_uuid}", response_model=StandardResponse)
-def item_delete(*, db: Session = Depends(get_db), item_uuid: UUID, force: bool = False, auth=Depends(has_token)):
+def item_delete(*, db: UserDB, item_uuid: UUID, auth_user: CurrentUser, force: bool = False):
     db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
     db_item = crud_items.get_item_by_uuid(db, item_uuid)
 

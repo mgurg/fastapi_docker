@@ -2,6 +2,7 @@ import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -11,7 +12,7 @@ from passlib.hash import argon2
 from pydantic import EmailStr
 from sentry_sdk import capture_exception
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
 from user_agents import parse
@@ -41,9 +42,12 @@ from app.service.tenants import alembic_upgrade_head, tenant_create
 settings = get_settings()
 auth_router = APIRouter()
 
+UserDB = Annotated[Session, Depends(get_db)]
+PublicDB = Annotated[AsyncSession, Depends(get_public_db)]
+
 
 @auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
-async def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
+async def auth_account_limit(*, public_db: PublicDB):
     db_companies_no = await crud_auth.get_public_company_count(public_db)
     limit = 20
 
@@ -51,7 +55,7 @@ async def auth_account_limit(*, public_db: Session = Depends(get_public_db)):
 
 
 @auth_router.post("/company_info")
-async def auth_company_info(*, public_db: Session = Depends(get_public_db), company: CompanyInfoRegisterIn):
+async def auth_company_info(*, public_db: PublicDB, company: CompanyInfoRegisterIn):
     db_public_company = crud_auth.get_public_company_by_nip(public_db, company.company_tax_id)
     if db_public_company:
         raise HTTPException(status_code=400, detail="Company already registered")
@@ -72,7 +76,7 @@ async def auth_company_info(*, public_db: Session = Depends(get_public_db), comp
 
 
 @auth_router.post("/register", response_model=StandardResponse)
-def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegisterIn):
+def auth_register(*, public_db: PublicDB, user: UserRegisterIn):
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=403, detail="Temporary email not allowed")
 
@@ -159,7 +163,7 @@ def auth_register(*, public_db: Session = Depends(get_public_db), user: UserRegi
 
 
 @auth_router.post("/first_run", response_model=ActivationResponse)
-def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFirstRunIn):
+def auth_first_run(*, public_db: PublicDB, user: UserFirstRunIn):
     """Activate user based on service token"""
 
     db_public_user: PublicUser = crud_auth.get_public_user_by_service_token(public_db, user.token)
@@ -239,7 +243,7 @@ def auth_first_run(*, public_db: Session = Depends(get_public_db), user: UserFir
 
 
 @auth_router.post("/login", response_model=UserLoginOut)
-async def auth_login(*, public_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
+async def auth_login(*, public_db: PublicDB, user: UserLoginIn, req: Request):
     print(req.headers["User-Agent"])
     db_public_user: PublicUser = await crud_auth.get_public_user_by_email(public_db, user.email)
 
@@ -288,7 +292,7 @@ async def auth_login(*, public_db: Session = Depends(get_public_db), user: UserL
 
 
 @auth_router.get("/company_summary", response_model=CompanyInfoBasic)
-def get_company_summary(*, public_db: Session = Depends(get_public_db), request: Request):
+def get_company_summary(*, public_db: PublicDB, request: Request):
     print(request.headers.get("tenant"))
     db_public_company = crud_auth.get_public_company_by_tenant_id(public_db, request.headers.get("tenant"))
 
@@ -309,7 +313,7 @@ def get_company_summary(*, public_db: Session = Depends(get_public_db), request:
 
 
 @auth_router.get("/verify/{token}", response_model=UserVerifyToken)
-def auth_verify(*, db: Session = Depends(get_db), token: str):
+def auth_verify(*, db: UserDB, token: str):
     user_db = crud_auth.get_tenant_user_by_auth_token(db, token)
     if user_db is None:
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -325,7 +329,7 @@ def auth_verify(*, db: Session = Depends(get_db), token: str):
 
 
 @auth_router.get("/reset-password/{email}", response_model=StandardResponse)
-def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: EmailStr, req: Request):
+def auth_remind_password(*, public_db: PublicDB, email: EmailStr, req: Request):
     user_agent = parse(req.headers["User-Agent"])
     ua_os = user_agent.os.family
     ua_browser = user_agent.browser.family
@@ -354,7 +358,7 @@ def auth_remind_password(*, public_db: Session = Depends(get_public_db), email: 
 
 
 @auth_router.post("/reset-password/{token}", response_model=StandardResponse)
-def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: str, reset_data: ResetPassword):
+def auth_reset_password(*, public_db: PublicDB, token: str, reset_data: ResetPassword):
     is_password_ok = Password(reset_data.password).compare(reset_data.password)
 
     if is_password_ok is not True:
@@ -379,7 +383,7 @@ def auth_reset_password(*, public_db: Session = Depends(get_public_db), token: s
 
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
-def auth_verify_qr(*, public_db: Session = Depends(get_public_db), qr_code: str):
+def auth_verify_qr(*, public_db: PublicDB, qr_code: str):
     pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
     if not pattern.match(qr_code):
         raise HTTPException(status_code=404, detail="Incorrect QR code")

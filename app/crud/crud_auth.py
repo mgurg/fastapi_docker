@@ -158,6 +158,13 @@ async def get_tenant_user_by_auth_token(db: Session, token: str) -> User | None:
         print(e)
 
 
+def get_anonymous_user(db: Session) -> User:
+    query = select(User).where(User.email == "anonymous@example.com").where(User.is_visible == False)  # noqa: E712
+
+    result = db.execute(query)  # await db.execute(query)
+    return result.scalar_one_or_none()
+
+
 def generate_base64_token(token: str) -> str:
     message_bytes = token.encode("ascii")
     base64_bytes = base64.b64encode(message_bytes)

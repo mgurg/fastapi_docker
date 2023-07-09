@@ -1,13 +1,13 @@
 from uuid import UUID
 
 from pydantic import EmailStr
-from sqlalchemy import func, select, text
+from sqlalchemy import Select, func, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.models import User
 
 
-async def get_users(db: Session, search: str, sort_column: str, sort_order: str) -> User:
+async def get_users(sort_column: str, sort_order: str, search: str | None = None) -> Select[tuple[User]]:
     query = (
         select(User)
         .where(User.deleted_at.is_(None))
@@ -21,9 +21,13 @@ async def get_users(db: Session, search: str, sort_column: str, sort_order: str)
 
         query = query.filter(*all_filters)
 
-    result = await db.execute(query.options(selectinload(User.role_FK)))  # await db.execute(query)
+    # result = await db.execute(query.options(selectinload(User.role_FK)))  # await db.execute(query)
 
-    return result.scalars().all()
+    # return result.scalars().all()
+    return query.options(selectinload(User.role_FK))
+    # result = db.execute(query)  # await db.execute(query)
+    #
+    # return result.scalars().all()
 
 
 def get_user_by_uuid(db: Session, uuid: UUID) -> User:
