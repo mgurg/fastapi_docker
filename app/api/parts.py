@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,22 +7,25 @@ from sqlalchemy.orm import Session
 
 from app.crud import crud_issues, crud_parts
 from app.db import get_db
+from app.models.models import User
 from app.schemas.requests import PartCreateIn, PartEditIn
 from app.schemas.responses import PartResponse, StandardResponse
 from app.service.bearer_auth import has_token
 
 part_router = APIRouter()
+CurrentUser = Annotated[User, Depends(has_token)]
+UserDB = Annotated[Session, Depends(get_db)]
 
 
 @part_router.get("/issue/{issue_uuid}", response_model=list[PartResponse])
 def parts_get_all(
     *,
-    db: Session = Depends(get_db),
+    db: UserDB,
+    issue_uuid: UUID,
+    auth_user: CurrentUser,
     field: str = "name",
     order: str = "asc",
     is_hidden: bool | None = None,
-    issue_uuid: UUID,
-    auth=Depends(has_token),
 ):
     if field not in ["name"]:
         field = "name"
@@ -33,7 +37,7 @@ def parts_get_all(
 
 
 @part_router.post("/", response_model=PartResponse)
-def parts_add_one(*, db: Session = Depends(get_db), part: PartCreateIn, auth=Depends(has_token)):
+def parts_add_one(*, db: UserDB, part: PartCreateIn, auth_user: CurrentUser):
     db_issue = crud_issues.get_issue_by_uuid(db, part.issue_uuid)
 
     if not db_issue:
@@ -46,7 +50,7 @@ def parts_add_one(*, db: Session = Depends(get_db), part: PartCreateIn, auth=Dep
     part_data = {
         "uuid": str(uuid4()),
         "issue_id": db_issue.id,
-        "author_id": auth["user_id"],
+        "author_id": auth_user.id,
         "name": part.name,
         "description": part.description,
         "price": part.price,
@@ -68,7 +72,7 @@ def parts_add_one(*, db: Session = Depends(get_db), part: PartCreateIn, auth=Dep
 
 
 @part_router.patch("/{part_uuid}", response_model=PartResponse)
-def parts_edit_one(*, db: Session = Depends(get_db), part_uuid: UUID, part: PartEditIn, auth=Depends(has_token)):
+def parts_edit_one(*, db: UserDB, part_uuid: UUID, part: PartEditIn, auth_user: CurrentUser):
     db_part = crud_parts.get_part_by_uuid(db, part_uuid)
 
     if not db_part:
@@ -99,9 +103,7 @@ def parts_edit_one(*, db: Session = Depends(get_db), part_uuid: UUID, part: Part
 
 
 @part_router.delete("/{part_uuid}", response_model=StandardResponse)
-def parts_delete_one(
-    *, db: Session = Depends(get_db), part_uuid: UUID, force_delete: bool = False, auth=Depends(has_token)
-):
+def parts_delete_one(*, db: UserDB, part_uuid: UUID, auth_user: CurrentUser, force_delete: bool = False):
     db_part = crud_parts.get_part_by_uuid(db, part_uuid)
 
     if not db_part:

@@ -1,4 +1,5 @@
 import traceback
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
@@ -15,6 +16,8 @@ from app.service.tenants import alembic_upgrade_head
 settings = get_settings()
 
 cc_router = APIRouter()
+
+PublicDB = Annotated[Session, Depends(get_public_db)]
 
 
 @cc_router.get("/create")
@@ -34,7 +37,7 @@ def check_revision(schema: str):
 
 
 @cc_router.post("/mark_orphan_files", name="files:MarkOrphans")
-def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db), auth=Depends(is_app_owner)):
+def cc_mark_orphan_files(*, public_db: PublicDB, auth=Depends(is_app_owner)):
     db_companies = cc_crud.get_public_companies(public_db)
 
     processed = []
@@ -51,15 +54,15 @@ def cc_mark_orphan_files(*, public_db: Session = Depends(get_public_db), auth=De
 
 
 @cc_router.get("/", name="companies:List")
-def cc_get_all(*, db: Session = Depends(get_public_db), auth=Depends(is_app_owner)):
-    db_companies = cc_crud.get_public_companies(db)
+def cc_get_all(*, public_db: PublicDB, auth=Depends(is_app_owner)):
+    db_companies = cc_crud.get_public_companies(public_db)
 
     return db_companies
 
 
 @cc_router.post("/", name="migrate:All")
-def cc_migrate_all(*, db: Session = Depends(get_public_db), auth=Depends(is_app_owner)):
-    db_companies = cc_crud.get_public_companies(db)
+def cc_migrate_all(*, public_db: PublicDB, auth=Depends(is_app_owner)):
+    db_companies = cc_crud.get_public_companies(public_db)
 
     processed = []
     for company in db_companies:
@@ -71,14 +74,14 @@ def cc_migrate_all(*, db: Session = Depends(get_public_db), auth=Depends(is_app_
 
 
 @cc_router.post("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
-def cc_migrate_one(*, db: Session = Depends(get_public_db), tenant_id: str, auth=Depends(is_app_owner)):
+def cc_migrate_one(*, public_db: PublicDB, tenant_id: str, auth=Depends(is_app_owner)):
     scheduler.add_job(alembic_upgrade_head, args=[tenant_id])  # , id="tenant_id"
 
     return {"ok": True}
 
 
 @cc_router.delete("/{tenant_id}", response_model=StandardResponse, name="migrate:One")
-def cc_delete_one(*, db: Session = Depends(get_public_db), tenant_id: str, auth=Depends(is_app_owner)):
+def cc_delete_one(*, public_db: PublicDB, tenant_id: str, auth=Depends(is_app_owner)):
     print("Cleaning DB 🧹")
 
     connection = engine.connect()

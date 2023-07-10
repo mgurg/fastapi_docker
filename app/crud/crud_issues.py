@@ -1,15 +1,13 @@
-from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Date, distinct, extract, func, not_, or_, select, text
+from sqlalchemy import Date, Select, distinct, extract, func, not_, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.models.models import EventSummary, Issue, Tag, User
 
 
 def get_issues(
-    db: Session,
     sort_column: str,
     sort_order: str,
     search: str | None,
@@ -19,7 +17,7 @@ def get_issues(
     date_from: datetime = None,
     date_to: datetime = None,
     tags: list[int] = None,
-) -> Sequence[Issue]:
+) -> Select[tuple[Issue]]:
     search_filters = []
 
     query = select(Issue)
@@ -64,9 +62,10 @@ def get_issues(
 
     query = query.order_by(text(f"{sort_column} {sort_order}"))
 
-    result = db.execute(query)  # await db.execute(query)
-
-    return result.scalars().all()
+    return query
+    # result = db.execute(query)  # await db.execute(query)
+    #
+    # return result.scalars().all()
 
 
 def get_last_issue_id(db):
