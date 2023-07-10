@@ -33,21 +33,6 @@ def get_items_counter_summary(db: Session):
     return result.all()
 
 
-# def get_users_counter_summary(db: Session, user_id: int | None = None):
-#     query = (
-#         select(func.count(User.id))
-#         .where(User.deleted_at.is_(None))
-#         .where(User.is_verified.is_(True))
-#         .where(User.is_visible.is_(True))
-#     )
-#
-#     if user_id:
-#         query = query.where(User.id.isnot(user_id))
-#
-#     result = db.execute(query)  # await db.execute(query)
-#     return result.scalar_one_or_none()
-
-
 def get_favourites_counter_summary(db: Session, user_id: int):
     query = select(func.count(Item.id)).filter(Item.users_item.any(User.id == user_id))
 
