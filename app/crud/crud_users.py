@@ -72,7 +72,7 @@ def get_user_count(db: Session, user_id: int | None = None) -> int:
     )
 
     if user_id:
-        query = query.where(User.id.isnot(user_id))
+        query = query.where(User.id != user_id)
 
     result = db.execute(query)  # await db.execute(query)
     return result.scalar_one_or_none()
