@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.crud import crud_statistics
+from app.crud import crud_statistics, crud_users
 from app.db import get_db
 from app.schemas.responses import StatsIssuesCounterResponse
 
@@ -45,7 +45,7 @@ def stats_first_steps(*, db: Session = Depends(get_db), auth=Depends(has_token))
     issues_inactive = dict(issues_inactive)
 
     response["items"] = {"total": sum(items.values()), "me": items.setdefault(user_id, 0)}
-    response["users"] = crud_statistics.get_users_counter_summary(db, user_id)
+    response["users"] = crud_users.get_user_count(db, user_id)
     response["issues_active"] = {"total": sum(issues_active.values()), "me": issues_active.setdefault(user_id, 0)}
     response["issues_inactive"] = {"total": sum(issues_inactive.values()), "me": issues_inactive.setdefault(user_id, 0)}
     response["favourites"] = crud_statistics.get_favourites_counter_summary(db, user_id)

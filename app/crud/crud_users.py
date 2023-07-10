@@ -63,11 +63,18 @@ def get_user_by_email(db: Session, email: EmailStr) -> User:
     return result.scalar_one_or_none()
 
 
-def get_user_count(db: Session) -> int:
-    query = select(func.count(User.id)).where(User.deleted_at.is_(None)).where(User.is_verified.is_(True))
+def get_user_count(db: Session, user_id: int | None = None) -> int:
+    query = (
+        select(func.count(User.id))
+        .where(User.deleted_at.is_(None))
+        .where(User.is_verified.is_(True))
+        .where(User.is_visible.is_(True))
+    )
 
-    result = db.execute(query)
+    if user_id:
+        query = query.where(User.id.isnot(user_id))
 
+    result = db.execute(query)  # await db.execute(query)
     return result.scalar_one_or_none()
 
 
