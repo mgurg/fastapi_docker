@@ -64,7 +64,7 @@ Test execution (with code coverage):
 coverage html
 ```
 
-Databese clean-up:
+Database clean-up:
 ```sql
 DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';
 DELETE FROM public.public_companies  WHERE city  LIKE 'faker_000_%';

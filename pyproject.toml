@@ -51,7 +51,7 @@ pytest-pretty = "^1.2"
 ruff = ">=0.0.249"
 
 [tool.poetry.group.dev.dependencies]
-bump-pydantic = "^0.1.0"
+bump-pydantic = "^0.3.0"
 pymender = "^0.2.0"
 
 [build-system]
