@@ -91,7 +91,7 @@ def parts_edit_one(*, db: UserDB, part_uuid: UUID, part: PartEditIn, auth_user: 
     if not value:
         value = price * quantity
 
-    part_data = part.dict(exclude_unset=True)
+    part_data = part.model_dump(exclude_unset=True)
     part_data["price"] = price
     part_data["quantity"] = quantity
     part_data["value"] = value

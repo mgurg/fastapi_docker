@@ -85,7 +85,7 @@ def role_edit(*, db: UserDB, role_uuid: UUID, role: RoleEditIn, auth_user: Curre
     if not db_role:
         raise HTTPException(status_code=400, detail="Role already exists!")
 
-    role_data = role.dict(exclude_unset=True)
+    role_data = role.model_dump(exclude_unset=True)
 
     permissions = []
     if ("permissions" in role_data) and (role_data["permissions"] is not None):

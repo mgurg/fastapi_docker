@@ -76,7 +76,7 @@ def group_edit(*, db: UserDB, group_uuid: UUID, role: GroupEditIn, auth_user: Cu
     if not db_user_group:
         raise HTTPException(status_code=400, detail="Group not found exists!")
 
-    group_data = role.dict(exclude_unset=True)
+    group_data = role.model_dump(exclude_unset=True)
 
     users = []
     if ("users" in group_data) and (group_data["users"] is not None):

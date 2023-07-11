@@ -370,7 +370,7 @@ def issue_edit(*, db: UserDB, issue_uuid: UUID, issue: IssueEditIn, auth_user: C
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
 
-    issue_data = issue.dict(exclude_unset=True)
+    issue_data = issue.model_dump(exclude_unset=True)
 
     files = []
     if ("files" in issue_data) and (issue_data["files"] is not None):

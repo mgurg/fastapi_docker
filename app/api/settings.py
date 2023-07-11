@@ -107,7 +107,7 @@ def setting_notification_set(*, db: UserDB, setting: SettingNotificationIn, auth
         db_settings = crud_settings.create_notification_setting(db, setting_data)
         return db_settings
 
-    crud_settings.update_notification_setting(db, db_settings, setting.dict(exclude_unset=False))
+    crud_settings.update_notification_setting(db, db_settings, setting.model_dump(exclude_unset=False))
 
     return db_settings
 

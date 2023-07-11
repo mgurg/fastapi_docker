@@ -343,7 +343,7 @@ def item_edit(*, db: UserDB, item_uuid: UUID, item: ItemEditIn, auth_user: Curre
     if not db_item:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    item_data = item.dict(exclude_unset=True)
+    item_data = item.model_dump(exclude_unset=True)
 
     files = []
     if ("files" in item_data) and (item_data["files"] is not None):

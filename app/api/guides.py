@@ -148,7 +148,7 @@ def guide_edit(*, db: UserDB, guide_uuid: UUID, guide: GuideEditIn, auth_user: C
     if not db_guide:
         raise HTTPException(status_code=400, detail="Item not found!")
 
-    guide_data = guide.dict(exclude_unset=True)
+    guide_data = guide.model_dump(exclude_unset=True)
 
     files = []
     if ("files" in guide_data) and (guide_data["files"] is not None):

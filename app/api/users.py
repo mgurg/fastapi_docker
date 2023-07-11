@@ -198,7 +198,7 @@ def user_edit(*, db: UserDB, user_uuid: UUID, user: UserCreateIn, auth_user: Cur
         if (email_db_user is not None) and (email_db_user.id != db_user.id):
             raise HTTPException(status_code=400, detail="Email is assigned to other user")
 
-    user_data = user.dict(exclude_unset=True)
+    user_data = user.model_dump(exclude_unset=True)
 
     if ("password" in user_data.keys()) and (user_data["password"] is not None):
         password = Password(user_data["password"])
