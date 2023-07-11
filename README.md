@@ -1,5 +1,5 @@
 # fastapi_docker
-**Hobby project** - backend for simple TODO list app hosted on [Render.com](render.com)
+**Hobby project** - backend for simple TODO list app hosted on [Render.com](http://render.com)
 
 ## 🗂️ Multitenancy
 

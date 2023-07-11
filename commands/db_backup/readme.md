@@ -66,7 +66,7 @@ python3 manage_postgres_db.py --configfile sample.config --action restore --date
 
 ## Authors
 
-- **Val Feron** - _Initial work_ - [github](https://github.com/valferon)
+- **Val Feron** - _Initial work_ - [GitHub](https://github.com/valferon)
 
 ## LicenseMIT License
 

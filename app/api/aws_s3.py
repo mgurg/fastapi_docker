@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from app.config import get_settings
-from app.db import get_session
-from app.models.models import Files
+from app.db import get_db
+from app.models.models import File
 from app.service.aws_s3 import s3_client, s3_resource
 
 settings = get_settings()
@@ -49,7 +49,7 @@ def get_buckets_list():
 
 # @s3_router.get("/list_files")
 # @logger.catch()
-# def get_files_list(*, session: Session = Depends(get_session)):
+# def get_files_list(*, session: Session = Depends(get_db)):
 #     # https://realpython.com/python-boto3-aws-s3/#object-traversal
 #     # bucket = s3_resource.Bucket(name=settings.s3_bucket_name)
 #
@@ -78,11 +78,11 @@ def get_buckets_list():
 
 
 @s3_router.delete("/delete_file/")
-def remove_bucket(*, session: Annotated[Session, Depends(get_session)], object_name: str):
+def remove_bucket(*, session: Annotated[Session, Depends(get_db)], object_name: str):
     a = s3_resource.Object(settings.s3_bucket_name, object_name).delete()
     print(a)
 
-    db_task = session.exec(select(Files).where(Files.file_name == object_name)).one_or_none()
+    db_task = session.execute(select(File).where(File.file_name == object_name)).one_or_none()
     session.delete(db_task)
     session.commit()
 
@@ -113,9 +113,7 @@ def get_s3(s3_obj: str):
 
 @s3_router.post("/upload/")
 @logger.catch()
-def upload_aws_s3(
-    *, session: Annotated[Session, Depends(get_session)], request: Request, file: UploadFile | None = None
-):
+def upload_aws_s3(*, session: Annotated[Session, Depends(get_db)], request: Request, file: UploadFile | None = None):
     if not file:
         return {"message": "No file sent"}
 
@@ -131,7 +129,7 @@ def upload_aws_s3(
     # },
     # )
 
-    quota = session.exec(select([func.sum(Files.size)]).where(Files.account_id == 2)).one()
+    quota = session.execute(select([func.sum(File.size)]).where(File.account_id == 2)).one()
     print("quota", quota)
 
     # if quota > 300000:
@@ -139,7 +137,7 @@ def upload_aws_s3(
 
     s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=file.filename)
 
-    new_file = Files(
+    new_file = File(
         uuid=str(uuid4()),
         account_id=2,
         owner_id=2,
