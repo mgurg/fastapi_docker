@@ -21,6 +21,7 @@ from app.schemas.responses import EventTimelineResponse, IssueIndexResponse, Iss
 from app.service import event
 from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
+from app.service.helpers import is_valid_uuid
 from app.service.notifications import notify_users
 
 issue_router = APIRouter()
@@ -290,12 +291,13 @@ def issue_change_status(*, db: UserDB, issue_uuid: UUID, issue: IssueChangeStatu
             status = "assigned"
 
             user_db_id = None
+            sms_notifications = []
+            email_users = []
             if internal_value:
-                user_db_id = crud_users.get_user_by_uuid(db, internal_value)
+                user_db_id = crud_users.get_user_by_uuid(db, is_valid_uuid(internal_value))
             if user_db_id:
                 email_users = crud_settings.get_users_list_for_email_notification(db, "assigned_to_me", user_db_id.id)
 
-            sms_notifications = []
             notify_users(sms_notifications, email_users, db_issue)
 
         case "issue_remove_person":
