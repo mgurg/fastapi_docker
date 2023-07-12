@@ -172,11 +172,8 @@ def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: Cur
     issue_uuid = str(uuid4())
 
     db_user = crud_users.get_user_by_id(db, auth_user.id)
-    author_name = "anonymous"
-    author_id = None
-    if db_user:
-        author_name = f"{db_user.first_name} {db_user.last_name}"
-        author_id = db_user.id
+    author_name = f"{db_user.first_name} {db_user.last_name}"
+    author_id = db_user.id
 
     db_item = crud_items.get_item_by_uuid(db, issue.item_uuid)
     item_id = None
