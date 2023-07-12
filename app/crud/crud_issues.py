@@ -144,6 +144,12 @@ def get_item_issues_by_hour(db, item_ids: list[int] | None, date_from: datetime 
 
     query = query.where(Issue.item_id.in_(item_ids))
 
+    if date_from is not None:
+        query = query.filter(func.DATE(Issue.created_at) >= date_from)
+
+    if date_to is not None:
+        query = query.filter(func.DATE(Issue.created_at) <= date_to)
+
     query = query.group_by("hour")
 
     result = db.execute(query)  # await db.execute(query)

@@ -178,30 +178,31 @@ def item_get_statistics(
     issues_repair_time_list = None
     users = None
 
+    db_item = crud_items.get_item_by_uuid(db, item_uuid)
+    if not db_item:
+        raise HTTPException(status_code=400, detail="Item not found!")
+
+    db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
+    # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
+
+    issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id], date_from, date_to)
+    issues_per_day_dict = {y.strftime("%Y-%m-%d"): x for y, x in issues_per_day}
+
+    issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
+    issues_per_hour_dict = {str(y): x for y, x in issues_per_hour}
+
+    for hours in [time(i).strftime("%H") for i in range(24)]:
+        issues_per_hour_dict.setdefault(hours, 0)
+    issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
+
+    issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
+    issues_status_dict = dict(issues_status)
+    for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
+        issues_status_dict.setdefault(status, 0)
+
+    issues_status_dict = dict(sorted(issues_status_dict.items()))
+
     try:
-        db_item = crud_items.get_item_by_uuid(db, item_uuid)
-        if not db_item:
-            raise HTTPException(status_code=400, detail="Item not found!")
-
-        db_issues_uuid: list[UUID] = crud_issues.get_item_issues_uuids(db, db_item.id)
-        # db_issues_id: list[int] = crud_issues.get_item_issues_ids(db, db_item.id)
-
-        issues_per_day = crud_issues.get_item_issues_by_day(db, [db_item.id], date_from, date_to)
-        issues_per_day_dict = {y.strftime("%Y-%m-%d"): x for y, x in issues_per_day}
-
-        issues_per_hour = crud_issues.get_item_issues_by_hour(db, [db_item.id], date_from, date_to)
-        issues_per_hour_dict = {str(y): x for y, x in issues_per_hour}
-        for hours in [time(i).strftime("%H") for i in range(24)]:
-            issues_per_hour_dict.setdefault(hours, 0)
-        issues_per_hour_dict = dict(sorted(issues_per_hour_dict.items()))
-
-        issues_status = crud_issues.get_item_issues_status(db, [db_item.id], date_from, date_to)
-        issues_status_dict = dict(issues_status)
-        for status in ["new", "accepted", "rejected", "assigned", "in_progress", "paused", "done"]:
-            issues_status_dict.setdefault(status, 0)
-
-        issues_status_dict = dict(sorted(issues_status_dict.items()))
-
         issues_repair_time = crud_issues.get_mode_action_time(db, db_issues_uuid, "issueRepairTime")
         issues_repair_time_list = [item for tpl in issues_repair_time for item in tpl]
 
@@ -236,15 +237,10 @@ def item_get_statistics(
         "users": None,
     }
 
-    if db_issues_uuid:
-        data["issuesCount"] = len(db_issues_uuid)
-
-    if issues_per_day_dict:
-        data["issuesPerDay"] = issues_per_day_dict
-    if issues_per_hour_dict:
-        data["issuesPerHour"] = issues_per_hour_dict
-    if issues_status_dict:
-        data["issuesStatus"] = issues_status_dict
+    data["issuesCount"] = len(db_issues_uuid)
+    data["issuesPerDay"] = issues_per_day_dict
+    data["issuesPerHour"] = issues_per_hour_dict
+    data["issuesStatus"] = issues_status_dict
     if issues_total_time_list and len(issues_total_time_list) > 0:
         data["totalTime"] = {"max": issues_total_time_list[0], "avg": issues_total_time_list[1]}
     if issues_repair_time_list and len(issues_repair_time_list) > 0:
