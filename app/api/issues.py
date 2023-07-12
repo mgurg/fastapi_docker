@@ -87,11 +87,9 @@ def get_export_issues(*, db: UserDB, auth_user: CurrentUser):
 def item_get_timeline_history(
     *, db: UserDB, issue_uuid: UUID, auth_user: CurrentUser, thread_resource: str | None = None
 ):
-    # db_item = crud_items.get_item_by_uuid(db, issue_uuid)
-    # if not db_item:
-    #     raise HTTPException(status_code=400, detail="Item not found!")
-
     db_events = crud_events.get_events_by_thread(db, issue_uuid, "issue")
+    if not db_events:
+        raise HTTPException(status_code=400, detail="Event not found!")
     return db_events
 
 
@@ -233,18 +231,13 @@ def issue_change_status(*, db: UserDB, issue_uuid: UUID, issue: IssueChangeStatu
     if not db_issue:
         raise HTTPException(status_code=400, detail="Issue not found!")
 
-    # db_item = crud_items.get_item_by_id(db, db_issue.item_id)
-
     db_user = crud_users.get_user_by_id(db, auth_user.id)
     if not db_user:
         raise HTTPException(status_code=400, detail="User not found!")
-    if db_user:
-        f"{db_user.first_name} {db_user.last_name}"
 
     actions_list = crud_events.get_event_status_list(db, "issue", issue_uuid)
 
     actions_counter = Counter(actions_list)
-    # internal_value = "284728ef-7c96-44ee-ab52-f3bb506bccb1"
     internal_value = issue.internal_value
     status = None
 

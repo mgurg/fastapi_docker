@@ -91,8 +91,44 @@ class User(Base):
 
     role_FK = relationship("Role", back_populates="users_FK")
     user_group = relationship("UserGroup", secondary=users_groups_rel, back_populates="users")
+    events_FK = relationship("Event", back_populates="author")
     problem = relationship("Issue", secondary=users_issues_rel, back_populates="users_issue")
     item = relationship("Item", secondary=users_items_rel, back_populates="users_item")
+
+
+class Event(Base):
+    __tablename__ = "events"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    # title = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    internal_value = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    resource = sa.Column(sa.VARCHAR(length=64), unique=True, autoincrement=False, nullable=True)
+    resource_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    author_id = sa.Column(sa.INTEGER(), sa.ForeignKey("users.id"), autoincrement=False, nullable=True)
+    # author_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    # author_name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    # author_FK = relationship("User", back_populates="user_event")  # Roles
+    author = relationship("User", back_populates="events_FK")
+
+
+class EventSummary(Base):
+    __tablename__ = "events_summary"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    resource = sa.Column(sa.VARCHAR(length=64), unique=True, autoincrement=False, nullable=True)
+    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    # issue_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
+    date_from = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    date_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    internal_value = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
 # file_idea_rel = sa.Table(
@@ -352,38 +388,6 @@ class UserGroup(Base):
     # permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
     users = relationship("User", secondary=users_groups_rel, back_populates="user_group")  # Roles
-
-
-class Event(Base):
-    __tablename__ = "events"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    # title = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    description = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    internal_value = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    resource = sa.Column(sa.VARCHAR(length=64), unique=True, autoincrement=False, nullable=True)
-    resource_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    author_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    author_name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-
-
-class EventSummary(Base):
-    __tablename__ = "events_summary"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
-    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    resource = sa.Column(sa.VARCHAR(length=64), unique=True, autoincrement=False, nullable=True)
-    resource_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    # issue_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    action = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
-    date_from = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    date_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    duration = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    internal_value = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
 class Tag(Base):

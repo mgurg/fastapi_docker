@@ -223,11 +223,12 @@ class ItemIndexResponse(BaseResponse):
 
 class EventTimelineResponse(BaseResponse):
     created_at: datetime
-    author_name: str | None = None
-    author_uuid: UUID | None = None
+    # author_name: str | None = None
+    # author_uuid: UUID | None = None
     action: str | None = None
     title: str | None = None
     description: str | None = None
+    author: UserBasicResponse | None = None
     # value: str | None
     # resource: str | None
     # resource_uuid: UUID | None

@@ -28,14 +28,14 @@ def create_new_basic_event(
     description: str | None = None,
     internal_value: str | None = None,
 ) -> Event:
-    author_id = None
-    author_uuid = None
-    author_name = "anonymous"
+    # author_id = None
+    # author_uuid = None
+    # author_name = "anonymous"
 
-    if author is not None:
-        author_id = author.id
-        author_uuid = author.uuid
-        author_name = f"{author.first_name} {author.last_name}"
+    # if author is not None:
+    #     author_id = author.id
+    #     author_uuid = author.uuid
+    #     author_name = f"{author.first_name} {author.last_name}"
 
     resource_id = None
     resource_uuid = None
@@ -45,9 +45,9 @@ def create_new_basic_event(
 
     event_data = {
         "uuid": str(uuid4()),
-        "author_id": author_id,
-        "author_uuid": author_uuid,
-        "author_name": author_name,
+        "author_id": author.id,
+        "author_uuid": author.uuid,
+        "author_name": f"{author.first_name} {author.last_name}",
         "resource": "issue",
         "resource_id": resource_id,
         "resource_uuid": resource_uuid,
