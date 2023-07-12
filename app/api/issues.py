@@ -251,96 +251,28 @@ def issue_change_status(*, db: UserDB, issue_uuid: UUID, issue: IssueChangeStatu
         #     event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
 
         case "issue_accept":
-            if "issue_accept" in actions_list:
-                raise HTTPException(status_code=400, detail="Action Exists!")
-
-            event.create_new_basic_event(db, db_user, db_issue, "issue_accept")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "acceptToStartTime")
-            # event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
-
-            status = "accepted"
+            status = issue_status_accept(actions_list, db, db_issue, db_user, status)
 
         case "issue_reject":
-            if ("issue_reject" in actions_list) or ("issue_accept" in actions_list):
-                raise HTTPException(status_code=400, detail="Action Exists!")
-
-            event.create_new_basic_event(db, db_user, db_issue, "issue_reject")
-
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
-
-            users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
-            for user_uuid in users_uuids:
-                event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
-
-            status = "rejected"
+            status = issue_status_reject(actions_list, db, db_issue, db_user, status)
 
         case "issue_add_person":
-            event.create_new_basic_event(db, db_user, db_issue, "issue_add_person", internal_value=internal_value)
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", internal_value=internal_value)
-
-            # TODO: now only frontend is checking if users is not added twice in row, add backend validation
-            status = "assigned"
-
-            user_db_id = None
-            sms_notifications = []
-            email_users = []
-            if internal_value:
-                user_db_id = crud_users.get_user_by_uuid(db, is_valid_uuid(internal_value))
-            if user_db_id:
-                email_users = crud_settings.get_users_list_for_email_notification(db, "assigned_to_me", user_db_id.id)
-
-            notify_users(sms_notifications, email_users, db_issue)
+            status = issue_status_add_person(db, db_issue, db_user, internal_value, status)
 
         case "issue_remove_person":
-            if "issue_add_person" not in actions_list:
-                raise HTTPException(status_code=400, detail="No user to remove!")
-
-            event.create_new_basic_event(db, db_user, db_issue, "issue_remove_person", internal_value=internal_value)
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", internal_value)
+            issue_status_remove_person(actions_list, db, db_issue, db_user, internal_value)
 
         case "issue_start_progress":
-            event.create_new_basic_event(db, db_user, db_issue, "issue_start_progress")
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "acceptToStartTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
-
-            status = "in_progress"
+            status = issue_status_start_progress(db, db_issue, db_user, status)
 
         case "issue_pause":
-            if ("issue_start_progress" not in actions_list) and (
-                (actions_counter.get("issue_start_progress") % 2) != 0
-            ):
-                raise HTTPException(status_code=400, detail="No started task!")
-
-            event.create_new_basic_event(db, db_user, db_issue, "issue_pause", description=issue.description)
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
-
-            status = "paused"
+            status = issue_status_pause(actions_counter, actions_list, db, db_issue, db_user, issue, status)
 
         case "issue_resume":
-            event.create_new_basic_event(db, db_user, db_issue, "issue_resume")
-            event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
-
-            status = "in_progress"
+            status = issue_status_resume(db, db_issue, db_user, status)
 
         case "issue_done":
-            if "issue_done" in actions_list:
-                raise HTTPException(status_code=400, detail="Task already finished!")
-
-            event.create_new_basic_event(db, db_user, db_issue, "issue_done", description=issue.description)
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
-            event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
-
-            users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
-            for user_uuid in users_uuids:
-                event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
-
-            status = "done"
+            status = issue_status_done(actions_list, db, db_issue, db_user, issue, status)
 
         case "issue_approve":
             if "issue_done" not in actions_list:
@@ -355,6 +287,94 @@ def issue_change_status(*, db: UserDB, issue_uuid: UUID, issue: IssueChangeStatu
         crud_issues.update_issue(db, db_issue, issue_update)
 
     return {"ok": True}
+
+
+def issue_status_done(actions_list, db, db_issue, db_user, issue, status):
+    if "issue_done" in actions_list:
+        raise HTTPException(status_code=400, detail="Task already finished!")
+    event.create_new_basic_event(db, db_user, db_issue, "issue_done", description=issue.description)
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+    users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
+    for user_uuid in users_uuids:
+        event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
+    status = "done"
+    return status
+
+
+def issue_status_resume(db, db_issue, db_user, status):
+    event.create_new_basic_event(db, db_user, db_issue, "issue_resume")
+    event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+    status = "in_progress"
+    return status
+
+
+def issue_status_pause(actions_counter, actions_list, db, db_issue, db_user, issue, status):
+    if ("issue_start_progress" not in actions_list) and ((actions_counter.get("issue_start_progress") % 2) != 0):
+        raise HTTPException(status_code=400, detail="No started task!")
+    event.create_new_basic_event(db, db_user, db_issue, "issue_pause", description=issue.description)
+    event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+    status = "paused"
+    return status
+
+
+def issue_status_start_progress(db, db_issue, db_user, status):
+    event.create_new_basic_event(db, db_user, db_issue, "issue_start_progress")
+    event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "acceptToStartTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueRepairPauseTime")
+    status = "in_progress"
+    return status
+
+
+def issue_status_remove_person(actions_list, db, db_issue, db_user, internal_value):
+    if "issue_add_person" not in actions_list:
+        raise HTTPException(status_code=400, detail="No user to remove!")
+    event.create_new_basic_event(db, db_user, db_issue, "issue_remove_person", internal_value=internal_value)
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", internal_value)
+
+
+def issue_status_add_person(db, db_issue, db_user, internal_value, status):
+    event.create_new_basic_event(db, db_user, db_issue, "issue_add_person", internal_value=internal_value)
+    event.open_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", internal_value=internal_value)
+    # TODO: now only frontend is checking if users is not added twice in row, add backend validation
+    status = "assigned"
+    user_db_id = None
+    sms_notifications = []
+    email_users = []
+    if internal_value:
+        user_db_id = crud_users.get_user_by_uuid(db, is_valid_uuid(internal_value))
+    if user_db_id:
+        email_users = crud_settings.get_users_list_for_email_notification(db, "assigned_to_me", user_db_id.id)
+    notify_users(sms_notifications, email_users, db_issue)
+    return status
+
+
+def issue_status_reject(actions_list, db, db_issue, db_user, status):
+    if ("issue_reject" in actions_list) or ("issue_accept" in actions_list):
+        raise HTTPException(status_code=400, detail="Action Exists!")
+    event.create_new_basic_event(db, db_user, db_issue, "issue_reject")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+    users_uuids = crud_events.get_basic_summary_users_uuids(db, "issue", db_issue.uuid, "issueUserActivity")
+    for user_uuid in users_uuids:
+        event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueUserActivity", user_uuid)
+    status = "rejected"
+    return status
+
+
+def issue_status_accept(actions_list, db, db_issue, db_user, status):
+    if "issue_accept" in actions_list:
+        raise HTTPException(status_code=400, detail="Action Exists!")
+    event.create_new_basic_event(db, db_user, db_issue, "issue_accept")
+    event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueResponseTime")
+    event.open_new_basic_summary(db, "issue", db_issue.uuid, "acceptToStartTime")
+    # event.close_new_basic_summary(db, "issue", db_issue.uuid, "issueTotalTime")
+    status = "accepted"
+    return status
 
 
 @issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
