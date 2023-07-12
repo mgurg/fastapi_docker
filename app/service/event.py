@@ -46,8 +46,8 @@ def create_new_basic_event(
     event_data = {
         "uuid": str(uuid4()),
         "author_id": author.id,
-        "author_uuid": author.uuid,
-        "author_name": f"{author.first_name} {author.last_name}",
+        # "author_uuid": author.uuid,
+        # "author_name": f"{author.first_name} {author.last_name}",
         "resource": "issue",
         "resource_id": resource_id,
         "resource_uuid": resource_uuid,
