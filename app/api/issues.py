@@ -13,8 +13,9 @@ from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-from app.crud import crud_auth, crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
-from app.db import engine, get_db
+from app.crud import crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
+from app.crud.crud_auth import get_public_company_from_tenant
+from app.db import get_db
 from app.models.models import User
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import EventTimelineResponse, IssueIndexResponse, IssueResponse, StandardResponse
@@ -147,13 +148,7 @@ def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: Cur
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
 
-    company = None
-    schema_translate_map = {"tenant": "public"}
-    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
-        company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
-    if not company:
-        raise HTTPException(status_code=400, detail="Unknown Company!")
+    get_public_company_from_tenant(tenant_id)
 
     files = []
     if issue.files is not None:
@@ -172,8 +167,6 @@ def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: Cur
     issue_uuid = str(uuid4())
 
     db_user = crud_users.get_user_by_id(db, auth_user.id)
-    author_name = f"{db_user.first_name} {db_user.last_name}"
-    author_id = db_user.id
 
     db_item = crud_items.get_item_by_uuid(db, issue.item_uuid)
     item_id = None
@@ -191,8 +184,8 @@ def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: Cur
 
     issue_data = {
         "uuid": issue_uuid,
-        "author_id": author_id,
-        "author_name": author_name,
+        "author_id": db_user.id,
+        "author_name": f"{db_user.first_name} {db_user.last_name}",
         "item_id": item_id,
         "symbol": f"PR-{last_issue_id}",
         "name": issue.name,

@@ -1,9 +1,11 @@
 import base64
 from datetime import datetime, timezone
 
+from fastapi import HTTPException
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
+from app.db import engine
 from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
 
@@ -173,3 +175,15 @@ def generate_base64_token(token: str) -> str:
     message_bytes = token.encode("ascii")
     base64_bytes = base64.b64encode(message_bytes)
     return base64_bytes.decode("ascii")
+
+
+def get_public_company_from_tenant(tenant_id: str) -> PublicCompany | None:
+    company = None
+    schema_translate_map = {"tenant": "public"}
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
+        company = get_public_company_by_tenant_id(public_db, tenant_id)
+    if not company:
+        raise HTTPException(status_code=400, detail="Unknown Company!")
+
+    return company

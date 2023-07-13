@@ -9,8 +9,9 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from app.crud import crud_auth, crud_files, crud_guides, crud_items, crud_qr
-from app.db import engine, get_db
+from app.crud import crud_files, crud_guides, crud_items, crud_qr
+from app.crud.crud_auth import get_public_company_from_tenant
+from app.db import get_db
 from app.models.models import User
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideIndexResponse, GuideResponse, StandardResponse
@@ -96,13 +97,14 @@ def guide_add(*, db: UserDB, request: Request, guide: GuideAddIn, auth_user: Cur
 
     description = BeautifulSoup(guide.text_html, "html.parser").get_text()
 
-    company = None
-    schema_translate_map = {"tenant": "public"}
-    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
-        company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
-    if not company:
-        raise HTTPException(status_code=400, detail="Unknown Company!")
+    # company = None
+    # schema_translate_map = {"tenant": "public"}
+    # connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    # with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
+    #     company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
+    # if not company:
+    #     raise HTTPException(status_code=400, detail="Unknown Company!")
+    company = get_public_company_from_tenant(tenant_id)
 
     guide_uuid = str(uuid4())
 

@@ -13,8 +13,9 @@ from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-from app.crud import crud_auth, crud_files, crud_guides, crud_issues, crud_items, crud_qr, crud_users
-from app.db import engine, get_db
+from app.crud import crud_files, crud_guides, crud_issues, crud_items, crud_qr, crud_users
+from app.crud.crud_auth import get_public_company_from_tenant
+from app.db import get_db
 from app.models.models import User
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
@@ -281,13 +282,7 @@ def item_add(*, db: UserDB, request: Request, item: ItemAddIn, auth_user: Curren
     if not tenant_id:
         raise HTTPException(status_code=400, detail="Unknown Company!")
 
-    company = None
-    schema_translate_map = {"tenant": "public"}
-    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
-        company = crud_auth.get_public_company_by_tenant_id(public_db, tenant_id)
-    if not company:
-        raise HTTPException(status_code=400, detail="Unknown Company!")
+    company = get_public_company_from_tenant(tenant_id)
 
     files = []
     if item.files is not None:
