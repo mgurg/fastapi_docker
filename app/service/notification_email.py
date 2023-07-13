@@ -144,7 +144,9 @@ class EmailNotification:
         data = self.get_template_admin_registration(user, activation_url)
         self.send_by_mailjet(data)
 
-    def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, user_os: str) -> None:
+    def send_password_reset_request(
+        self, user: User | PublicUser, reset_token: str, browser: str, user_os: str
+    ) -> None:
         data = self.get_template_reset_password_request(user, reset_token, browser, user_os)
 
         self.send_by_mailjet(data)
