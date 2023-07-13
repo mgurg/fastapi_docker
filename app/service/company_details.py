@@ -138,7 +138,7 @@ class CompanyDetails:
 
             with path.open(encoding="UTF-8") as file:
                 request_json = json.load(file)
-            return "TEST_EMAIL_NOTIFICATION"
+            return {"message" : "TEST_EMAIL_NOTIFICATION"}
         else:
             headers = {"Authorization": settings.REJESTR_IO_KEY}
             url = "https://rejestr.io/api/v2/org?nip=" + self.tax_id

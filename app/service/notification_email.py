@@ -94,7 +94,7 @@ class EmailNotification:
 
         return {"Messages": [message_dict]}
 
-    def get_template_reset_password_request(self, user: User, reset_token: str, browser: str, os: str):
+    def get_template_reset_password_request(self, user: User, reset_token: str, browser: str, user_os: str):
         message_dict = {
             "From": self.message_from_field(),
             "To": self.message_to_field(user),
@@ -104,7 +104,7 @@ class EmailNotification:
             "Variables": {
                 "product_name": self.product_name,
                 "reset_password_url": f"{self.base_url}/set_password/{reset_token}",
-                "operating_system": os,
+                "operating_system": user_os,
                 "browser_name": browser,
             },
         }
@@ -144,8 +144,8 @@ class EmailNotification:
         data = self.get_template_admin_registration(user, activation_url)
         self.send_by_mailjet(data)
 
-    def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, os: str) -> None:
-        data = self.get_template_reset_password_request(user, reset_token, browser, os)
+    def send_password_reset_request(self, user: User | PublicUser, reset_token: str, browser: str, user_os: str) -> None:
+        data = self.get_template_reset_password_request(user, reset_token, browser, user_os)
 
         self.send_by_mailjet(data)
 

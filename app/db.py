@@ -65,8 +65,8 @@ Base = declarative_base(metadata=metadata)
 
 
 class TenantNotFoundError(Exception):
-    def __init__(self, id):
-        self.message = "Tenant %s not found!" % str(id)
+    def __init__(self, tenant_name):
+        self.message = "Tenant %s not found!" % str(tenant_name)
         super().__init__(self.message)
 
 
