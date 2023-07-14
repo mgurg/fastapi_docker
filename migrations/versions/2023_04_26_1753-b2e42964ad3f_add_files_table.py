@@ -34,6 +34,8 @@ def upgrade() -> None:
         schema=None,
     )
 
+    op.create_foreign_key("files_users_fk", "files", "users", ["owner_id"], ["id"])
+
 
 def downgrade() -> None:
     op.drop_table("files", schema=None)

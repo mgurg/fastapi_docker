@@ -37,6 +37,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name="items_pkey"),
         schema=None,
     )
+
+    op.create_foreign_key("items_users_fk", "items", "users", ["author_id"], ["id"])
+
     op.create_table(
         "files_items_link",
         sa.Column("item_id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),

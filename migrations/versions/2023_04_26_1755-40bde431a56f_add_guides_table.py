@@ -36,6 +36,8 @@ def upgrade() -> None:
         schema=None,
     )
 
+    op.create_foreign_key("guides_users_fk", "guides", "users", ["author_id"], ["id"])
+
     op.create_table(
         "files_guides_link",
         sa.Column("guide_id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),

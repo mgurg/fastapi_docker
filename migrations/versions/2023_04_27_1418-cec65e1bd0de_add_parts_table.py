@@ -39,6 +39,10 @@ def upgrade() -> None:
         schema=None,
     )
 
+    op.create_foreign_key("parts_used_items_fk", "parts_used", "items", ["item_id"], ["id"])
+    op.create_foreign_key("parts_used_issues_fk", "parts_used", "issues", ["issue_id"], ["id"])
+    op.create_foreign_key("parts_used_users_fk", "parts_used", "users", ["author_id"], ["id"])
+
     # op.create_table(
     #     "parts_used_issues_link",
     #     sa.Column("issue_id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
