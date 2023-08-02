@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any
 
 import sentry_sdk
@@ -168,7 +167,7 @@ storage = PublicAssetS3Storage()
 @app.post("/test")
 def test_endpoint(file: UploadFile):
     try:
-        print("NAME:", storage.get_name("test (1).txt"))
+        print("NAME:", storage.get_name("test (1)ąśćł.txt"))
         print(storage.get_path("test (1).txt"))
 
         # tmp_path = Path(__file__).resolve().parent
@@ -177,11 +176,11 @@ def test_endpoint(file: UploadFile):
         # file_hdd = tmp_file.open("rb")
         # print(file_hdd)
 
-        file_web = file.file
-
-        save = storage.write(file_web, "example.txt")
-        print(save)
-        print(storage.get_size("example.txt"))
+        # file_web = file.file
+        #
+        # save = storage.write(file_web, "example.txt")
+        # print(save)
+        # print(storage.get_size("example.txt"))
 
     except BaseException as error:
         print(error)

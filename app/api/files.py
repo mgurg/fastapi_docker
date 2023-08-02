@@ -40,15 +40,6 @@ def file_get_info_all(*, db: UserDB, auth_user: CurrentUser):
     if db is None:
         raise HTTPException(status_code=500, detail="General Error")
 
-    # quota = session.exec(select([func.sum(Files.size)]).where(Files.account_id == 2)).one()
-    # print("quota", quota)
-    # if quota > 300000:
-    #     raise HTTPException(status_code=413, detail="Quota exceeded")
-
-    # files = session.exec(
-    #     select(Files).where(Files.account_id == auth["account"]).where(Files.deleted_at.is_(None))
-    # ).all()
-
     db_files = crud_files.get_files(db)
 
     return db_files
@@ -61,9 +52,6 @@ def file_get_info_single(*, db: UserDB, uuid: UUID, auth_user: CurrentUser):
 
     if not db_file:
         raise HTTPException(status_code=404, detail="File not found")
-
-    # file = dict(file)
-    # file["url"] = "https://placeimg.com/500/300/nature?t=" + file["file_name"]
 
     return db_file
 
