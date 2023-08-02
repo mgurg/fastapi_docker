@@ -14,16 +14,17 @@ class PrivateS3Storage(S3Storage):
     AWS_SECRET_ACCESS_KEY = "secret"
     AWS_S3_BUCKET_NAME = "bucket"
     AWS_S3_ENDPOINT_URL = "custom.s3.endpoint"
+    AWS_S3_REGION = "us-east-1"
     AWS_S3_USE_SSL = False
 
 
 @mock_s3
 def test_s3_storage_methods(tmp_path: Path) -> None:
-    # s3 = boto3.client("s3")
-    # s3.create_bucket(Bucket="bucket")
+    s3 = boto3.client("s3")
+    s3.create_bucket(Bucket="bucket", CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
 
-    # tmp_file = tmp_path / "example.txt"
-    # tmp_file.write_bytes(b"123")
+    tmp_file = tmp_path / "example.txt"
+    tmp_file.write_bytes(b"123")
 
     storage = PrivateS3Storage()
 
