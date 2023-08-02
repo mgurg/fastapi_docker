@@ -14,10 +14,10 @@ from app.crud import crud_files
 from app.db import get_db
 from app.models.models import User
 from app.schemas.responses import FileResponse, StandardResponse
+from app.service.bearer_auth import has_token
 
 # from app.models.models import FileResponse, Files, FileUrlResponse, StandardResponse
-from app.service.aws_s3 import generate_presigned_url, s3_resource
-from app.service.bearer_auth import has_token
+from app.storage.aws_s3 import generate_presigned_url, s3_resource
 
 settings = get_settings()
 

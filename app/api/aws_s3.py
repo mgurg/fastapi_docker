@@ -11,7 +11,7 @@ from starlette.responses import StreamingResponse
 from app.config import get_settings
 from app.db import get_db
 from app.models.models import File
-from app.service.aws_s3 import s3_client, s3_resource
+from app.storage.aws_s3 import s3_client, s3_resource
 
 settings = get_settings()
 s3_router = APIRouter()

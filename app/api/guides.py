@@ -15,10 +15,10 @@ from app.db import get_db
 from app.models.models import User
 from app.schemas.requests import GuideAddIn, GuideEditIn
 from app.schemas.responses import GuideIndexResponse, GuideResponse, StandardResponse
+from app.service.bearer_auth import has_token
 
 # from app.schemas.schemas import GuideIndexResponse
-from app.service.aws_s3 import generate_presigned_url
-from app.service.bearer_auth import has_token
+from app.storage.aws_s3 import generate_presigned_url
 
 guide_router = APIRouter()
 

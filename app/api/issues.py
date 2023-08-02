@@ -20,10 +20,10 @@ from app.models.models import User
 from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
 from app.schemas.responses import EventTimelineResponse, IssueIndexResponse, IssueResponse, StandardResponse
 from app.service import event
-from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
 from app.service.helpers import is_valid_uuid
 from app.service.notifications import notify_users
+from app.storage.aws_s3 import generate_presigned_url
 
 issue_router = APIRouter()
 

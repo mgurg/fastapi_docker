@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import Any
 
 import sentry_sdk
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from loguru import logger
@@ -25,6 +26,7 @@ from app.config import get_settings
 from app.service.health_check import test_db
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
+from app.storage.s3 import S3Storage
 
 settings = get_settings()
 
@@ -94,6 +96,7 @@ if settings.ENVIRONMENT == "PRD":
     )
     app.add_middleware(SentryAsgiMiddleware)
 
+
 # if settings.ENVIRONMENT != "PRD":
 
 #     @app.middleware("http")
@@ -152,6 +155,37 @@ async def health_check():
 @app.get("/health_db")
 def health_check_db():
     return test_db()
+
+
+class PublicAssetS3Storage(S3Storage):
+    AWS_DEFAULT_ACL = "public-read"
+    AWS_QUERYSTRING_AUTH = True
+
+
+storage = PublicAssetS3Storage()
+
+
+@app.post("/test")
+def test_endpoint(file: UploadFile):
+    try:
+        print("NAME:", storage.get_name("test (1).txt"))
+        print(storage.get_path("test (1).txt"))
+
+        # tmp_path = Path(__file__).resolve().parent
+        # tmp_file = tmp_path / "example.txt"
+        # tmp_file.write_bytes(b"123")
+        # file_hdd = tmp_file.open("rb")
+        # print(file_hdd)
+
+        file_web = file.file
+
+        save = storage.write(file_web, "example.txt")
+        print(save)
+        print(storage.get_size("example.txt"))
+
+    except BaseException as error:
+        print(error)
+    return {"status": "ok"}
 
 
 # if __name__ == "__main__":

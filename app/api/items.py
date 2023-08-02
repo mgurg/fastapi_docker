@@ -19,8 +19,8 @@ from app.db import get_db
 from app.models.models import User
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
-from app.service.aws_s3 import generate_presigned_url
 from app.service.bearer_auth import has_token
+from app.storage.aws_s3 import generate_presigned_url
 
 item_router = APIRouter()
 CurrentUser = Annotated[User, Depends(has_token)]
