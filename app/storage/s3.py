@@ -116,9 +116,14 @@ class S3Storage(BaseStorage):
         Write input file which is opened in binary mode to destination.
         """
 
-
         file.seek(0, 0)
         key = self.get_name(name)
 
         self._bucket.upload_fileobj(Fileobj=file, Key=name)  # , ExtraArgs={"ACL": self.AWS_DEFAULT_ACL}
         return key
+
+    def read(self):
+        ...
+
+    def remove_file(self):
+        ...
