@@ -6,9 +6,9 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = {extras = ["all"], version = "^0.100.1"}
+fastapi = { extras = ["all"], version = "^0.100.1" }
 SQLAlchemy = "^2.0"
-alembic = "^1.9.1"
+alembic = "^1.11.2"
 uvicorn = ">=0.23.1"
 gunicorn = "^21.2.0"
 python-dotenv = "^1.0.0"
@@ -17,19 +17,19 @@ typeguard = "^4.1.0"
 Faker = "^16"
 email-validator = ">=2.0.0"
 requests = "^2.28.1"
-typer = {extras = ["all"], version = "^0.9.0"}
+typer = { extras = ["all"], version = "^0.9.0" }
 disposable-email-domains = ">=0.0.84"
-passlib = {extras = ["argon2"], version = "^1.7.4"}
+passlib = { extras = ["argon2"], version = "^1.7.4" }
 pytz = "^2023.3"
 langcodes = "^3.3.0"
 python-stdnum = "^1.18"
 Unidecode = "^1.3"
 pendulum = "^2.1.2"
-sentry-sdk = {extras = ["fastapi"], version = "^1.29.0"}
+sentry-sdk = { extras = ["fastapi"], version = "^1.29.0" }
 user-agents = "^2.2.0"
 boto3 = "^1.28.00"
 python-multipart = "^0.0.6"
-fastapi-pagination = {extras = ["sqlalchemy"], version = "^0.12.0"}
+fastapi-pagination = { extras = ["sqlalchemy"], version = "^0.12.0" }
 pydantic-factories = "^1.4.1"
 RegonAPI = "^1.3.1"
 APScheduler = "4.0.0a2"
@@ -37,7 +37,7 @@ sqlalchemy-easy-profile = "^1.3"
 pyvieser = "^0.0.4"
 pyotp = "^2.9.0"
 httpx = "^0.24"
-psycopg = {extras = ["binary"], version = "^3.1"}
+psycopg = { extras = ["binary"], version = "^3.1" }
 pandas = "^2.0.0"
 fastapi-babel = "^0.0.8"
 
@@ -49,7 +49,7 @@ pytest-pretty = "^1.2"
 ruff = ">=0.0.249"
 
 [tool.poetry.group.dev.dependencies]
-bump-pydantic = "^0.3.0"
+bump-pydantic = "^0.6.1"
 pymender = "^0.2.0"
 setuptools = "^68.0.0"
 moto = "^4.1.14"
@@ -59,13 +59,22 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
-parallel = true
+parallel = false
 source = [
     "app",
-    "tests"
+]
+omit = [
+    # omit anything in a .local directory anywhere
+    '*/.local/*',
+    '__init__.py',
+    'tests/*',
+    '*/tests/*',
+    # omit anything in a .venv directory anywhere
+    '.venv/*'
 ]
 
 [tool.coverage.report]
+skip_empty = true
 precision = 2
 exclude_lines = [
     "pragma: no cover",
@@ -85,23 +94,23 @@ skip-magic-trailing-comma = true
 [tool.ruff]
 line-length = 120
 select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "C",  # flake8-comprehensions
-    "B",  # flake8-bugbear
-    'Q', 
-    'RUF100', 
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    'Q',
+    'RUF100',
     'C90', # is too complex ({complexity} > {max_complexity})
     'UP', #  upgrade syntax for newer versions of the language.
 ]
 ignore = [
-#    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-#    "C901",  # too complex
+    #    "E501",  # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    #    "C901",  # too complex
 ]
-flake8-quotes = {inline-quotes = 'double', multiline-quotes = 'double'}
+flake8-quotes = { inline-quotes = 'double', multiline-quotes = 'double' }
 target-version = "py310"
 
 [tool.ruff.isort]

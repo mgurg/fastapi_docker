@@ -57,14 +57,15 @@ export DB_HOST=localhost DB_PORT=5432 DB_DATABASE=pg_db DB_USERNAME=postgres DB_
 Test execution (with code coverage):
 
 ```bash
-(.venv) fastapi-multitenant-example-app$ coverage run -m pytest -v tests && coverage report -m
+(.venv) fastapi-multitenant-example-app$ 
+
+coverage run -m pytest -v tests && coverage report -m && coverage html
 ```
 
-```bash
-coverage html
-```
+Coverage report: **49.46%**
 
-Database clean-up:
+
+Manual database clean-up:
 ```sql
 DELETE FROM public.public_users WHERE email LIKE 'faker_000_%';
 DELETE FROM public.public_companies  WHERE city  LIKE 'faker_000_%';
