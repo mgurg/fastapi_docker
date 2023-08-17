@@ -41,14 +41,12 @@ psycopg = { extras = ["binary"], version = "^3.1" }
 pandas = "^2.0.0"
 fastapi-babel = "^0.0.8"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.2"
 black = "^23"
 pytest-cov = "^4.0.0"
 pytest-pretty = "^1.2"
 ruff = ">=0.0.249"
-
-[tool.poetry.group.dev.dependencies]
 bump-pydantic = "^0.6.1"
 pymender = "^0.2.0"
 setuptools = "^68.0.0"
