@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = { extras = ["all"], version = "^0.103" }
+fastapi = { extras = ["all"], version = "^0.110" }
 SQLAlchemy = "^2.0"
 alembic = "^1.12.0"
 uvicorn = ">=0.23.1"
@@ -20,7 +20,7 @@ requests = "^2.28.1"
 typer = { extras = ["all"], version = "^0.9.0" }
 disposable-email-domains = ">=0.0.94"
 passlib = { extras = ["argon2"], version = "^1.7.4" }
-pytz = "^2023.3"
+pytz = "^2024.1"
 langcodes = "^3.3.0"
 python-stdnum = "^1.18"
 Unidecode = "^1.3"
@@ -28,7 +28,6 @@ pendulum = "^2.1.2"
 sentry-sdk = { extras = ["fastapi"], version = "^1.31.0" }
 user-agents = "^2.2.0"
 boto3 = "^1.28.00"
-python-multipart = "^0.0.6"
 fastapi-pagination = { extras = ["sqlalchemy"], version = "^0.12.0" }
 pydantic-factories = "^1.4.1"
 RegonAPI = "^1.3.1"
@@ -36,14 +35,13 @@ APScheduler = "4.0.0a2"
 sqlalchemy-easy-profile = "^1.3"
 pyvieser = "^0.0.4"
 pyotp = "^2.9.0"
-httpx = "^0.25"
+httpx = "^0.27"
 psycopg = { extras = ["binary"], version = "^3.1" }
 pandas = "^2.1.0"
-fastapi-babel = "^0.0.8"
+fastapi-babel = "^0.0.9"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2"
-black = "^23"
 pytest-cov = "^4.0.0"
 pytest-pretty = "^1.2"
 ruff = ">=0.0.249"
@@ -82,22 +80,15 @@ exclude_lines = [
 ]
 
 
-[tool.black]
-color = true
-line-length = 120
-target-version = ['py310']
-skip-string-normalization = false
-skip-magic-trailing-comma = true
-
-[tool.ruff]
-line-length = 120
+[tool.ruff.lint]
 select = [
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings
-    "F", # pyflakes
-    "I", # isort
-    "C", # flake8-comprehensions
-    "B", # flake8-bugbear
+    "ASYNC",
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
     'Q',
     'RUF100',
     'C90', # is too complex ({complexity} > {max_complexity})
@@ -105,12 +96,21 @@ select = [
 ]
 ignore = [
     #    "E501",  # line too long, handled by black
-    "B008", # do not perform function calls in argument defaults
+    "B008",  # do not perform function calls in argument defaults
     #    "C901",  # too complex
+    "W191", # indentation contains tabs
 ]
-flake8-quotes = { inline-quotes = 'double', multiline-quotes = 'double' }
-target-version = "py310"
+#flake8-quotes = {inline-quotes = 'single', multiline-quotes = 'double'}
 
-[tool.ruff.isort]
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+#flake8-quotes = {inline-quotes = 'single', multiline-quotes = 'double'}
+
+[tool.ruff.format]
+#quote-style = "single"
+#indent-style = "tab"
+
+[tool.ruff.lint.isort]
 combine-as-imports = true
 known-third-party = ["fastapi", "pydantic", "starlette"]
