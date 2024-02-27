@@ -121,5 +121,6 @@ def with_db(tenant_schema: str | None):
     except Exception as e:
         logger.error(e)
         print("ERRRR: " + tenant_schema)
+        raise
     finally:
         db.close()
