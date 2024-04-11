@@ -16,12 +16,12 @@ Main differences: Alembic behavior. All tables are created using migrations. Eac
    - manual test `alembic -x dry_run=True -x tenant=a upgrade head`
    - Manual run: `alembic -x tenant=a upgrade head`
 
-There is a `/cc/` group of endpoints which allows to: 
+There is a `/cc/` group of endpoints which allows to:
   - get list of all tenants
   - run migration for single tenant
-  - run migrations for all tenants 
+  - run migrations for all tenants
 
-⚠️ Important - after adding a new migration rebuild of docker image is required (to copy new migration)   
+⚠️ Important - after adding a new migration rebuild of docker image is required (to copy new migration)
 ### ⚗️ Alembic
 
 Auto generating migrations (❌ - please, don't use it in this project!)
@@ -41,10 +41,50 @@ Execute All Migrations ⏩:
 alembic upgrade head
 ```
 
-Migration Rollback ↩️ (by one step) 
+Migration Rollback ↩️ (by one step)
 ```bash
 alembic downgrade -1
 ```
+
+### Pre-commits and code linting
+
+we are using a tool called [pre-commit](https://pre-commit.com/) for code linting and formatting.
+
+When you install it, it runs right before making a commit in git. This way it ensures that the code is consistent and formatted even before it is committed.
+
+You can find a file `.pre-commit-config.yaml` with configurations at the root of the project.
+
+#### Install pre-commit to run automatically
+
+`pre-commit` is already part of the dependencies of the project, but you could also install it globally if you prefer to, following [the official pre-commit docs](https://pre-commit.com/).
+
+After having the `pre-commit` tool installed and available, you need to "install" it in the local repository, so that it runs automatically before each commit.
+
+Using Poetry, you could do it with:
+
+```bash
+❯ poetry run pre-commit install
+pre-commit installed at .git/hooks/pre-commit
+```
+
+Now whenever you try to commit, e.g. with:
+
+```bash
+git commit
+```
+
+...pre-commit will run and check and format the code you are about to commit, and will ask you to add that code (stage it) with git again before committing.
+
+Then you can `git add` the modified/fixed files again and now you can commit.
+
+#### Running pre-commit hooks manually
+
+you can also run `pre-commit` manually on all the files, you can do it using Poetry with:
+
+```bash
+poetry run pre-commit run --all-files
+```
+
 ### 🧪 Tests
 
 To run tests locally in VS Code export environment variable first:
@@ -52,12 +92,12 @@ To run tests locally in VS Code export environment variable first:
 export PYTHONPATH=$PWD
 set -a; source ./app/.env; set +a
 export DB_HOST=localhost DB_PORT=5432 DB_DATABASE=pg_db DB_USERNAME=postgres DB_PASSWORD=postgres
-``` 
+```
 
 Test execution (with code coverage):
 
 ```bash
-(.venv) fastapi-multitenant-example-app$ 
+(.venv) fastapi-multitenant-example-app$
 
 coverage run -m pytest -v tests && coverage report -m && coverage html
 ```
@@ -194,4 +234,4 @@ Time per request:       31.878 [ms] (mean, across all concurrent requests)
 Transfer rate:          27.45 [Kbytes/sec] received
 ```
 
-Probably above `30` Requests per second comparing to `20` - `25` in sync version 
+Probably above `30` Requests per second comparing to `20` - `25` in sync version
