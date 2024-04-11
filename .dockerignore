@@ -9,6 +9,7 @@
 Dockerfile
 README.md
 docker-compose.yml
+compose.yaml
 **/.DS_Store
 **/venv
 **/env
