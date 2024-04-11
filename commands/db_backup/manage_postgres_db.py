@@ -29,9 +29,9 @@ from enum import Enum
 
 
 class Actions(str, Enum):
-    list= 'list', 
+    list= 'list',
     list_dbs = 'list_dbs'
-    restore = 'restore', 
+    restore = 'restore',
     backup = 'backup'
 
 # from psycopg.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -295,7 +295,7 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
          action: Actions = typer.Option(Actions.list , help="Action"),
          verbose: str = typer.Option("", help="Verbose output"),
          date: str = typer.Option("", help="Date to use for restore (show with --action list)"),
-         dest_db :str = typer.Option(None, help="Name of the new restored database") 
+         dest_db :str = typer.Option(None, help="Name of the new restored database")
          ):
 
 # LOGGER
@@ -323,7 +323,7 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
     logger.addHandler(shell_handler)
     logger.addHandler(file_handler)
 
-# PATHS 
+# PATHS
     # args_parser = argparse.ArgumentParser(description="Postgres database management")
     # args_parser.add_argument(
     #     "--action", metavar="action", choices=["list", "list_dbs", "restore", "backup"], required=True
@@ -405,7 +405,7 @@ def main(configfile: str = typer.Option("", help="Database configuration file"),
 
 
         console = Console()
-        console.print(table)    
+        console.print(table)
     # backup task
     elif action == "backup":
         logger.info(f"Backing up {postgres_db} database to {local_file_path}")

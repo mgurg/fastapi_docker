@@ -41,6 +41,7 @@ pandas = "^2.1.0"
 fastapi-babel = "^0.0.9"
 
 [tool.poetry.group.dev.dependencies]
+pre-commit = "^3.6.2"
 pytest = "^7.2"
 pytest-cov = "^4.0.0"
 pytest-pretty = "^1.2"

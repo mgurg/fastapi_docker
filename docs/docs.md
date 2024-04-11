@@ -83,24 +83,24 @@ graph TD
 
  ### QR CODES
  `POST /auth/qr/{qr_code}`
-  
+
   body:
-  
+
   ```json
   {
     "tenant_id" : 1234,
     "token": 213
   }
-  ``` 
+  ```
 
-QR Code format 4 letters (company/tentant ID) + 4 letters (resource id) ex: `8tl+234` 
+QR Code format 4 letters (company/tentant ID) + 4 letters (resource id) ex: `8tl+234`
 
 If `(token && tenant_id) == null`:
   - Search QR Code (field: `qr_id`) in `public_companies`
   - Return temporary token: `base64(db_company.tenant_id.token_valid_to)`
   - Only available for anonymous Ideas without IMG/VIDEO
 
-  
+
 
 ### Events
 
@@ -245,7 +245,7 @@ alembic upgrade head
 
 Relacje pomiędzy tabelami `1:1` (Users & Task):
 
-Tabela `Tasks` ma powiązanie (`author_id`) do tabeli `Users` skąd pobieram dodatkowe dane o użytkowniku. Ustalenie relacji w DB: 
+Tabela `Tasks` ma powiązanie (`author_id`) do tabeli `Users` skąd pobieram dodatkowe dane o użytkowniku. Ustalenie relacji w DB:
 
 ![FK](./img/FK_Tasks_Users.png)
 
@@ -262,7 +262,7 @@ Modyfikacja modeli
 
 ```python
     author_id: Optional[int] = Field(default=None, foreign_key="users.id") # kolumna w tabeli Tasks
-    tasks_fk: Optional[Users] = Relationship(back_populates="usr_FK") # relacja 
+    tasks_fk: Optional[Users] = Relationship(back_populates="usr_FK") # relacja
 ```
 
 
@@ -288,7 +288,7 @@ class TaskIndexResponse(SQLModel):
     is_active: Optional[bool]
     priority: str
     mode: str
-    tasks_fk: Optional[UserIndexResponse] # nazwa taka jak relacji, nie musi być to taka sama nazwa jak nazwa w BD 
+    tasks_fk: Optional[UserIndexResponse] # nazwa taka jak relacji, nie musi być to taka sama nazwa jak nazwa w BD
 ```
 
 
@@ -310,7 +310,7 @@ CREATE TABLE users (
     account_id int,
     password varchar(256) NOT NULL,
     email varchar(256) UNIQUE,
-    phone varchar(16) UNIQUE,    
+    phone varchar(16) UNIQUE,
     first_name varchar(100),
     last_name varchar(100),
     auth_token varchar(128),
@@ -469,7 +469,7 @@ CREATE TABLE tasks (
     all_day bool NOT NULL DEFAULT 1;
     is_active boolean,
     priority varchar(32),
-    mode varchar(128),  
+    mode varchar(128),
     deleted_at timestamptz,
     created_at timestamptz,
     updated_at timestamptz
@@ -569,7 +569,7 @@ CREATE TABLE events (
     at_Sa boolean, 	-- The reminder days (single): Saturday
     at_Su boolean, 	-- The reminder days (single): Sunday
     );
-    
+
 
 ```
 
@@ -654,4 +654,3 @@ CREATE TABLE settings (
     updated_at timestamptz
 );
 ```
-
