@@ -134,6 +134,6 @@ COPY --chown=appuser:appuser ./tests/api_responses /src/tests/api_responses
 # Expose the port that the application listens on.
 EXPOSE 5000
 
-CMD ["uvicorn", "app.main:app","--no-server-header","--no-proxy-headers", "--host", "0.0.0.0", "--port", "5000" ]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload", "--reload-dir", "/src/app"]
 
 HEALTHCHECK --interval=21s --timeout=3s --start-period=10s CMD curl --fail http://localhost:5000/health || exit 1

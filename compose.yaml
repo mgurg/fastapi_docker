@@ -1,0 +1,32 @@
+services:
+  web:
+    build:
+      context: .
+      # dockerfile: ./Dockerfile
+      dockerfile: dev.Dockerfile
+      args:
+        - "UID=${UID:-1000}"
+    volumes:
+      - ./app:/src/app
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+    env_file: ./app/.env
+    depends_on:
+      db:
+        condition: service_healthy # Disable this if you are using an external Postgres database
+  db:
+    image: postgres:15
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pg_db
