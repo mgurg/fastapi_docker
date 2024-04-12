@@ -8,6 +8,8 @@ from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
+from app.api.controller.user import user_test_router
+
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.user import user_test_router
