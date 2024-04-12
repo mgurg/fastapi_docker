@@ -1,0 +1,14 @@
+### Get test user by uuid
+GET http://0.0.0.0:5000/user_test/59e49dd8-efb0-4201-b767-607257fd13de
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+
+### Get user by uuid
+GET http://0.0.0.0:5000/users/94ca4f7e-e4ae-4921-8758-94e672fe201d
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{bearerToken}}
+Content-Type: application/json

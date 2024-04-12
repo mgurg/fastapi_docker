@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.db import Base
 
@@ -32,6 +32,18 @@ users_items_rel = sa.Table(
     sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+class BaseModel(Base):
+    __abstract__ = True
+    """
+    Base model for all tables
+
+    Attributes:
+        id (int): Primary key for all tables
+        created_at (datetime): Date and time of creation
+        updated_at (datetime): Date and time of last update
+    """
+
+    id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
 
 class Role(Base):
     __tablename__ = "roles"
@@ -66,9 +78,9 @@ class Permission(Base):
     role = relationship("Role", secondary=role_permission_rel, back_populates="permission")
 
 
-class User(Base):
+class User(BaseModel):
     __tablename__ = "users"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     phone = sa.Column(sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True)

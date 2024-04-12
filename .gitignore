@@ -3,6 +3,7 @@
 *.db
 .coverage
 docs/coverage/
+http-client.private.env.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
