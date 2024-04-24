@@ -10,7 +10,7 @@ APP_DIR = Path(__file__).parent.parent / "app"
 
 class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
-    ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] | None = os.getenv("APP_ENV", "PYTEST")
+    ENVIRONMENT: str | None = os.getenv("APP_ENV", "PYTEST") # Literal["DEV", "PYTEST", "STG", "PRD"]
     OPEN_API: str | None = os.getenv("APP_OPEN_API")
     base_app_url: str | None = os.getenv("APP_HOST", "https://frontend-host.com")
 

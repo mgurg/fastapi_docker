@@ -34,7 +34,6 @@ DEFAULT_DB = settings.DEFAULT_DATABASE_DB
 
 sql_performance_monitoring = False
 if sql_performance_monitoring is True:
-
     @event.listens_for(Engine, "before_cursor_execute")
     def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         conn.info.setdefault("query_start_time", []).append(time.time())
