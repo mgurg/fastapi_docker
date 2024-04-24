@@ -8,20 +8,20 @@ from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-from app.api.auth import auth_router
-from app.api.cc import cc_router
+# from app.api.auth import auth_router
+# from app.api.cc import cc_router
 from app.api.controller.user import user_test_router
-from app.api.files import file_router
-from app.api.guides import guide_router
-from app.api.issues import issue_router
-from app.api.items import item_router
-from app.api.parts import part_router
-from app.api.settings import setting_router
-from app.api.statistics import statistics_router
-from app.api.tags import tag_router
+# from app.api.files import file_router
+# from app.api.guides import guide_router
+# from app.api.issues import issue_router
+# from app.api.items import item_router
+# from app.api.parts import part_router
+# from app.api.settings import setting_router
+# from app.api.statistics import statistics_router
+# from app.api.tags import tag_router
 from app.api.users import user_router
-from app.api.users_groups import group_router
-from app.api.users_permissions import permission_router
+# from app.api.users_groups import group_router
+# from app.api.users_permissions import permission_router
 from app.config import get_settings
 from app.service.health_check import test_db
 from app.service.scheduler import scheduler, start_scheduler
@@ -52,21 +52,21 @@ def create_application() -> FastAPI:
         max_age=86400,
     )
 
-    app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
+    # app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
     app.include_router(user_router, prefix="/users", tags=["USER"])
-    app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
-    app.include_router(group_router, prefix="/groups", tags=["USER_GROUP"])
-
-    app.include_router(item_router, prefix="/items", tags=["ITEM"])
-    app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
-    app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
-    app.include_router(part_router, prefix="/parts", tags=["PART"])
-
-    app.include_router(file_router, prefix="/files", tags=["FILE"])
-    app.include_router(tag_router, prefix="/tags", tags=["TAG"])
-    app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
-    app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
-    app.include_router(cc_router, prefix="/cc", tags=["C&C"])
+    # app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
+    # app.include_router(group_router, prefix="/groups", tags=["USER_GROUP"])
+    #
+    # app.include_router(item_router, prefix="/items", tags=["ITEM"])
+    # app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
+    # app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
+    # app.include_router(part_router, prefix="/parts", tags=["PART"])
+    #
+    # app.include_router(file_router, prefix="/files", tags=["FILE"])
+    # app.include_router(tag_router, prefix="/tags", tags=["TAG"])
+    # app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
+    # app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
+    # app.include_router(cc_router, prefix="/cc", tags=["C&C"])
 
     app.include_router(user_test_router, prefix="/user_test", tags=["TEST"])
     return app

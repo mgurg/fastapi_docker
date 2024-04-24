@@ -3,10 +3,12 @@ from contextlib import contextmanager
 from functools import lru_cache
 from typing import Annotated
 
+import sqlalchemy
 import sqlalchemy as sa
 from fastapi import Depends, Request
 from loguru import logger
 from sqlalchemy import create_engine, event, select
+from sqlalchemy.dialects.postgresql import psycopg
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, declarative_base
 
@@ -69,57 +71,81 @@ class TenantNotFoundError(Exception):
         super().__init__(self.message)
 
 
-@lru_cache
-def get_tenant(request: Request) -> PublicCompany | None:
-    try:
-        # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
-        host_without_port = request.headers.get("tenant")  # based on tenant header: abc
-
-        if host_without_port is None:
-            return None
-
-        with with_db(None) as db:
-            query = select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
-
-            result = db.execute(query)
-            tenant = result.scalar_one_or_none()
-
-        if tenant is None:
-            # raise TenantNotFoundError(host_without_port)
-            return None
-    except Exception as e:
-        print(e)
-    return tenant
-
-
-def get_db(tenant: Annotated[PublicCompany, Depends(get_tenant)]):
-    if tenant is None:
-        yield None
-
-    with with_db(tenant.tenant_id) as db:
-        yield db
+# @lru_cache
+# def get_tenant(request: Request) -> PublicCompany | None:
+#     try:
+#         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
+#         host_without_port = request.headers.get("tenant")  # based on tenant header: abc
+#
+#         if host_without_port is None:
+#             return None
+#
+#         with with_db(None) as db:
+#             query = select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
+#
+#             result = db.execute(query)
+#             tenant = result.scalar_one_or_none()
+#
+#         if tenant is None:
+#             # raise TenantNotFoundError(host_without_port)
+#             return None
+#     except Exception as e:
+#         print(e)
+#     return tenant
 
 
-def get_public_db():
-    with with_db("public") as db:
-        yield db
+# def get_db(tenant: Annotated[PublicCompany, Depends(get_tenant)]):
+#     if tenant is None:
+#         yield None
+#
+#     with with_db(tenant.tenant_id) as db:
+#         yield db
+#
+#
+# def get_public_db():
+#     with with_db("public") as db:
+#         yield db
     # --------------------
 
 
+def get_session(request: Request):
+    tenant = request.headers.get("tenant")
+    pg_schema = tenant if tenant else "public"
+    with with_db(pg_schema) as db:
+        yield db
+
+def get_public_session(request: Request):
+    with with_db("public") as db:
+        yield db
+
 @contextmanager
 def with_db(tenant_schema: str | None):
-    if tenant_schema:
-        schema_translate_map = {"tenant": tenant_schema}
-    else:
-        schema_translate_map = None
-
+    schema_translate_map = {"tenant": tenant_schema} if tenant_schema else None
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     try:
-        db = Session(autocommit=False, autoflush=False, bind=connectable)
-        yield db
-    except Exception as e:
-        logger.error(e)
+        with Session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
+    except Exception:
+        session.rollback()
         print("ERRRR: " + tenant_schema)
-        raise
     finally:
-        db.close()
+        session.close()
+
+
+# @contextmanager
+# def with_db(tenant_schema: str | None):
+#     if tenant_schema:
+#         schema_translate_map = {"tenant": tenant_schema}
+#     else:
+#         schema_translate_map = None
+#
+#     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+#     try:
+#         db = Session(autocommit=False, autoflush=False, bind=connectable)
+#         yield db
+#     except Exception as e:
+#         logger.error(e)
+#         print("ERRRR: " + tenant_schema)
+#         raise
+#     finally:
+#         db.close()

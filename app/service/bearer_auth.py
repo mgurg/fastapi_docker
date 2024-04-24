@@ -8,13 +8,13 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.crud import crud_auth
-from app.db import get_db
+from app.db import get_session
 from app.models.models import User
 
 settings = get_settings()
 security = HTTPBearer()
 
-UserDB = Annotated[Session, Depends(get_db)]
+UserDB = Annotated[Session, Depends(get_session)]
 
 
 def is_base64(sb: str) -> bool:
