@@ -9,7 +9,7 @@ from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-from app.api.controller.user import user_test_router
+from app.api.controller.users import user_test_router
 
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
@@ -23,6 +23,7 @@ from app.api.controller.user import user_test_router
 # from app.api.statistics import statistics_router
 # from app.api.tags import tag_router
 from app.api.users import user_router
+
 # from app.api.users_groups import group_router
 # from app.api.users_permissions import permission_router
 from app.config import get_settings

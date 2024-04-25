@@ -2,10 +2,12 @@ import time
 from contextlib import contextmanager
 
 import sqlalchemy as sa
-from fastapi import Request
+from fastapi import Request, HTTPException
 from loguru import logger
+from psycopg.errors import UndefinedTable
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
@@ -102,17 +104,26 @@ Base = declarative_base(metadata=metadata)
 #         yield db
 # --------------------
 
+
 def get_db(request: Request):
+    tenant_schema = request.headers.get("tenant")
     try:
-        tenant_schema = request.headers.get("tenant")
         schema_translate_map = {"tenant": tenant_schema} if tenant_schema else None
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as session:
             yield session
-    except Exception as e:
-        print(e)
+    except ProgrammingError as pe:
+        if isinstance(pe.orig, UndefinedTable):
+            # Handle the case where the table is undefined
+            logger.error(f"Table does not exist for schema: {tenant_schema}")
+        else:
+            # Handle other ProgrammingErrors
+            logger.error("ProgrammingError:", pe)
         session.rollback()
-        print("ERRRR: " + tenant_schema)
+        raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}")
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}")
     finally:
         session.close()
 

@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
@@ -32,6 +32,7 @@ users_items_rel = sa.Table(
     sa.Column("item_id", sa.ForeignKey("items.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+
 class BaseModel(Base):
     __abstract__ = True
     """
@@ -44,6 +45,7 @@ class BaseModel(Base):
     """
 
     id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+
 
 class Role(Base):
     __tablename__ = "roles"

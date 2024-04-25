@@ -1,7 +1,6 @@
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,7 +9,7 @@ APP_DIR = Path(__file__).parent.parent / "app"
 
 class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
-    ENVIRONMENT: str | None = os.getenv("APP_ENV", "PYTEST") # Literal["DEV", "PYTEST", "STG", "PRD"]
+    ENVIRONMENT: str | None = os.getenv("APP_ENV", "PYTEST")  # Literal["DEV", "PYTEST", "STG", "PRD"]
     OPEN_API: str | None = os.getenv("APP_OPEN_API")
     base_app_url: str | None = os.getenv("APP_HOST", "https://frontend-host.com")
 

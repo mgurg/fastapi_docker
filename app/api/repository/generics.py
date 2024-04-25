@@ -74,7 +74,6 @@ class GenericRepo(Generic[T]):
             # created_items.append(obj)
         self.session.commit()
 
-
     def update(self, id: int, **kwargs: dict[str, Any]) -> None:
         """
         Updates an object with the given ID and keyword arguments.
@@ -88,7 +87,6 @@ class GenericRepo(Generic[T]):
         self.session.execute(update(self.model).where(self.model.id == id).values(**kwargs))
         self.session.commit()
 
-
     def delete(self, id: int) -> T | None:
         """
         Deletes an object by its ID.
@@ -101,7 +99,6 @@ class GenericRepo(Generic[T]):
             self.session.delete(obj)
             self.session.commit()
         return obj
-
 
     def filter(self, page: int = 1, per_page: int = 10, **kwargs: dict[str, Any]) -> list[T]:
         """

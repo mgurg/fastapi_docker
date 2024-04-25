@@ -27,14 +27,14 @@ UserDB = Annotated[Session, Depends(get_session)]
 
 @user_router.get("/", response_model=Page[UserIndexResponse])
 def user_get_all(
-        *,
-        db: UserDB,
-        params: Annotated[Params, Depends()],
-        auth_user: CurrentUser,
-        # search: Annotated[str | None, Query(max_length=50)] = None,
-        search: str | None = None,
-        field: str = "name",
-        order: str = "asc",
+    *,
+    db: UserDB,
+    params: Annotated[Params, Depends()],
+    auth_user: CurrentUser,
+    # search: Annotated[str | None, Query(max_length=50)] = None,
+    search: str | None = None,
+    field: str = "name",
+    order: str = "asc",
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
