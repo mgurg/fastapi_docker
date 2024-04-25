@@ -8,7 +8,14 @@ Content-Type: application/json
 ### Get users by uuid
 GET http://0.0.0.0:5000/user_test
 Accept: application/json
-#tenant: {{tenant}}
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get users by uuid
+GET http://0.0.0.0:5000/users/
+Accept: application/json
+tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 

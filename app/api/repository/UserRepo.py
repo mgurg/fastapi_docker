@@ -37,4 +37,13 @@ class UserRepo(GenericRepo[User]):
             query = query.filter(*all_filters)
 
         result = self.session.execute(query)
+
+        try:
+            count_statement = select(func.count(self.Model.id)).where(self.Model.deleted_at.is_(None)).where(
+                self.Model.is_visible.is_(True))
+            count = self.session.execute(count_statement)
+            print("count", count.scalar_one_or_none())
+        except Exception as e:
+            print(e)
+
         return result.scalars().all()
