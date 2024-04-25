@@ -1,19 +1,14 @@
 import time
 from contextlib import contextmanager
-from functools import lru_cache
-from typing import Annotated
 
-import sqlalchemy
 import sqlalchemy as sa
-from fastapi import Depends, Request
+from fastapi import Request
 from loguru import logger
-from sqlalchemy import create_engine, event, select
-from sqlalchemy.dialects.postgresql import psycopg
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
-from app.models.shared_models import PublicCompany
 
 settings = get_settings()
 
@@ -42,12 +37,12 @@ if sql_performance_monitoring is True:
         logger.debug("Start Query:")
         logger.debug("%s" % statement)
 
+
     @event.listens_for(Engine, "after_cursor_execute")
     def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         total = time.time() - conn.info["query_start_time"].pop(-1)
         logger.debug("Query Complete!")
         logger.debug("Total Time: %f" % total)
-
 
 SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 echo = False
@@ -65,10 +60,10 @@ metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
 
-class TenantNotFoundError(Exception):
-    def __init__(self, tenant_name):
-        self.message = "Tenant %s not found!" % str(tenant_name)
-        super().__init__(self.message)
+# class TenantNotFoundError(Exception):
+#     def __init__(self, tenant_name):
+#         self.message = "Tenant %s not found!" % str(tenant_name)
+#         super().__init__(self.message)
 
 
 # @lru_cache
@@ -105,7 +100,21 @@ class TenantNotFoundError(Exception):
 # def get_public_db():
 #     with with_db("public") as db:
 #         yield db
-    # --------------------
+# --------------------
+
+def get_db(request: Request):
+    try:
+        tenant_schema = request.headers.get("tenant")
+        schema_translate_map = {"tenant": tenant_schema} if tenant_schema else None
+        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        with Session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
+    except Exception as e:
+        print(e)
+        session.rollback()
+        print("ERRRR: " + tenant_schema)
+    finally:
+        session.close()
 
 
 def get_session(request: Request):
@@ -114,9 +123,11 @@ def get_session(request: Request):
     with with_db(pg_schema) as db:
         yield db
 
+
 def get_public_session(request: Request):
     with with_db("public") as db:
         yield db
+
 
 @contextmanager
 def with_db(tenant_schema: str | None):
@@ -125,12 +136,12 @@ def with_db(tenant_schema: str | None):
     try:
         with Session(autocommit=False, autoflush=False, bind=connectable) as session:
             yield session
-    except Exception:
+    except Exception as e:
+        print(e)
         session.rollback()
         print("ERRRR: " + tenant_schema)
     finally:
         session.close()
-
 
 # @contextmanager
 # def with_db(tenant_schema: str | None):

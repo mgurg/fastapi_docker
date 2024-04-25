@@ -1,3 +1,4 @@
+import sys
 from typing import Any
 
 import sentry_sdk
@@ -118,6 +119,7 @@ if settings.ENVIRONMENT == "PRD":
 def startup():
     logger.info("🚀 [Starting up] Initializing DB data...")
     alembic_upgrade_head("public", "d6ba8c13303e")
+    print(sys.getrecursionlimit())
     logger.info("🎽 [Job] Running test Job")
 
 
