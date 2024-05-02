@@ -80,6 +80,13 @@ class UserIndexResponse(BaseResponse):
     role_FK: RoleBasic
 
 
+class UsersPaginated(BaseResponse):
+    data: list[UserIndexResponse]
+    count: int
+    limit: int
+    offset: int
+
+
 class FileResponse(BaseResponse):
     uuid: UUID
     file_name: str

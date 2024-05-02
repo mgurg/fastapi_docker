@@ -9,11 +9,10 @@ from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-from app.api.controller.users import user_test_router
-
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
+
 # from app.api.files import file_router
 # from app.api.guides import guide_router
 # from app.api.issues import issue_router
@@ -32,7 +31,6 @@ from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
 from app.storage.s3 import S3Storage
 
-from fastapi_pagination import Page, add_pagination, paginate
 settings = get_settings()
 
 logger.add("./app/logs/logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)

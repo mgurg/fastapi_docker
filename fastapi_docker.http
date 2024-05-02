@@ -5,12 +5,15 @@ tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
-### Get users by uuid
-GET http://0.0.0.0:5000/user_test
+### Get all users
+GET http://0.0.0.0:5000/user_test?limit=1&offset=1
 Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+
+
 
 ### Get users by uuid
 GET http://0.0.0.0:5000/users/

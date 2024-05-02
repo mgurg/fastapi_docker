@@ -2,7 +2,7 @@ import time
 from contextlib import contextmanager
 
 import sqlalchemy as sa
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
 from loguru import logger
 from psycopg.errors import UndefinedTable
 from sqlalchemy import create_engine, event
@@ -33,18 +33,19 @@ DEFAULT_DB = settings.DEFAULT_DATABASE_DB
 
 sql_performance_monitoring = False
 if sql_performance_monitoring is True:
+
     @event.listens_for(Engine, "before_cursor_execute")
     def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         conn.info.setdefault("query_start_time", []).append(time.time())
         logger.debug("Start Query:")
         logger.debug("%s" % statement)
 
-
     @event.listens_for(Engine, "after_cursor_execute")
     def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         total = time.time() - conn.info["query_start_time"].pop(-1)
         logger.debug("Query Complete!")
         logger.debug("Total Time: %f" % total)
+
 
 SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
 echo = False
@@ -121,7 +122,7 @@ def get_db(request: Request):
             logger.error("ProgrammingError:", pe)
         session.rollback()
         raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}")
-    except Exception as e:
+    except Exception:
         session.rollback()
         raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}")
     finally:
@@ -153,6 +154,7 @@ def with_db(tenant_schema: str | None):
         print("ERRRR: " + tenant_schema)
     finally:
         session.close()
+
 
 # @contextmanager
 # def with_db(tenant_schema: str | None):

@@ -2,11 +2,10 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination import Params
 
 from app.api.service.user_service import UserService
-from app.schemas.responses import UserIndexResponse
+from app.schemas.responses import UserIndexResponse, UsersPaginated
 
 user_test_router = APIRouter()
 
@@ -15,25 +14,24 @@ user_test_router = APIRouter()
 # UserDB = Annotated[Session, Depends(get_session)]
 
 
-@user_test_router.get("", response_model=list[UserIndexResponse])
+@user_test_router.get("", response_model=UsersPaginated)
 def user_get_all(
-        user_service: Annotated[UserService, Depends()],
-        params: Annotated[Params, Depends()],
-        # auth_user: CurrentUser,
-        # search: Annotated[str | None, Query(max_length=50)] = None,
-        search: str | None = None,
-        field: str = "name",
-        order: str = "asc",
+    user_service: Annotated[UserService, Depends()],
+    params: Annotated[Params, Depends()],
+    # auth_user: CurrentUser,
+    # search: Annotated[str | None, Query(max_length=50)] = None,
+    limit: int = 10,
+    offset: int = 0,
+    search: str | None = None,
+    field: str = "name",
+    order: str = "asc",
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
-    db_users = user_service.get_users(field, order, search)
+    db_users, count = user_service.get_users(offset, limit, field, order, search)
 
-    # result = db.execute(db_users_query)  # await db.execute(query)
-    # db_users = result.scalars().all()
-
-    return db_users
+    return UsersPaginated(data=db_users, count=count, offset=offset, limit=limit)
 
 
 @user_test_router.get("/{user_uuid}", response_model=UserIndexResponse)

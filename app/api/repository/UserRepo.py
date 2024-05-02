@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select, Sequence, func, text
+from sqlalchemy import Sequence, func, select, text
 from sqlalchemy.orm import Session
 
 from app.api.repository.generics import GenericRepo
@@ -22,7 +22,9 @@ class UserRepo(GenericRepo[User]):
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_users(self, sort_column: str, sort_order: str, search: str | None = None) -> Sequence[User]:
+    def get_users(
+        self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
+    ) -> tuple[Sequence[User], int]:
         query = (
             select(self.Model)
             .where(self.Model.deleted_at.is_(None))
@@ -36,14 +38,21 @@ class UserRepo(GenericRepo[User]):
 
             query = query.filter(*all_filters)
 
-        result = self.session.execute(query)
+        result = self.session.execute(query.offset(offset).limit(limit))
 
+        total_records: int = 0
         try:
-            count_statement = select(func.count(self.Model.id)).where(self.Model.deleted_at.is_(None)).where(
-                self.Model.is_visible.is_(True))
-            count = self.session.execute(count_statement)
-            print("count", count.scalar_one_or_none())
+            count_statement = (
+                select(func.count(self.Model.id))
+                .where(self.Model.deleted_at.is_(None))
+                .where(self.Model.is_visible.is_(True))
+            )
+            count_result = self.session.execute(count_statement)
+            counter = count_result.scalar_one_or_none()
+            if counter:
+                total_records = counter
+
         except Exception as e:
             print(e)
 
-        return result.scalars().all()
+        return result.scalars().all(), total_records
