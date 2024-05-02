@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Annotated
 from uuid import UUID
 
@@ -56,3 +57,28 @@ class UserRepo(GenericRepo[User]):
             print(e)
 
         return result.scalars().all(), total_records
+
+    def get_users_count(self, user_id: int | None = None) -> int:
+        query = (
+            select(func.count(User.id))
+            .where(User.deleted_at.is_(None))
+            .where(User.is_verified.is_(True))
+            .where(User.is_visible.is_(True))
+        )
+
+        if user_id:
+            query = query.where(User.id != user_id)
+
+        result = self.session.execute(query)  # await db.execute(query)
+        return result.scalar_one_or_none()
+
+    def get_user_by_auth_token(self, token: str) -> User | None:
+        query = (
+            select(User)
+            .where(User.auth_token == token)
+            .where(User.is_active == True)  # noqa: E712
+            .where(User.auth_token_valid_to > datetime.now(timezone.utc))
+        )
+
+        result = self.session.execute(query)  # await db.execute(query)
+        return result.scalar_one_or_none()

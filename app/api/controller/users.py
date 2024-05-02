@@ -5,17 +5,19 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Params
 
 from app.api.service.user_service import UserService
+from app.models.models import User
 from app.schemas.responses import UserIndexResponse, UsersPaginated
+from app.service.bearer_auth import check_token
 
 user_test_router = APIRouter()
 
 
-# CurrentUser = Annotated[User, Depends(has_token)]
+CurrentUser = Annotated[User, Depends(check_token)]
 # UserDB = Annotated[Session, Depends(get_session)]
 
 
 @user_test_router.get("", response_model=UsersPaginated)
-def user_get_all(
+def get_all_users(
     user_service: Annotated[UserService, Depends()],
     params: Annotated[Params, Depends()],
     # auth_user: CurrentUser,
@@ -29,13 +31,20 @@ def user_get_all(
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
 
-    db_users, count = user_service.get_users(offset, limit, field, order, search)
+    db_users, count = user_service.get_all_users(offset, limit, field, order, search)
 
     return UsersPaginated(data=db_users, count=count, offset=offset, limit=limit)
 
 
+@user_test_router.get("/count")
+def get_users_count(user_service: Annotated[UserService, Depends()], auth_user: CurrentUser):
+    db_user_cnt = user_service.count_all_users()
+
+    return db_user_cnt
+
+
 @user_test_router.get("/{user_uuid}", response_model=UserIndexResponse)
-def user_get_one(user_service: Annotated[UserService, Depends()], user_uuid: str):
+def get_one_user(user_service: Annotated[UserService, Depends()], user_uuid: str):
     user = user_service.get_user_by_uuid(UUID(user_uuid))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

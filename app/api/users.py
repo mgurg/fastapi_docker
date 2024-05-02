@@ -6,8 +6,6 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
-from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
@@ -15,7 +13,7 @@ from app.crud import crud_auth, crud_permission, crud_users
 from app.db import engine, get_session
 from app.models.models import User
 from app.schemas.requests import UserCreateIn
-from app.schemas.responses import StandardResponse, UserIndexResponse
+from app.schemas.responses import StandardResponse
 from app.service.bearer_auth import has_token
 from app.service.password import Password
 
@@ -25,26 +23,26 @@ CurrentUser = Annotated[User, Depends(has_token)]
 UserDB = Annotated[Session, Depends(get_session)]
 
 
-@user_router.get("/", response_model=Page[UserIndexResponse])
-def user_get_all(
-    *,
-    db: UserDB,
-    params: Annotated[Params, Depends()],
-    auth_user: CurrentUser,
-    # search: Annotated[str | None, Query(max_length=50)] = None,
-    search: str | None = None,
-    field: str = "name",
-    order: str = "asc",
-):
-    if field not in ["first_name", "last_name", "created_at"]:
-        field = "last_name"
-
-    db_users_query = crud_users.get_users(field, order, search)
-
-    # result = db.execute(db_users_query)  # await db.execute(query)
-    # db_users = result.scalars().all()
-
-    return paginate(db, db_users_query)
+# @user_router.get("/", response_model=Page[UserIndexResponse])
+# def user_get_all(
+#     *,
+#     db: UserDB,
+#     params: Annotated[Params, Depends()],
+#     auth_user: CurrentUser,
+#     # search: Annotated[str | None, Query(max_length=50)] = None,
+#     search: str | None = None,
+#     field: str = "name",
+#     order: str = "asc",
+# ):
+#     if field not in ["first_name", "last_name", "created_at"]:
+#         field = "last_name"
+#
+#     db_users_query = crud_users.get_users(field, order, search)
+#
+#     # result = db.execute(db_users_query)  # await db.execute(query)
+#     # db_users = result.scalars().all()
+#
+#     return paginate(db, db_users_query)
 
 
 @user_router.get("/count")
@@ -108,12 +106,12 @@ def get_import_users(*, db: UserDB, auth_user: CurrentUser, file: UploadFile | N
     return data
 
 
-@user_router.get("/{user_uuid}", response_model=UserIndexResponse)
-def user_get_one(*, db: UserDB, user_uuid: UUID, auth_user: CurrentUser):
-    user = crud_users.get_user_by_uuid(db, user_uuid)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# @user_router.get("/{user_uuid}", response_model=UserIndexResponse)
+# def user_get_one(*, db: UserDB, user_uuid: UUID, auth_user: CurrentUser):
+#     user = crud_users.get_user_by_uuid(db, user_uuid)
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return user
 
 
 @user_router.post("/", response_model=StandardResponse)  # , response_model=User , auth_user: CurrentUser

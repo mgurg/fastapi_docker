@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.api.service.user_service import UserService
 from app.config import get_settings
 from app.crud import crud_auth
 from app.db import get_session
@@ -32,6 +33,19 @@ def is_base64(sb: str) -> bool:
 
     except Exception:
         return False
+
+
+def check_token(
+    user_service: Annotated[UserService, Depends()], credentials: Annotated[HTTPBasicCredentials, Depends(security)]
+):
+    """
+    Function that is used to validate the token in the case that it requires it
+    """
+    token = credentials.credentials
+    if token is None:
+        raise HTTPException(status_code=401, detail="Missing auth token")
+
+    return user_service.get_user_by_auth_token(token)
 
 
 def has_token(*, db: UserDB, credentials: Annotated[HTTPBasicCredentials, Depends(security)]) -> User:
