@@ -121,10 +121,10 @@ def get_db(request: Request):
             # Handle other ProgrammingErrors
             logger.error("ProgrammingError:", pe)
         session.rollback()
-        raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}")
-    except Exception:
+        raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}") from pe
+    except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}")
+        raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}") from e
     finally:
         session.close()
 
