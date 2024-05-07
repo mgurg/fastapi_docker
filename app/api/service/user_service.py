@@ -1,5 +1,3 @@
-from sqlalchemy import Sequence
-
 from datetime import datetime, timezone
 from typing import Annotated
 from uuid import UUID, uuid4
@@ -95,3 +93,24 @@ class UserService:
 
     def get_user_by_auth_token(self, token: str) -> User | None:
         return self.user_repo.get_user_by_auth_token(token)
+
+    def delete_user(self, user_uuid: UUID, force: bool = False):
+        db_user = self.user_repo.get_by_uuid(user_uuid)
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        email = db_user.email
+
+        if force is True:
+            self.user_repo.delete(db_user.id)
+        else:
+            self.user_repo.update(db_user.id, **{"deleted_at": datetime.now(timezone.utc)})
+
+        schema_translate_map = {"tenant": "public"}
+        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        with Session(autocommit=False, autoflush=False, bind=connectable) as db:
+            db_public_user = crud_auth.get_public_user_by_email(db, email)
+
+            if db_public_user:
+                db.delete(db_public_user)
+                db.commit()

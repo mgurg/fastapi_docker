@@ -60,9 +60,7 @@ def user_add(user_service: Annotated[UserService, Depends()], user: UserCreateIn
     return {"ok": True}
 
 
-# @user_test_router.delete("/{user_uuid}", response_model=StandardResponse)
-# def get_one_user(user_service: Annotated[UserService, Depends()], user_uuid: str):
-#     user = user_service.get_user_by_uuid(UUID(user_uuid))
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return user
+@user_test_router.delete("/{user_uuid}", response_model=StandardResponse)
+def delete_user(user_service: Annotated[UserService, Depends()], user_uuid: str, force: bool = False):
+    user = user_service.delete_user(UUID(user_uuid), force)
+    return {"ok": True}
