@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
+from pydantic import EmailStr
 from sqlalchemy import Sequence, func, select, text
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,13 @@ class UserRepo(GenericRepo[User]):
 
     def get_by_uuid(self, uuid: UUID) -> User | None:
         query = select(self.Model).where(self.Model.uuid == str(uuid))  # .options(selectinload("*"))
+
+        result = self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    def get_by_email(self, email: EmailStr) -> User:
+        query = select(User).where(User.email == email).where(User.deleted_at.is_(None))
+
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 

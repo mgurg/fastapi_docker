@@ -1,3 +1,20 @@
+### Add user
+POST http://0.0.0.0:5000/user_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "httpAPIUser",
+  "last_name": "string",
+  "email": "httpAPIUser@example.com",
+  "phone": "string",
+  "password": "string",
+  "password_confirmation": "string",
+  "is_verified": true,
+  "user_role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
+}
 ### Get user by uuid
 GET http://0.0.0.0:5000/user_test/59e49dd8-efb0-4201-b767-607257fd13de
 Accept: application/json
