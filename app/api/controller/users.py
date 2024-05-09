@@ -1,8 +1,10 @@
+import traceback
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_pagination import Params
+from loguru import logger
 
 from app.api.service.user_service import UserService
 from app.models.models import User
@@ -32,9 +34,12 @@ def get_all_users(
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
-
-    db_users, count = user_service.get_all_users(offset, limit, field, order, search)
-
+    try:
+        db_users, count = user_service.get_all_users(offset, limit, field, order, search)
+    except Exception as e:
+        tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+        print(tb_str)
+        logger.error(e.__traceback__)
     return UsersPaginated(data=db_users, count=count, offset=offset, limit=limit)
 
 

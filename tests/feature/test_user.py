@@ -1,10 +1,8 @@
 import json
 
-import pytest
 from faker import Faker
 from fastapi.testclient import TestClient
 from loguru import logger
-from sqlalchemy.orm import Session
 
 
 def test_get_users(client: TestClient):
@@ -12,52 +10,38 @@ def test_get_users(client: TestClient):
         "GET", "/users", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
     )
     data = response.json()
-    logger.error(data)
+
+    expected_data = {'items': [{'email': 'user@example.com',
+                                'first_name': 'Jan',
+                                'is_active': True,
+                                'is_verified': True,
+                                'last_name': 'Kowalski',
+                                'phone': '',
+                                'role_FK': {'role_name': 'ADMIN_MASTER',
+                                            'role_title': 'Main admin',
+                                            'uuid': 'a8cd3ea8-6a52-482d-9ca8-097d59429ea5'},
+                                'uuid': '59e49dd8-efb0-4201-b767-607257fd13de'},
+                               {'email': 'maciej.xxx@gmail.com',
+                                'first_name': 'Maciej',
+                                'is_active': True,
+                                'is_verified': True,
+                                'last_name': 'Nowak',
+                                'phone': '',
+                                'role_FK': {'role_name': 'Serwisant',
+                                            'role_title': 'Serwisant',
+                                            'uuid': '4b3be063-7cdd-434a-96c5-7de2a32d19d3'},
+                                'uuid': '94ca4f7e-e4ae-4921-8758-94e672fe201d'}],
+                     'page': 1,
+                     'pages': 1,
+                     'size': 50,
+                     'total': 2}
 
     assert response.status_code == 200
-#     r = {
-#         "items": [
-#             {
-#                 "first_name": "faker_000_Thomas",
-#                 "last_name": "faker_000_Franklin",
-#                 "email": "faker_000_@email.com",
-#                 "phone": None,
-#                 "uuid": "ef37fb58-98aa-4a85-8901-5b63a0c3563b",
-#                 "is_active": True,
-#                 "is_verified": True,
-#                 "role_FK": {
-#                     "uuid": "e255f78e-704f-4046-b1d7-89bb83786fef",
-#                     "role_name": "ADMIN_MASTER",
-#                     "role_title": "Main admin",
-#                 },
-#             }
-#         ],
-#         "total": 1,
-#         "page": 1,
-#         "size": 50,
-#     }
-
-#     assert response.status_code == 200
-#     assert data["items"]
-#     assert data["total"]
-#     assert data["page"]
-#     assert data["size"]
-#     assert data["items"][0]["first_name"]
-#     assert data["items"][0]["last_name"]
-#     assert data["items"][0]["email"]
-#     # assert data["items"][0]["phone"]
-#     assert data["items"][0]["uuid"]
-#     assert data["items"][0]["is_active"]
-#     assert data["items"][0]["is_verified"]
-#     assert data["items"][0]["role_FK"]
-#     assert data["items"][0]["role_FK"]["uuid"]
-#     assert data["items"][0]["role_FK"]["role_name"]
-#     assert data["items"][0]["role_FK"]["role_title"]
+    assert data == expected_data
 
 
 # TODO role_uuid
 def test_add_users(client: TestClient):
-
     fake = Faker()
 
     password = fake.password()
@@ -70,12 +54,12 @@ def test_add_users(client: TestClient):
         "password_confirmation": password
         # "is_verified": True,
     }
-    headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000", "Content-Type": "application/json"}
-    response = client.request("POST","/users/", content=json.dumps(data), headers=headers)
+    headers = {"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000",
+               "Content-Type": "application/json"}
+    response = client.request("POST", "/users/", content=json.dumps(data), headers=headers)
     data = response.json()
     logger.info(data)
     assert response.status_code == 200
-
 
 # def test_edit_user(session: Session, client: TestClient):
 

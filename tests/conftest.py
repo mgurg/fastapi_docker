@@ -16,7 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from testcontainers.postgres import PostgresContainer
 
-from app.db import get_session
+from app.db import get_session, get_db
 from app.main import app
 from app.models.models import User
 from app.service.bearer_auth import has_token
@@ -83,22 +83,47 @@ def session_fixture():
     )
     with pg as postgres_container:
         psql_url = postgres_container.get_connection_url()
+        print(psql_url)
+        engine = create_engine(postgres_container.get_connection_url())
+        schema_translate_map = dict(tenant="fake_tenant_company_for_test_00000000000000000000000000000000")
+        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as session:
+            yield session
+@pytest.fixture(scope="session")
+def db_fixture():
+    pg = PostgresContainer(POSTGRES_VERSION, driver="psycopg")
+    # pg.volumes = {str('sql'): {"bind": "/data"}}
+
+    current_dir = Path(__file__).resolve().parent
+    root_dir = current_dir.parent.parent
+    sql_dir = str(current_dir / "sql/users.sql")
+
+    pg.with_volume_mapping(
+        host=sql_dir,
+        container="/docker-entrypoint-initdb.d/users.sql",
+    )
+    with pg as postgres_container:
+        psql_url = postgres_container.get_connection_url()
+        print(psql_url)
         engine = create_engine(postgres_container.get_connection_url())
         schema_translate_map = dict(tenant="fake_tenant_company_for_test_00000000000000000000000000000000")
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as session:
             yield session
 
-
 @pytest.fixture(name="client")
-def client_fixture(session_fixture: Session):
+def client_fixture(db_fixture: Session, session_fixture: Session):
     def get_session_override():
         return session_fixture
+
+    def get_db_override():
+        return db_fixture
 
     def get_auth_override():
         return User(id=1)
 
     app.dependency_overrides[get_session] = get_session_override
+    app.dependency_overrides[get_db] = get_db_override
     app.dependency_overrides[has_token] = get_auth_override
 
     client = TestClient(app)
