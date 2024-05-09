@@ -19,7 +19,7 @@ from testcontainers.postgres import PostgresContainer
 from app.db import get_session, get_db
 from app.main import app
 from app.models.models import User
-from app.service.bearer_auth import has_token
+from app.service.bearer_auth import has_token, check_token
 
 # def get_settings_override():
 #     load_dotenv("./app/.env")
@@ -121,10 +121,13 @@ def client_fixture(db_fixture: Session, session_fixture: Session):
 
     def get_auth_override():
         return User(id=1)
+    def get_check_token_override():
+        return User(id=1)
 
     app.dependency_overrides[get_session] = get_session_override
     app.dependency_overrides[get_db] = get_db_override
     app.dependency_overrides[has_token] = get_auth_override
+    app.dependency_overrides[check_token] = get_check_token_override
 
     client = TestClient(app)
     yield client

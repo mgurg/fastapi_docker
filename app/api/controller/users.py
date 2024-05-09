@@ -34,12 +34,8 @@ def get_all_users(
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
-    try:
-        db_users, count = user_service.get_all_users(offset, limit, field, order, search)
-    except Exception as e:
-        tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
-        print(tb_str)
-        logger.error(e.__traceback__)
+
+    db_users, count = user_service.get_all_users(offset, limit, field, order, search)
     return UsersPaginated(data=db_users, count=count, offset=offset, limit=limit)
 
 
