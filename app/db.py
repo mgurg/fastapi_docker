@@ -128,6 +128,25 @@ def get_db(request: Request):
     finally:
         session.close()
 
+def get_public_db():
+    try:
+        connectable = engine.execution_options(schema_translate_map={"tenant": "public"})
+        with Session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
+    except ProgrammingError as pe:
+        if isinstance(pe.orig, UndefinedTable):
+            # Handle the case where the table is undefined
+            logger.error(f"Table does not exist for schema: public")
+        else:
+            # Handle other ProgrammingErrors
+            logger.error("ProgrammingError:", pe)
+        session.rollback()
+        raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}") from pe
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}") from e
+    finally:
+        session.close()
 
 def get_session(request: Request):
     tenant = request.headers.get("tenant")

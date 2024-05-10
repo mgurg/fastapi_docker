@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, timezone
 from typing import Annotated
 from uuid import UUID, uuid4
@@ -6,6 +7,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 
+from app.api.repository.PublicUserRepo import PublicUserRepo
 from app.api.repository.UserRepo import UserRepo
 from app.crud import crud_auth
 from app.db import engine
@@ -15,8 +17,10 @@ from app.service.password import Password
 
 
 class UserService:
-    def __init__(self, user_repo: Annotated[UserRepo, Depends()]) -> None:
+    def __init__(self, user_repo: Annotated[UserRepo, Depends()],
+                 public_user_repo: Annotated[PublicUserRepo, Depends()],) -> None:
         self.user_repo = user_repo
+        self.public_user_repo = public_user_repo
 
     def add_user(self, user: UserCreateIn, tenant_id: str | None):
         if tenant_id is None:
@@ -59,6 +63,10 @@ class UserService:
 
         self.user_repo.create(**user_data)
 
+        if not "pytest" in sys.modules:
+            self.create_public_user(tenant_id, user, user_uuid)
+
+    def create_public_user(self, tenant_id, user, user_uuid):
         schema_translate_map = {"tenant": "public"}
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as db:

@@ -71,22 +71,22 @@ def test_should_return_count_of_all_users(client: TestClient):
     assert data['count'] == 2
 
 
-# def test_should_add_new_user(client: TestClient):
-#     data = {
-#         "first_name": "httpAPIUser",
-#         "last_name": "string",
-#         "email": "httpAPIUser@example.com",
-#         "phone": "string",
-#         "password": "string",
-#         "password_confirmation": "string",
-#         "is_verified": True,
-#         "user_role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
-#     }
-#
-#     response = client.request(
-#         "POST", "/user_test", content=json.dumps(data),
-#         headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
-#     )
-#     data = response.json()
-#
-#     assert response.status_code == 200
+def test_should_add_new_user(client: TestClient):
+    data = {
+        "first_name": "httpAPIUser",
+        "last_name": "string",
+        "email": "httpAPIUser@example.com",
+        "phone": "string",
+        "password": "string",
+        "password_confirmation": "string",
+        "is_verified": True,
+        "user_role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
+    }
+
+    response = client.request(
+        "POST", "/user_test", content=json.dumps(data),
+        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
+    data = response.json()
+
+    assert response.status_code == 200
