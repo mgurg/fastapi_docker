@@ -17,7 +17,7 @@ Content-Type: application/json
 }
 
 ### Delete user
-DELETE http://0.0.0.0:5000/user_test/2857bc87-4370-431f-b576-f7cac48aeb96?force=true
+DELETE http://0.0.0.0:5000/user_test/1446e861-7dbf-432d-80be-12849d4fccd1?force=true
 Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}

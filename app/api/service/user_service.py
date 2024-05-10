@@ -38,6 +38,7 @@ class UserService:
         if db_user is not None:
             raise HTTPException(status_code=400, detail="User already exists")
 
+        # TODO
         # db_role = crud_permission.get_role_by_uuid(db, user.user_role_uuid)
         # if db_role is None:
         #     raise HTTPException(status_code=400, detail="Invalid Role")
@@ -67,23 +68,21 @@ class UserService:
             self.create_public_user(tenant_id, user, user_uuid)
 
     def create_public_user(self, tenant_id, user, user_uuid):
-        schema_translate_map = {"tenant": "public"}
-        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-        with Session(autocommit=False, autoflush=False, bind=connectable) as db:
-            public_user_data = {
-                "uuid": user_uuid,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "email": user.email,
-                "is_active": True,
-                "is_verified": True,
-                "tos": True,
-                "tenant_id": tenant_id,
-                "tz": "Europe/Warsaw",
-                "lang": "pl",
-                "created_at": datetime.now(timezone.utc),
-            }
-            crud_auth.create_public_user(db, public_user_data)
+        public_user_data = {
+            "uuid": user_uuid,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "is_active": True,
+            "is_verified": True,
+            "tos": True,
+            "tenant_id": tenant_id,
+            "tz": "Europe/Warsaw",
+            "lang": "pl",
+            "created_at": datetime.now(timezone.utc),
+        }
+
+        self.public_user_repo.create(**public_user_data)
 
     def get_user_by_uuid(self, uuid: UUID) -> User | None:
         db_user = self.user_repo.get_by_uuid(uuid)
