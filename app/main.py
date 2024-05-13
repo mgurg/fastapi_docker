@@ -2,7 +2,7 @@ import sys
 from typing import Any
 
 import sentry_sdk
-from fastapi import FastAPI, Request, UploadFile
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from loguru import logger

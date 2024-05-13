@@ -47,9 +47,9 @@ class BaseModel(Base):
     id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
 
 
-class Role(Base):
+class Role(BaseModel):
     __tablename__ = "roles"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)

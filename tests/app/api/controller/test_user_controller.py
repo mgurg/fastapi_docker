@@ -1,6 +1,7 @@
 import json
 
 from fastapi.testclient import TestClient
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
 
 
 def test_should_return_all_users(client: TestClient):
@@ -80,7 +81,7 @@ def test_should_add_new_user(client: TestClient):
         "password": "string",
         "password_confirmation": "string",
         "is_verified": True,
-        "user_role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
+        "role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
     }
 
     response = client.request(
@@ -89,4 +90,13 @@ def test_should_add_new_user(client: TestClient):
     )
     data = response.json()
 
-    assert response.status_code == 200
+    assert response.status_code == HTTP_201_CREATED
+
+
+def test_should_delete_user(client: TestClient):
+    response = client.request(
+        "DELETE", "/user_test/59e49dd8-efb0-4201-b767-607257fd13de",
+        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
+
+    assert response.status_code == HTTP_204_NO_CONTENT

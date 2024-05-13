@@ -50,19 +50,16 @@ class UserRepo(GenericRepo[User]):
         result = self.session.execute(query.offset(offset).limit(limit))
 
         total_records: int = 0
-        try:
-            count_statement = (
-                select(func.count(self.Model.id))
-                .where(self.Model.deleted_at.is_(None))
-                .where(self.Model.is_visible.is_(True))
-            )
-            count_result = self.session.execute(count_statement)
-            counter = count_result.scalar_one_or_none()
-            if counter:
-                total_records = counter
 
-        except Exception as e:
-            print(e)
+        count_statement = (
+            select(func.count(self.Model.id))
+            .where(self.Model.deleted_at.is_(None))
+            .where(self.Model.is_visible.is_(True))
+        )
+        count_result = self.session.execute(count_statement)
+        counter = count_result.scalar_one_or_none()
+        if counter:
+            total_records = counter
 
         return result.scalars().all(), total_records
 

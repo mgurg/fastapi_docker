@@ -2,10 +2,11 @@ from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
 metadata = sa.MetaData(schema="shared")
 Base = declarative_base(metadata=metadata)
+
 
 class BaseModel(Base):
     __abstract__ = True

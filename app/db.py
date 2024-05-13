@@ -7,7 +7,7 @@ from loguru import logger
 from psycopg.errors import UndefinedTable
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, InternalError
 from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
@@ -38,13 +38,13 @@ if sql_performance_monitoring is True:
     def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         conn.info.setdefault("query_start_time", []).append(time.time())
         logger.debug("Start Query:")
-        logger.debug("%s" % statement)
+        logger.debug(f"{statement}")
 
     @event.listens_for(Engine, "after_cursor_execute")
     def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         total = time.time() - conn.info["query_start_time"].pop(-1)
         logger.debug("Query Complete!")
-        logger.debug("Total Time: %f" % total)
+        logger.debug(f"Total Time: {total:f}")
 
 
 SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
@@ -113,6 +113,8 @@ def get_db(request: Request):
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as session:
             yield session
+    except HTTPException as he:
+        raise
     except ProgrammingError as pe:
         if isinstance(pe.orig, UndefinedTable):
             # Handle the case where the table is undefined
@@ -128,6 +130,7 @@ def get_db(request: Request):
     finally:
         session.close()
 
+
 def get_public_db():
     try:
         connectable = engine.execution_options(schema_translate_map={"tenant": "public"})
@@ -136,17 +139,18 @@ def get_public_db():
     except ProgrammingError as pe:
         if isinstance(pe.orig, UndefinedTable):
             # Handle the case where the table is undefined
-            logger.error(f"Table does not exist for schema: public")
+            logger.error("Table does not exist for schema: public")
         else:
             # Handle other ProgrammingErrors
             logger.error("ProgrammingError:", pe)
         session.rollback()
-        raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}") from pe
+        raise HTTPException(status_code=400, detail=f"Application error for schema: 'public'") from pe
     except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}") from e
+        raise HTTPException(status_code=500, detail=f"Application error for schema: 'public'") from e
     finally:
         session.close()
+
 
 def get_session(request: Request):
     tenant = request.headers.get("tenant")

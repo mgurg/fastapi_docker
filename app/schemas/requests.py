@@ -55,7 +55,7 @@ class UserCreateIn(BaseRequest):
     password: str | None = None
     password_confirmation: str | None = None
     is_verified: bool | None = None
-    user_role_uuid: UUID | None = None
+    role_uuid: UUID | None = None
 
 
 class IdeaAddIn(BaseRequest):
