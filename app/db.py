@@ -7,7 +7,7 @@ from loguru import logger
 from psycopg.errors import UndefinedTable
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import ProgrammingError, InternalError
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
@@ -113,7 +113,7 @@ def get_db(request: Request):
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as session:
             yield session
-    except HTTPException as he:
+    except HTTPException:
         raise
     except ProgrammingError as pe:
         if isinstance(pe.orig, UndefinedTable):
@@ -144,10 +144,10 @@ def get_public_db():
             # Handle other ProgrammingErrors
             logger.error("ProgrammingError:", pe)
         session.rollback()
-        raise HTTPException(status_code=400, detail=f"Application error for schema: 'public'") from pe
+        raise HTTPException(status_code=400, detail="Application error for schema: 'public'") from pe
     except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=500, detail=f"Application error for schema: 'public'") from e
+        raise HTTPException(status_code=500, detail="Application error for schema: 'public'") from e
     finally:
         session.close()
 

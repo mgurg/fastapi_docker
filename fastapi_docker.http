@@ -16,6 +16,23 @@ Content-Type: application/json
   "role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
 }
 
+### Edit user
+PATCH http://0.0.0.0:5000/user_test/6dd0ade6-706a-44fb-8ef5-d79026257054
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Jan",
+  "last_name": "Kowalski",
+  "email": "jk@example.com",
+  "phone": "2231478",
+  "password": "string",
+  "password_confirmation": "string",
+  "role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
+}
+
 ### Delete user
 DELETE http://0.0.0.0:5000/user_test/347bd71e-d6f1-42d8-867c-983a55b2e453?force=true
 Accept: application/json

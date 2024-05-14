@@ -1,5 +1,4 @@
 from typing import Annotated
-from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
@@ -8,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
 from app.db import get_db
-from app.models.models import User, Role
+from app.models.models import Role, User
 
 UserDB = Annotated[Session, Depends(get_db)]
 

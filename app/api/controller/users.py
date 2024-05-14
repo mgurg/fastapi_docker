@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.api.service.user_service import UserService
 from app.models.models import User
@@ -55,6 +55,14 @@ def user_add(
     user_service: Annotated[UserService, Depends()], user: UserCreateIn, request: Request, auth_user: CurrentUser
 ):
     user = user_service.add_user(user, request.headers.get("tenant", None))
+    return {"ok": True}
+
+
+@user_test_router.patch("/{user_uuid}", response_model=StandardResponse)
+def user_edit(
+    user_service: Annotated[UserService, Depends()], user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser
+):
+    user = user_service.edit_user(user_uuid, user)
     return {"ok": True}
 
 

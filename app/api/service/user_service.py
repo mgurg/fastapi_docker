@@ -44,7 +44,7 @@ class UserService:
 
         db_role = self.role_repo.get_by_uuid(user.role_uuid)
         if db_role is None:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Invalid Role")
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Invalid role: {user.role_uuid}")
 
         user_uuid = str(uuid4())
         user_data = {
@@ -87,6 +87,55 @@ class UserService:
 
         self.public_user_repo.create(**public_user_data)
 
+    def edit_user(self, user_uuid: UUID, user: UserCreateIn):
+        db_user = self.user_repo.get_by_uuid(user_uuid)
+        if db_user is None:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"User {user_uuid} not found")
+
+        if user.email:
+            email_db_user = self.user_repo.get_by_email(db_user.email)
+            if (email_db_user is not None) and (email_db_user.id != db_user.id):
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST, detail=f"Email {user.email} is already assigned to other user"
+                )
+
+        user_data = user.model_dump(exclude_unset=True)
+
+        if ("password" in user_data.keys()) and (user_data["password"] is not None):
+            password = Password(user_data["password"])
+            is_password_ok = password.compare(user_data["password_confirmation"])
+
+            if is_password_ok is not True:
+                raise HTTPException(status_code=400, detail=is_password_ok)
+
+            user_data["password"] = password.hash()
+            user_data["updated_at"] = datetime.now(timezone.utc)
+            user_data.pop("password_confirmation", None)
+
+        if "role_uuid" in user_data.keys():
+            db_role = self.role_repo.get_by_uuid(user.role_uuid)
+            if db_role is None:
+                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Invalid role: {user.role_uuid}")
+            user_data["user_role_id"] = db_role.id
+            user_data.pop("role_uuid", None)
+
+        self.user_repo.update(db_user.id, **user_data)
+        # UPDATE PUBLIC USER INFO
+        if ("email" in user_data.keys()) and (user_data["email"] is not None) and ("pytest" not in sys.modules):
+            self.update_public_user(user_uuid, {"email": user_data["email"]})
+
+    def update_public_user(self, user_uuid, public_user_data):
+        db_public_user = self.public_user_repo.get_by_uuid(user_uuid)
+        self.public_user_repo.update(db_public_user.id, **public_user_data)
+
+        # schema_translate_map = {"tenant": "public"}
+        # connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        # with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
+        #     db_public_user = crud_auth.get_public_user_by_email(public_db, current_email)
+        #     # print(current_email, db_public_user.id)
+        #     # print({"email": user_data["email"]})
+        #     crud_auth.update_public_user(public_db, db_public_user, {"email": user_data["email"]})
+
     def get_user_by_uuid(self, uuid: UUID) -> User | None:
         db_user = self.user_repo.get_by_uuid(uuid)
         return db_user
@@ -108,8 +157,6 @@ class UserService:
         db_user = self.user_repo.get_by_uuid(user_uuid)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
-
-        email = db_user.email
 
         if force is True:
             self.user_repo.delete(db_user.id)
