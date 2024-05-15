@@ -1,6 +1,7 @@
 # project/tests/conftest.py
 
 import os
+import time
 import traceback
 import warnings
 from pathlib import Path
@@ -64,6 +65,11 @@ def pytest_configure():
     logger.error("Hello ENV: " + os.getenv("TESTING"))
     logger.error("Hello ENV: " + os.getenv("ENVIRONMENT"))
 
+
+@pytest.fixture(autouse=True)
+def slow_down_tests():
+    yield
+    time.sleep(5)
 
 # We bind this to session level to ensure it is only
 # initialized once.

@@ -1,10 +1,14 @@
+import codecs
+import csv
+import io
 import sys
 from datetime import datetime, timezone
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, UploadFile
 from sqlalchemy import Sequence
+from starlette.responses import StreamingResponse
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from app.api.repository.PublicUserRepo import PublicUserRepo
@@ -128,14 +132,6 @@ class UserService:
         db_public_user = self.public_user_repo.get_by_uuid(user_uuid)
         self.public_user_repo.update(db_public_user.id, **public_user_data)
 
-        # schema_translate_map = {"tenant": "public"}
-        # connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-        # with Session(autocommit=False, autoflush=False, bind=connectable) as public_db:
-        #     db_public_user = crud_auth.get_public_user_by_email(public_db, current_email)
-        #     # print(current_email, db_public_user.id)
-        #     # print({"email": user_data["email"]})
-        #     crud_auth.update_public_user(public_db, db_public_user, {"email": user_data["email"]})
-
     def get_user_by_uuid(self, uuid: UUID) -> User | None:
         db_user = self.user_repo.get_by_uuid(uuid)
         return db_user
@@ -172,11 +168,42 @@ class UserService:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Public user {user_uuid} not found")
 
         self.public_user_repo.delete(public_db_user.id)
-        # schema_translate_map = {"tenant": "public"}
-        # connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-        # with Session(autocommit=False, autoflush=False, bind=connectable) as db:
-        #     db_public_user = crud_auth.get_public_user_by_email(db, email)
-        #
-        #     if db_public_user:
-        #         db.delete(db_public_user)
-        #         db.commit()
+
+    def export(self):
+        db_users, count = self.user_repo.get_users(0, 50, "last_name", "asc", None)
+
+        f = io.StringIO()
+        csv_file = csv.writer(f, delimiter=";")
+        csv_file.writerow(["First Name", "Last Name", "Email"])
+        for u in db_users:
+            csv_file.writerow([u.first_name, u.last_name, u.email])
+
+        f.seek(0)
+        response = StreamingResponse(f, media_type="text/csv")
+        filename = f"users_{datetime.today().strftime('%Y-%m-%d')}.csv"
+        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
+
+    def import_users(self, file: UploadFile):
+        csv_reader = csv.DictReader(codecs.iterdecode(file.file, "utf-8"), delimiter=";")
+
+        data = {}
+        for idx, rows in enumerate(csv_reader):
+            key = idx  # Assuming a column named 'Id' to be the primary key
+            data[key] = rows
+            data[key]["uuid"] = str(uuid4())
+            data[key]["is_active"] = True
+            data[key]["is_verified"] = True
+            data[key]["tz"] = "Europe/Warsaw"
+            data[key]["lang"] = "pl"
+            data[key]["phone"] = None
+
+        file.file.close()
+
+        print(list(data.values()))
+
+        # crud_users.bulk_insert(db, list(data.values()))
+
+        # https://stackoverflow.com/a/70655118
+
+        return data

@@ -1,8 +1,8 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 
 from app.api.service.user_service import UserService
 from app.models.models import User
@@ -40,6 +40,20 @@ def get_users_count(user_service: Annotated[UserService, Depends()], auth_user: 
     db_user_cnt = user_service.count_all_users()
 
     return db_user_cnt
+
+
+@user_test_router.get("/export")
+def get_export_users(user_service: Annotated[UserService, Depends()], auth_user: CurrentUser):
+    return user_service.export()
+
+
+@user_test_router.post("/import")
+def get_import_users(
+    user_service: Annotated[UserService, Depends()], auth_user: CurrentUser, file: UploadFile | None = None
+):
+    if not file:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="No file sent")
+    return user_service.import_users(file)
 
 
 @user_test_router.get("/{user_uuid}", response_model=UserIndexResponse)

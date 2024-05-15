@@ -54,6 +54,14 @@ tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
+
+### Export users to CSV
+GET http://0.0.0.0:5000/user_test/export
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
 ### Count users
 GET http://0.0.0.0:5000/user_test/count
 Accept: application/json

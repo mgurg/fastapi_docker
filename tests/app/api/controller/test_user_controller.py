@@ -1,7 +1,19 @@
 import json
+from io import BytesIO
 
 from fastapi.testclient import TestClient
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED, HTTP_200_OK
+
+
+def test_should_return_count_of_all_users(client: TestClient):
+    response = client.request(
+        "GET", "/user_test/count",
+        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data == 2
 
 
 def test_should_return_all_users(client: TestClient):
@@ -61,17 +73,6 @@ def test_should_return_main_admin(client: TestClient):
     assert data == expected_data
 
 
-def test_should_return_count_of_all_users(client: TestClient):
-    response = client.request(
-        "GET", "/user_test?/count",
-        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
-    )
-    data = response.json()
-
-    assert response.status_code == 200
-    assert data['count'] == 2
-
-
 def test_should_add_new_user(client: TestClient):
     data = {
         "first_name": "httpAPIUser",
@@ -93,6 +94,63 @@ def test_should_add_new_user(client: TestClient):
     assert response.status_code == HTTP_201_CREATED
 
 
+def test_should_export_all_users_to_csv(client: TestClient):
+    response = client.request(
+        "GET", "/user_test/export",
+        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
+
+    # Expected CSV content
+    expected_csv = ('First Name;Last Name;Email\r\n'
+                    'Maciej;Nowak;maciej.xxx@gmail.com\r\n'
+                    'httpAPIUser;string;httpAPIUser@example.com\r\n')
+
+    data = response.content.decode("utf-8")
+
+    assert response.status_code == HTTP_200_OK
+    # Assert headers
+    assert response.headers["content-type"] == "text/csv; charset=utf-8"
+    assert "content-disposition" in response.headers
+    assert response.headers["content-disposition"].startswith("attachment; filename=users_")
+    assert response.headers["content-disposition"].endswith(".csv")
+
+    # Assert CSV content
+    assert data == expected_csv
+
+
+def test_should_import_all_users_from_csv(client: TestClient):
+    csv_content = b"""Id;Name;Email\n1;Alice;alice@example.com\n2;Bob;bob@example.com\n"""
+    file = BytesIO(csv_content)
+    file.seek(0)
+
+    response = client.request(
+        "POST", "/user_test/import", files={"file": ("test.csv", file, "text/csv")},
+        headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
+    )
+
+    data = response.json()
+
+    assert response.status_code == HTTP_200_OK
+    assert len(data) == 2
+    assert data["0"]["Name"] == "Alice"
+    assert data["0"]["Email"] == "alice@example.com"
+    assert data["0"]["uuid"] is not None
+    assert data["0"]["is_active"] is True
+    assert data["0"]["is_verified"] is True
+    assert data["0"]["tz"] == "Europe/Warsaw"
+    assert data["0"]["lang"] == "pl"
+    assert data["0"]["phone"] is None
+
+    assert data["1"]["Name"] == "Bob"
+    assert data["1"]["Email"] == "bob@example.com"
+    assert data["1"]["uuid"] is not None
+    assert data["1"]["is_active"] is True
+    assert data["1"]["is_verified"] is True
+    assert data["1"]["tz"] == "Europe/Warsaw"
+    assert data["1"]["lang"] == "pl"
+    assert data["1"]["phone"] is None
+
+
 def test_should_edit_existing_user(client: TestClient):
     data = {
         "first_name": "Jan",
@@ -108,9 +166,10 @@ def test_should_edit_existing_user(client: TestClient):
         "PATCH", "/user_test/59e49dd8-efb0-4201-b767-607257fd13de", content=json.dumps(data),
         headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}
     )
-    data = response.json()
+    # data = response.json()
 
     assert response.status_code == HTTP_200_OK
+
 
 def test_should_delete_user(client: TestClient):
     response = client.request(
