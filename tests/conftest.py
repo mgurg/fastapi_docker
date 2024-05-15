@@ -66,10 +66,10 @@ def pytest_configure():
     logger.error("Hello ENV: " + os.getenv("ENVIRONMENT"))
 
 
-@pytest.fixture(autouse=True)
-def slow_down_tests():
-    yield
-    time.sleep(5)
+# @pytest.fixture(autouse=True)
+# def slow_down_tests():
+#     yield
+#     time.sleep(5)
 
 # We bind this to session level to ensure it is only
 # initialized once.

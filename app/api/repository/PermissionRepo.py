@@ -7,23 +7,23 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
 from app.db import get_db
-from app.models.models import Role, User
+from app.models.models import Role, User, Permission
 
 UserDB = Annotated[Session, Depends(get_db)]
 
 
-class RoleRepo(GenericRepo[Role]):
+class PermissionRepo(GenericRepo[Role]):
     def __init__(self, session: UserDB) -> None:
-        self.Model = Role
+        self.Model = Permission
         super().__init__(session, self.Model)
 
-    def get_by_uuid(self, uuid: UUID) -> Role | None:
+    def get_by_uuid(self, uuid: UUID) -> Permission | None:
         query = select(self.Model).where(self.Model.uuid == str(uuid)).options(selectinload("*"))
 
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_role_by_name(self, name: str) -> Role | None:
+    def get_role_by_name(self, name: str) -> Permission | None:
         query = select(self.Model).where(func.lower(self.Model.role_title) == name.lower())
 
         result = self.session.execute(query)

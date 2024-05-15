@@ -1,3 +1,7 @@
+# PERMISIONS
+
+# USERS
+
 ### Add user
 POST http://0.0.0.0:5000/user_test
 Accept: application/json
@@ -70,23 +74,23 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### =====Old Way=====
-### Get all users
-GET http://0.0.0.0:5000/users/
-Accept: application/json
-tenant: {{tenant}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-### Get user by uuid
-GET http://0.0.0.0:5000/users/94ca4f7e-e4ae-4921-8758-94e672fe201d
-Accept: application/json
-tenant: {{tenant}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-### Count users
-GET http://0.0.0.0:5000/users/count
-Accept: application/json
-tenant: {{tenant}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
+#### Get all users
+#GET http://0.0.0.0:5000/users/
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json
+#
+#### Get user by uuid
+#GET http://0.0.0.0:5000/users/94ca4f7e-e4ae-4921-8758-94e672fe201d
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json
+#
+#### Count users
+#GET http://0.0.0.0:5000/users/count
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json

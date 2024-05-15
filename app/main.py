@@ -9,6 +9,7 @@ from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
+from app.api.controller.permissions import permission_test_router
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
@@ -22,6 +23,7 @@ from app.api.controller.users import user_test_router
 # from app.api.statistics import statistics_router
 # from app.api.tags import tag_router
 from app.api.users import user_router
+from app.api.users_permissions import permission_router
 
 # from app.api.users_groups import group_router
 # from app.api.users_permissions import permission_router
@@ -57,7 +59,7 @@ def create_application() -> FastAPI:
 
     # app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
     app.include_router(user_router, prefix="/users", tags=["USER"])
-    # app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
+    app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
     # app.include_router(group_router, prefix="/groups", tags=["USER_GROUP"])
     #
     # app.include_router(item_router, prefix="/items", tags=["ITEM"])
@@ -71,7 +73,8 @@ def create_application() -> FastAPI:
     # app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
     # app.include_router(cc_router, prefix="/cc", tags=["C&C"])
 
-    app.include_router(user_test_router, prefix="/user_test", tags=["TEST"])
+    app.include_router(user_test_router, prefix="/user_test", tags=["TEST_U"])
+    app.include_router(permission_test_router, prefix="/user_test", tags=["TEST_P"])
     return app
 
 
