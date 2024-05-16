@@ -13,14 +13,14 @@ from app.service.bearer_auth import check_token
 user_test_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(check_token)]
-
+UserServiceDepenedency = Annotated[UserService, Depends()]
 
 # UserDB = Annotated[Session, Depends(get_session)]
 
 
 @user_test_router.get("", response_model=UsersPaginated)
 def get_all_users(
-    user_service: Annotated[UserService, Depends()],
+    user_service: UserServiceDepenedency,
     # auth_user: CurrentUser,
     search: Annotated[str | None, Query(max_length=50)] = None,
     limit: int = 10,
@@ -36,28 +36,26 @@ def get_all_users(
 
 
 @user_test_router.get("/count")
-def get_users_count(user_service: Annotated[UserService, Depends()], auth_user: CurrentUser):
+def get_users_count(user_service: UserServiceDepenedency, auth_user: CurrentUser):
     db_user_cnt = user_service.count_all_users()
 
     return db_user_cnt
 
 
 @user_test_router.get("/export")
-def get_export_users(user_service: Annotated[UserService, Depends()], auth_user: CurrentUser):
+def get_export_users(user_service: UserServiceDepenedency, auth_user: CurrentUser):
     return user_service.export()
 
 
 @user_test_router.post("/import")
-def get_import_users(
-    user_service: Annotated[UserService, Depends()], auth_user: CurrentUser, file: UploadFile | None = None
-):
+def get_import_users(user_service: UserServiceDepenedency, auth_user: CurrentUser, file: UploadFile | None = None):
     if not file:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="No file sent")
     return user_service.import_users(file)
 
 
 @user_test_router.get("/{user_uuid}", response_model=UserIndexResponse)
-def get_one_user(user_service: Annotated[UserService, Depends()], user_uuid: str):
+def get_one_user(user_service: UserServiceDepenedency, user_uuid: str):
     user = user_service.get_user_by_uuid(UUID(user_uuid))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -65,21 +63,17 @@ def get_one_user(user_service: Annotated[UserService, Depends()], user_uuid: str
 
 
 @user_test_router.post("", response_model=StandardResponse, status_code=HTTP_201_CREATED)
-def user_add(
-    user_service: Annotated[UserService, Depends()], user: UserCreateIn, request: Request, auth_user: CurrentUser
-):
+def user_add(user_service: UserServiceDepenedency, user: UserCreateIn, request: Request, auth_user: CurrentUser):
     user = user_service.add_user(user, request.headers.get("tenant", None))
     return {"ok": True}
 
 
 @user_test_router.patch("/{user_uuid}", response_model=StandardResponse)
-def user_edit(
-    user_service: Annotated[UserService, Depends()], user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser
-):
+def user_edit(user_service: UserServiceDepenedency, user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser):
     user = user_service.edit_user(user_uuid, user)
     return {"ok": True}
 
 
 @user_test_router.delete("/{user_uuid}", status_code=HTTP_204_NO_CONTENT)
-def delete_user(user_service: Annotated[UserService, Depends()], user_uuid: str, force: bool = False):
+def delete_user(user_service: UserServiceDepenedency, user_uuid: str, force: bool = False):
     user = user_service.delete_user(UUID(user_uuid), force)

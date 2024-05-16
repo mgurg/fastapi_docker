@@ -9,7 +9,9 @@ from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
+from app.api.controller.auth import auth_test_router
 from app.api.controller.permissions import permission_test_router
+
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
@@ -73,6 +75,7 @@ def create_application() -> FastAPI:
     # app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
     # app.include_router(cc_router, prefix="/cc", tags=["C&C"])
 
+    app.include_router(auth_test_router, prefix="/user_test", tags=["TEST_A"])
     app.include_router(user_test_router, prefix="/user_test", tags=["TEST_U"])
     app.include_router(permission_test_router, prefix="/user_test", tags=["TEST_P"])
     return app

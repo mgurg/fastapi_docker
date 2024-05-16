@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
 from app.db import get_db
-from app.models.models import Role, User, Permission
+from app.models.models import Permission, Role
 
 UserDB = Annotated[Session, Depends(get_db)]
 
