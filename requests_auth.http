@@ -1,0 +1,9 @@
+### AUTH
+POST {{baseUrl}}/auth_test/company_info
+accept: application/json
+Content-Type: application/json
+
+{
+  "country": "pl",
+  "company_tax_id": "9542752600"
+}

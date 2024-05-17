@@ -6,10 +6,10 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.repository.generics import GenericRepo
-from app.db import get_db, get_public_db
+from app.db import get_public_db
 from app.models.shared_models import PublicCompany
 
-UserDB = Annotated[Session, Depends(get_db)]
+# UserDB = Annotated[Session, Depends(get_db)]
 
 PublicUserDB = Annotated[Session, Depends(get_public_db)]
 
@@ -25,7 +25,13 @@ class PublicCompanyRepo(GenericRepo[PublicCompany]):
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_users_count(self) -> int:
+    def get_by_nip(self, nip: str) -> PublicCompany | None:
+        query = select(self.Model).where(self.Model.nip == nip)
+
+        result = self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    def get_users_count(self) -> int | None:
         query = select(func.count(self.Model.id))
 
         result = self.session.execute(query)  # await db.execute(query)

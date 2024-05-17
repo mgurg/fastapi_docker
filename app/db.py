@@ -35,16 +35,15 @@ sql_performance_monitoring = False
 if sql_performance_monitoring is True:
 
     @event.listens_for(Engine, "before_cursor_execute")
-    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-        conn.info.setdefault("query_start_time", []).append(time.time())
-        logger.debug("Start Query:")
-        logger.debug(f"{statement}")
+    def before_cursor_execute(conn, _cursor, statement, parameters, _context, _executemany) -> None:
+        conn.info.setdefault("query_start_time", []).append(time.perf_counter())
+        logger.debug(f"Start Query:\n{statement}", extra={"task": "SQL"})
+        logger.debug(f"Parameters:\n{parameters!r}", extra={"task": "SQL"})
 
     @event.listens_for(Engine, "after_cursor_execute")
-    def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-        total = time.time() - conn.info["query_start_time"].pop(-1)
-        logger.debug("Query Complete!")
-        logger.debug(f"Total Time: {total:f}")
+    def after_cursor_execute(conn, _cursor, _statement, _parameters, _context, _executemany) -> None:
+        total_seconds = time.perf_counter() - conn.info["query_start_time"].pop(-1)
+        logger.debug("Query Complete, total Time: %.02fms" % (total_seconds * 1000), extra={"task": "SQL"})
 
 
 SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
@@ -136,6 +135,8 @@ def get_public_db():
         connectable = engine.execution_options(schema_translate_map={"tenant": "public"})
         with Session(autocommit=False, autoflush=False, bind=connectable) as session:
             yield session
+    except HTTPException:
+        raise
     except ProgrammingError as pe:
         if isinstance(pe.orig, UndefinedTable):
             # Handle the case where the table is undefined

@@ -4,6 +4,7 @@ import re
 import traceback
 from pathlib import Path
 from string import capwords
+from typing import TypedDict
 
 import requests
 from loguru import logger
@@ -15,158 +16,127 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# https://stackoverflow.com/questions/48572494/structuring-api-calls-in-python
-# https://github.com/sunkaflek/vies-parser
+
+class CompanyData(TypedDict):
+    name: str
+    short_name: str
+    street: str
+    postcode: str
+    city: str
+    country_code: str
 
 
-class CompanyDetails:
+class CompanyInfo:
     def __init__(self, country: str, tax_id: str):
         self.country = country.upper()
-        self.tax_id = re.sub("[^A-Za-z0-9]", "", tax_id)
-        self.vat_eu = "".join([self.country, self.tax_id.upper()])
+        self.tax_id = re.sub(r"[^A-Za-z0-9]", "", tax_id)
+        self.vat_eu = f"{self.country}{self.tax_id.upper()}"
 
-    def get_company_details(self):
-        data = None
-        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+    def get_details(self) -> CompanyData | None:
+        if os.getenv("TESTING") == "1":
             logger.info("Company data test")
             return self.rejestr_io()
 
         try:
-            if data is None:
-                data = self.vies()
-            if data is None:
-                data = self.gus()
-            if data is None:
-                data = self.rejestr_io()
-            if data is None:
-                data = {
-                    "name": "Nie znaleziono - uzupelnij",
-                    "short_name": "Nie znaleziono - uzupelnij",
-                    "street": "",
-                    "postcode": "",
-                    "city": "",
-                    "country_code": "PL",
-                }
+            for method in (self.vies, self.gus, self.rejestr_io):
+                data = method()
+                if data is not None:
+                    return data
+            return self._default_data()
         except Exception as e:
-            print(e)
+            logger.error(f"Error retrieving company details: {e}")
             traceback.print_exc()
             return None
-        return data
 
     def vies(self):
         try:
             vies = api.Vies()
             result = vies.request(self.vat_eu, self.country, extended_info=True)
-
-        except api.ViesValidationError as e:
-            print("ViesValidationError", e)
-            return None
-        except api.ViesHTTPError as e:
-            print("ViesHTTPError", e)
-            return None
-        except api.ViesError as e:
-            print("ViesError", e)
+        except (api.ViesValidationError, api.ViesHTTPError, api.ViesError) as e:
+            logger.error(f"Vies API error: {e}")
             return None
 
-        if result and (result["valid"] is False):  # 5691805989
+        if not result or not result.get("valid"):
             return None
 
         try:
             name = {
                 "name": capwords(result["traderName"], sep=None),
-                "short_name": self.get_company_short_name(company_name=result["traderName"]),
+                "short_name": self._get_company_short_name(result["traderName"]),
             }
-
-            print(result["traderAddress"])
-            address = self.get_vies_parsed_address(address=result["traderAddress"])
-        except Exception:
+            address = self._get_vies_parsed_address(result["traderAddress"])
+            if address:
+                return {**name, **address}
+        except Exception as e:
+            logger.error(f"Error parsing VIES data: {e}")
             traceback.print_exc()
-            return None
-        if address is None:
-            return None
-        return name | address
+        return None
 
     def gus(self):
-        # Authentication
-        api = RegonAPI(bir_version="bir1.1", is_production=False, timeout=10, operation_timeout=10)
+        regon_api = RegonAPI(bir_version="bir1.1", is_production=False, timeout=10, operation_timeout=10)
         try:
-            api.authenticate(key=settings.GUS_API_DEV)
+            regon_api.authenticate(key=settings.GUS_API_DEV)
         except ApiAuthenticationError as e:
-            print("[-]", e)
-            exit(0)
-        except Exception:
-            raise
-
-        # Search by NIP
-        result = api.searchData(nip=self.tax_id)
-        company_name: str = result[0].get("Nazwa")
-
-        if company_name is None:
+            logger.error(f"GUS API authentication error: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error during GUS API authentication: {e}")
             return None
 
-        mapping = [
-            ('"', ""),
-            ("SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ", "SP. Z O. O."),
-            ("SPÓŁKA KOMANDYTOWA", "SP. K."),
-            ("SPÓŁKA CYWILNA", "S.C."),
-            ("SPÓŁKA JAWNA", "SP. J."),
-            ("SPÓŁKA AKCYJNA", "SP. A."),
-        ]
-        for k, v in mapping:
-            company_name.replace(k, v)
+        result = regon_api.searchData(nip=self.tax_id)
+        if not result:
+            return None
+
+        company_name = result[0].get("Nazwa")
+        if not company_name:
+            return None
+
+        company_name = self._replace_company_suffixes(company_name)
 
         street = " ".join(
-            [result[0].get("Ulica", ""), result[0].get("NrNieruchomosci", ""), result[0].get("NrLokalu", "")]
+            filter(None, [result[0].get("Ulica"), result[0].get("NrNieruchomosci"), result[0].get("NrLokalu")])
         )
 
-        data = {
+        return {
             "name": company_name,
-            "short_name": self.get_company_short_name(company_name=company_name),
+            "short_name": self._get_company_short_name(company_name),
             "street": street,
             "postcode": result[0].get("KodPocztowy", ""),
             "city": result[0].get("Miejscowosc", ""),
-            "country_code": self.vat_eu[:2],
+            "country_code": self.country,
         }
 
-        return data
-
     def rejestr_io(self) -> dict | None:
-        data = None
-        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+        if os.getenv("TESTING") == "1":
             logger.info("Company data test")
             path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")
-
             with path.open(encoding="UTF-8") as file:
-                request_json = json.load(file)
-            return {"message": "TEST_EMAIL_NOTIFICATION"}
+                return json.load(file)
         else:
             headers = {"Authorization": settings.REJESTR_IO_KEY}
-            url = "https://rejestr.io/api/v2/org?nip=" + self.tax_id
-            r = requests.get(url, headers=headers)
-            # if r.status_code != 200:
-            #     print("error")
+            url = f"https://rejestr.io/api/v2/org?nip={self.tax_id}"
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                logger.error(f"Rejestr.io API error: {response.status_code}")
+                return None
 
-            request_json = r.json()
-
-        try:
-            data = {
-                "name": request_json["wyniki"][0]["nazwy"]["pelna"],
-                "short_name": request_json["wyniki"][0]["nazwy"]["pelna"],
-                "street": request_json["wyniki"][0]["adres"]["ulica"],
-                "postcode": request_json["wyniki"][0]["adres"]["kod"],
-                "city": request_json["wyniki"][0]["adres"]["miejscowosc"],
-                "country_code": self.vat_eu[:2],
-            }
-
-        except Exception as e:
-            print(e)
-
-        return data
+            try:
+                request_json = response.json()
+                result = request_json["wyniki"][0]
+                return {
+                    "name": result["nazwy"]["pelna"],
+                    "short_name": result["nazwy"]["pelna"],
+                    "street": result["adres"]["ulica"],
+                    "postcode": result["adres"]["kod"],
+                    "city": result["adres"]["miejscowosc"],
+                    "country_code": self.country,
+                }
+            except (KeyError, IndexError) as e:
+                logger.error(f"Error parsing rejestr.io data: {e}")
+        return None
 
     @staticmethod
-    def get_company_short_name(company_name):
-        company_name = company_name.upper()
-
+    def _replace_company_suffixes(company_name: str) -> str:
         mapping = [
             ('"', ""),
             ("SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ", "SP. Z O. O."),
@@ -177,56 +147,51 @@ class CompanyDetails:
         ]
         for k, v in mapping:
             company_name = company_name.replace(k, v)
-
-        return capwords(company_name, sep=None)
+        return company_name
 
     @staticmethod
-    def get_vies_supported_countries():
+    def _get_company_short_name(company_name: str) -> str:
+        return capwords(CompanyInfo._replace_company_suffixes(company_name), sep=None)
+
+    @staticmethod
+    def get_vies_supported_countries() -> list[str]:
         return ["SK", "NL", "BE", "FR", "PT", "IT", "FI", "RO", "SI", "AT", "PL", "HR", "EL", "DK", "EE", "CZ"]
 
-    def get_vies_parsed_address(self, address) -> dict | None:
-        country_code = self.vat_eu[:2]
-        newlines = address.count("\n")
-
-        # -DE does not return address on VIES at all
-        # -IE has pretty much unparsable addresses in VIES - split by commas, in different orders,
-        #   without postcode codes, often without street number etc
-        # -ES VIES does not return address unless you tell it what it is
-        # -RO does not have postcode codes in VIES data, but we parse the rest.
-        #   postcode will return false - needs to be input by customer manualy
-        # -EL additionaly gets transliterated to English characters (resulting in Greeklish)
-
+    def _get_vies_parsed_address(self, address: str) -> dict | None:
+        country_code = self.country
+        address_lines = address.split("\n")
         if country_code not in self.get_vies_supported_countries():
             return None
 
-        if (newlines == 1) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
-            address_split = address.split("\n")
-            street = address_split[0]
-            postcode, city = address_split[1].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
-
+        if len(address_lines) == 2 and country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]:
+            street, postcode_city = address_lines
+            postcode, city = postcode_city.split(" ", 1)
             return {
                 "street": street.strip().capitalize(),
                 "postcode": postcode.strip(),
                 "city": city.strip().capitalize(),
-                "country_code": country_code.strip(),
+                "country_code": country_code,
             }
 
-        if (newlines == 2) and (country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]):
-            """
-            KOZERY
-            UROCZA 54
-            05-825 GRODZISK MAZOWIECKI
-            """
-            address_split = address.split("\n")
-            street = address_split[1]
-            postcode, city = address_split[2].split(" ", maxsplit=1)  # "58-500 JELENIA GÓRA"
-            city = address_split[0]
-
+        if len(address_lines) == 3 and country_code in ["NL", "BE", "FR", "FI", "AT", "PL", "DK"]:
+            city, street, postcode_city = address_lines
+            postcode, city = postcode_city.split(" ", 1)
             return {
                 "street": street.strip().capitalize(),
                 "postcode": postcode.strip(),
                 "city": city.strip().capitalize(),
-                "country_code": country_code.strip(),
+                "country_code": country_code,
             }
 
         return None
+
+    @staticmethod
+    def _default_data() -> CompanyData:
+        return {
+            "name": "Nie znaleziono - uzupelnij",
+            "short_name": "Nie znaleziono - uzupelnij",
+            "street": "",
+            "postcode": "",
+            "city": "",
+            "country_code": "PL",
+        }

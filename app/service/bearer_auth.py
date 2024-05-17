@@ -5,6 +5,7 @@ import pendulum
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from sqlalchemy.orm import Session
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from app.api.service.user_service import UserService
 from app.config import get_settings
@@ -43,9 +44,13 @@ def check_token(
     """
     token = credentials.credentials
     if token is None:
-        raise HTTPException(status_code=401, detail="Missing auth token")
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Missing auth token")
 
-    return user_service.get_user_by_auth_token(token)
+    current_user = user_service.get_user_by_auth_token(token)
+    if current_user:
+        return current_user
+
+    raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect auth token")
 
 
 def has_token(*, db: UserDB, credentials: Annotated[HTTPBasicCredentials, Depends(security)]) -> User:

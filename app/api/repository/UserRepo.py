@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import Depends
 from pydantic import EmailStr
 from sqlalchemy import Sequence, func, select, text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
 from app.db import get_db
@@ -83,7 +83,7 @@ class UserRepo(GenericRepo[User]):
             .where(User.auth_token == token)
             .where(User.is_active == True)  # noqa: E712
             .where(User.auth_token_valid_to > datetime.now(timezone.utc))
-        )
+        ).options(selectinload("*"))
 
         result = self.session.execute(query)  # await db.execute(query)
         return result.scalar_one_or_none()

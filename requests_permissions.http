@@ -1,0 +1,13 @@
+### Get all permissions
+GET {{baseUrl}}/permission_test/all
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get role with permissions and users
+GET {{baseUrl}}/permission_test/758fb334-fe25-40b6-9ac4-98417522afd7
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

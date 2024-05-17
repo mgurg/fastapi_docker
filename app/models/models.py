@@ -64,9 +64,9 @@ class Role(BaseModel):
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
 
-class Permission(Base):
+class Permission(BaseModel):
     __tablename__ = "permissions"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)

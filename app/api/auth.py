@@ -32,7 +32,7 @@ from app.schemas.responses import (
     UserVerifyToken,
 )
 from app.service import auth
-from app.service.company_details import CompanyDetails
+from app.service.company_details import CompanyInfo
 from app.service.notification_email import EmailNotification
 from app.service.password import Password
 from app.service.scheduler import scheduler
@@ -61,8 +61,8 @@ async def auth_company_info(*, public_db: PublicDB, company: CompanyInfoRegister
 
     company_details = None
     try:
-        company = CompanyDetails(country=company.country, tax_id=company.company_tax_id)
-        company_details = company.get_company_details()  # VIES -> GUS -> Rejestr.io
+        company = CompanyInfo(country=company.country, tax_id=company.company_tax_id)
+        company_details = company.get_details()  # VIES -> GUS -> Rejestr.io
     except Exception as e:
         print(e)
         capture_exception(e)
