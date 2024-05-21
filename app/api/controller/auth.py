@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from pydantic import EmailStr
 from starlette.status import HTTP_200_OK
 
 from app.api.service.auth_service import AuthService
 from app.config import get_settings
-from app.schemas.requests import CompanyInfoRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword
 from app.schemas.responses import (
     PublicCompanyCounterResponse,
     UserVerifyToken,
@@ -39,3 +40,15 @@ def auth_verify(auth_service: AuthServiceDependency, token: str):
 @auth_test_router.post("/logout/{token}", status_code=HTTP_200_OK)
 def auth_login(auth_service: AuthServiceDependency, token: str):
     return auth_service.logout(token)
+
+
+@auth_test_router.get("/reset-password/{email}", status_code=HTTP_200_OK)
+def auth_send_remind_password_to_email(auth_service: AuthServiceDependency, email: EmailStr, req: Request):
+    auth_service.send_remind_password_to_email(email, req)
+    return None
+
+
+@auth_test_router.post("/reset-password/{token}", status_code=HTTP_200_OK)
+def auth_reset_password_by_token(auth_service: AuthServiceDependency, token: str, reset_data: ResetPassword):
+    auth_service.reset_password_by_token(token, reset_data)
+    return None
