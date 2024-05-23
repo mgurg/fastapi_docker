@@ -10,7 +10,6 @@ from langcodes import standardize_tag
 from loguru import logger
 from passlib.hash import argon2
 from pydantic import EmailStr
-from sentry_sdk import capture_exception
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
@@ -21,18 +20,16 @@ from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
+from app.schemas.requests import ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
     ActivationResponse,
     CompanyInfoBasic,
-    PublicCompanyCounterResponse,
     StandardResponse,
     UserLoginOut,
     UserQrToken,
     UserVerifyToken,
 )
-from app.service import auth
-from app.service.company_details import CompanyInfo
+from app.service import auth_validators
 from app.service.notification_email import EmailNotification
 from app.service.password import Password
 from app.service.scheduler import scheduler
@@ -45,38 +42,38 @@ UserDB = Annotated[Session, Depends(get_db)]
 PublicDB = Annotated[Session, Depends(get_public_db)]
 
 
-@auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
-def auth_account_limit(*, public_db: PublicDB):
-    db_companies_no = crud_auth.get_public_company_count(public_db)
-    limit = 120
-
-    return {"accounts": db_companies_no, "limit": limit}
-
-
-@auth_router.post("/company_info")
-async def auth_company_info(*, public_db: PublicDB, company: CompanyInfoRegisterIn):
-    db_public_company = crud_auth.get_public_company_by_nip(public_db, company.company_tax_id)
-    if db_public_company:
-        raise HTTPException(status_code=400, detail="Company already registered")
-
-    company_details = None
-    try:
-        company = CompanyInfo(country=company.country, tax_id=company.company_tax_id)
-        company_details = company.get_details()  # VIES -> GUS -> Rejestr.io
-    except Exception as e:
-        print(e)
-        capture_exception(e)
-
-    if company_details is None:
-        capture_exception("NIP not found: " + company.company_tax_id)
-        raise HTTPException(status_code=404, detail="Information not found")
-
-    return company_details
+# @auth_router.get("/account_limit", response_model=PublicCompanyCounterResponse)
+# def auth_account_limit(*, public_db: PublicDB):
+#     db_companies_no = crud_auth.get_public_company_count(public_db)
+#     limit = 120
+#
+#     return {"accounts": db_companies_no, "limit": limit}
+#
+#
+# @auth_router.post("/company_info")
+# async def auth_company_info(*, public_db: PublicDB, company: CompanyInfoRegisterIn):
+#     db_public_company = crud_auth.get_public_company_by_nip(public_db, company.company_tax_id)
+#     if db_public_company:
+#         raise HTTPException(status_code=400, detail="Company already registered")
+#
+#     company_details = None
+#     try:
+#         company = CompanyInfo(country=company.country, tax_id=company.company_tax_id)
+#         company_details = company.get_details()  # VIES -> GUS -> Rejestr.io
+#     except Exception as e:
+#         print(e)
+#         capture_exception(e)
+#
+#     if company_details is None:
+#         capture_exception("NIP not found: " + company.company_tax_id)
+#         raise HTTPException(status_code=404, detail="Information not found")
+#
+#     return company_details
 
 
 @auth_router.post("/register", response_model=StandardResponse)
 def auth_register(*, public_db: PublicDB, user: UserRegisterIn):
-    if auth.is_email_temporary(user.email):
+    if auth_validators.is_email_temporary(user.email):
         raise HTTPException(status_code=403, detail="Temporary email not allowed")
 
     db_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
@@ -88,7 +85,7 @@ def auth_register(*, public_db: PublicDB, user: UserRegisterIn):
     if is_password_ok is not True:
         raise HTTPException(status_code=400, detail=is_password_ok)
 
-    if auth.is_timezone_correct is False:
+    if auth_validators.is_timezone_correct is False:
         raise HTTPException(status_code=400, detail="Invalid timezone")
 
     db_company = crud_auth.get_public_company_by_nip(public_db, user.company_tax_id)

@@ -122,7 +122,7 @@ def get_db(request: Request):
             # Handle other ProgrammingErrors
             logger.error("ProgrammingError:", pe)
         session.rollback()
-        raise HTTPException(status_code=400, detail=f"Application error for schema: {tenant_schema}") from pe
+        raise HTTPException(status_code=400, detail=f"Application ProgrammingError for schema: {tenant_schema}") from pe
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}") from e
@@ -151,7 +151,7 @@ def get_public_db():
         raise HTTPException(status_code=500, detail="Application error for schema: 'public'") from e
     finally:
         session.close()
-
+# TODO: ("'UserRegisterIn' object is not subscriptable",)
 
 def get_session(request: Request):
     tenant = request.headers.get("tenant")

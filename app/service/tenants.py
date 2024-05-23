@@ -10,7 +10,7 @@ from sentry_sdk import capture_exception
 from unidecode import unidecode
 
 from app.config import get_settings
-from app.db import SQLALCHEMY_DB_URL, with_db
+from app.db import SQLALCHEMY_DB_URL, with_db, get_public_db
 from app.utils.decorators import timer
 
 settings = get_settings()
@@ -18,9 +18,7 @@ settings = get_settings()
 
 @timer
 def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
-    logger.info("🔺 [Schema upgrade] " + tenant_name + " to version: " + revision)
-    print("🔺[Schema upgrade] " + tenant_name + " to version: " + revision)
-    # set the paths values
+    logger.info("🔺 [Schema upgrade] {tenant_name} to version: {revision}")
 
     if url is None:
         url = SQLALCHEMY_DB_URL
@@ -58,7 +56,6 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
         # print(traceback.format_exc())
 
     logger.info("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
-    print("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
 
 
 def tenant_create(schema: str) -> None:
@@ -73,6 +70,17 @@ def tenant_create(schema: str) -> None:
         capture_exception(e)
     logger.info("Done create schema: " + schema)
 
+# def tenant_create(schema: str) -> None:
+#     logger.info("START create schema: " + schema)
+#
+#     try:
+#         with get_public_db() as db:
+#             db.execute(sa.schema.CreateSchema(schema))
+#             db.commit()
+#     except Exception as e:
+#         logger.error(e)
+#         capture_exception(e)
+#     logger.info("Done create schema: " + schema)
 
 def tenant_remove(schema: str) -> None:
     logger.info("START DROP schema: " + schema)

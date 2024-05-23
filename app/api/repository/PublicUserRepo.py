@@ -35,7 +35,7 @@ class PublicUserRepo(GenericRepo[PublicUser]):
         query = (
             select(self.Model)
             .where(self.Model.service_token == token)
-            .where(self.Model.is_active == True)
+            .where(self.Model.is_active == True)  # noqa: E712
             .where(self.Model.service_token_valid_to > datetime.now(timezone.utc))
         )
 

@@ -1,15 +1,25 @@
+import os
+import re
 import secrets
 import sys
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException, Request
+from langcodes import standardize_tag
 from loguru import logger
 from passlib.hash import argon2
 from pydantic import EmailStr
 from sentry_sdk import capture_message
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_401_UNAUTHORIZED
+from starlette.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
+)
+from unidecode import unidecode
 from user_agents import parse
 
 from app.api.repository.PublicCompanyRepo import PublicCompanyRepo
@@ -17,20 +27,25 @@ from app.api.repository.PublicUserRepo import PublicUserRepo
 from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import User
-from app.models.shared_models import PublicUser
-from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword
+from app.models.shared_models import PublicCompany, PublicUser
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserRegisterIn
+from app.service import auth_validators
 from app.service.company_details import CompanyInfo
 from app.service.notification_email import EmailNotification
 from app.service.password import Password
+from app.service.scheduler import scheduler
+from app.service.tenants import alembic_upgrade_head, tenant_create
+
+TEST_TENANT_ID = "fake_tenant_company_for_test_123456789000000000000000000000000"
 
 
 class AuthService:
     def __init__(
-            self,
-            user_repo: Annotated[UserRepo, Depends()],
-            role_repo: Annotated[RoleRepo, Depends()],
-            public_user_repo: Annotated[PublicUserRepo, Depends()],
-            public_company_repo: Annotated[PublicCompanyRepo, Depends()],
+        self,
+        user_repo: Annotated[UserRepo, Depends()],
+        role_repo: Annotated[RoleRepo, Depends()],
+        public_user_repo: Annotated[PublicUserRepo, Depends()],
+        public_company_repo: Annotated[PublicCompanyRepo, Depends()],
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
@@ -57,6 +72,97 @@ class AuthService:
             )
 
         return official_data
+
+    def register_new_company_account(self, user_registration: UserRegisterIn):
+        if auth_validators.is_email_temporary(user_registration.email):
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Temporary email not allowed")
+
+        is_password_ok = Password(user_registration.password).compare(user_registration.password_confirmation)
+
+        if is_password_ok is not True:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=is_password_ok)
+
+        if auth_validators.is_timezone_correct is False:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Invalid timezone")
+
+        db_public_user = self.public_user_repo.get_by_email(user_registration.email)
+        if db_public_user:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"User {user_registration.email} exists")
+
+        is_new_company = False
+        db_public_company = self.public_company_repo.get_by_nip(user_registration.company_tax_id)
+        if not db_public_company:
+            db_public_company = self.register_new_public_company(user_registration)
+            is_new_company = True
+
+        tenant_id = db_public_company.id
+
+        new_db_public_user = self.register_new_public_user(tenant_id, user_registration)
+
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            logger.error("TEST AUTH SCHEMA " + db_public_company.tenant_id)
+            tenant_create(db_public_company.tenant_id)
+            alembic_upgrade_head(db_public_company.tenant_id)
+            return True
+
+        if is_new_company:
+            scheduler.add_job(tenant_create, args=[db_public_company.tenant_id])
+            scheduler.add_job(alembic_upgrade_head, args=[db_public_company.tenant_id])
+
+        if user_registration.email.split("@")[1] == "example.com":
+            return True
+
+        # Notification
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            email = EmailNotification()
+            email.send_admin_registration(new_db_public_user, f"/activate/{new_db_public_user.service_token}")
+
+        return True
+
+    def register_new_public_user(self, tenant_id, user_registration) -> PublicUser:
+        service_token = secrets.token_hex(32)
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            today = datetime.now().strftime("%A-%Y-%m-%d-%H")
+            service_token = ("a" * int(64 - len(today))) + today
+
+        user = {
+            "uuid": str(uuid4()),
+            "email": user_registration.email.strip(),
+            "first_name": user_registration.first_name,
+            "last_name": user_registration.last_name,
+            "password": argon2.hash(user_registration.password),
+            "service_token": service_token,
+            "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+            "is_active": False,
+            "is_verified": False,
+            "tos": user_registration.tos,
+            "tenant_id": tenant_id,
+            "tz": user_registration.tz,
+            "lang": standardize_tag(user_registration.lang),
+            "created_at": datetime.now(timezone.utc),
+        }
+        new_db_user = self.public_user_repo.create(**user)
+        return new_db_user
+
+    def register_new_public_company(self, user_registration) -> PublicCompany:
+        db_public_company_uuid = str(uuid4())
+        company = re.sub("[^A-Za-z0-9 _]", "", unidecode(user_registration.company_name))
+        tenant_id = "".join([company[:28], "_", db_public_company_uuid.replace("-", "")]).lower().replace(" ", "_")
+        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+            tenant_id = TEST_TENANT_ID
+        company_data = {
+            "uuid": db_public_company_uuid,
+            "name": user_registration.company_name,
+            "short_name": user_registration.company_name,
+            "nip": user_registration.company_tax_id,
+            "country": "pl",
+            "city": user_registration.company_city,
+            "tenant_id": tenant_id,
+            "qr_id": "afxp",  # TODO crud_qr.generate_company_qr_id(public_db),
+            "created_at": datetime.now(timezone.utc),
+        }
+        new_db_company = self.public_company_repo.create(**company_data)
+        return new_db_company
 
     def verify_auth_token(self, token: str) -> User | None:
         db_user = self.user_repo.get_user_by_auth_token(token)
@@ -118,5 +224,5 @@ class AuthService:
     def update_user_password(self, user_uuid: UUID, new_password: str):
         db_user = self.user_repo.get_by_uuid(user_uuid)
         if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found!")
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found!")
         self.user_repo.update(db_user.id, **{"password": argon2.hash(new_password)})

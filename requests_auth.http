@@ -7,3 +7,30 @@ Content-Type: application/json
   "country": "pl",
   "company_tax_id": "9542752600"
 }
+
+### Register new company account with admin user account
+POST http://0.0.0.0:5000/auth_test/register
+accept: */*
+Content-Type: application/json
+
+{
+  "first_name": "string",
+  "last_name": "string",
+  "email": "user3@example.com",
+  "password": "string",
+  "password_confirmation": "string",
+  "country": "pl",
+  "company_tax_id": "5223071241",
+  "company_name": "Żabka",
+  "company_street": "string",
+  "company_city": "string",
+  "company_postcode": "string",
+  "company_info_changed": true,
+  "tos": true,
+  "tz": "Europe/Warsaw",
+  "lang": "pl"
+}
+
+###
+
+
