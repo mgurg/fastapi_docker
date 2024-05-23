@@ -106,6 +106,7 @@ Base = declarative_base(metadata=metadata)
 
 
 def get_db(request: Request):
+    session = None
     tenant_schema = request.headers.get("tenant")
     try:
         schema_translate_map = {"tenant": tenant_schema} if tenant_schema else None
@@ -116,21 +117,20 @@ def get_db(request: Request):
         raise
     except ProgrammingError as pe:
         if isinstance(pe.orig, UndefinedTable):
-            # Handle the case where the table is undefined
-            logger.error(f"Table does not exist for schema: {tenant_schema}")
+            logger.error(f"Table does not exist for schema: public, msg: {str(pe)}")
         else:
-            # Handle other ProgrammingErrors
-            logger.error("ProgrammingError:", pe)
-        session.rollback()
-        raise HTTPException(status_code=400, detail=f"Application ProgrammingError for schema: {tenant_schema}") from pe
+            logger.error(f"App error, schema: 'public', msg: {str(pe)}")
+        raise HTTPException(status_code=400, detail=f"App error, schema: ' {tenant_schema}', msg: {str(pe)}") from pe
     except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"Application error for schema: {tenant_schema}") from e
+        raise HTTPException(status_code=500, detail=f"App error, schema: ' {tenant_schema}', msg: {str(e)}") from e
     finally:
-        session.close()
+        if session:
+            session.rollback()
+            session.close()
 
 
 def get_public_db():
+    session = None
     try:
         connectable = engine.execution_options(schema_translate_map={"tenant": "public"})
         with Session(autocommit=False, autoflush=False, bind=connectable) as session:
@@ -139,19 +139,16 @@ def get_public_db():
         raise
     except ProgrammingError as pe:
         if isinstance(pe.orig, UndefinedTable):
-            # Handle the case where the table is undefined
-            logger.error("Table does not exist for schema: public")
+            logger.error(f"Table does not exist for schema: public, msg: {str(pe)}")
         else:
-            # Handle other ProgrammingErrors
-            logger.error("ProgrammingError:", pe)
-        session.rollback()
-        raise HTTPException(status_code=400, detail="Application error for schema: 'public'") from pe
+            logger.error(f"App error, schema: 'public', msg: {str(pe)}")
+        raise HTTPException(status_code=400, detail=f"App error, schema: 'public', msg: {str(pe)}") from pe
     except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail="Application error for schema: 'public'") from e
+        raise HTTPException(status_code=500, detail=f"App error, schema: 'public', msg: {str(e)}") from e
     finally:
-        session.close()
-# TODO: ("'UserRegisterIn' object is not subscriptable",)
+        if session:
+            session.rollback()
+            session.close()
 
 def get_session(request: Request):
     tenant = request.headers.get("tenant")
