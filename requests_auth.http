@@ -9,8 +9,8 @@ Content-Type: application/json
 }
 
 ### Register new company account with admin user account
-POST http://0.0.0.0:5000/auth_test/register
-accept: */*
+POST {{baseUrl}}/auth_test/register
+accept: application/json
 Content-Type: application/json
 
 {
@@ -31,6 +31,26 @@ Content-Type: application/json
   "lang": "pl"
 }
 
-###
+### Get tenant uid
+GET {{baseUrl}}/auth_test/get_tenant_uid?email=user@example.com
+accept: application/json
+Content-Type: application/json
 
+### Login user
+POST {{baseUrl}}/auth_test/login
+accept: application/json
+Content-Type: application/json
+
+{
+  "permanent": false,
+  "password": "string",
+  "email": "user@examlpe.com"
+}
+
+
+### Company summary
+GET {{baseUrl}}/auth_test/company_summary
+accept: application/json
+tenant: {{tenant}}
+Content-Type: application/json
 

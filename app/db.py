@@ -105,6 +105,7 @@ Base = declarative_base(metadata=metadata)
 # --------------------
 
 
+# TODO: tenant: Annotated[str | None, Header()] = None
 def get_db(request: Request):
     session = None
     tenant_schema = request.headers.get("tenant")
@@ -149,6 +150,7 @@ def get_public_db():
         if session:
             session.rollback()
             session.close()
+
 
 def get_session(request: Request):
     tenant = request.headers.get("tenant")

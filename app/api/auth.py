@@ -1,4 +1,3 @@
-import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -6,34 +5,21 @@ from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from langcodes import standardize_tag
-from loguru import logger
 from passlib.hash import argon2
-from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
-from unidecode import unidecode
-from user_agents import parse
 
 from app.config import get_settings
 from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
+from app.schemas.requests import UserFirstRunIn, UserLoginIn
 from app.schemas.responses import (
     ActivationResponse,
-    CompanyInfoBasic,
-    StandardResponse,
     UserLoginOut,
     UserQrToken,
-    UserVerifyToken,
 )
-from app.service import auth_validators
-from app.service.notification_email import EmailNotification
-from app.service.password import Password
-from app.service.scheduler import scheduler
-from app.service.tenants import alembic_upgrade_head, tenant_create
 
 settings = get_settings()
 auth_router = APIRouter()
@@ -71,91 +57,91 @@ PublicDB = Annotated[Session, Depends(get_public_db)]
 #     return company_details
 
 
-@auth_router.post("/register", response_model=StandardResponse)
-def auth_register(*, public_db: PublicDB, user: UserRegisterIn):
-    if auth_validators.is_email_temporary(user.email):
-        raise HTTPException(status_code=403, detail="Temporary email not allowed")
-
-    db_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    is_password_ok = Password(user.password).compare(user.password_confirmation)
-
-    if is_password_ok is not True:
-        raise HTTPException(status_code=400, detail=is_password_ok)
-
-    if auth_validators.is_timezone_correct is False:
-        raise HTTPException(status_code=400, detail="Invalid timezone")
-
-    db_company = crud_auth.get_public_company_by_nip(public_db, user.company_tax_id)
-
-    if not db_company:
-        uuid = str(uuid4())
-        company = re.sub("[^A-Za-z0-9 _]", "", unidecode(user.company_name))
-        tenant_id = "".join([company[:28], "_", uuid.replace("-", "")]).lower().replace(" ", "_")
-
-        if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
-            tenant_id = "fake_tenant_company_for_test_00000000000000000000000000000000"
-
-        company_data = {
-            "uuid": uuid,
-            "name": user.company_name,
-            "short_name": user.company_name,
-            "nip": user.company_tax_id,
-            "country": "pl",
-            "city": user.company_city,
-            "tenant_id": tenant_id,
-            "qr_id": crud_qr.generate_company_qr_id(public_db),
-            "created_at": datetime.now(timezone.utc),
-        }
-
-        db_company = crud_auth.create_public_company(public_db, company_data)
-
-    else:
-        tenant_id = db_company.tenant_id
-
-    service_token = secrets.token_hex(32)
-    if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
-        today = datetime.now().strftime("%A-%Y-%m-%d-%H")
-        service_token = ("a" * int(64 - len(today))) + today
-
-    user = {
-        "uuid": str(uuid4()),
-        "email": user.email.strip(),
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "password": argon2.hash(user.password),
-        "service_token": service_token,
-        "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-        "is_active": False,
-        "is_verified": False,
-        "tos": user.tos,
-        "tenant_id": tenant_id,
-        "tz": user.tz,
-        "lang": standardize_tag(user.lang),
-        "created_at": datetime.now(timezone.utc),
-    }
-    new_db_user = crud_auth.create_public_user(public_db, user)
-
-    if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
-        # tenant_create("fake_tenant_company_for_test_00000000000000000000000000000000")
-        # alembic_upgrade_head("fake_tenant_company_for_test_00000000000000000000000000000000")
-        logger.error("AUTH SCHEMA " + db_company.tenant_id)
-        tenant_create(db_company.tenant_id)
-        alembic_upgrade_head(db_company.tenant_id)
-    else:
-        scheduler.add_job(tenant_create, args=[db_company.tenant_id])
-        scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
-
-    if user["email"].split("@")[1] == "example.com":
-        return {"ok": True}
-
-    # Notification
-    email = EmailNotification()
-    email.send_admin_registration(new_db_user, f"/activate/{service_token}")
-
-    return {"ok": True}
+# @auth_router.post("/register", response_model=StandardResponse)
+# def auth_register(*, public_db: PublicDB, user: UserRegisterIn):
+#     if auth_validators.is_email_temporary(user.email):
+#         raise HTTPException(status_code=403, detail="Temporary email not allowed")
+#
+#     db_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
+#     if db_user:
+#         raise HTTPException(status_code=400, detail="User already exists")
+#
+#     is_password_ok = Password(user.password).compare(user.password_confirmation)
+#
+#     if is_password_ok is not True:
+#         raise HTTPException(status_code=400, detail=is_password_ok)
+#
+#     if auth_validators.is_timezone_correct is False:
+#         raise HTTPException(status_code=400, detail="Invalid timezone")
+#
+#     db_company = crud_auth.get_public_company_by_nip(public_db, user.company_tax_id)
+#
+#     if not db_company:
+#         uuid = str(uuid4())
+#         company = re.sub("[^A-Za-z0-9 _]", "", unidecode(user.company_name))
+#         tenant_id = "".join([company[:28], "_", uuid.replace("-", "")]).lower().replace(" ", "_")
+#
+#         if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+#             tenant_id = "fake_tenant_company_for_test_00000000000000000000000000000000"
+#
+#         company_data = {
+#             "uuid": uuid,
+#             "name": user.company_name,
+#             "short_name": user.company_name,
+#             "nip": user.company_tax_id,
+#             "country": "pl",
+#             "city": user.company_city,
+#             "tenant_id": tenant_id,
+#             "qr_id": crud_qr.generate_company_qr_id(public_db),
+#             "created_at": datetime.now(timezone.utc),
+#         }
+#
+#         db_company = crud_auth.create_public_company(public_db, company_data)
+#
+#     else:
+#         tenant_id = db_company.tenant_id
+#
+#     service_token = secrets.token_hex(32)
+#     if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+#         today = datetime.now().strftime("%A-%Y-%m-%d-%H")
+#         service_token = ("a" * int(64 - len(today))) + today
+#
+#     user = {
+#         "uuid": str(uuid4()),
+#         "email": user.email.strip(),
+#         "first_name": user.first_name,
+#         "last_name": user.last_name,
+#         "password": argon2.hash(user.password),
+#         "service_token": service_token,
+#         "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+#         "is_active": False,
+#         "is_verified": False,
+#         "tos": user.tos,
+#         "tenant_id": tenant_id,
+#         "tz": user.tz,
+#         "lang": standardize_tag(user.lang),
+#         "created_at": datetime.now(timezone.utc),
+#     }
+#     new_db_user = crud_auth.create_public_user(public_db, user)
+#
+#     if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
+#         # tenant_create("fake_tenant_company_for_test_00000000000000000000000000000000")
+#         # alembic_upgrade_head("fake_tenant_company_for_test_00000000000000000000000000000000")
+#         logger.error("AUTH SCHEMA " + db_company.tenant_id)
+#         create_new_db_schema(db_company.tenant_id)
+#         alembic_upgrade_head(db_company.tenant_id)
+#     else:
+#         scheduler.add_job(create_new_db_schema, args=[db_company.tenant_id])
+#         scheduler.add_job(alembic_upgrade_head, args=[db_company.tenant_id])
+#
+#     if user["email"].split("@")[1] == "example.com":
+#         return {"ok": True}
+#
+#     # Notification
+#     email = EmailNotification()
+#     email.send_admin_registration(new_db_user, f"/activate/{service_token}")
+#
+#     return {"ok": True}
 
 
 @auth_router.post("/first_run", response_model=ActivationResponse)
@@ -283,15 +269,15 @@ def auth_login(*, public_db: PublicDB, user: UserLoginIn, req: Request):
         return db_user
 
 
-@auth_router.get("/company_summary", response_model=CompanyInfoBasic)
-def get_company_summary(*, public_db: PublicDB, request: Request):
-    print(request.headers.get("tenant"))
-    db_public_company = crud_auth.get_public_company_by_tenant_id(public_db, request.headers.get("tenant"))
-
-    if db_public_company is None:
-        raise HTTPException(status_code=404, detail="Company not found")
-
-    return db_public_company
+# @auth_router.get("/company_summary", response_model=CompanyInfoBasic)
+# def get_company_summary(*, public_db: PublicDB, request: Request):
+#     print(request.headers.get("tenant"))
+#     db_public_company = crud_auth.get_public_company_by_tenant_id(public_db, request.headers.get("tenant"))
+#
+#     if db_public_company is None:
+#         raise HTTPException(status_code=404, detail="Company not found")
+#
+#     return db_public_company
 
 
 # @auth_router.post("/login_tenant", response_model=UserLoginOut)
@@ -304,74 +290,74 @@ def get_company_summary(*, public_db: PublicDB, request: Request):
 #     return db_user
 
 
-@auth_router.get("/verify/{token}", response_model=UserVerifyToken)
-def auth_verify(*, db: UserDB, token: str):
-    user_db = crud_auth.get_tenant_user_by_auth_token(db, token)
-    if user_db is None:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    db_user = db.execute(
-        select(User).where(User.email == user_db.email).options(selectinload("*"))
-    ).scalar_one_or_none()
-
-    if db_user is None:
-        raise HTTPException(status_code=401, detail="Strange error")
-
-    return db_user
-
-
-@auth_router.get("/reset-password/{email}", response_model=StandardResponse)
-def auth_remind_password(*, public_db: PublicDB, email: EmailStr, req: Request):
-    user_agent = parse(req.headers["User-Agent"])
-    ua_os = user_agent.os.family
-    ua_browser = user_agent.browser.family
-
-    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, email)
-
-    if db_public_user is None:
-        logger.warning(f"reset password for nonexisting email {email} , OS: {ua_os}, browser: {ua_browser}")
-        return {"ok": True}
-        # raise HTTPException(status_code=404, detail="User not found")
-
-    service_token = secrets.token_hex(32)
-
-    update_user = {
-        "service_token": service_token,
-        "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-        "updated_at": datetime.now(timezone.utc),
-    }
-
-    crud_auth.update_public_user(public_db, db_public_user, update_user)
-
-    email_notification = EmailNotification()
-    email_notification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
-
-    return {"ok": True}
+# @auth_router.get("/verify/{token}", response_model=UserVerifyToken)
+# def auth_verify(*, db: UserDB, token: str):
+#     user_db = crud_auth.get_tenant_user_by_auth_token(db, token)
+#     if user_db is None:
+#         raise HTTPException(status_code=401, detail="Invalid token")
+#
+#     db_user = db.execute(
+#         select(User).where(User.email == user_db.email).options(selectinload("*"))
+#     ).scalar_one_or_none()
+#
+#     if db_user is None:
+#         raise HTTPException(status_code=401, detail="Strange error")
+#
+#     return db_user
 
 
-@auth_router.post("/reset-password/{token}", response_model=StandardResponse)
-def auth_reset_password(*, public_db: PublicDB, token: str, reset_data: ResetPassword):
-    is_password_ok = Password(reset_data.password).compare(reset_data.password)
+# @auth_router.get("/reset-password/{email}", response_model=StandardResponse)
+# def auth_remind_password(*, public_db: PublicDB, email: EmailStr, req: Request):
+#     user_agent = parse(req.headers["User-Agent"])
+#     ua_os = user_agent.os.family
+#     ua_browser = user_agent.browser.family
+#
+#     db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, email)
+#
+#     if db_public_user is None:
+#         logger.warning(f"reset password for nonexisting email {email} , OS: {ua_os}, browser: {ua_browser}")
+#         return {"ok": True}
+#         # raise HTTPException(status_code=404, detail="User not found")
+#
+#     service_token = secrets.token_hex(32)
+#
+#     update_user = {
+#         "service_token": service_token,
+#         "service_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+#         "updated_at": datetime.now(timezone.utc),
+#     }
+#
+#     crud_auth.update_public_user(public_db, db_public_user, update_user)
+#
+#     email_notification = EmailNotification()
+#     email_notification.send_password_reset_request(db_public_user, service_token, ua_browser, ua_os)
+#
+#     return {"ok": True}
 
-    if is_password_ok is not True:
-        raise HTTPException(status_code=400, detail=is_password_ok)
 
-    db_public_user: PublicUser = crud_auth.get_public_active_user_by_service_token(public_db, token)
-
-    if db_public_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
-    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        db_user = crud_users.get_user_by_uuid(db, db_public_user.uuid)
-        if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found!")
-        update_package = {"password": argon2.hash(reset_data.password)}
-        crud_users.update_user(db, db_user, update_package)
-
-    crud_auth.update_public_user(public_db, db_public_user, {"service_token": None, "service_token_valid_to": None})
-
-    return {"ok": True}
+# @auth_router.post("/reset-password/{token}", response_model=StandardResponse)
+# def auth_reset_password(*, public_db: PublicDB, token: str, reset_data: ResetPassword):
+#     is_password_ok = Password(reset_data.password).compare(reset_data.password)
+#
+#     if is_password_ok is not True:
+#         raise HTTPException(status_code=400, detail=is_password_ok)
+#
+#     db_public_user: PublicUser = crud_auth.get_public_active_user_by_service_token(public_db, token)
+#
+#     if db_public_user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+#
+#     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
+#     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+#         db_user = crud_users.get_user_by_uuid(db, db_public_user.uuid)
+#         if db_user is None:
+#             raise HTTPException(status_code=404, detail="User not found!")
+#         update_package = {"password": argon2.hash(reset_data.password)}
+#         crud_users.update_user(db, db_user, update_package)
+#
+#     crud_auth.update_public_user(public_db, db_public_user, {"service_token": None, "service_token_valid_to": None})
+#
+#     return {"ok": True}
 
 
 @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)

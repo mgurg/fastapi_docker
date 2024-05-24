@@ -44,6 +44,10 @@ class RoleLoginBasic(BaseResponse):
     permission: list[PermissionsLoginBasic]
 
 
+class TenantUidOut(BaseResponse):
+    tenant_uid: str
+
+
 class UserLoginOut(BaseResponse):
     auth_token: str
     auth_token_valid_to: datetime

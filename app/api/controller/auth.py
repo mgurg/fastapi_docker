@@ -1,14 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Header
 from pydantic import EmailStr
 from starlette.status import HTTP_204_NO_CONTENT
 
 from app.api.service.auth_service import AuthService
 from app.config import get_settings
-from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
+    CompanyInfoBasic,
     PublicCompanyCounterResponse,
+    TenantUidOut,
+    UserLoginOut,
     UserVerifyToken,
 )
 
@@ -32,10 +35,32 @@ async def auth_company_info(auth_service: AuthServiceDependency, company: Compan
     return company_details
 
 
+@auth_test_router.get("/company_summary", response_model=CompanyInfoBasic)
+def get_company_summary(auth_service: AuthServiceDependency, tenant: Annotated[str | None, Header()] = None):
+    # TODO: verify if needed
+    company_summary = auth_service.get_company_summary(tenant)
+    return company_summary
+
+
 @auth_test_router.post("/register", status_code=HTTP_204_NO_CONTENT)
 def auth_register(auth_service: AuthServiceDependency, user_registration: UserRegisterIn):
     auth_service.register_new_company_account(user_registration)
     return None
+
+
+@auth_test_router.get("/get_tenant_uid", response_model=TenantUidOut)
+def auth_get_tenant_uid(auth_service: AuthServiceDependency, email: EmailStr):
+    tenant_uid = auth_service.get_tenant_uid(email)
+    return {"tenant_uid": tenant_uid}
+
+
+@auth_test_router.post("/login", response_model=UserLoginOut)
+def auth_login(
+    auth_service: AuthServiceDependency,
+    login_data: UserLoginIn,
+    user_agent: Annotated[str | None, Header()] = None,
+):
+    auth_service.login(login_data, user_agent)
 
 
 @auth_test_router.get("/verify/{token}", response_model=UserVerifyToken)
@@ -44,14 +69,16 @@ def auth_verify(auth_service: AuthServiceDependency, token: str):
 
 
 @auth_test_router.post("/logout/{token}", status_code=HTTP_204_NO_CONTENT)
-def auth_login(auth_service: AuthServiceDependency, token: str):
+def auth_logout(auth_service: AuthServiceDependency, token: str):
     auth_service.logout(token)
     return None
 
 
 @auth_test_router.get("/reset-password/{email}", status_code=HTTP_204_NO_CONTENT)
-def auth_send_remind_password_to_email(auth_service: AuthServiceDependency, email: EmailStr, req: Request):
-    auth_service.send_remind_password_to_email(email, req)
+def auth_send_remind_password_to_email(
+    auth_service: AuthServiceDependency, email: EmailStr, user_agent: Annotated[str | None, Header()] = None
+):
+    auth_service.send_remind_password_to_email(email, user_agent)
     return None
 
 

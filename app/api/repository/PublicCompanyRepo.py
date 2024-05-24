@@ -31,6 +31,12 @@ class PublicCompanyRepo(GenericRepo[PublicCompany]):
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
+    def get_by_tenant_uid(self, tenant: str) -> PublicCompany | None:
+        query = select(self.Model).where(self.Model.tenant_id == tenant)
+
+        result = self.session.execute(query)
+        return result.scalar_one_or_none()
+
     def get_users_count(self) -> int | None:
         query = select(func.count(self.Model.id))
 

@@ -10,7 +10,7 @@ from sentry_sdk import capture_exception
 from unidecode import unidecode
 
 from app.config import get_settings
-from app.db import SQLALCHEMY_DB_URL, with_db, get_public_db
+from app.db import SQLALCHEMY_DB_URL, engine
 from app.utils.decorators import timer
 
 settings = get_settings()
@@ -58,23 +58,11 @@ def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
     logger.info("✅ Schema upgraded for: " + tenant_name + " to version: " + revision)
 
 
-def tenant_create(schema: str) -> None:
-    logger.info("START create schema: " + schema)
-
-    try:
-        with with_db("public") as db:
-            db.execute(sa.schema.CreateSchema(schema))
-            db.commit()
-    except Exception as e:
-        logger.error(e)
-        capture_exception(e)
-    logger.info("Done create schema: " + schema)
-
 # def tenant_create(schema: str) -> None:
 #     logger.info("START create schema: " + schema)
 #
 #     try:
-#         with get_public_db() as db:
+#         with with_db("public") as db:
 #             db.execute(sa.schema.CreateSchema(schema))
 #             db.commit()
 #     except Exception as e:
@@ -82,16 +70,28 @@ def tenant_create(schema: str) -> None:
 #         capture_exception(e)
 #     logger.info("Done create schema: " + schema)
 
-def tenant_remove(schema: str) -> None:
+
+@timer
+def create_new_db_schema(schema: str) -> None:
+    try:
+        with engine.connect() as connection:
+            connection.execute(sa.schema.CreateSchema(schema))
+            connection.commit()
+    except Exception as e:
+        logger.error(f"New schema creation failed: {str(e)}")
+        capture_exception(e)
+    logger.info(f"🔩 New schema created: {schema}")
+
+
+def delete_existing_db_schema(schema: str) -> None:
     logger.info("START DROP schema: " + schema)
     try:
-        with with_db("public") as db:
-            db.execute(sa.schema.DropSchema(schema, cascade=True))
-            db.commit()
+        with engine.connect() as connection:
+            connection.execute(sa.schema.DropSchema(schema, cascade=True))
+            connection.commit()
     except Exception as e:
         capture_exception(e)
-        logger.error(e)
-        print(e)
+        logger.error(str(e))
     logger.info("Done DROP schema: " + schema)
 
 

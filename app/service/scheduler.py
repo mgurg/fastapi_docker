@@ -1,5 +1,5 @@
-from fastapi import FastAPI
 from apscheduler import Scheduler
+from fastapi import FastAPI
 
 scheduler = Scheduler()
 

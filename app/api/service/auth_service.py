@@ -28,13 +28,13 @@ from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
-from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserLoginIn, UserRegisterIn
 from app.service import auth_validators
 from app.service.company_details import CompanyInfo
 from app.service.notification_email import EmailNotification
 from app.service.password import Password
 from app.service.scheduler import scheduler
-from app.service.tenants import alembic_upgrade_head, tenant_create
+from app.service.tenants import alembic_upgrade_head, create_new_db_schema
 
 TEST_TENANT_ID = "fake_tenant_company_for_test_123456789000000000000000000000000"
 
@@ -73,6 +73,14 @@ class AuthService:
 
         return official_data
 
+    def get_company_summary(self, tenant_header: str):
+        db_public_company = self.public_company_repo.get_by_tenant_uid(tenant_header)
+
+        if db_public_company is None:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Company not found")
+
+        return db_public_company
+
     def register_new_company_account(self, user_registration: UserRegisterIn):
         if auth_validators.is_email_temporary(user_registration.email):
             raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Temporary email not allowed")
@@ -101,12 +109,12 @@ class AuthService:
 
         if (os.getenv("TESTING") is not None) and (os.getenv("TESTING") == "1"):
             logger.error("TEST AUTH SCHEMA " + db_public_company.tenant_id)
-            tenant_create(db_public_company.tenant_id)
+            create_new_db_schema(db_public_company.tenant_id)
             alembic_upgrade_head(db_public_company.tenant_id)
             return True
 
         if is_new_company:
-            scheduler.add_job(tenant_create, args=[db_public_company.tenant_id])
+            scheduler.add_job(create_new_db_schema, args=[db_public_company.tenant_id])
             scheduler.add_job(alembic_upgrade_head, args=[db_public_company.tenant_id])
 
         if user_registration.email.split("@")[1] == "example.com":
@@ -163,6 +171,40 @@ class AuthService:
         }
         new_db_company = self.public_company_repo.create(**company_data)
         return new_db_company
+
+    def get_tenant_uid(self, email: EmailStr):
+        db_public_user = self.public_user_repo.get_by_email(email)
+        if db_public_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return db_public_user.tenant_id
+
+    def login(self, login_data: UserLoginIn, user_agent: str):
+        db_user = self.user_repo.get_by_email(login_data.email)
+
+        if db_user is None or argon2.verify(login_data.password, db_user.password) is False:
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
+
+        if db_user.is_active is False:
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=f"User {login_data.email} not activated")
+
+        if db_user.is_verified is False:
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=f"User {login_data.email} not verified yet")
+
+        days_to_add: int = 30 if login_data.permanent else 1
+        token_valid_to = datetime.now(timezone.utc) + timedelta(days=days_to_add)
+
+        new_auth_token = secrets.token_hex(64)
+        update_package = {
+            "auth_token": new_auth_token,  # token,
+            "auth_token_valid_to": token_valid_to,
+            "updated_at": datetime.now(timezone.utc),
+        }
+        self.user_repo.update(db_user.id, **update_package)
+
+        updated_db_user = self.user_repo.get_user_by_auth_token(new_auth_token)
+
+        return updated_db_user
 
     def verify_auth_token(self, token: str) -> User | None:
         db_user = self.user_repo.get_user_by_auth_token(token)
