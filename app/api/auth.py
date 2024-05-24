@@ -4,20 +4,16 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from passlib.hash import argon2
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.crud import crud_auth, crud_qr, crud_users
 from app.db import engine, get_db, get_public_db
-from app.models.models import User
 from app.models.shared_models import PublicUser
-from app.schemas.requests import UserFirstRunIn, UserLoginIn
+from app.schemas.requests import UserFirstRunIn
 from app.schemas.responses import (
     ActivationResponse,
-    UserLoginOut,
     UserQrToken,
 )
 
@@ -224,49 +220,49 @@ def auth_first_run(*, public_db: PublicDB, user: UserFirstRunIn):
     }
 
 
-@auth_router.post("/login", response_model=UserLoginOut)
-def auth_login(*, public_db: PublicDB, user: UserLoginIn, req: Request):
-    print(req.headers["User-Agent"])
-    db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
-
-    if db_public_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    schema_translate_map = {"tenant": db_public_user.tenant_id}
-    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    with Session(autocommit=False, autoflush=False, bind=connectable) as db:
-        db_user = crud_users.get_user_by_email(db, user.email)
-
-        if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        if db_user.is_active is False:
-            raise HTTPException(status_code=403, detail="User not activated")
-
-        if db_user.is_verified is False:
-            raise HTTPException(status_code=403, detail="User not verified yet")
-
-        if argon2.verify(user.password, db_user.password) is False:
-            raise HTTPException(status_code=401, detail="Incorrect username or password")
-
-        token_valid_to = datetime.now(timezone.utc) + timedelta(days=1)
-        if user.permanent is True:
-            token_valid_to = datetime.now(timezone.utc) + timedelta(days=30)
-
-        update_package = {
-            "auth_token": secrets.token_hex(64),  # token,
-            "auth_token_valid_to": token_valid_to,
-            "updated_at": datetime.now(timezone.utc),
-        }
-
-        crud_users.update_user(db, db_user, update_package)
-
-        # Load with relations
-        query = select(User).where(User.email == user.email).options(selectinload("*"))
-        db_user = db.execute(query).scalar_one_or_none()
-        db_user.tenant_id = db_public_user.tenant_id
-
-        return db_user
+# @auth_router.post("/login", response_model=UserLoginOut)
+# def auth_login(*, public_db: PublicDB, user: UserLoginIn, req: Request):
+#     print(req.headers["User-Agent"])
+#     db_public_user: PublicUser = crud_auth.get_public_user_by_email(public_db, user.email)
+#
+#     if db_public_user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+#
+#     schema_translate_map = {"tenant": db_public_user.tenant_id}
+#     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+#     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
+#         db_user = crud_users.get_user_by_email(db, user.email)
+#
+#         if db_user is None:
+#             raise HTTPException(status_code=404, detail="User not found")
+#
+#         if db_user.is_active is False:
+#             raise HTTPException(status_code=403, detail="User not activated")
+#
+#         if db_user.is_verified is False:
+#             raise HTTPException(status_code=403, detail="User not verified yet")
+#
+#         if argon2.verify(user.password, db_user.password) is False:
+#             raise HTTPException(status_code=401, detail="Incorrect username or password")
+#
+#         token_valid_to = datetime.now(timezone.utc) + timedelta(days=1)
+#         if user.permanent is True:
+#             token_valid_to = datetime.now(timezone.utc) + timedelta(days=30)
+#
+#         update_package = {
+#             "auth_token": secrets.token_hex(64),  # token,
+#             "auth_token_valid_to": token_valid_to,
+#             "updated_at": datetime.now(timezone.utc),
+#         }
+#
+#         crud_users.update_user(db, db_user, update_package)
+#
+#         # Load with relations
+#         query = select(User).where(User.email == user.email).options(selectinload("*"))
+#         db_user = db.execute(query).scalar_one_or_none()
+#         db_user.tenant_id = db_public_user.tenant_id
+#
+#         return db_user
 
 
 # @auth_router.get("/company_summary", response_model=CompanyInfoBasic)

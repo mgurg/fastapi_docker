@@ -28,7 +28,7 @@ from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import User
 from app.models.shared_models import PublicCompany, PublicUser
-from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserLoginIn, UserRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.service import auth_validators
 from app.service.company_details import CompanyInfo
 from app.service.notification_email import EmailNotification
@@ -54,6 +54,14 @@ class AuthService:
 
     def count_registered_accounts(self) -> int | None:
         return self.public_company_repo.get_users_count()
+
+    def get_public_user_by_service_token(self, service_token: str) -> PublicUser:
+        db_public_user = self.public_user_repo.get_by_service_token(service_token)
+        if not db_public_user:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
+        return db_public_user
+
+    def finalize_first_run(self) -> None: ...
 
     def get_rich_registration_data(self, company: CompanyInfoRegisterIn) -> dict:
         db_public_company = self.public_company_repo.get_by_nip(company.company_tax_id)
@@ -178,6 +186,88 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
 
         return db_public_user.tenant_id
+
+    def first_run_activation(self, user: UserFirstRunIn):
+        db_public_user = self.get_public_user_by_service_token(user.token)
+
+        db_user_cnt = self.user_repo.get_users_count()
+        user_role_id = 2  # ADMIN_MASTER[1] / ADMIN[2]
+        is_verified = False
+
+        if db_user_cnt == 0:
+            user_role_id = 1
+            is_verified = True
+
+        common_data = {
+            "is_active": True,
+            "tenant_id": db_public_user.tenant_id,
+            "created_at": datetime.now(timezone.utc),
+        }
+
+        user_data = {
+            "uuid": db_public_user.uuid,
+            "first_name": db_public_user.first_name,
+            "last_name": db_public_user.last_name,
+            "email": db_public_user.email,
+            "password": db_public_user.password,
+            "auth_token": secrets.token_hex(32),
+            "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+            "user_role_id": user_role_id,
+            # "is_active": True,
+            "is_verified": is_verified,
+            "is_visible": True,
+            "tos": db_public_user.tos,
+            "lang": db_public_user.lang,
+            "tz": db_public_user.tz,
+            **common_data,
+            # "tenant_id": db_public_user.tenant_id,
+            # "created_at": datetime.now(timezone.utc),
+        }
+
+        anonymous_user_data = {
+            "uuid": str(uuid4()),
+            "first_name": "Anonymous",
+            "last_name": "User",
+            "email": "anonymous@example.com",
+            "password": None,
+            "auth_token": secrets.token_hex(32),
+            "auth_token_valid_to": datetime.now(timezone.utc),
+            "user_role_id": None,
+            # "is_active": True,
+            "is_verified": True,
+            "is_visible": False,
+            "tos": True,
+            "lang": "pl",
+            "tz": "Europe/Warsaw",
+            **common_data,
+            # "tenant_id": db_public_user.tenant_id,
+            # "created_at": datetime.now(timezone.utc),
+        }
+
+        _db_new_anonymous_user = self.user_repo.create(**anonymous_user_data)
+        db_new_master_admin_user = self.user_repo.create(**user_data)
+
+        empty_data = {
+            "service_token": None,
+            "service_token_valid_to": None,
+            "password": None,
+            "is_active": True,
+            "is_verified": True,
+        }
+
+        # TODO: clean
+        # crud_auth.update_public_user(public_db, db_public_user, empty_data)
+
+        return {
+            "ok": True,
+            "first_name": db_new_master_admin_user.first_name,
+            "last_name": db_new_master_admin_user.last_name,
+            "lang": db_new_master_admin_user.lang,
+            "tz": db_new_master_admin_user.tz,
+            "uuid": db_new_master_admin_user.uuid,
+            "tenant_id": db_new_master_admin_user.tenant_id,
+            "token": db_new_master_admin_user.auth_token,
+        }
 
     def login(self, login_data: UserLoginIn, user_agent: str):
         db_user = self.user_repo.get_by_email(login_data.email)

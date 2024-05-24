@@ -6,8 +6,9 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 from app.api.service.auth_service import AuthService
 from app.config import get_settings
-from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserLoginIn, UserRegisterIn
+from app.schemas.requests import CompanyInfoRegisterIn, ResetPassword, UserFirstRunIn, UserLoginIn, UserRegisterIn
 from app.schemas.responses import (
+    ActivationResponse,
     CompanyInfoBasic,
     PublicCompanyCounterResponse,
     TenantUidOut,
@@ -52,6 +53,11 @@ def auth_register(auth_service: AuthServiceDependency, user_registration: UserRe
 def auth_get_tenant_uid(auth_service: AuthServiceDependency, email: EmailStr):
     tenant_uid = auth_service.get_tenant_uid(email)
     return {"tenant_uid": tenant_uid}
+
+
+@auth_test_router.post("/first_run", response_model=ActivationResponse)
+def auth_first_run(auth_service: AuthServiceDependency, user: UserFirstRunIn):
+    auth_service.first_run_activation(user)
 
 
 @auth_test_router.post("/login", response_model=UserLoginOut)
