@@ -140,84 +140,84 @@ PublicDB = Annotated[Session, Depends(get_public_db)]
 #     return {"ok": True}
 
 
-@auth_router.post("/first_run", response_model=ActivationResponse)
-def auth_first_run(*, public_db: PublicDB, user: UserFirstRunIn):
-    """Activate user based on service token"""
-
-    db_public_user: PublicUser = crud_auth.get_public_user_by_service_token(public_db, user.token)
-    if not db_public_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
-    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        db_user_cnt = crud_users.get_user_count(db)
-        user_role_id = 2  # ADMIN_MASTER[1] / ADMIN[2]
-        is_verified = False
-
-        if db_user_cnt == 0:
-            user_role_id = 1
-            is_verified = True
-
-        user_data = {
-            "uuid": db_public_user.uuid,
-            "first_name": db_public_user.first_name,
-            "last_name": db_public_user.last_name,
-            "email": db_public_user.email,
-            "password": db_public_user.password,
-            "auth_token": secrets.token_hex(32),
-            "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-            "user_role_id": user_role_id,
-            "is_active": True,
-            "is_verified": is_verified,
-            "is_visible": True,
-            "tos": db_public_user.tos,
-            "lang": db_public_user.lang,
-            "tz": db_public_user.tz,
-            "tenant_id": db_public_user.tenant_id,
-            "created_at": datetime.now(timezone.utc),
-        }
-
-        anonymous_user_data = {
-            "uuid": str(uuid4()),
-            "first_name": "Anonymous",
-            "last_name": "User",
-            "email": "anonymous@example.com",
-            "password": None,
-            "auth_token": secrets.token_hex(32),
-            "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
-            "user_role_id": None,
-            "is_active": True,
-            "is_verified": True,
-            "is_visible": False,
-            "tos": True,
-            "lang": "pl",
-            "tz": "Europe/Warsaw",
-            "tenant_id": db_public_user.tenant_id,
-            "created_at": datetime.now(timezone.utc),
-        }
-
-        crud_auth.create_tenant_user(db, anonymous_user_data)
-        db_tenant_user = crud_auth.create_tenant_user(db, user_data)
-
-    empty_data = {
-        "service_token": None,
-        "service_token_valid_to": None,
-        "password": None,
-        "is_active": True,
-        "is_verified": True,
-    }
-    crud_auth.update_public_user(public_db, db_public_user, empty_data)
-
-    return {
-        "ok": True,
-        "first_name": db_tenant_user.first_name,
-        "last_name": db_tenant_user.last_name,
-        "lang": db_tenant_user.lang,
-        "tz": db_tenant_user.tz,
-        "uuid": db_tenant_user.uuid,
-        "tenant_id": db_tenant_user.tenant_id,
-        "token": db_tenant_user.auth_token,
-    }
+# @auth_router.post("/first_run", response_model=ActivationResponse)
+# def auth_first_run(*, public_db: PublicDB, user: UserFirstRunIn):
+#     """Activate user based on service token"""
+#
+#     db_public_user: PublicUser = crud_auth.get_public_user_by_service_token(public_db, user.token)
+#     if not db_public_user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#
+#     connectable = engine.execution_options(schema_translate_map={"tenant": db_public_user.tenant_id})
+#     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+#         db_user_cnt = crud_users.get_user_count(db)
+#         user_role_id = 2  # ADMIN_MASTER[1] / ADMIN[2]
+#         is_verified = False
+#
+#         if db_user_cnt == 0:
+#             user_role_id = 1
+#             is_verified = True
+#
+#         user_data = {
+#             "uuid": db_public_user.uuid,
+#             "first_name": db_public_user.first_name,
+#             "last_name": db_public_user.last_name,
+#             "email": db_public_user.email,
+#             "password": db_public_user.password,
+#             "auth_token": secrets.token_hex(32),
+#             "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+#             "user_role_id": user_role_id,
+#             "is_active": True,
+#             "is_verified": is_verified,
+#             "is_visible": True,
+#             "tos": db_public_user.tos,
+#             "lang": db_public_user.lang,
+#             "tz": db_public_user.tz,
+#             "tenant_id": db_public_user.tenant_id,
+#             "created_at": datetime.now(timezone.utc),
+#         }
+#
+#         anonymous_user_data = {
+#             "uuid": str(uuid4()),
+#             "first_name": "Anonymous",
+#             "last_name": "User",
+#             "email": "anonymous@example.com",
+#             "password": None,
+#             "auth_token": secrets.token_hex(32),
+#             "auth_token_valid_to": datetime.now(timezone.utc) + timedelta(days=1),
+#             "user_role_id": None,
+#             "is_active": True,
+#             "is_verified": True,
+#             "is_visible": False,
+#             "tos": True,
+#             "lang": "pl",
+#             "tz": "Europe/Warsaw",
+#             "tenant_id": db_public_user.tenant_id,
+#             "created_at": datetime.now(timezone.utc),
+#         }
+#
+#         crud_auth.create_tenant_user(db, anonymous_user_data)
+#         db_tenant_user = crud_auth.create_tenant_user(db, user_data)
+#
+#     empty_data = {
+#         "service_token": None,
+#         "service_token_valid_to": None,
+#         "password": None,
+#         "is_active": True,
+#         "is_verified": True,
+#     }
+#     crud_auth.update_public_user(public_db, db_public_user, empty_data)
+#
+#     return {
+#         "ok": True,
+#         "first_name": db_tenant_user.first_name,
+#         "last_name": db_tenant_user.last_name,
+#         "lang": db_tenant_user.lang,
+#         "tz": db_tenant_user.tz,
+#         "uuid": db_tenant_user.uuid,
+#         "tenant_id": db_tenant_user.tenant_id,
+#         "token": db_tenant_user.auth_token,
+#     }
 
 
 # @auth_router.post("/login", response_model=UserLoginOut)
@@ -356,34 +356,34 @@ def auth_first_run(*, public_db: PublicDB, user: UserFirstRunIn):
 #     return {"ok": True}
 
 
-@auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
-def auth_verify_qr(*, public_db: PublicDB, qr_code: str):
-    pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
-    if not pattern.match(qr_code):
-        raise HTTPException(status_code=404, detail="Incorrect QR code")
-
-    company, qr_id = qr_code.split("+")
-    company = re.sub(r"\d+", "", company)
-
-    db_company = crud_auth.get_public_company_by_qr_id(public_db, company)
-    if not db_company:
-        raise HTTPException(status_code=404, detail="Company not found: " + company)
-
-    token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
-
-    base64_token = crud_auth.generate_base64_token(f"{db_company.tenant_id}.{token_valid_to}")
-
-    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
-    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
-        if not db_qr:
-            raise HTTPException(status_code=404, detail="QR not found")
-        if db_qr.public_access is False:
-            base64_token = None
-
-        return {
-            "resource": db_qr.resource,
-            "resource_uuid": db_qr.resource_uuid,
-            "url": f"/{db_qr.resource}/{db_qr.resource_uuid}",
-            "anonymous_token": base64_token,
-        }
+# @auth_router.post("/qr/{qr_code}", response_model=UserQrToken)
+# def auth_verify_qr(*, public_db: PublicDB, qr_code: str):
+#     pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
+#     if not pattern.match(qr_code):
+#         raise HTTPException(status_code=404, detail="Incorrect QR code")
+#
+#     company, qr_id = qr_code.split("+")
+#     company = re.sub(r"\d+", "", company)
+#
+#     db_company = crud_auth.get_public_company_by_qr_id(public_db, company)
+#     if not db_company:
+#         raise HTTPException(status_code=404, detail="Company not found: " + company)
+#
+#     token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
+#
+#     base64_token = crud_auth.generate_base64_token(f"{db_company.tenant_id}.{token_valid_to}")
+#
+#     connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
+#     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+#         db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
+#         if not db_qr:
+#             raise HTTPException(status_code=404, detail="QR not found")
+#         if db_qr.public_access is False:
+#             base64_token = None
+#
+#         return {
+#             "resource": db_qr.resource,
+#             "resource_uuid": db_qr.resource_uuid,
+#             "url": f"/{db_qr.resource}/{db_qr.resource_uuid}",
+#             "anonymous_token": base64_token,
+#         }

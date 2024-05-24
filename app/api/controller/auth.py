@@ -13,7 +13,7 @@ from app.schemas.responses import (
     PublicCompanyCounterResponse,
     TenantUidOut,
     UserLoginOut,
-    UserVerifyToken,
+    UserVerifyToken, UserQrToken,
 )
 
 ACCOUNTS_LIMIT = 120
@@ -57,14 +57,14 @@ def auth_get_tenant_uid(auth_service: AuthServiceDependency, email: EmailStr):
 
 @auth_test_router.post("/first_run", response_model=ActivationResponse)
 def auth_first_run(auth_service: AuthServiceDependency, user: UserFirstRunIn):
-    auth_service.first_run_activation(user)
+    return auth_service.first_run_activation(user)
 
 
 @auth_test_router.post("/login", response_model=UserLoginOut)
 def auth_login(
-    auth_service: AuthServiceDependency,
-    login_data: UserLoginIn,
-    user_agent: Annotated[str | None, Header()] = None,
+        auth_service: AuthServiceDependency,
+        login_data: UserLoginIn,
+        user_agent: Annotated[str | None, Header()] = None,
 ):
     auth_service.login(login_data, user_agent)
 
@@ -82,7 +82,7 @@ def auth_logout(auth_service: AuthServiceDependency, token: str):
 
 @auth_test_router.get("/reset-password/{email}", status_code=HTTP_204_NO_CONTENT)
 def auth_send_remind_password_to_email(
-    auth_service: AuthServiceDependency, email: EmailStr, user_agent: Annotated[str | None, Header()] = None
+        auth_service: AuthServiceDependency, email: EmailStr, user_agent: Annotated[str | None, Header()] = None
 ):
     auth_service.send_remind_password_to_email(email, user_agent)
     return None
@@ -91,4 +91,10 @@ def auth_send_remind_password_to_email(
 @auth_test_router.post("/reset-password/{token}", status_code=HTTP_204_NO_CONTENT)
 def auth_reset_password_by_token(auth_service: AuthServiceDependency, token: str, reset_data: ResetPassword):
     auth_service.reset_password_by_token(token, reset_data)
+    return None
+
+
+@auth_test_router.post("/qr/{qr_code}", response_model=UserQrToken)
+def auth_verify_qr(auth_service: AuthServiceDependency, qr_code: str):
+    auth_service.get_temporary_creditentials_for_qrcode()
     return None

@@ -61,6 +61,19 @@ class AuthService:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
         return db_public_user
 
+    def confirm_first_run_activation(self, user: PublicUser) -> bool | None:
+        self.public_user_repo.update(
+            user.id,
+            **{
+                "service_token": None,
+                "service_token_valid_to": None,
+                "password": None,
+                "is_active": True,
+                "is_verified": True,
+            },
+        )
+        return True
+
     def finalize_first_run(self) -> None: ...
 
     def get_rich_registration_data(self, company: CompanyInfoRegisterIn) -> dict:
@@ -247,16 +260,7 @@ class AuthService:
         _db_new_anonymous_user = self.user_repo.create(**anonymous_user_data)
         db_new_master_admin_user = self.user_repo.create(**user_data)
 
-        empty_data = {
-            "service_token": None,
-            "service_token_valid_to": None,
-            "password": None,
-            "is_active": True,
-            "is_verified": True,
-        }
-
-        # TODO: clean
-        # crud_auth.update_public_user(public_db, db_public_user, empty_data)
+        self.confirm_first_run_activation(db_public_user)
 
         return {
             "ok": True,
@@ -358,3 +362,36 @@ class AuthService:
         if db_user is None:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found!")
         self.user_repo.update(db_user.id, **{"password": argon2.hash(new_password)})
+
+    def get_temporary_creditentials_for_qrcode(self):
+        ...
+
+    # pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
+    # if not pattern.match(qr_code):
+    #     raise HTTPException(status_code=404, detail="Incorrect QR code")
+    #
+    # company, qr_id = qr_code.split("+")
+    # company = re.sub(r"\d+", "", company)
+    #
+    # db_company = crud_auth.get_public_company_by_qr_id(public_db, company)
+    # if not db_company:
+    #     raise HTTPException(status_code=404, detail="Company not found: " + company)
+    #
+    # token_valid_to = (datetime.now(timezone.utc) + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
+    #
+    # base64_token = crud_auth.generate_base64_token(f"{db_company.tenant_id}.{token_valid_to}")
+    #
+    # connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
+    # with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+    #     db_qr = crud_qr.get_entity_by_qr_code(db, qr_id)
+    #     if not db_qr:
+    #         raise HTTPException(status_code=404, detail="QR not found")
+    #     if db_qr.public_access is False:
+    #         base64_token = None
+    #
+    #     return {
+    #         "resource": db_qr.resource,
+    #         "resource_uuid": db_qr.resource_uuid,
+    #         "url": f"/{db_qr.resource}/{db_qr.resource_uuid}",
+    #         "anonymous_token": base64_token,
+    #     }
