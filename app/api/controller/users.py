@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
-from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from app.api.service.user_service import UserService
 from app.models.models import User
@@ -22,13 +22,13 @@ userServiceDependency = Annotated[UserService, Depends()]
 
 @user_test_router.get("", response_model=UsersPaginated)
 def get_all_users(
-    user_service: userServiceDependency,
-    # auth_user: CurrentUser,
-    search: Annotated[str | None, Query(max_length=50)] = None,
-    limit: int = 10,
-    offset: int = 0,
-    field: str = "name",
-    order: str = "asc",
+        user_service: userServiceDependency,
+        # auth_user: CurrentUser,
+        search: Annotated[str | None, Query(max_length=50)] = None,
+        limit: int = 10,
+        offset: int = 0,
+        field: str = "name",
+        order: str = "asc",
 ):
     if field not in ["first_name", "last_name", "created_at"]:
         field = "last_name"
@@ -57,10 +57,9 @@ def get_import_users(user_service: userServiceDependency, auth_user: CurrentUser
 
 
 @user_test_router.get("/{user_uuid}", response_model=UserIndexResponse)
-def get_one_user(user_service: userServiceDependency, user_uuid: str):
-    user = user_service.get_user_by_uuid(UUID(user_uuid))
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+def get_one_user(user_service: userServiceDependency, user_uuid: UUID):
+    user = user_service.get_user_by_uuid(user_uuid)
+
     return user
 
 

@@ -134,6 +134,8 @@ class UserService:
 
     def get_user_by_uuid(self, uuid: UUID) -> User | None:
         db_user = self.user_repo.get_by_uuid(uuid)
+        if not db_user:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
         return db_user
 
     def get_all_users(
