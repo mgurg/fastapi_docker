@@ -1,0 +1,14 @@
+### Count Issues by type
+GET {{baseUrl}}/statistics_test/issues_counter
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Count Issues by type
+GET {{baseUrl}}/statistics_test/first_steps
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

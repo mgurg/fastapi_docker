@@ -183,7 +183,6 @@ file_item_rel = sa.Table(
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
-
 item_guide_rel = sa.Table(
     "items_guides_link",
     Base.metadata,
@@ -260,6 +259,7 @@ tag_issue_rel = sa.Table(
     sa.Column("tag_id", sa.ForeignKey("tags.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+
 # part_used_issue_rel = sa.Table(
 #     "parts_used_issues_link",
 #     Base.metadata,
@@ -268,9 +268,9 @@ tag_issue_rel = sa.Table(
 # )
 
 
-class Issue(Base):
+class Issue(BaseModel):
     __tablename__ = "issues"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     author_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)

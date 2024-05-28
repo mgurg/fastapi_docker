@@ -20,7 +20,7 @@ UserDB = Annotated[Session, Depends(get_db)]
 
 
 @statistics_router.get("/issues_counter", response_model=StatsIssuesCounterResponse)
-def stats_issues_counter(*, db: UserDB, auth_user: CurrentUser):
+def stats_issues_counter(*, db: UserDB):
     issues_counter_summary = crud_statistics.get_issues_counter_summary(db)
     if not issues_counter_summary:
         return {"new": 0, "accepted": 0, "rejected": 0, "assigned": 0, "in_progress": 0, "paused": 0, "done": 0}
