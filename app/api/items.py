@@ -229,9 +229,14 @@ def item_get_statistics(
 
     # średni czas potrzebny na podjęcie zgłoszenia
 
-    data = {"issuesCount": len(db_issues_uuid), "issuesPerDay": issues_per_day_dict,
-            "issuesPerHour": issues_per_hour_dict, "issuesStatus": issues_status_dict, "repairTime": None,
-            "users": None}
+    data = {
+        "issuesCount": len(db_issues_uuid),
+        "issuesPerDay": issues_per_day_dict,
+        "issuesPerHour": issues_per_hour_dict,
+        "issuesStatus": issues_status_dict,
+        "repairTime": None,
+        "users": None,
+    }
 
     if issues_total_time_list and len(issues_total_time_list) > 0:
         data["totalTime"] = {"max": issues_total_time_list[0], "avg": issues_total_time_list[1]}

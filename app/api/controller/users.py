@@ -22,13 +22,13 @@ userServiceDependency = Annotated[UserService, Depends()]
 
 @user_test_router.get("", response_model=UsersPaginated)
 def get_all_users(
-        user_service: userServiceDependency,
-        # auth_user: CurrentUser,
-        search: Annotated[str | None, Query(max_length=50)] = None,
-        limit: int = 10,
-        offset: int = 0,
-        field: Literal["first_name", "last_name", "created_at"] = "name",
-        order: Literal["asc", "desc"] = "asc",
+    user_service: userServiceDependency,
+    # auth_user: CurrentUser,
+    search: Annotated[str | None, Query(max_length=50)] = None,
+    limit: int = 10,
+    offset: int = 0,
+    field: Literal["first_name", "last_name", "created_at"] = "name",
+    order: Literal["asc", "desc"] = "asc",
 ):
     db_users, count = user_service.get_all_users(offset, limit, field, order, search)
     return UsersPaginated(data=db_users, count=count, offset=offset, limit=limit)

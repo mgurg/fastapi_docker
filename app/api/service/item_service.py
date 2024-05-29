@@ -2,6 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from loguru import logger
 from starlette.status import HTTP_404_NOT_FOUND
 
 from app.api.repository.ItemRepo import ItemRepo
@@ -9,15 +10,14 @@ from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import Item
 from app.storage.aws_s3 import generate_presigned_url
-from loguru import logger
 
 
 class ItemService:
     def __init__(
-            self,
-            user_repo: Annotated[UserRepo, Depends()],
-            role_repo: Annotated[RoleRepo, Depends()],
-            item_repo: Annotated[ItemRepo, Depends()],
+        self,
+        user_repo: Annotated[UserRepo, Depends()],
+        role_repo: Annotated[RoleRepo, Depends()],
+        item_repo: Annotated[ItemRepo, Depends()],
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
@@ -37,8 +37,15 @@ class ItemService:
 
         return db_item
 
-    def get_all_items(self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None,
-                      user_id: int | None = None):
+    def get_all_items(
+        self,
+        offset: int,
+        limit: int,
+        sort_column: str,
+        sort_order: str,
+        search: str | None = None,
+        user_id: int | None = None,
+    ):
         db_items, count = self.item_repo.get_items(offset, limit, sort_column, sort_order, search, user_id)
 
         return db_items, count

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException
 from langcodes import standardize_tag
 from loguru import logger
 from passlib.hash import argon2
