@@ -18,5 +18,4 @@ def count_issues_types(statistics_service: Annotated[StatisticsService, Depends(
 
 @statistics_test_router.get("/first_steps")
 def stats_first_steps(statistics_service: Annotated[StatisticsService, Depends()], auth_user: CurrentUser):
-    a = 1
     return statistics_service.first_steps(auth_user.id)

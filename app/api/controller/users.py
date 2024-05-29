@@ -1,8 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
-from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 
 from app.api.service.user_service import UserService
 from app.models.models import User
@@ -27,12 +27,9 @@ def get_all_users(
         search: Annotated[str | None, Query(max_length=50)] = None,
         limit: int = 10,
         offset: int = 0,
-        field: str = "name",
-        order: str = "asc",
+        field: Literal["first_name", "last_name", "created_at"] = "name",
+        order: Literal["asc", "desc"] = "asc",
 ):
-    if field not in ["first_name", "last_name", "created_at"]:
-        field = "last_name"
-
     db_users, count = user_service.get_all_users(offset, limit, field, order, search)
     return UsersPaginated(data=db_users, count=count, offset=offset, limit=limit)
 

@@ -1,21 +1,10 @@
-import re
-import secrets
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.crud import crud_auth, crud_qr, crud_users
-from app.db import engine, get_db, get_public_db
-from app.models.shared_models import PublicUser
-from app.schemas.requests import UserFirstRunIn
-from app.schemas.responses import (
-    ActivationResponse,
-    UserQrToken,
-)
+from app.db import get_db, get_public_db
 
 settings = get_settings()
 auth_router = APIRouter()

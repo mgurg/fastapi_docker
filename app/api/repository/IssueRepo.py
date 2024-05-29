@@ -1,9 +1,10 @@
-from datetime import datetime, timezone, time
-from typing import Annotated, Any, Sequence
+from collections.abc import Sequence
+from datetime import datetime, time, timezone
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import func, select, Row
+from sqlalchemy import Row, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
@@ -35,8 +36,9 @@ class IssueRepo(GenericRepo[Issue]):
 
     def get_issues_counter_by_status(self, status: list):
         query = (
-            select(self.Model.author_id, func.count(self.Model.author_id)).where(
-                self.Model.status.in_(status)).group_by(self.Model.author_id)
+            select(self.Model.author_id, func.count(self.Model.author_id))
+            .where(self.Model.status.in_(status))
+            .group_by(self.Model.author_id)
         )
 
         result = self.session.execute(query)

@@ -10,11 +10,11 @@ from app.api.repository.UserRepo import UserRepo
 
 class StatisticsService:
     def __init__(
-            self,
-            user_repo: Annotated[UserRepo, Depends()],
-            role_repo: Annotated[RoleRepo, Depends()],
-            issue_repo: Annotated[IssueRepo, Depends()],
-            item_repo: Annotated[ItemRepo, Depends()],
+        self,
+        user_repo: Annotated[UserRepo, Depends()],
+        role_repo: Annotated[RoleRepo, Depends()],
+        issue_repo: Annotated[IssueRepo, Depends()],
+        item_repo: Annotated[ItemRepo, Depends()],
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
@@ -51,8 +51,10 @@ class StatisticsService:
         response["items"] = {"total": sum(items.values()), "me": items.setdefault(user_id, 0)}
         response["users"] = self.user_repo.get_users_count(user_id)
         response["issues_active"] = {"total": sum(issues_active.values()), "me": issues_active.setdefault(user_id, 0)}
-        response["issues_inactive"] = {"total": sum(issues_inactive.values()),
-                                       "me": issues_inactive.setdefault(user_id, 0)}
+        response["issues_inactive"] = {
+            "total": sum(issues_inactive.values()),
+            "me": issues_inactive.setdefault(user_id, 0),
+        }
         response["favourites"] = self.item_repo.get_favourites_counter_summary(user_id)
 
         return response

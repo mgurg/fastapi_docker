@@ -313,8 +313,8 @@ class AuthService:
             raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid auth token")
         self.user_repo.update(db_user.id, **{"auth_token": None, "auth_token_valid_to": None})
 
-    def send_remind_password_to_email(self, email: EmailStr, req: Request) -> None:
-        user_agent = parse(req.headers["User-Agent"])
+    def send_remind_password_to_email(self, email: EmailStr, user_agent: str) -> None:
+        user_agent = parse(user_agent)
         os = user_agent.os.family
         browser = user_agent.browser.family
 
@@ -363,8 +363,7 @@ class AuthService:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found!")
         self.user_repo.update(db_user.id, **{"password": argon2.hash(new_password)})
 
-    def get_temporary_creditentials_for_qrcode(self):
-        ...
+    def get_temporary_creditentials_for_qrcode(self): ...
 
     # pattern = re.compile(r"^[a-z2-9]{2,6}\+[a-z2-9]{2,3}$")
     # if not pattern.match(qr_code):

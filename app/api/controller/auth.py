@@ -13,7 +13,8 @@ from app.schemas.responses import (
     PublicCompanyCounterResponse,
     TenantUidOut,
     UserLoginOut,
-    UserVerifyToken, UserQrToken,
+    UserQrToken,
+    UserVerifyToken,
 )
 
 ACCOUNTS_LIMIT = 120
@@ -62,9 +63,9 @@ def auth_first_run(auth_service: AuthServiceDependency, user: UserFirstRunIn):
 
 @auth_test_router.post("/login", response_model=UserLoginOut)
 def auth_login(
-        auth_service: AuthServiceDependency,
-        login_data: UserLoginIn,
-        user_agent: Annotated[str | None, Header()] = None,
+    auth_service: AuthServiceDependency,
+    login_data: UserLoginIn,
+    user_agent: Annotated[str | None, Header()] = None,
 ):
     auth_service.login(login_data, user_agent)
 
@@ -82,7 +83,7 @@ def auth_logout(auth_service: AuthServiceDependency, token: str):
 
 @auth_test_router.get("/reset-password/{email}", status_code=HTTP_204_NO_CONTENT)
 def auth_send_remind_password_to_email(
-        auth_service: AuthServiceDependency, email: EmailStr, user_agent: Annotated[str | None, Header()] = None
+    auth_service: AuthServiceDependency, email: EmailStr, user_agent: Annotated[str | None, Header()] = None
 ):
     auth_service.send_remind_password_to_email(email, user_agent)
     return None

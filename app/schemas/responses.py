@@ -232,6 +232,13 @@ class ItemIndexResponse(BaseResponse):
     text_json: dict | None = None
 
 
+class ItemsPaginated(BaseResponse):
+    data: list[ItemIndexResponse]
+    count: int
+    limit: int
+    offset: int
+
+
 class EventTimelineResponse(BaseResponse):
     created_at: datetime
     # author_name: str | None = None

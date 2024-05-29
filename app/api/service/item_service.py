@@ -1,24 +1,15 @@
-import codecs
-import csv
-import io
-import sys
-from datetime import datetime, timezone
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from fastapi import Depends, HTTPException, UploadFile
-from sqlalchemy import Sequence
-from starlette.responses import StreamingResponse
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from fastapi import Depends, HTTPException
+from starlette.status import HTTP_404_NOT_FOUND
 
 from app.api.repository.ItemRepo import ItemRepo
-from app.api.repository.PublicUserRepo import PublicUserRepo
 from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
-from app.models.models import User, Item
-from app.schemas.requests import UserCreateIn
-from app.service.password import Password
+from app.models.models import Item
 from app.storage.aws_s3 import generate_presigned_url
+from loguru import logger
 
 
 class ItemService:
@@ -32,7 +23,7 @@ class ItemService:
         self.role_repo = role_repo
         self.item_repo = item_repo
 
-    def get_item_by_uuid(self, item_uuid: UUID) -> Item | None:
+    def get_item_by_uuid(self, item_uuid: UUID, tenant: str) -> Item | None:
         db_item = self.item_repo.get_by_uuid(item_uuid)
 
         if not db_item:
@@ -40,9 +31,14 @@ class ItemService:
 
         try:
             for picture in db_item.files_item:
-                picture.url = generate_presigned_url(
-                    # TODO: Annotaed
-                    request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
-                )
+                picture.url = generate_presigned_url(tenant, "_".join([str(picture.uuid), picture.file_name]))
         except Exception as e:
-            capture_exception(e)
+            logger.error("Error getting item by uuid", exc_info=e)
+
+        return db_item
+
+    def get_all_items(self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None,
+                      user_id: int | None = None):
+        db_items, count = self.item_repo.get_items(offset, limit, sort_column, sort_order, search, user_id)
+
+        return db_items, count
