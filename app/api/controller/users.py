@@ -73,5 +73,6 @@ def user_edit(user_service: userServiceDependency, user_uuid: UUID, user: UserCr
 
 
 @user_test_router.delete("/{user_uuid}", status_code=HTTP_204_NO_CONTENT)
-def delete_user(user_service: userServiceDependency, user_uuid: str, force: bool = False):
-    user = user_service.delete_user(UUID(user_uuid), force)
+def delete_user(user_service: userServiceDependency, user_uuid: UUID, force: bool = False):
+    user_service.delete_user(user_uuid, force)
+    return None

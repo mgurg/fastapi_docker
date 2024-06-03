@@ -26,7 +26,7 @@ class UserRepo(GenericRepo[User]):
         return result.scalar_one_or_none()
 
     def get_by_email(self, email: EmailStr) -> User:
-        query = select(User).where(User.email == email).where(User.deleted_at.is_(None))
+        query = select(User).where(self.Model.email == email).where(self.Model.deleted_at.is_(None))
 
         result = self.session.execute(query)
         return result.scalar_one_or_none()

@@ -317,9 +317,9 @@ class PartUsed(Base):
     # issue_part = relationship("Issue", secondary=part_used_issue_rel, back_populates="part")
 
 
-class File(Base):
+class File(BaseModel):
     __tablename__ = "files"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     owner_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     file_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
@@ -372,9 +372,9 @@ class SettingNotification(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-class QrCode(Base):
+class QrCode(BaseModel):
     __tablename__ = "qr_codes"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     resource = sa.Column(sa.VARCHAR(length=64), unique=True, autoincrement=False, nullable=True)
     qr_code_id = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
