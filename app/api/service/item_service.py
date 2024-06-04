@@ -16,7 +16,7 @@ from app.api.repository.QrCodeRepo import QrCodeRepo
 from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import Item
-from app.schemas.requests import ItemAddIn, ItemEditIn
+from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.storage.aws_s3 import generate_presigned_url
 
 
@@ -175,5 +175,29 @@ class ItemService:
 
         self.item_repo.delete(db_item.id)
         self.qr_code_repo.delete(db_qr.id)
+
+        return True
+
+    def add_favourite(self, favourites: FavouritesAddIn) -> bool:
+        db_item = self.item_repo.get_by_uuid(favourites.uuid)
+
+        if not db_item:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Item {favourites.uuid} not found!")
+
+        for user in db_item.users_item:
+            if user.uuid == favourites.user_uuid:
+                db_item.users_item.remove(user)
+                # TODO - check
+                # db_item.users_item.remove(user)
+                # db.add(user)
+                # db.commit()
+                return True
+
+        db_user = self.user_repo.get_by_uuid(favourites.user_uuid)
+        if not db_user:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"User {favourites.user_uuid} not found")
+
+        item_data = {"users_item": [db_user]}
+        self.item_repo.update(db_item.id, **item_data)
 
         return True

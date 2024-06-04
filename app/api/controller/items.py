@@ -6,7 +6,7 @@ from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.api.service.item_service import ItemService
 from app.models.models import User
-from app.schemas.requests import ItemAddIn, ItemEditIn
+from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.schemas.responses import ItemIndexResponse, ItemResponse, ItemsPaginated, StandardResponse
 from app.service.bearer_auth import check_token
 
@@ -71,3 +71,10 @@ def get_export_items(item_service: itemServiceDependency, auth_user: CurrentUser
 def item_delete(item_service: itemServiceDependency, item_uuid: UUID, auth_user: CurrentUser, force: bool = False):
     item_service.delete_item(item_uuid, force)
     return None
+
+
+@item_test_router.post("/favourites", response_model=StandardResponse)
+def item_add_to_favourites(item_service: itemServiceDependency, favourites: FavouritesAddIn, auth_user: CurrentUser):
+    item_service.add_favourite(favourites)
+
+    return {"ok": True}
