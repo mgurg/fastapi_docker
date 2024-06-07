@@ -63,11 +63,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 #
 #### Export users to CSV
-#GET {{baseUrl}}/user_test/export
-#Accept: application/json
-#tenant: {{tenant}}
-#Authorization: Bearer {{token}}
-#Content-Type: application/json
+GET {{baseUrl}}/item_test/export
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
 #
 #### Count users
 #GET {{baseUrl}}/user_test/count
