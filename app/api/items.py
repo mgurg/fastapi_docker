@@ -9,8 +9,6 @@ from sqlalchemy.orm import Session
 from app.crud import crud_issues, crud_items, crud_users
 from app.db import get_db
 from app.models.models import User
-from app.schemas.requests import FavouritesAddIn
-from app.schemas.responses import StandardResponse
 from app.service.bearer_auth import has_token
 
 item_router = APIRouter()

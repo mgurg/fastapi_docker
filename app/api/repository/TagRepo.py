@@ -1,8 +1,9 @@
-from typing import Annotated
+from collections.abc import Sequence
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select, text, func
+from sqlalchemy import Row, RowMapping, func, select, text
 from sqlalchemy.orm import Session
 
 from app.api.repository.generics import GenericRepo
@@ -29,7 +30,16 @@ class TagRepo(GenericRepo[Tag]):
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_tags(self, offset: int, limit: int, sort_column: str, sort_order: str, is_hidden: bool | None = None):
+    def get_ids_by_tags_uuid(self, uuid: list[UUID]) -> Sequence[Row[Any] | RowMapping | Any]:
+        query = select(self.Model.id).filter(self.Model.uuid.in_(uuid))
+
+        result = self.session.execute(query)
+
+        return result.scalars().all()
+
+    def get_tags(
+        self, offset: int, limit: int, sort_column: str, sort_order: str, is_hidden: bool | None = None
+    ) -> tuple[Sequence[Tag], int]:
         base_query = select(Tag).where(Tag.deleted_at.is_(None))
 
         if is_hidden is True:

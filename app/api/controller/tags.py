@@ -7,7 +7,7 @@ from starlette.status import HTTP_204_NO_CONTENT
 from app.api.service.tag_service import TagService
 from app.models.models import User
 from app.schemas.requests import TagCreateIn, TagEditIn
-from app.schemas.responses import TagsPaginated, TagResponse
+from app.schemas.responses import TagResponse, TagsPaginated
 from app.service.bearer_auth import check_token
 
 tag_test_router = APIRouter()
@@ -21,12 +21,12 @@ tagServiceDependency = Annotated[TagService, Depends()]
 
 @tag_test_router.get("", response_model=TagsPaginated)
 def issues_get_all(
-        tag_service: tagServiceDependency,
-        is_hidden: bool | None = None,
-        limit: int = 10,
-        offset: int = 0,
-        field: Literal["name"] = "name",
-        order: Literal["asc", "desc"] = "asc"
+    tag_service: tagServiceDependency,
+    is_hidden: bool | None = None,
+    limit: int = 10,
+    offset: int = 0,
+    field: Literal["name"] = "name",
+    order: Literal["asc", "desc"] = "asc",
 ):
     db_tags, count = tag_service.get_all(offset, limit, field, order, is_hidden)
 

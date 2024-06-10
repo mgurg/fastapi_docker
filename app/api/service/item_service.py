@@ -71,8 +71,7 @@ class ItemService:
 
         files = []
         if ("files" in item_data) and (item_data["files"] is not None):
-            for file in db_item.files_item:
-                db_item.files_item.remove(file)
+            db_item.files_item.clear()
             for file in item_data["files"]:
                 db_file = self.file_repo.get_by_uuid(file)
                 if db_file:
@@ -82,7 +81,8 @@ class ItemService:
             del item_data["files"]
 
         if ("text_html" in item_data) and (item_data["text_html"] is not None):
-            item_data["text"] = BeautifulSoup(item_data.text_html, "html.parser").get_text()
+            item_data["text"] = BeautifulSoup(item_data['text_html'], "html.parser").get_text()
+            del item_data["text_html"]
 
         item_data["updated_at"] = datetime.now(timezone.utc)
 

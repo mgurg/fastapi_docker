@@ -1,15 +1,10 @@
-from datetime import datetime, timezone
 from typing import Annotated
-from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.crud import crud_issues, crud_tags
 from app.db import get_db
 from app.models.models import User
-from app.schemas.requests import TagCreateIn, TagEditIn
-from app.schemas.responses import StandardResponse, TagResponse
 from app.service.bearer_auth import has_token
 
 tag_router = APIRouter()

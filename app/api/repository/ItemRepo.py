@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import Depends
@@ -24,14 +24,14 @@ class ItemRepo(GenericRepo[Item]):
         return result.scalar_one_or_none()
 
     def get_items(
-        self,
-        offset: int,
-        limit: int,
-        sort_column: str,
-        sort_order: str,
-        search: str | None = None,
-        user_id: int | None = None,
-    ):
+            self,
+            offset: int,
+            limit: int,
+            sort_column: str,
+            sort_order: str,
+            search: str | None = None,
+            user_id: int | None = None,
+    ) -> tuple[Sequence[Item], int]:
         base_query = self.session.query(self.Model).filter(self.Model.deleted_at.is_(None))
 
         if search:

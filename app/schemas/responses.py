@@ -175,6 +175,7 @@ class TagResponse(BaseResponse):
     color: Color | None = "#66b3ff"
     is_hidden: bool | None = None
 
+
 class TagsPaginated(BaseResponse):
     data: list[TagResponse]
     count: int

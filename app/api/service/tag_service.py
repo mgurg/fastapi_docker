@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from typing import Annotated
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from app.api.repository.IssueRepo import IssueRepo
 from app.api.repository.TagRepo import TagRepo
@@ -13,19 +13,14 @@ from app.schemas.requests import TagCreateIn, TagEditIn
 
 class TagService:
     def __init__(
-            self,
-            tag_repo: Annotated[TagRepo, Depends()],
-            issue_repo: Annotated[IssueRepo, Depends()],
+        self,
+        tag_repo: Annotated[TagRepo, Depends()],
+        issue_repo: Annotated[IssueRepo, Depends()],
     ) -> None:
         self.tag_repo = tag_repo
         self.issue_repo = issue_repo
 
-    def get_all(self,
-                offset: int,
-                limit: int,
-                sort_column: str,
-                sort_order: str,
-                is_hidden: bool | None = None):
+    def get_all(self, offset: int, limit: int, sort_column: str, sort_order: str, is_hidden: bool | None = None):
         db_tags, count = self.tag_repo.get_tags(offset, limit, sort_column, sort_order, is_hidden)
 
         return db_tags, count
@@ -47,7 +42,6 @@ class TagService:
         return new_tag
 
     def update(self, tag_uuid: UUID, tag: TagEditIn) -> None:
-
         db_tag = self.tag_repo.get_by_uuid(tag_uuid)
 
         tag_data = {"is_hidden": tag.is_hidden}
@@ -59,7 +53,6 @@ class TagService:
         self.tag_repo.update(db_tag.id, **tag_data)
 
     def delete_tag(self, tag_uuid: UUID) -> None:
-
         db_tag = self.tag_repo.get_by_uuid(tag_uuid)
         if not db_tag:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Tag `{tag_uuid}` not found")
