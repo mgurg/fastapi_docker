@@ -1,3 +1,5 @@
+@tag_uuid = 80feaa21-40c7-4d61-8391-b90422dc8014
+
 #### Add tag
 POST {{baseUrl}}/tag_test
 Accept: application/json
@@ -12,7 +14,7 @@ Content-Type: application/json
 }
 
 #### Edit tag
-PATCH {{baseUrl}}/tag_test/80feaa21-40c7-4d61-8391-b90422dc8014
+PATCH {{baseUrl}}/tag_test/{{tag_uuid}}
 Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}
@@ -24,20 +26,21 @@ Content-Type: application/json
   "icon": null
 }
 
-#### Delete user
-#DELETE {{baseUrl}}/tag_test/80feaa21-40c7-4d61-8391-b90422dc8014?force=true
-#Accept: application/json
-#tenant: {{tenant}}
-#Authorization: Bearer {{token}}
-#Content-Type: application/json
-#
+#### Delete tag
+DELETE {{baseUrl}}/tag_test/{{tag_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
 
 #### Get tag by uuid
-#GET {{baseUrl}}/tag_test/580feaa21-40c7-4d61-8391-b90422dc8014
+#GET {{baseUrl}}/tag_test/{{tag_uuid}}
 #Accept: application/json
 #tenant: {{tenant}}
 #Authorization: Bearer {{token}}
 #Content-Type: application/json
+
 
 ### Get all tags
 GET {{baseUrl}}/tag_test?limit=10&offset=0

@@ -39,7 +39,7 @@ class TagRepo(GenericRepo[Tag]):
 
         result = self.session.execute(query)
 
-        count_query = base_query.with_only_columns([func.count()]).order_by(None)
+        count_query = base_query.with_only_columns(func.count()).order_by(None)
         total_records = self.session.execute(count_query).scalar_one_or_none() or 0
 
         return result.scalars().all(), total_records

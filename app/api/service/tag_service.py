@@ -54,9 +54,11 @@ class TagService:
         if tag.color is not None:
             tag_data["color"] = tag.color.as_hex()
 
+        # TODO: dodać możliwosć zmiany nazwy?
+
         self.tag_repo.update(db_tag.id, **tag_data)
 
-    def delete_tag(self, tag_uuid: UUID, force_delete: bool) -> None:
+    def delete_tag(self, tag_uuid: UUID) -> None:
 
         db_tag = self.tag_repo.get_by_uuid(tag_uuid)
         if not db_tag:

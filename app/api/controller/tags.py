@@ -46,6 +46,6 @@ def tags_edit_one(tag_service: tagServiceDependency, tag_uuid: UUID, tag: TagEdi
 
 
 @tag_test_router.delete("/{tag_uuid}", status_code=HTTP_204_NO_CONTENT)
-def tags_delete_one(tag_service: tagServiceDependency, tag_uuid: UUID, auth_user: CurrentUser, force_delete: bool = False):
-    tag_service.delete_tag(tag_uuid, force_delete)
+def tags_delete_one(tag_service: tagServiceDependency, tag_uuid: UUID, auth_user: CurrentUser):
+    tag_service.delete_tag(tag_uuid)
     return None
