@@ -389,9 +389,9 @@ class QrCode(BaseModel):
     guides_FK = relationship("Guide", back_populates="qr_code")
 
 
-class UserGroup(Base):
+class UserGroup(BaseModel):
     __tablename__ = "users_groups"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
@@ -404,9 +404,9 @@ class UserGroup(Base):
     users = relationship("User", secondary=users_groups_rel, back_populates="user_group")  # Roles
 
 
-class Tag(Base):
+class Tag(BaseModel):
     __tablename__ = "tags"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     color = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)

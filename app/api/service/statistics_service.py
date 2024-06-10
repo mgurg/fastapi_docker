@@ -42,10 +42,10 @@ class StatisticsService:
         active = ["new", "accepted", "assigned", "in_progress", "paused"]
         inactive = ["rejected", "done"]
 
-        issues_active = self.issue_repo.get_issues_counter_by_status(active)
+        issues_active = self.issue_repo.count_by_status(active)
         issues_active = dict(issues_active)
 
-        issues_inactive = self.issue_repo.get_issues_counter_by_status(active)
+        issues_inactive = self.issue_repo.count_by_status(active)
         issues_inactive = dict(issues_inactive)
 
         response["items"] = {"total": sum(items.values()), "me": items.setdefault(user_id, 0)}

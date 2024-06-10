@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
 from app.db import get_db
-from app.models.models import Issue
+from app.models.models import Issue, Tag
 
 UserDB = Annotated[Session, Depends(get_db)]
 
@@ -34,7 +34,7 @@ class IssueRepo(GenericRepo[Issue]):
         result = self.session.execute(query)
         return result.all()
 
-    def get_issues_counter_by_status(self, status: list):
+    def count_by_status(self, status: list):
         query = (
             select(self.Model.author_id, func.count(self.Model.author_id))
             .where(self.Model.status.in_(status))
@@ -43,3 +43,9 @@ class IssueRepo(GenericRepo[Issue]):
 
         result = self.session.execute(query)
         return result.all()
+
+    def count_by_tag(self, tag_id: int):
+        query = select(func.count(self.Model.id)).filter(self.Model.tags_issue.any(Tag.id == tag_id))
+
+        result = self.session.execute(query)
+        return result.scalar_one_or_none()

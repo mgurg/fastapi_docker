@@ -175,6 +175,12 @@ class TagResponse(BaseResponse):
     color: Color | None = "#66b3ff"
     is_hidden: bool | None = None
 
+class TagsPaginated(BaseResponse):
+    data: list[TagResponse]
+    count: int
+    limit: int
+    offset: int
+
 
 class PartResponse(BaseResponse):
     uuid: UUID
@@ -278,6 +284,13 @@ class IssueIndexResponse(BaseResponse):
     color: str | None = None
     users_issue: list[UserBasicResponse] | None = None
     created_at: datetime
+
+
+class IssuesPaginated(BaseResponse):
+    data: list[IssueIndexResponse]
+    count: int
+    limit: int
+    offset: int
 
 
 class IssueResponse(BaseResponse):

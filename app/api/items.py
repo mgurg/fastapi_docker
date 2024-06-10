@@ -239,28 +239,28 @@ def item_get_statistics(
     return data
 
 
-@item_router.post("/favourites", response_model=StandardResponse)
-def item_add_to_favourites(*, db: UserDB, favourites: FavouritesAddIn, auth_user: CurrentUser):
-    db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
-
-    for user in db_item.users_item:
-        if user.uuid == favourites.user_uuid:
-            db_item.users_item.remove(user)
-            db.add(user)
-            db.commit()
-            return {"ok": True}
-
-    db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    item_data = {"users_item": [db_user]}
-
-    crud_items.update_item(db, db_item, item_data)
-
-    return {"ok": True}
+# @item_router.post("/favourites", response_model=StandardResponse)
+# def item_add_to_favourites(*, db: UserDB, favourites: FavouritesAddIn, auth_user: CurrentUser):
+#     db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
+#     if not db_item:
+#         raise HTTPException(status_code=400, detail="Item not found!")
+#
+#     for user in db_item.users_item:
+#         if user.uuid == favourites.user_uuid:
+#             db_item.users_item.remove(user)
+#             db.add(user)
+#             db.commit()
+#             return {"ok": True}
+#
+#     db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
+#     if not db_user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#
+#     item_data = {"users_item": [db_user]}
+#
+#     crud_items.update_item(db, db_item, item_data)
+#
+#     return {"ok": True}
 
 
 # @item_router.post("/", response_model=ItemIndexResponse)

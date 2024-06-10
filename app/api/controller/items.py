@@ -38,6 +38,13 @@ def get_export_items(item_service: itemServiceDependency, auth_user: CurrentUser
     return item_service.export()
 
 
+@item_test_router.post("/favourites", response_model=StandardResponse)
+def item_add_to_favourites(item_service: itemServiceDependency, favourites: FavouritesAddIn, auth_user: CurrentUser):
+    item_service.add_favourite(favourites)
+
+    return {"ok": True}
+
+
 @item_test_router.get("/{item_uuid}", response_model=ItemResponse)
 def item_get_one(
         item_service: itemServiceDependency,
@@ -71,10 +78,3 @@ def item_edit(item_service: itemServiceDependency, item_uuid: UUID, item_data: I
 def item_delete(item_service: itemServiceDependency, item_uuid: UUID, auth_user: CurrentUser, force: bool = False):
     item_service.delete_item(item_uuid, force)
     return None
-
-
-@item_test_router.post("/favourites", response_model=StandardResponse)
-def item_add_to_favourites(item_service: itemServiceDependency, favourites: FavouritesAddIn, auth_user: CurrentUser):
-    item_service.add_favourite(favourites)
-
-    return {"ok": True}
