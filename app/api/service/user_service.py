@@ -21,10 +21,10 @@ from app.service.password import Password
 
 class UserService:
     def __init__(
-        self,
-        user_repo: Annotated[UserRepo, Depends()],
-        role_repo: Annotated[RoleRepo, Depends()],
-        public_user_repo: Annotated[PublicUserRepo, Depends()],
+            self,
+            user_repo: Annotated[UserRepo, Depends()],
+            role_repo: Annotated[RoleRepo, Depends()],
+            public_user_repo: Annotated[PublicUserRepo, Depends()],
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
@@ -91,7 +91,7 @@ class UserService:
 
         self.public_user_repo.create(**public_user_data)
 
-    def edit_user(self, user_uuid: UUID, user: UserCreateIn):
+    def edit_user(self, user_uuid: UUID, user: UserCreateIn) -> None:
         db_user = self.user_repo.get_by_uuid(user_uuid)
         if db_user is None:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"User {user_uuid} not found")
@@ -127,6 +127,7 @@ class UserService:
         # UPDATE PUBLIC USER INFO
         if ("email" in user_data.keys()) and (user_data["email"] is not None) and ("pytest" not in sys.modules):
             self.update_public_user(user_uuid, {"email": user_data["email"]})
+        return None
 
     def update_public_user(self, user_uuid, public_user_data):
         db_public_user = self.public_user_repo.get_by_uuid(user_uuid)
@@ -139,7 +140,7 @@ class UserService:
         return db_user
 
     def get_all_users(
-        self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
+            self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
     ) -> tuple[Sequence[User], int]:
         db_users, count = self.user_repo.get_users(offset, limit, sort_column, sort_order, search)
 

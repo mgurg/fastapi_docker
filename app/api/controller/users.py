@@ -62,14 +62,14 @@ def get_one_user(user_service: userServiceDependency, user_uuid: UUID):
 
 @user_test_router.post("", response_model=StandardResponse, status_code=HTTP_201_CREATED)
 def user_add(user_service: userServiceDependency, user: UserCreateIn, request: Request, auth_user: CurrentUser):
-    user = user_service.add_user(user, request.headers.get("tenant", None))
-    return {"ok": True}
+    user_service.add_user(user, request.headers.get("tenant", None))
+    return None
 
 
-@user_test_router.patch("/{user_uuid}", response_model=StandardResponse)
+@user_test_router.patch("/{user_uuid}",status_code=HTTP_204_NO_CONTENT)
 def user_edit(user_service: userServiceDependency, user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser):
-    user = user_service.edit_user(user_uuid, user)
-    return {"ok": True}
+    user_service.edit_user(user_uuid, user)
+    return None
 
 
 @user_test_router.delete("/{user_uuid}", status_code=HTTP_204_NO_CONTENT)

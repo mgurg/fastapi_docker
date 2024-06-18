@@ -69,15 +69,16 @@ class ItemService:
 
         item_data = item_data.model_dump(exclude_unset=True)
 
-        files = []
+        # files = []
         if ("files" in item_data) and (item_data["files"] is not None):
-            db_item.files_item.clear()
-            for file in item_data["files"]:
-                db_file = self.file_repo.get_by_uuid(file)
-                if db_file:
-                    files.append(db_file)
+            if len(item_data["files"]) > 0:
+                db_item.files_item.clear()
+                for file in item_data["files"]:
+                    db_file = self.file_repo.get_by_uuid(file)
+                    if db_file:
+                        db_item.files_item.append(db_file)
 
-            item_data["files_item"] = files
+            # item_data["files_item"] = files
             del item_data["files"]
 
         if ("text_html" in item_data) and (item_data["text_html"] is not None):
@@ -88,7 +89,7 @@ class ItemService:
 
         new_item = self.item_repo.update(db_item.id, **item_data)
 
-        return new_item
+        return None
 
     def add_item(self, item: ItemAddIn, tenant: str):
         # tenant_id = request.headers.get("tenant", None)
