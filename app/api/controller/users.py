@@ -17,9 +17,6 @@ CurrentUser = Annotated[User, Depends(check_token)]
 userServiceDependency = Annotated[UserService, Depends()]
 
 
-# UserDB = Annotated[Session, Depends(get_session)]
-
-
 @user_test_router.get("", response_model=UsersPaginated)
 def get_all_users(
     user_service: userServiceDependency,
@@ -66,7 +63,7 @@ def user_add(user_service: userServiceDependency, user: UserCreateIn, request: R
     return None
 
 
-@user_test_router.patch("/{user_uuid}",status_code=HTTP_204_NO_CONTENT)
+@user_test_router.patch("/{user_uuid}", status_code=HTTP_204_NO_CONTENT)
 def user_edit(user_service: userServiceDependency, user_uuid: UUID, user: UserCreateIn, auth_user: CurrentUser):
     user_service.edit_user(user_uuid, user)
     return None

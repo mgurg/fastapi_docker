@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.service.issue_service import IssueService
 from app.models.models import User
-from app.schemas.responses import ItemsPaginated
+from app.schemas.responses import IssuesPaginated, ItemsPaginated
 from app.service.bearer_auth import check_token
 
 issue_test_router = APIRouter()

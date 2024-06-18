@@ -21,10 +21,10 @@ from app.service.password import Password
 
 class UserService:
     def __init__(
-            self,
-            user_repo: Annotated[UserRepo, Depends()],
-            role_repo: Annotated[RoleRepo, Depends()],
-            public_user_repo: Annotated[PublicUserRepo, Depends()],
+        self,
+        user_repo: Annotated[UserRepo, Depends()],
+        role_repo: Annotated[RoleRepo, Depends()],
+        public_user_repo: Annotated[PublicUserRepo, Depends()],
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
@@ -140,7 +140,7 @@ class UserService:
         return db_user
 
     def get_all_users(
-            self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
+        self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
     ) -> tuple[Sequence[User], int]:
         db_users, count = self.user_repo.get_users(offset, limit, sort_column, sort_order, search)
 

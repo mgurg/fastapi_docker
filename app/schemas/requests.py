@@ -1,4 +1,5 @@
 # from typing import list
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, condecimal
@@ -184,8 +185,8 @@ class IssueChangeStatus(BaseRequest):
 
 
 class SettingNotificationIn(BaseRequest):
-    sms_notification_level: str | None = None
-    email_notification_level: str | None = None
+    sms_notification_level: Literal["all", "none"] | None = None
+    email_notification_level: Literal["all", "none"] | None = None
 
 
 class SettingUserLanguage(BaseRequest):
@@ -195,7 +196,7 @@ class SettingUserLanguage(BaseRequest):
 class SettingGeneralIn(BaseRequest):
     name: str
     value: str
-    type: str
+    type: Literal["bool", "int", "float", "str"]
 
 
 class TagCreateIn(BaseRequest):

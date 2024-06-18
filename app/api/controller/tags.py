@@ -12,11 +12,8 @@ from app.service.bearer_auth import check_token
 
 tag_test_router = APIRouter()
 
-CurrentUser = Annotated[User, Depends(check_token)]
 tagServiceDependency = Annotated[TagService, Depends()]
-
-
-# UserDB = Annotated[Session, Depends(get_session)]
+CurrentUser = Annotated[User, Depends(check_token)]
 
 
 @tag_test_router.get("", response_model=TagsPaginated)

@@ -82,123 +82,127 @@ class ItemService:
             del item_data["files"]
 
         if ("text_html" in item_data) and (item_data["text_html"] is not None):
-            item_data["text"] = BeautifulSoup(item_data['text_html'], "html.parser").get_text()
+            item_data["text"] = BeautifulSoup(item_data["text_html"], "html.parser").get_text()
             del item_data["text_html"]
 
         item_data["updated_at"] = datetime.now(timezone.utc)
 
-        new_item = self.item_repo.update(db_item.id, **item_data)
+        self.item_repo.update(db_item.id, **item_data)
 
         return None
 
-    def add_item(self, item: ItemAddIn, tenant: str):
-        # tenant_id = request.headers.get("tenant", None)
-        # if not tenant_id:
-        #     raise HTTPException(status_code=400, detail="Unknown Company!")
-        #
-        # company = get_public_company_from_tenant(tenant_id)
-        #
-        files = []
-        if item.files is not None:
-            for file in item.files:
-                db_file = self.file_repo.get_by_uuid(file)
-                if db_file:
-                    files.append(db_file)
 
-        item_uuid = str(uuid4())
+def add_item(self, item: ItemAddIn, tenant: str):
+    # tenant_id = request.headers.get("tenant", None)
+    # if not tenant_id:
+    #     raise HTTPException(status_code=400, detail="Unknown Company!")
+    #
+    # company = get_public_company_from_tenant(tenant_id)
+    #
+    files = []
+    if item.files is not None:
+        for file in item.files:
+            db_file = self.file_repo.get_by_uuid(file)
+            if db_file:
+                files.append(db_file)
 
-        qr_code_id = 1  # TODO: crud_qr.generate_item_qr_id(db)
-        qr_code_company = "A"  # TODO:  crud_qr.add_noise_to_qr(company.qr_id)
+    item_uuid = str(uuid4())
 
-        qr_code_data = {
-            "uuid": str(uuid4()),
-            "resource": "items",
-            "resource_uuid": item_uuid,
-            "qr_code_id": qr_code_id,
-            "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
-            "ecc": "L",
-            "created_at": datetime.now(timezone.utc),
-        }
+    qr_code_id = 1  # TODO: crud_qr.generate_item_qr_id(db)
+    qr_code_company = "A"  # TODO:  crud_qr.add_noise_to_qr(company.qr_id)
 
-        new_qr_code = self.qr_code_repo.create(**qr_code_data)
-        #
-        description = BeautifulSoup(item.text_html, "html.parser").get_text()
+    qr_code_data = {
+        "uuid": str(uuid4()),
+        "resource": "items",
+        "resource_uuid": item_uuid,
+        "qr_code_id": qr_code_id,
+        "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
+        "ecc": "L",
+        "created_at": datetime.now(timezone.utc),
+    }
 
-        item_data = {
-            "uuid": item_uuid,
-            "author_id": 1,  # TODO: auth_user.id,
-            "name": item.name,
-            "symbol": item.symbol,
-            "summary": item.summary,
-            "text": description,
-            "text_json": item.text_json,
-            "qr_code_id": new_qr_code.id,
-            "files_item": files,
-            "created_at": datetime.now(timezone.utc),
-        }
+    new_qr_code = self.qr_code_repo.create(**qr_code_data)
+    #
+    description = BeautifulSoup(item.text_html, "html.parser").get_text()
 
-        new_item = self.item_repo.create(**item_data)
+    item_data = {
+        "uuid": item_uuid,
+        "author_id": 1,  # TODO: auth_user.id,
+        "name": item.name,
+        "symbol": item.symbol,
+        "summary": item.summary,
+        "text": description,
+        "text_json": item.text_json,
+        "qr_code_id": new_qr_code.id,
+        "files_item": files,
+        "created_at": datetime.now(timezone.utc),
+    }
 
-        return new_item
+    new_item = self.item_repo.create(**item_data)
 
-    def export(self) -> StreamingResponse:
-        db_items, count = self.item_repo.get_items(0, 50, "name", "asc", None)
-        f = io.StringIO()
-        csv_file = csv.writer(f, delimiter=";")
-        csv_file.writerow(["Name", "Description", "Symbol"])
-        for item in db_items:
-            csv_file.writerow([item.name, item.text, item.symbol])
+    return new_item
 
-        f.seek(0)
-        response = StreamingResponse(f, media_type="text/csv")
-        filename = f"items_{datetime.today().strftime('%Y-%m-%d')}.csv"
-        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-        return response
 
-    def delete_item(self, item_uuid: UUID, force: bool = False) -> bool:
-        ...
-        db_qr = self.qr_code_repo.get_by_resource_uuid(item_uuid)
-        db_item = self.item_repo.get_by_uuid(item_uuid)
+def export(self) -> StreamingResponse:
+    db_items, count = self.item_repo.get_items(0, 50, "name", "asc", None)
+    f = io.StringIO()
+    csv_file = csv.writer(f, delimiter=";")
+    csv_file.writerow(["Name", "Description", "Symbol"])
+    for item in db_items:
+        csv_file.writerow([item.name, item.text, item.symbol])
 
-        if not db_item:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Item {item_uuid} not found!")
+    f.seek(0)
+    response = StreamingResponse(f, media_type="text/csv")
+    filename = f"items_{datetime.today().strftime('%Y-%m-%d')}.csv"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
 
-        if force is False:
-            self.item_repo.update(db_item.id, **{"deleted_at": datetime.now(timezone.utc)})
+
+def delete_item(self, item_uuid: UUID, force: bool = False) -> bool:
+    ...
+    db_qr = self.qr_code_repo.get_by_resource_uuid(item_uuid)
+    db_item = self.item_repo.get_by_uuid(item_uuid)
+
+    if not db_item:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Item {item_uuid} not found!")
+
+    if force is False:
+        self.item_repo.update(db_item.id, **{"deleted_at": datetime.now(timezone.utc)})
+        return True
+
+    for file in db_item.files_item:
+        db_file = self.file_repo.get_by_uuid(file.uuid)
+
+    # TODO: Guides / Guides_Files - add when refactored
+    # for guide in db_item.item_guides:
+    #     crud_guides.get_guide_by_uuid(db, guide.uuid)
+
+    self.item_repo.delete(db_item.id)
+    self.qr_code_repo.delete(db_qr.id)
+
+    return True
+
+
+def add_favourite(self, favourites: FavouritesAddIn) -> bool:
+    db_item = self.item_repo.get_by_uuid(favourites.uuid)
+
+    if not db_item:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Item {favourites.uuid} not found!")
+
+    for user in db_item.users_item:
+        if user.uuid == favourites.user_uuid:
+            db_item.users_item.remove(user)
+            # TODO - check
+            # db_item.users_item.remove(user)
+            # db.add(user)
+            # db.commit()
             return True
 
-        for file in db_item.files_item:
-            db_file = self.file_repo.get_by_uuid(file.uuid)
+    db_user = self.user_repo.get_by_uuid(favourites.user_uuid)
+    if not db_user:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"User {favourites.user_uuid} not found")
 
-        # TODO: Guides / Guides_Files - add when refactored
-        # for guide in db_item.item_guides:
-        #     crud_guides.get_guide_by_uuid(db, guide.uuid)
+    item_data = {"users_item": [db_user]}
+    self.item_repo.update(db_item.id, **item_data)
 
-        self.item_repo.delete(db_item.id)
-        self.qr_code_repo.delete(db_qr.id)
-
-        return True
-
-    def add_favourite(self, favourites: FavouritesAddIn) -> bool:
-        db_item = self.item_repo.get_by_uuid(favourites.uuid)
-
-        if not db_item:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Item {favourites.uuid} not found!")
-
-        for user in db_item.users_item:
-            if user.uuid == favourites.user_uuid:
-                db_item.users_item.remove(user)
-                # TODO - check
-                # db_item.users_item.remove(user)
-                # db.add(user)
-                # db.commit()
-                return True
-
-        db_user = self.user_repo.get_by_uuid(favourites.user_uuid)
-        if not db_user:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"User {favourites.user_uuid} not found")
-
-        item_data = {"users_item": [db_user]}
-        self.item_repo.update(db_item.id, **item_data)
-
-        return True
+    return True
