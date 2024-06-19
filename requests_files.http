@@ -1,0 +1,15 @@
+@tag_uuid = 80feaa21-40c7-4d61-8391-b90422dc8014
+
+### Get all files size
+GET {{baseUrl}}/file_test/used_space
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get all files
+GET {{baseUrl}}/file_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

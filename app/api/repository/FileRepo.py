@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
@@ -17,8 +17,14 @@ class FileRepo(GenericRepo[File]):
         self.Model = File
         super().__init__(session, self.Model)
 
-    def get_by_uuid(self, uuid: UUID) -> Issue | None:
+    def get_by_uuid(self, uuid: UUID) -> File | None:
         query = select(self.Model).where(self.Model.uuid == str(uuid)).options(selectinload("*"))
+
+        result = self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    def get_total_size_in_bytes(self) -> int | None:
+        query = select(func.sum(File.size))
 
         result = self.session.execute(query)
         return result.scalar_one_or_none()
