@@ -1,3 +1,4 @@
+import boto3
 import os
 import re
 import unicodedata
@@ -5,9 +6,32 @@ from pathlib import Path
 from typing import BinaryIO
 from app.config import get_settings
 from app.storage.base import BaseStorage
-from app.storage.aws_s3 import s3_resource, generate_presigned_url
 
 settings = get_settings()
+
+# Initialize boto3 clients
+s3_client = boto3.client(
+    "s3",
+    region_name=settings.s3_region,
+    aws_access_key_id=settings.s3_access_key,
+    aws_secret_access_key=settings.s3_secret_access_key,
+)
+
+s3_resource = boto3.resource(
+    "s3",
+    region_name=settings.s3_region,
+    aws_access_key_id=settings.s3_access_key,
+    aws_secret_access_key=settings.s3_secret_access_key,
+)
+
+
+def generate_presigned_url(bucket: str, key: str, expiration: int = 3600) -> str:
+    """Generate a presigned URL to share an S3 object."""
+    return s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=expiration,
+    )
 
 
 class S3Storage(BaseStorage):
