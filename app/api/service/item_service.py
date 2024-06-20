@@ -17,7 +17,7 @@ from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import Item
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
-from app.storage.s3 import generate_presigned_url
+from app.storage.aws_s3 import generate_presigned_url
 
 
 class ItemService:

@@ -38,7 +38,7 @@ from app.config import get_settings
 from app.service.health_check import test_db
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
-from app.storage.s3 import S3Storage
+from app.storage.aws_s3 import S3Storage
 
 settings = get_settings()
 

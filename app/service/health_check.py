@@ -1,7 +1,7 @@
 from loguru import logger
 from app.config import get_settings
 from app.db import engine
-from app.storage.s3 import s3_client
+from app.storage.aws_s3 import s3_client
 
 settings = get_settings()
 

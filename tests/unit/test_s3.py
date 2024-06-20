@@ -4,7 +4,7 @@ from pathlib import Path
 import boto3
 from moto import mock_s3
 
-from app.storage.s3 import S3Storage
+from app.storage.aws_s3 import S3Storage
 
 os.environ["MOTO_S3_CUSTOM_ENDPOINTS"] = "http://custom.s3.endpoint"
 

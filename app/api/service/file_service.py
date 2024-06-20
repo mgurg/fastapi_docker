@@ -10,7 +10,7 @@ from app.api.repository.FileRepo import FileRepo
 from app.api.repository.IssueRepo import IssueRepo
 from app.config import get_settings
 from app.models.models import File
-from app.storage.s3 import s3_resource, generate_presigned_url
+from app.storage.aws_s3 import s3_resource, generate_presigned_url
 
 settings = get_settings()
 
