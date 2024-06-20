@@ -132,8 +132,6 @@ class GuideAddIn(BaseRequest):
     name: str
     text_html: str
     text_json: dict
-    # video_id: str | None
-    # video_json: dict | None
     files: list[UUID] | None = None
     item_uuid: UUID | None = None
 
@@ -142,8 +140,6 @@ class GuideEditIn(BaseRequest):
     name: str | None = None
     text_html: str | None = None
     text_json: dict | None = None
-    # video_id: str | None
-    # video_json: dict | None
     files: list[UUID] | None = None
 
 

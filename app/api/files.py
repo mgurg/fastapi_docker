@@ -25,6 +25,8 @@ file_router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(has_token)]
 UserDB = Annotated[Session, Depends(get_db)]
+
+
 # UserDB = Annotated[Session, Depends(get_db)]
 
 
@@ -58,12 +60,12 @@ def file_get_info_single(*, db: UserDB, uuid: UUID, auth_user: CurrentUser):
 
 @file_router.post("/", response_model=FileResponse)
 def file_add(
-    *,
-    db: UserDB,
-    request: Request,
-    auth_user: CurrentUser,
-    file: UploadFile | None = None,
-    uuid: UUID | None = Form(None),
+        *,
+        db: UserDB,
+        request: Request,
+        auth_user: CurrentUser,
+        file: UploadFile | None = None,
+        uuid: UUID | None = Form(None),
 ):
     if not file:
         raise HTTPException(status_code=400, detail="No file sent")
@@ -154,33 +156,3 @@ def file_download(*, db: UserDB, request: Request, file_uuid: UUID):
 def file_download_pre_signed(tenant, file):
     url = generate_presigned_url(tenant, file)
     return url
-
-
-@file_router.get("/video_upload_token/", name="video:token")
-def video_upload_token(auth_user: CurrentUser):
-    # #  https://api.video/blog/tutorials/delegated-uploads
-    # # Part One
-    # payload = json.dumps({"apiKey": "47yczv1m0huXDEg6iyNRqYT9QXmUcMAArHY0Qqzgz0I"})
-    # headers = {"accept": "application/json", "content-type": "application/json"}
-
-    # response = requests.post("https://sandbox.api.video/auth/api-key", headers=headers, data=payload)
-
-    # print(response.text)  # get Bearer Token
-
-    # #  Part Two
-
-    # payload = {}
-    # headers = {
-    #     "accept": "application/vnd.api.video+json",
-    #     "Authorization": "Bearer 5dZBuv0dF7w0SG6V1Py1Ho5eqNT_Jk3zpRUeeIj3tPHzswdGEBRPcT9Ytw",
-    # }
-
-    # response = requests.post("https://sandbox.api.video/upload-tokens", headers=headers, data=payload)
-
-    # print(response.text)  # final upload token
-
-    # url = generate_presigned_url(tenant, file)
-
-    upload_token = settings.API_VIDEO_UPLOAD
-    api_token = settings.API_VIDEO
-    return {"api_token": api_token, "upload_token": upload_token}

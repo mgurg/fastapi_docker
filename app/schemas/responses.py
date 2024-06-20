@@ -229,7 +229,6 @@ class GuideResponse(BaseResponse):
     text: str | None = None
     text_json: dict | None = None
     item: list[ItemNameResponse] | None = None
-    # video_id: str | None
 
 
 class ItemIndexResponse(BaseResponse):
@@ -330,8 +329,6 @@ class GuideIndexResponse(BaseResponse):
     name: str | None = None
     text: str | None = None
     text_json: dict | None = None
-    # video_id: str | None
-    # video_json: dict | None
     files_guide: list[FileBasicInfo] | None = None
     item: list[BasicItems] | None = None
     qr_code: QRCodeItemResponse | None = None

@@ -37,8 +37,6 @@ class Settings(BaseSettings):
     REJESTR_IO_KEY: str | None = os.getenv("REJESTR_IO_KEY")
     GUS_KEY: str | None = os.getenv("GUS_API")
     GUS_API_DEV: str | None = os.getenv("GUS_API_DEV")
-    API_VIDEO: str | None = os.getenv("API_VIDEO")
-    API_VIDEO_UPLOAD: str | None = os.getenv("API_VIDEO_UPLOAD")
 
     # POSTGRESQL DEFAULT DATABASE
     DEFAULT_DATABASE_HOSTNAME: str | None = os.getenv("DB_HOST")

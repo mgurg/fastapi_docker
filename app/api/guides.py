@@ -130,8 +130,6 @@ def guide_add(*, db: UserDB, request: Request, guide: GuideAddIn, auth_user: Cur
         "text": description,
         "qr_code_id": new_qr_code.id,
         "text_json": guide.text_json,
-        # "video_json": guide.video_json,
-        # "video_id": guide.video_id,
         "files_guide": files,
         "created_at": datetime.now(timezone.utc),
     }
