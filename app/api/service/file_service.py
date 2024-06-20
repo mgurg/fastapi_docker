@@ -4,6 +4,7 @@ from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException, UploadFile
+from loguru import logger
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_413_REQUEST_ENTITY_TOO_LARGE
 
 from app.api.repository.FileRepo import FileRepo
@@ -63,3 +64,23 @@ class FileService:
         new_file.url = generate_presigned_url(settings.s3_bucket_name, s3_folder_path)
 
         return new_file
+
+    def delete_file(self, file_uuid: UUID, tenant: str) -> None:
+        db_file = self.file_repo.get_by_uuid(file_uuid)
+        if not db_file:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
+
+        s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
+
+        try:
+            s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()
+        except Exception as err:
+            logger.exception("Failed to delete S3 object: {}", err)
+            raise HTTPException(status_code=500, detail=f"Failed to delete file `{file_uuid}` from storage")
+
+        self.file_repo.delete(db_file.id)
+
+        return None
+
+    def get_presigned_url(self, tenant: str, file_name: str) -> str:
+        return generate_presigned_url(tenant, file_name)
