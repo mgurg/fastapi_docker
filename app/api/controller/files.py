@@ -51,7 +51,6 @@ def file_add(
         file_size: Annotated[int, Depends(valid_content_length)],
         uuid: UUID | None = Form(None),
         tenant: Annotated[str | None, Header()] = None,
-
 ):
     uploaded_file = file_service.upload(file, file_size, tenant, auth_user.id, uuid)
     return uploaded_file

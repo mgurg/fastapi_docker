@@ -39,28 +39,20 @@ class FileService:
         return db_file
 
     def upload(self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None) -> File:
-
         used_quota = self.get_total_size_from_db()
 
-        if used_quota > 50000000:  # ~5MB
-            used_quota_mb = used_quota / (1024 * 1024)
-            raise HTTPException(status_code=HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                                detail=f"Quota exceeded. Used: {used_quota_mb:.2f} MB")
+        if used_quota > 50 * 1024 * 1024:
+            raise HTTPException(status_code=HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Quota exceeded")
 
         file_uuid = str(uuid4()) if not uuid else uuid
+        s3_folder_path = f"{tenant}/{file_uuid}_{file.filename}"
 
-        try:
-            s3_folder_path = "".join([tenant, "/", file_uuid, "_", file.filename])
-
-            s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
-        except Exception as e:
-            print(e)
+        s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
 
         file_data = {
             "uuid": file_uuid,
             "owner_id": user_id,
             "file_name": file.filename,
-            "file_description": None,
             "extension": Path(file.filename).suffix,
             "mimetype": file.content_type,
             "size": file_size,
@@ -68,9 +60,6 @@ class FileService:
         }
 
         new_file = self.file_repo.create(**file_data)
-
-        new_file.url = generate_presigned_url(
-            tenant, "_".join([str(file_uuid), file.filename])
-        )
+        new_file.url = generate_presigned_url(settings.s3_bucket_name, s3_folder_path)
 
         return new_file
