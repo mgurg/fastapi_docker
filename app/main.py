@@ -16,11 +16,9 @@ from app.api.controller.permissions import permission_test_router
 from app.api.controller.settings import setting_test_router
 from app.api.controller.statistics import statistics_test_router
 from app.api.controller.tags import tag_test_router
-
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
-
 # from app.api.files import file_router
 # from app.api.guides import guide_router
 # from app.api.issues import issue_router
@@ -31,14 +29,12 @@ from app.api.controller.users import user_test_router
 # from app.api.tags import tag_router
 from app.api.users import user_router
 from app.api.users_permissions import permission_router
-
 # from app.api.users_groups import group_router
 # from app.api.users_permissions import permission_router
 from app.config import get_settings
-from app.service.health_check import test_db
+from app.service.health_check import run_healthcheck
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
-from app.storage.aws_s3 import S3Storage
 
 settings = get_settings()
 
@@ -166,50 +162,8 @@ async def read_root(request: Request):
 @app.get("/health")
 async def health_check():
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
-    # try:
-    #     response = run_healthcheck()
-    # except Exception as err:
-    #     logger.exception(err)
-    #     raise err
-    # return response
-    return {"status": "ok"}
 
-
-@app.get("/health_db")
-def health_check_db():
-    return test_db()
-
-
-class PublicAssetS3Storage(S3Storage):
-    AWS_DEFAULT_ACL = "public-read"
-    AWS_QUERYSTRING_AUTH = True
-
-
-# storage = PublicAssetS3Storage()
-
-
-# @app.post("/test")
-# def test_endpoint(file: UploadFile):
-#     try:
-#         print("NAME:", storage.get_name("test (1)ąśćł.txt"))
-#         print(storage.get_path("test (1).txt"))
-#
-#         # tmp_path = Path(__file__).resolve().parent
-#         # tmp_file = tmp_path / "example.txt"
-#         # tmp_file.write_bytes(b"123")
-#         # file_hdd = tmp_file.open("rb")
-#         # print(file_hdd)
-#
-#         # file_web = file.file
-#         #
-#         # save = storage.write(file_web, "example.txt")
-#         # print(save)
-#         # print(storage.get_size("example.txt"))
-#
-#     except BaseException as error:
-#         print(error)
-#     return {"status": "ok"}
-
+    return run_healthcheck()
 
 # if __name__ == "__main__":
 #     logger.info("Running APP locally (not docker)")

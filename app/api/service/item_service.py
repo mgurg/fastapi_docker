@@ -17,7 +17,7 @@ from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import Item
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
-from app.storage.aws_s3 import generate_presigned_url
+# from app.storage.aws_s3 import generate_presigned_url
 
 
 class ItemService:
@@ -43,7 +43,8 @@ class ItemService:
 
         try:
             for picture in db_item.files_item:
-                picture.url = generate_presigned_url(tenant, "_".join([str(picture.uuid), picture.file_name]))
+                ...
+                # picture.url = generate_presigned_url(tenant, "_".join([str(picture.uuid), picture.file_name]))
         except Exception as e:
             logger.error("Error getting item by uuid", exc_info=e)
 

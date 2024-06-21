@@ -56,14 +56,12 @@ def file_add(
     uploaded_file = file_service.upload(file, file_size, tenant, auth_user.id, uuid)
     return uploaded_file
 
-
 @file_test_router.delete("/{file_uuid}", status_code=HTTP_204_NO_CONTENT)
 def remove_file(file_service: fileServiceDependency, file_uuid: UUID, auth_user: CurrentUser,
                 tenant: Annotated[str | None, Header()] = None):
     file_service.delete_file(file_uuid, tenant)
 
-
-@file_test_router.get("/presigned_url/{file}")
-def file_download_pre_signed(file_service: fileServiceDependency, tenant: Annotated[str | None, Header()], file_name: str ):
-    presigned_url = file_service.get_presigned_url(tenant, file_name)
+@file_test_router.get("/presigned_url/{file_name}")
+def file_download_pre_signed(file_service: fileServiceDependency):
+    presigned_url = file_service.get_presigned_url()
     return presigned_url

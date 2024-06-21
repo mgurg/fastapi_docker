@@ -13,3 +13,11 @@ Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+
+### Get URL
+GET {{baseUrl}}/file_test/presigned_url/1
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

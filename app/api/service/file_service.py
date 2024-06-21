@@ -11,7 +11,9 @@ from app.api.repository.FileRepo import FileRepo
 from app.api.repository.IssueRepo import IssueRepo
 from app.config import get_settings
 from app.models.models import File
-from app.storage.aws_s3 import s3_resource, generate_presigned_url
+from app.storage.storage_factory import StorageFactory
+from app.storage.storage_interface import StorageInterface
+from app.storage.storage_service_provider import get_storage_provider
 
 settings = get_settings()
 
@@ -21,9 +23,11 @@ class FileService:
             self,
             file_repo: Annotated[FileRepo, Depends()],
             issue_repo: Annotated[IssueRepo, Depends()],
+            storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)]
     ) -> None:
         self.file_repo = file_repo
         self.issue_repo = issue_repo
+        self.storage_provider = storage_provider
 
     def get_total_size_from_db(self) -> int:
         return self.file_repo.get_total_size_in_bytes() or 0
@@ -48,7 +52,7 @@ class FileService:
         file_uuid = str(uuid4()) if not uuid else uuid
         s3_folder_path = f"{tenant}/{file_uuid}_{file.filename}"
 
-        s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
+        # s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
 
         file_data = {
             "uuid": file_uuid,
@@ -61,7 +65,7 @@ class FileService:
         }
 
         new_file = self.file_repo.create(**file_data)
-        new_file.url = generate_presigned_url(settings.s3_bucket_name, s3_folder_path)
+        # new_file.url = generate_presigned_url(settings.s3_bucket_name, s3_folder_path)
 
         return new_file
 
@@ -73,7 +77,8 @@ class FileService:
         s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
 
         try:
-            s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()
+            ...
+            # s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()
         except Exception as err:
             logger.exception("Failed to delete S3 object: {}", err)
             raise HTTPException(status_code=500, detail=f"Failed to delete file `{file_uuid}` from storage")
@@ -82,5 +87,7 @@ class FileService:
 
         return None
 
-    def get_presigned_url(self, tenant: str, file_name: str) -> str:
-        return generate_presigned_url(tenant, file_name)
+    def get_presigned_url(self) -> str:
+        s3_folder_path = "string_05eab8892bea4db18c3ff73222e073ee/12379584-5dd0-434d-9f05-6a0c54149d13_TH_NARTY.jpg"
+        a =  self.storage_provider.get_url(s3_folder_path)
+        return a
