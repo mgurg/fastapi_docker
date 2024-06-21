@@ -12,7 +12,7 @@ class StorageFactory:
                 bucket_name=kwargs.get("bucket_name"),
                 aws_access_key_id=kwargs.get("aws_access_key_id"),
                 aws_secret_access_key=kwargs.get("aws_secret_access_key"),
-                region_name=kwargs.get("region_name")
+                region_name=kwargs.get("region_name"),
             )
         else:
             raise ValueError(f"Unsupported storage provider: {provider}")

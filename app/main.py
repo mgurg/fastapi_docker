@@ -16,9 +16,11 @@ from app.api.controller.permissions import permission_test_router
 from app.api.controller.settings import setting_test_router
 from app.api.controller.statistics import statistics_test_router
 from app.api.controller.tags import tag_test_router
+
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
+
 # from app.api.files import file_router
 # from app.api.guides import guide_router
 # from app.api.issues import issue_router
@@ -29,6 +31,7 @@ from app.api.controller.users import user_test_router
 # from app.api.tags import tag_router
 from app.api.users import user_router
 from app.api.users_permissions import permission_router
+
 # from app.api.users_groups import group_router
 # from app.api.users_permissions import permission_router
 from app.config import get_settings
@@ -164,6 +167,7 @@ async def health_check():
     # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
 
     return run_healthcheck()
+
 
 # if __name__ == "__main__":
 #     logger.info("Running APP locally (not docker)")

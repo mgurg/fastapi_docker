@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import BinaryIO
 
 
 class StorageInterface(ABC):
     @abstractmethod
-    def upload_file(self, file_path: str, destination_path: str) -> bool:
+    def upload_file(self, file_obj: BinaryIO, destination_path: str) -> bool:
         pass
 
     @abstractmethod

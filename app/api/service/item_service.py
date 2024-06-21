@@ -17,6 +17,9 @@ from app.api.repository.RoleRepo import RoleRepo
 from app.api.repository.UserRepo import UserRepo
 from app.models.models import Item
 from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
+from app.storage.storage_interface import StorageInterface
+from app.storage.storage_service_provider import get_storage_provider
+
 # from app.storage.aws_s3 import generate_presigned_url
 
 
@@ -28,12 +31,14 @@ class ItemService:
         item_repo: Annotated[ItemRepo, Depends()],
         file_repo: Annotated[FileRepo, Depends()],
         qr_code_repo: Annotated[QrCodeRepo, Depends()],
+        storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
         self.item_repo = item_repo
         self.file_repo = file_repo
         self.qr_code_repo = qr_code_repo
+        self.storage_provider = storage_provider
 
     def get_item_by_uuid(self, item_uuid: UUID, tenant: str) -> Item | None:
         db_item = self.item_repo.get_by_uuid(item_uuid)
@@ -43,8 +48,7 @@ class ItemService:
 
         try:
             for picture in db_item.files_item:
-                ...
-                # picture.url = generate_presigned_url(tenant, "_".join([str(picture.uuid), picture.file_name]))
+                picture.url = self.storage_provider.get_url(f"{tenant}/{picture.uuid}_{picture.file_name}")
         except Exception as e:
             logger.error("Error getting item by uuid", exc_info=e)
 

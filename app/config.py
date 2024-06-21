@@ -13,11 +13,10 @@ class Settings(BaseSettings):
     OPEN_API: str | None = os.getenv("APP_OPEN_API")
     base_app_url: str | None = os.getenv("APP_HOST", "https://frontend-host.com")
 
-
     STORAGE_PROVIDER: str = "aws_s3"
-    AWS_BUCKET_NAME: str  = os.getenv("AWS_S3_BUCKET")
-    AWS_ACCESS_KEY_ID: str =  os.getenv("AWS_S3_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY: str =  os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+    AWS_BUCKET_NAME: str = os.getenv("AWS_S3_BUCKET")
+    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_S3_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
     AWS_REGION_NAME: str = os.getenv("AWS_S3_DEFAULT_REGION")
 
     # s3_region: str | None = os.getenv("AWS_DEFAULT_REGION")

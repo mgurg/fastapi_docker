@@ -34,11 +34,8 @@ def run_healthcheck(storage_provider: StorageInterface = Depends(get_storage_pro
     db_status = test_db()
     storage_status = test_storage(storage_provider)
 
-    overall_status = "ALIVE" if all(
-        status == "healthy" for status in [db_status["db"], storage_status["storage"]]) else "DEGRADED"
+    overall_status = (
+        "ALIVE" if all(status == "healthy" for status in [db_status["db"], storage_status["storage"]]) else "DEGRADED"
+    )
 
-    return {
-        "status": overall_status,
-        **db_status,
-        **storage_status
-    }
+    return {"status": overall_status, **db_status, **storage_status}

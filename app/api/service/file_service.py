@@ -11,19 +11,19 @@ from app.api.repository.FileRepo import FileRepo
 from app.api.repository.IssueRepo import IssueRepo
 from app.config import get_settings
 from app.models.models import File
-from app.storage.storage_factory import StorageFactory
 from app.storage.storage_interface import StorageInterface
 from app.storage.storage_service_provider import get_storage_provider
+from app.utils.filename_utils import get_safe_filename
 
 settings = get_settings()
 
 
 class FileService:
     def __init__(
-            self,
-            file_repo: Annotated[FileRepo, Depends()],
-            issue_repo: Annotated[IssueRepo, Depends()],
-            storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)]
+        self,
+        file_repo: Annotated[FileRepo, Depends()],
+        issue_repo: Annotated[IssueRepo, Depends()],
+        storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
     ) -> None:
         self.file_repo = file_repo
         self.issue_repo = issue_repo
@@ -43,29 +43,38 @@ class FileService:
 
         return db_file
 
-    def upload(self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None) -> File:
+    async def upload(
+        self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None
+    ) -> File:
         used_quota = self.get_total_size_from_db()
 
         if used_quota > 50 * 1024 * 1024:
             raise HTTPException(status_code=HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Quota exceeded")
 
-        file_uuid = str(uuid4()) if not uuid else uuid
-        s3_folder_path = f"{tenant}/{file_uuid}_{file.filename}"
+        file_uuid = str(uuid4()) if not uuid else str(uuid)
+        safe_filename = get_safe_filename(file.filename)
+        s3_folder_path = f"{tenant}/{file_uuid}_{safe_filename}"
 
-        # s3_resource.Bucket(settings.s3_bucket_name).upload_fileobj(Fileobj=file.file, Key=s3_folder_path)
+        # Reset the file cursor to the beginning
+        await file.seek(0)
+
+        success = self.storage_provider.upload_file(file.file, s3_folder_path)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to upload file to storage")
 
         file_data = {
             "uuid": file_uuid,
             "owner_id": user_id,
-            "file_name": file.filename,
-            "extension": Path(file.filename).suffix,
+            "file_name": safe_filename,
+            "extension": Path(safe_filename).suffix,
             "mimetype": file.content_type,
             "size": file_size,
             "created_at": datetime.now(timezone.utc),
         }
 
         new_file = self.file_repo.create(**file_data)
-        # new_file.url = generate_presigned_url(settings.s3_bucket_name, s3_folder_path)
+        s3_folder_path = f"{tenant}/{file_uuid}_{safe_filename}"
+        new_file.url = self.storage_provider.get_url(s3_folder_path)
 
         return new_file
 
@@ -76,18 +85,18 @@ class FileService:
 
         s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
 
-        try:
-            ...
-            # s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()
-        except Exception as err:
-            logger.exception("Failed to delete S3 object: {}", err)
+        success = self.storage_provider.delete_file(s3_folder_path)
+        if not success:
+            logger.exception("Failed to delete S3 object")
             raise HTTPException(status_code=500, detail=f"Failed to delete file `{file_uuid}` from storage")
 
         self.file_repo.delete(db_file.id)
 
         return None
 
+        return None
+
     def get_presigned_url(self) -> str:
         s3_folder_path = "string_05eab8892bea4db18c3ff73222e073ee/12379584-5dd0-434d-9f05-6a0c54149d13_TH_NARTY.jpg"
-        a =  self.storage_provider.get_url(s3_folder_path)
+        a = self.storage_provider.get_url(s3_folder_path)
         return a

@@ -1,11 +1,8 @@
 import io
-from datetime import datetime, timezone
-from pathlib import Path
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
-from sentry_sdk import capture_exception
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
@@ -13,11 +10,10 @@ from app.config import get_settings
 from app.crud import crud_files
 from app.db import get_db
 from app.models.models import User
-from app.schemas.responses import FileResponse, StandardResponse
 from app.service.bearer_auth import has_token
 
 # from app.models.models import FileResponse, Files, FileUrlResponse, StandardResponse
-from app.storage.aws_s3 import generate_presigned_url, s3_resource
+from app.storage.aws_s3 import s3_resource
 
 settings = get_settings()
 
