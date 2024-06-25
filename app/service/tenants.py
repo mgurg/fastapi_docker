@@ -18,7 +18,7 @@ settings = get_settings()
 
 @timer
 def alembic_upgrade_head(tenant_name: str, revision="head", url: str = None):
-    logger.info("🔺 [Schema upgrade] {tenant_name} to version: {revision}")
+    logger.info(f"🔺 [Schema upgrade] {tenant_name} to version: {revision}")
 
     if url is None:
         url = SQLALCHEMY_DB_URL

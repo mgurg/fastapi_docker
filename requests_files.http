@@ -1,4 +1,4 @@
-@tag_uuid = 80feaa21-40c7-4d61-8391-b90422dc8014
+@file_uuid = 498851e8-c4c1-4aef-832b-cf088bfd2f45
 
 ### Get all files size
 GET {{baseUrl}}/file_test/used_space
@@ -14,9 +14,15 @@ tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
+### Get presigned URL
+GET {{baseUrl}}/file_test/{{file_uuid}}/presigned_url
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
 
-### Get URL
-GET {{baseUrl}}/file_test/presigned_url/1
+### Delete file
+DELETE {{baseUrl}}/file_test/{{file_uuid}}
 Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}

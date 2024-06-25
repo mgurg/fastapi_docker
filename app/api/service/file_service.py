@@ -20,10 +20,10 @@ settings = get_settings()
 
 class FileService:
     def __init__(
-        self,
-        file_repo: Annotated[FileRepo, Depends()],
-        issue_repo: Annotated[IssueRepo, Depends()],
-        storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
+            self,
+            file_repo: Annotated[FileRepo, Depends()],
+            issue_repo: Annotated[IssueRepo, Depends()],
+            storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
     ) -> None:
         self.file_repo = file_repo
         self.issue_repo = issue_repo
@@ -44,7 +44,7 @@ class FileService:
         return db_file
 
     async def upload(
-        self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None
+            self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None
     ) -> File:
         used_quota = self.get_total_size_from_db()
 
@@ -94,9 +94,10 @@ class FileService:
 
         return None
 
-        return None
+    def get_presigned_url(self, file_uuid: UUID, tenant: str) -> str:
+        db_file = self.file_repo.get_by_uuid(file_uuid)
+        if not db_file:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
 
-    def get_presigned_url(self) -> str:
-        s3_folder_path = "string_05eab8892bea4db18c3ff73222e073ee/12379584-5dd0-434d-9f05-6a0c54149d13_TH_NARTY.jpg"
-        a = self.storage_provider.get_url(s3_folder_path)
-        return a
+        s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
+        return self.storage_provider.get_url(s3_folder_path)

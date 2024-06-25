@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import BinaryIO
-
+from loguru import logger
 import boto3
 from botocore.exceptions import ClientError
 
@@ -35,7 +35,17 @@ class AWSS3Storage(StorageInterface):
         try:
             self.s3_resource.Object(self.bucket_name, file_path).delete()
             return True
-        except ClientError:
+        except ClientError as e:
+            # Check if the error is a 404 (Not Found) or other client errors
+            error_code = e.response['Error']['Code']
+            if error_code == '404':
+                logger.error(f"File {file_path} not found in bucket {self.bucket_name}.")
+            else:
+                logger.error(f"Client error occurred: {e.response['Error']['Message']}")
+            return False
+        except Exception as e:
+            # Handle any other exceptions
+            logger.error(f"An unexpected error occurred: {str(e)}")
             return False
 
     def get_url(self, file_path: str, expiration: int = 3600) -> str:
