@@ -1,3 +1,4 @@
+import io
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
@@ -5,6 +6,7 @@ from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException, UploadFile
 from loguru import logger
+from starlette.responses import StreamingResponse
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_413_REQUEST_ENTITY_TOO_LARGE
 
 from app.api.repository.FileRepo import FileRepo
@@ -43,6 +45,21 @@ class FileService:
 
         return db_file
 
+    def download(self, file_uuid: UUID, tenant: str):
+        db_file = self.file_repo.get_by_uuid(file_uuid)
+        if not db_file:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
+
+        try:
+            s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
+            file = self.storage_provider.download_file(s3_folder_path)
+            header = {"Content-Disposition": f'inline; filename="{db_file.file_name}"'}
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=404, detail="File not found")
+
+        return StreamingResponse(file, media_type=db_file.mimetype, headers=header)
+
     async def upload(
             self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None
     ) -> File:
@@ -78,26 +95,28 @@ class FileService:
 
         return new_file
 
-    def delete_file(self, file_uuid: UUID, tenant: str) -> None:
-        db_file = self.file_repo.get_by_uuid(file_uuid)
-        if not db_file:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
 
-        s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
+def delete_file(self, file_uuid: UUID, tenant: str) -> None:
+    db_file = self.file_repo.get_by_uuid(file_uuid)
+    if not db_file:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
 
-        success = self.storage_provider.delete_file(s3_folder_path)
-        if not success:
-            logger.exception("Failed to delete S3 object")
-            raise HTTPException(status_code=500, detail=f"Failed to delete file `{file_uuid}` from storage")
+    s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
 
-        self.file_repo.delete(db_file.id)
+    success = self.storage_provider.delete_file(s3_folder_path)
+    if not success:
+        logger.exception("Failed to delete S3 object")
+        raise HTTPException(status_code=500, detail=f"Failed to delete file `{file_uuid}` from storage")
 
-        return None
+    self.file_repo.delete(db_file.id)
 
-    def get_presigned_url(self, file_uuid: UUID, tenant: str) -> str:
-        db_file = self.file_repo.get_by_uuid(file_uuid)
-        if not db_file:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
+    return None
 
-        s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
-        return self.storage_provider.get_url(s3_folder_path)
+
+def get_presigned_url(self, file_uuid: UUID, tenant: str) -> str:
+    db_file = self.file_repo.get_by_uuid(file_uuid)
+    if not db_file:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"File `{file_uuid}` not found")
+
+    s3_folder_path = f"{tenant}/{file_uuid}_{db_file.file_name}"
+    return self.storage_provider.get_url(s3_folder_path)

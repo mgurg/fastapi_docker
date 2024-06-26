@@ -1,4 +1,4 @@
-@file_uuid = 498851e8-c4c1-4aef-832b-cf088bfd2f45
+@file_uuid = 2e80d572-7663-4dc0-a261-feb4408b370e
 
 ### Get all files size
 GET {{baseUrl}}/file_test/used_space
@@ -20,6 +20,15 @@ Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+
+### Download file
+GET {{baseUrl}}/file_test/{{file_uuid}}/download
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
 
 ### Delete file
 DELETE {{baseUrl}}/file_test/{{file_uuid}}

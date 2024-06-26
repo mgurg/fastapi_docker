@@ -44,6 +44,11 @@ def file_get_info_single(file_service: fileServiceDependency, uuid: UUID, auth_u
     return db_files
 
 
+@file_test_router.get("/{file_uuid}/download", name="file:Download")
+def file_download(file_service: fileServiceDependency, file_uuid: UUID, tenant: Annotated[str | None, Header()]):
+    s3_file = file_service.download(file_uuid, tenant)
+    return s3_file
+
 @file_test_router.post("/", response_model=FileResponse)
 def file_add(
         file_service: fileServiceDependency,

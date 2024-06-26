@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import BinaryIO
-from loguru import logger
+import io
+
 import boto3
 from botocore.exceptions import ClientError
+from loguru import logger
 
 from app.utils.filename_utils import get_safe_filename
-
 from .storage_interface import StorageInterface
 
 
@@ -57,6 +58,18 @@ class AWSS3Storage(StorageInterface):
         except ClientError:
             return ""
 
-    def download_file(self, file_path: str, destination_path: str) -> bool: ...
+    def download_file(self, file_path: str) -> BinaryIO:
+        try:
+            file_obj = io.BytesIO()
+            self.s3_resource.Bucket(self.bucket_name).download_fileobj(file_path, file_obj)
+            file_obj.seek(0)
+            return file_obj
+        except ClientError as e:
+            logger.error(f"Client error occurred: {e.response['Error']['Message']}")
+            raise
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {str(e)}")
+            raise
 
-    def list_files(self, prefix: str = "") -> list: ...
+    def list_files(self, prefix: str = "") -> list:
+        ...

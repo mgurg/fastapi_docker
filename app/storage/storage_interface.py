@@ -8,7 +8,7 @@ class StorageInterface(ABC):
         pass
 
     @abstractmethod
-    def download_file(self, file_path: str, destination_path: str) -> bool:
+    def download_file(self, file_path: str) -> BinaryIO:
         pass
 
     @abstractmethod

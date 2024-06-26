@@ -13,7 +13,7 @@ from app.models.models import User
 from app.service.bearer_auth import has_token
 
 # from app.models.models import FileResponse, Files, FileUrlResponse, StandardResponse
-from app.storage.aws_s3 import s3_resource
+# from app.storage.aws_s3 import s3_resource
 
 settings = get_settings()
 
@@ -125,27 +125,27 @@ UserDB = Annotated[Session, Depends(get_db)]
 #     return {"ok": True}
 
 
-@file_router.get("/download/{file_uuid}", name="file:Download")
-def file_download(*, db: UserDB, request: Request, file_uuid: UUID):
-    db_file = crud_files.get_file_by_uuid(db, file_uuid)
-
-    if not db_file:
-        raise HTTPException(status_code=404, detail="File not found")
-
-    try:
-        s3_folder_path = "".join([str(request.headers.get("tenant")), "/", str(file_uuid), "_", db_file.file_name])
-        print(s3_folder_path)
-
-        f = io.BytesIO()
-        s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(s3_folder_path, f)
-
-        f.seek(0)
-        header = {"Content-Disposition": f'inline; filename="{db_file.file_name}"'}
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=404, detail="File not found")
-
-    return StreamingResponse(f, media_type=db_file.mimetype, headers=header)
+# @file_router.get("/download/{file_uuid}", name="file:Download")
+# def file_download(*, db: UserDB, request: Request, file_uuid: UUID):
+#     db_file = crud_files.get_file_by_uuid(db, file_uuid)
+#
+#     if not db_file:
+#         raise HTTPException(status_code=404, detail="File not found")
+#
+#     try:
+#         s3_folder_path = "".join([str(request.headers.get("tenant")), "/", str(file_uuid), "_", db_file.file_name])
+#         print(s3_folder_path)
+#
+#         f = io.BytesIO()
+#         s3_resource.Bucket(settings.s3_bucket_name).download_fileobj(s3_folder_path, f)
+#
+#         f.seek(0)
+#         header = {"Content-Disposition": f'inline; filename="{db_file.file_name}"'}
+#     except Exception as e:
+#         print(e)
+#         raise HTTPException(status_code=404, detail="File not found")
+#
+#     return StreamingResponse(f, media_type=db_file.mimetype, headers=header)
 
 
 # @file_router.get("/download/", name="file:Download")
