@@ -57,18 +57,18 @@ class IssueRepo(GenericRepo[Issue]):
         return result.scalar_one_or_none()
 
     def get_issues(
-            self,
-            offset: int,
-            limit: int,
-            sort_column: str,
-            sort_order: str,
-            search: str | None = None,
-            status: str | None = None,
-            user_id: int | None = None,
-            priority: str | None = None,
-            date_from: datetime = None,
-            date_to: datetime = None,
-            tags: list[int] = None,
+        self,
+        offset: int,
+        limit: int,
+        sort_column: str,
+        sort_order: str,
+        search: str | None = None,
+        status: str | None = None,
+        user_id: int | None = None,
+        priority: str | None = None,
+        date_from: datetime = None,
+        date_to: datetime = None,
+        tags: list[int] = None,
     ) -> tuple[Sequence[Issue], int]:
         base_query = self.session.query(Issue).filter(Issue.deleted_at.is_(None)).options(selectinload("*"))
 
