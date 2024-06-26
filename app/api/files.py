@@ -1,13 +1,9 @@
-import io
 from typing import Annotated
-from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from starlette.responses import StreamingResponse
 
 from app.config import get_settings
-from app.crud import crud_files
 from app.db import get_db
 from app.models.models import User
 from app.service.bearer_auth import has_token

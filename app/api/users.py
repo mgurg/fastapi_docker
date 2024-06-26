@@ -1,23 +1,11 @@
-import codecs
-import csv
-import io
-from datetime import datetime, timezone
 from typing import Annotated
-from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
-from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from starlette.responses import StreamingResponse
 
-from app.crud import crud_auth, crud_permission, crud_users
-from app.db import engine, get_session
+from app.db import get_session
 from app.models.models import User
-from app.schemas.requests import UserCreateIn
-from app.schemas.responses import StandardResponse, UserIndexResponse
 from app.service.bearer_auth import has_token
-from app.service.password import Password
 
 user_router = APIRouter()
 

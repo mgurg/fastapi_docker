@@ -4,10 +4,8 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import Row
-from sqlalchemy import func, not_, or_, select, text
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import selectinload
+from sqlalchemy import Row, func, not_, or_, select, text
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.repository.generics import GenericRepo
 from app.db import get_db
@@ -52,59 +50,65 @@ class IssueRepo(GenericRepo[Issue]):
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
-    def get_issues(self,
-                   sort_column: str,
-                   sort_order: str,
-                   search: str | None,
-                   status: str | None,
-                   user_id: int | None,
-                   priority: str | None,
-                   date_from: datetime = None,
-                   date_to: datetime = None,
-                   tags: list[int] = None,
-                   ):
-        search_filters = []
+    def get_issues(
+        self,
+        offset: int,
+        limit: int,
+        sort_column: str,
+        sort_order: str,
+        search: str | None = None,
+        status: str | None = None,
+        user_id: int | None = None,
+        priority: str | None = None,
+        date_from: datetime = None,
+        date_to: datetime = None,
+        tags: list[int] = None,
+    ) -> tuple[Sequence[Issue], int]:
+        base_query = self.session.query(Issue).filter(Issue.deleted_at.is_(None)).options(selectinload("*"))
 
-        query = select(Issue)
+        if search:
+            search_filter = or_(Issue.name.ilike(f"%{search}%"), Issue.text.ilike(f"%{search}%"))
+            base_query = base_query.filter(search_filter)
 
-        if search is not None:
-            search_filters.append(Issue.name.ilike(f"%{search}%"))
-            search_filters.append(Issue.text.ilike(f"%{search}%"))
+        if status:
+            match status:
+                case "all":
+                    pass
+                case "active":
+                    base_query = base_query.filter(not_(Issue.status.in_(["done", "rejected"])))
+                case "inactive":
+                    base_query = base_query.filter(Issue.status.in_(["done", "rejected"]))
+                case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "done" as issue_status:
+                    base_query = base_query.filter(Issue.status == issue_status)
 
-            query = query.filter(or_(False, *search_filters))
+        if priority:
+            match priority:
+                case "low":
+                    base_query = base_query.filter(Issue.priority == "10")
+                case "medium":
+                    base_query = base_query.filter(Issue.priority == "20")
+                case "high":
+                    base_query = base_query.filter(Issue.priority == "30")
 
-        match status:
-            case "all":
-                ...
-            case "active":
-                query = query.where(not_(Issue.status.in_(["done", "rejected"])))
-            case "inactive":
-                query = query.where(Issue.status.in_(["done", "rejected"]))
-            case "new" | "accepted" | "rejected" | "in_progress" | "paused" | "done" as issue_status:
-                query = query.where(Issue.status == issue_status)
+        if user_id:
+            user_filter = Issue.users_issue.any(User.id == user_id)
+            base_query = base_query.filter(user_filter)
 
-        match priority:
-            case "low":
-                query = query.where(self.Model.priority == "10")
-            case "medium":
-                query = query.where(self.Model.priority == "20")
-            case "high":
-                query = query.where(self.Model.priority == "30")
-            case _:
-                ...
+        if date_from:
+            base_query = base_query.filter(func.DATE(Issue.created_at) >= date_from)
 
-        if user_id is not None:
-            query = query.filter(Issue.users_issue.any(User.id == user_id))
+        if date_to:
+            base_query = base_query.filter(func.DATE(Issue.created_at) <= date_to)
 
-        if date_from is not None:
-            query = query.filter(func.DATE(Issue.created_at) >= date_from)
+        if tags:
+            tags_filter = Issue.tags_issue.any(Tag.id.in_(tags))
+            base_query = base_query.filter(tags_filter)
 
-        if date_to is not None:
-            query = query.filter(func.DATE(Issue.created_at) <= date_to)
+        items_query = base_query.order_by(text(f"{sort_column} {sort_order}")).offset(offset).limit(limit)
+        result = self.session.execute(items_query)
 
-        if tags is not None:
-            query = query.where(Issue.tags_issue.any(Tag.id.in_(tags)))
+        count_query = base_query.with_entities(func.count(Issue.id))
+        count_result = self.session.execute(count_query)
+        total_records = count_result.scalar_one_or_none() or 0
 
-        query = query.order_by(text(f"{sort_column} {sort_order}"))
-
-        return query
+        return result.scalars().all(), total_records

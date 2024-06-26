@@ -1,12 +1,13 @@
+import io
 from pathlib import Path
 from typing import BinaryIO
-import io
 
 import boto3
 from botocore.exceptions import ClientError
 from loguru import logger
 
 from app.utils.filename_utils import get_safe_filename
+
 from .storage_interface import StorageInterface
 
 
@@ -38,8 +39,8 @@ class AWSS3Storage(StorageInterface):
             return True
         except ClientError as e:
             # Check if the error is a 404 (Not Found) or other client errors
-            error_code = e.response['Error']['Code']
-            if error_code == '404':
+            error_code = e.response["Error"]["Code"]
+            if error_code == "404":
                 logger.error(f"File {file_path} not found in bucket {self.bucket_name}.")
             else:
                 logger.error(f"Client error occurred: {e.response['Error']['Message']}")
@@ -71,5 +72,4 @@ class AWSS3Storage(StorageInterface):
             logger.error(f"An unexpected error occurred: {str(e)}")
             raise
 
-    def list_files(self, prefix: str = "") -> list:
-        ...
+    def list_files(self, prefix: str = "") -> list: ...

@@ -1,4 +1,3 @@
-import io
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
@@ -22,10 +21,10 @@ settings = get_settings()
 
 class FileService:
     def __init__(
-            self,
-            file_repo: Annotated[FileRepo, Depends()],
-            issue_repo: Annotated[IssueRepo, Depends()],
-            storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
+        self,
+        file_repo: Annotated[FileRepo, Depends()],
+        issue_repo: Annotated[IssueRepo, Depends()],
+        storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
     ) -> None:
         self.file_repo = file_repo
         self.issue_repo = issue_repo
@@ -61,7 +60,7 @@ class FileService:
         return StreamingResponse(file, media_type=db_file.mimetype, headers=header)
 
     async def upload(
-            self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None
+        self, file: UploadFile, file_size: int, tenant: str, user_id: int, uuid: UUID | None = None
     ) -> File:
         used_quota = self.get_total_size_from_db()
 
