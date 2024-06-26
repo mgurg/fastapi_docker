@@ -1,18 +1,16 @@
 from collections import Counter
 from datetime import datetime, timezone
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from bs4 import BeautifulSoup
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.crud import crud_events, crud_files, crud_issues, crud_items, crud_settings, crud_tags, crud_users
-from app.crud.crud_auth import get_public_company_from_tenant
+from app.crud import crud_events, crud_files, crud_issues, crud_settings, crud_users
 from app.db import get_db
 from app.models.models import User
-from app.schemas.requests import IssueAddIn, IssueChangeStatus, IssueEditIn
-from app.schemas.responses import EventTimelineResponse, IssueResponse, StandardResponse
+from app.schemas.requests import IssueChangeStatus
+from app.schemas.responses import EventTimelineResponse, StandardResponse
 from app.service import event
 from app.service.bearer_auth import has_token
 from app.service.helpers import is_valid_uuid
@@ -135,77 +133,77 @@ def item_get_issue_summary(*, db: UserDB, issue_uuid: UUID, auth_user: CurrentUs
 #     return db_issue
 
 
-@issue_router.post("/", response_model=IssueResponse)  #
-def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: CurrentUser):
-    tenant_id = request.headers.get("tenant", None)
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Unknown Company!")
-
-    get_public_company_from_tenant(tenant_id)
-
-    files = []
-    if issue.files is not None:
-        for file in issue.files:
-            db_file = crud_files.get_file_by_uuid(db, file)
-            if db_file:
-                files.append(db_file)
-
-    tags = []
-    if issue.tags is not None:
-        for tag in issue.tags:
-            db_tag = crud_tags.get_tag_by_uuid(db, tag)
-            if db_tag:
-                tags.append(db_tag)
-
-    issue_uuid = str(uuid4())
-
-    db_user = crud_users.get_user_by_id(db, auth_user.id)
-
-    db_item = crud_items.get_item_by_uuid(db, issue.item_uuid)
-    item_id = None
-    if db_item:
-        item_id = db_item.id
-
-    description = None
-    if issue.text_html is not None:
-        description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
-
-    last_issue_id = crud_issues.get_last_issue_id(db)
-    if not last_issue_id:
-        last_issue_id = 0
-    last_issue_id += 1
-
-    issue_data = {
-        "uuid": issue_uuid,
-        "author_id": db_user.id,
-        "author_name": f"{db_user.first_name} {db_user.last_name}",
-        "item_id": item_id,
-        "symbol": f"PR-{last_issue_id}",
-        "name": issue.name,
-        "summary": issue.summary,
-        "text": description,
-        "text_json": issue.text_json,
-        "files_issue": files,
-        "tags_issue": tags,
-        "color": issue.color,
-        "priority": issue.priority,
-        "status": "new",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_issue = crud_issues.create_issue(db, issue_data)
-
-    # Notification
-    email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")  # empty: []
-    sms_users_list = []
-    if email_users_list or sms_users_list:
-        notify_users(sms_users_list, email_users_list, new_issue)
-
-    event.create_new_basic_event(db, db_user, new_issue, "issue_add")
-    event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
-    event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
-
-    return new_issue
+# @issue_router.post("/", response_model=IssueResponse)  #
+# def issue_add(*, db: UserDB, request: Request, issue: IssueAddIn, auth_user: CurrentUser):
+#     tenant_id = request.headers.get("tenant", None)
+#     if not tenant_id:
+#         raise HTTPException(status_code=400, detail="Unknown Company!")
+#
+#     get_public_company_from_tenant(tenant_id)
+#
+#     files = []
+#     if issue.files is not None:
+#         for file in issue.files:
+#             db_file = crud_files.get_file_by_uuid(db, file)
+#             if db_file:
+#                 files.append(db_file)
+#
+#     tags = []
+#     if issue.tags is not None:
+#         for tag in issue.tags:
+#             db_tag = crud_tags.get_tag_by_uuid(db, tag)
+#             if db_tag:
+#                 tags.append(db_tag)
+#
+#     issue_uuid = str(uuid4())
+#
+#     db_user = crud_users.get_user_by_id(db, auth_user.id)
+#
+#     db_item = crud_items.get_item_by_uuid(db, issue.item_uuid)
+#     item_id = None
+#     if db_item:
+#         item_id = db_item.id
+#
+#     description = None
+#     if issue.text_html is not None:
+#         description = BeautifulSoup(issue.text_html, "html.parser").get_text()  # TODO add fix when empty
+#
+#     last_issue_id = crud_issues.get_last_issue_id(db)
+#     if not last_issue_id:
+#         last_issue_id = 0
+#     last_issue_id += 1
+#
+#     issue_data = {
+#         "uuid": issue_uuid,
+#         "author_id": db_user.id,
+#         "author_name": f"{db_user.first_name} {db_user.last_name}",
+#         "item_id": item_id,
+#         "symbol": f"PR-{last_issue_id}",
+#         "name": issue.name,
+#         "summary": issue.summary,
+#         "text": description,
+#         "text_json": issue.text_json,
+#         "files_issue": files,
+#         "tags_issue": tags,
+#         "color": issue.color,
+#         "priority": issue.priority,
+#         "status": "new",
+#         "created_at": datetime.now(timezone.utc),
+#     }
+#
+#     new_issue = crud_issues.create_issue(db, issue_data)
+#
+#     # Notification
+#     email_users_list = crud_settings.get_users_list_for_email_notification(db, "all")  # empty: []
+#     sms_users_list = []
+#     if email_users_list or sms_users_list:
+#         notify_users(sms_users_list, email_users_list, new_issue)
+#
+#     event.create_new_basic_event(db, db_user, new_issue, "issue_add")
+#     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueTotalTime")
+#     event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
+#
+#     return new_issue
 
 
 @issue_router.post("/status/{issue_uuid}")
@@ -360,58 +358,58 @@ def issue_status_accept(actions_list, db, db_issue, db_user, status):
     return status
 
 
-@issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
-def issue_edit(*, db: UserDB, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
-    db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
-    if not db_issue:
-        raise HTTPException(status_code=400, detail="Issue not found!")
-
-    issue_data = issue.model_dump(exclude_unset=True)
-
-    files = []
-    if ("files" in issue_data) and (issue_data["files"] is not None):
-        for file in db_issue.files_issue:
-            db_issue.files_issue.remove(file)
-        for file in issue_data["files"]:
-            db_file = crud_files.get_file_by_uuid(db, file)
-            if db_file:
-                files.append(db_file)
-
-        issue_data["files_issue"] = files
-        del issue_data["files"]
-
-    tags = []
-    if ("tags" in issue_data) and (issue_data["tags"] is not None):
-        for tag in db_issue.tags_issue:
-            db_issue.tags_issue.remove(tag)
-        for tag in issue_data["tags"]:
-            db_tag = crud_tags.get_tag_by_uuid(db, tag)
-            if db_tag:
-                tags.append(db_tag)
-
-        issue_data["tags_issue"] = tags
-        del issue_data["tags"]
-
-    users = []
-    if ("users" in issue_data) and (issue_data["users"] is not None):
-        for user in db_issue.users_issue:
-            db_issue.users_issue.remove(user)
-        for user in issue_data["users"]:
-            db_user = crud_users.get_user_by_uuid(db, user)
-            if db_user:
-                users.append(db_user)
-
-        issue_data["users_issue"] = users
-        del issue_data["users"]
-
-    if ("text_html" in issue_data) and (issue_data["text_html"] is not None):
-        issue_data["text"] = BeautifulSoup(issue.text_html, "html.parser").get_text()
-
-    issue_data["updated_at"] = datetime.now(timezone.utc)
-
-    new_issue = crud_issues.update_issue(db, db_issue, issue_data)
-
-    return new_issue
+# @issue_router.patch("/{issue_uuid}", response_model=IssueResponse)
+# def issue_edit(*, db: UserDB, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
+#     db_issue = crud_issues.get_issue_by_uuid(db, issue_uuid)
+#     if not db_issue:
+#         raise HTTPException(status_code=400, detail="Issue not found!")
+#
+#     issue_data = issue.model_dump(exclude_unset=True)
+#
+#     files = []
+#     if ("files" in issue_data) and (issue_data["files"] is not None):
+#         for file in db_issue.files_issue:
+#             db_issue.files_issue.remove(file)
+#         for file in issue_data["files"]:
+#             db_file = crud_files.get_file_by_uuid(db, file)
+#             if db_file:
+#                 files.append(db_file)
+#
+#         issue_data["files_issue"] = files
+#         del issue_data["files"]
+#
+#     tags = []
+#     if ("tags" in issue_data) and (issue_data["tags"] is not None):
+#         for tag in db_issue.tags_issue:
+#             db_issue.tags_issue.remove(tag)
+#         for tag in issue_data["tags"]:
+#             db_tag = crud_tags.get_tag_by_uuid(db, tag)
+#             if db_tag:
+#                 tags.append(db_tag)
+#
+#         issue_data["tags_issue"] = tags
+#         del issue_data["tags"]
+#
+#     users = []
+#     if ("users" in issue_data) and (issue_data["users"] is not None):
+#         for user in db_issue.users_issue:
+#             db_issue.users_issue.remove(user)
+#         for user in issue_data["users"]:
+#             db_user = crud_users.get_user_by_uuid(db, user)
+#             if db_user:
+#                 users.append(db_user)
+#
+#         issue_data["users_issue"] = users
+#         del issue_data["users"]
+#
+#     if ("text_html" in issue_data) and (issue_data["text_html"] is not None):
+#         issue_data["text"] = BeautifulSoup(issue.text_html, "html.parser").get_text()
+#
+#     issue_data["updated_at"] = datetime.now(timezone.utc)
+#
+#     new_issue = crud_issues.update_issue(db, db_issue, issue_data)
+#
+#     return new_issue
 
 
 @issue_router.delete("/{issue_uuid}", response_model=StandardResponse)

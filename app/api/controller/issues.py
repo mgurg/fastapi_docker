@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Header, Query
 
 from app.api.service.issue_service import IssueService
 from app.models.models import User
-from app.schemas.requests import IssueAddIn
+from app.schemas.requests import IssueAddIn, IssueEditIn
 from app.schemas.responses import IssueResponse, ItemsPaginated
 from app.service.bearer_auth import check_token
 
@@ -21,18 +21,18 @@ issueServiceDependency = Annotated[IssueService, Depends()]
 
 @issue_test_router.get("", response_model=ItemsPaginated)
 def issues_get_all(
-        issue_service: issueServiceDependency,
-        search: str | None = None,
-        status: str = "active",
-        user_uuid: UUID | None = None,
-        priority: str | None = None,
-        dateFrom: datetime | None = None,
-        dateTo: datetime | None = None,
-        tags: Annotated[list[UUID] | None, Query()] = None,
-        limit: int = 10,
-        offset: int = 0,
-        field: Literal["created_at", "name", "priority", "status"] = "name",
-        order: Literal["asc", "desc"] = "asc",
+    issue_service: issueServiceDependency,
+    search: str | None = None,
+    status: str = "active",
+    user_uuid: UUID | None = None,
+    priority: str | None = None,
+    dateFrom: datetime | None = None,
+    dateTo: datetime | None = None,
+    tags: Annotated[list[UUID] | None, Query()] = None,
+    limit: int = 10,
+    offset: int = 0,
+    field: Literal["created_at", "name", "priority", "status"] = "name",
+    order: Literal["asc", "desc"] = "asc",
 ):
     db_items, count = issue_service.get_all(
         offset, limit, field, order, search, status, user_uuid, priority, dateFrom, dateTo, tags
@@ -48,10 +48,10 @@ def get_export_issues(issue_service: issueServiceDependency, auth_user: CurrentU
 
 @issue_test_router.get("/{issue_uuid}", response_model=IssueResponse)
 def issue_get_one(
-        issue_service: issueServiceDependency,
-        issue_uuid: UUID,
-        tenant: Annotated[str | None, Header()],
-        auth_user: CurrentUser,
+    issue_service: issueServiceDependency,
+    issue_uuid: UUID,
+    tenant: Annotated[str | None, Header()],
+    auth_user: CurrentUser,
 ):
     issue = issue_service.get_issue_by_uuid(issue_uuid, tenant)
 
@@ -60,9 +60,14 @@ def issue_get_one(
 
 @issue_test_router.post("", response_model=IssueResponse)  #
 def issue_add(
-        issue_service: issueServiceDependency,
-        tenant: Annotated[str | None, Header()],
-        issue: IssueAddIn,
-        auth_user: CurrentUser,
+    issue_service: issueServiceDependency,
+    tenant: Annotated[str | None, Header()],
+    issue: IssueAddIn,
+    auth_user: CurrentUser,
 ):
     issue_service.add(issue, auth_user.id, tenant)
+
+
+@issue_test_router.patch("/{issue_uuid}", response_model=IssueResponse)
+def issue_edit(issue_service: issueServiceDependency, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
+    issue_service.edit(issue_uuid, issue)

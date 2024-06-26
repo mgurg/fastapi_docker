@@ -15,20 +15,20 @@ from app.api.repository.IssueRepo import IssueRepo
 from app.api.repository.ItemRepo import ItemRepo
 from app.api.repository.TagRepo import TagRepo
 from app.api.repository.UserRepo import UserRepo
-from app.schemas.requests import IssueAddIn
+from app.schemas.requests import IssueAddIn, IssueEditIn
 from app.storage.storage_interface import StorageInterface
 from app.storage.storage_service_provider import get_storage_provider
 
 
 class IssueService:
     def __init__(
-            self,
-            user_repo: Annotated[UserRepo, Depends()],
-            issue_repo: Annotated[IssueRepo, Depends()],
-            item_repo: Annotated[ItemRepo, Depends()],
-            tag_repo: Annotated[TagRepo, Depends()],
-            file_repo: Annotated[FileRepo, Depends()],
-            storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
+        self,
+        user_repo: Annotated[UserRepo, Depends()],
+        issue_repo: Annotated[IssueRepo, Depends()],
+        item_repo: Annotated[ItemRepo, Depends()],
+        tag_repo: Annotated[TagRepo, Depends()],
+        file_repo: Annotated[FileRepo, Depends()],
+        storage_provider: Annotated[StorageInterface, Depends(get_storage_provider)],
     ) -> None:
         self.user_repo = user_repo
         self.issue_repo = issue_repo
@@ -38,18 +38,18 @@ class IssueService:
         self.storage_provider = storage_provider
 
     def get_all(
-            self,
-            offset: int,
-            limit: int,
-            sort_column: str,
-            sort_order: str,
-            search: str | None,
-            status: str | None,
-            user_uuid: UUID | None,
-            priority: str | None,
-            date_from: datetime = None,
-            date_to: datetime = None,
-            tags: list[UUID] = None,
+        self,
+        offset: int,
+        limit: int,
+        sort_column: str,
+        sort_order: str,
+        search: str | None,
+        status: str | None,
+        user_uuid: UUID | None,
+        priority: str | None,
+        date_from: datetime = None,
+        date_to: datetime = None,
+        tags: list[UUID] = None,
     ):
         tag_ids = self.tag_repo.get_ids_by_tags_uuid(tags) if tags else None
 
@@ -95,8 +95,6 @@ class IssueService:
         return db_issue
 
     def add(self, issue: IssueAddIn, user_id: int, tenant: str):
-        # get_public_company_from_tenant(tenant_id) TODO
-
         files = []
         if issue.files is not None:
             for file in issue.files:
@@ -157,3 +155,62 @@ class IssueService:
         # event.open_new_basic_summary(db, "issue", new_issue.uuid, "issueResponseTime")
 
         return new_issue
+
+    def edit(self, issue_uuid: UUID, issue: IssueEditIn):
+        db_issue = self.issue_repo.get_by_uuid(issue_uuid)
+        if not db_issue:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Issue `{issue_uuid}` not found!")
+
+        issue_data = issue.model_dump(exclude_unset=True)
+
+        # files = []
+        # if ("files" in issue_data) and (issue_data["files"] is not None):
+        #     for file in db_issue.files_issue:
+        #         db_issue.files_issue.remove(file)
+        #     for file in issue_data["files"]:
+        #         db_file = crud_files.get_file_by_uuid(db, file)
+        #         if db_file:
+        #             files.append(db_file)
+        if ("files" in issue_data) and (issue_data["files"] is not None):
+            if len(issue_data["files"]) > 0:
+                db_issue.files_issue.clear()
+                for file in issue_data["files"]:
+                    db_file = self.file_repo.get_by_uuid(file)
+                    if db_file:
+                        db_issue.files_issue.append(db_file)
+
+            # issue_data["files_item"] = files
+            del issue_data["files"]
+
+        tags = []
+        if ("tags" in issue_data) and (issue_data["tags"] is not None):
+            for tag in db_issue.tags_issue:
+                db_issue.tags_issue.remove(tag)
+            for tag in issue_data["tags"]:
+                db_tag = self.tag_repo.get_by_uuid(tag)
+                if db_tag:
+                    tags.append(db_tag)
+
+            issue_data["tags_issue"] = tags
+            del issue_data["tags"]
+
+        users = []
+        if ("users" in issue_data) and (issue_data["users"] is not None):
+            for user in db_issue.users_issue:
+                db_issue.users_issue.remove(user)
+            for user in issue_data["users"]:
+                db_user = self.user_repo.get_by_uuid(user)
+                if db_user:
+                    users.append(db_user)
+
+            issue_data["users_issue"] = users
+            del issue_data["users"]
+
+        if ("text_html" in issue_data) and (issue_data["text_html"] is not None):
+            issue_data["text"] = BeautifulSoup(issue.text_html, "html.parser").get_text()
+
+        issue_data["updated_at"] = datetime.now(timezone.utc)
+
+        self.issue_repo.update(db_issue.id, **issue_data)
+        db_issue = self.issue_repo.get_by_uuid(issue_uuid)
+        return db_issue
