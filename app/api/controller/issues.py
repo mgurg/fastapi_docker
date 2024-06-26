@@ -68,6 +68,6 @@ def issue_add(
     issue_service.add(issue, auth_user.id, tenant)
 
 
-@issue_test_router.patch("/{issue_uuid}", response_model=IssueResponse)
+@issue_test_router.patch("/{issue_uuid}")  # , response_model=IssueResponse
 def issue_edit(issue_service: issueServiceDependency, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
     issue_service.edit(issue_uuid, issue)

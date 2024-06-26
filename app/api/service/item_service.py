@@ -72,7 +72,6 @@ class ItemService:
 
         item_data = item_data.model_dump(exclude_unset=True)
 
-        # files = []
         if ("files" in item_data) and (item_data["files"] is not None):
             if len(item_data["files"]) > 0:
                 db_item.files_item.clear()
@@ -80,8 +79,6 @@ class ItemService:
                     db_file = self.file_repo.get_by_uuid(file)
                     if db_file:
                         db_item.files_item.append(db_file)
-
-            # item_data["files_item"] = files
             del item_data["files"]
 
         if ("text_html" in item_data) and (item_data["text_html"] is not None):
@@ -162,7 +159,6 @@ def export(self) -> StreamingResponse:
 
 
 def delete_item(self, item_uuid: UUID, force: bool = False) -> bool:
-    ...
     db_qr = self.qr_code_repo.get_by_resource_uuid(item_uuid)
     db_item = self.item_repo.get_by_uuid(item_uuid)
 

@@ -156,21 +156,13 @@ class IssueService:
 
         return new_issue
 
-    def edit(self, issue_uuid: UUID, issue: IssueEditIn):
+    def edit(self, issue_uuid: UUID, issue: IssueEditIn) -> None:
         db_issue = self.issue_repo.get_by_uuid(issue_uuid)
         if not db_issue:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Issue `{issue_uuid}` not found!")
 
         issue_data = issue.model_dump(exclude_unset=True)
 
-        # files = []
-        # if ("files" in issue_data) and (issue_data["files"] is not None):
-        #     for file in db_issue.files_issue:
-        #         db_issue.files_issue.remove(file)
-        #     for file in issue_data["files"]:
-        #         db_file = crud_files.get_file_by_uuid(db, file)
-        #         if db_file:
-        #             files.append(db_file)
         if ("files" in issue_data) and (issue_data["files"] is not None):
             if len(issue_data["files"]) > 0:
                 db_issue.files_issue.clear()
@@ -178,39 +170,32 @@ class IssueService:
                     db_file = self.file_repo.get_by_uuid(file)
                     if db_file:
                         db_issue.files_issue.append(db_file)
-
-            # issue_data["files_item"] = files
             del issue_data["files"]
 
-        tags = []
         if ("tags" in issue_data) and (issue_data["tags"] is not None):
-            for tag in db_issue.tags_issue:
-                db_issue.tags_issue.remove(tag)
+            if len(issue_data["tags"]) > 0:
+                db_issue.tags_issue.clear()
             for tag in issue_data["tags"]:
                 db_tag = self.tag_repo.get_by_uuid(tag)
                 if db_tag:
-                    tags.append(db_tag)
-
-            issue_data["tags_issue"] = tags
+                    db_issue.tags_issue.append(db_tag)
             del issue_data["tags"]
 
-        users = []
         if ("users" in issue_data) and (issue_data["users"] is not None):
-            for user in db_issue.users_issue:
-                db_issue.users_issue.remove(user)
+            if len(issue_data["tags"]) > 0:
+                db_issue.users_issue.clear()
             for user in issue_data["users"]:
                 db_user = self.user_repo.get_by_uuid(user)
                 if db_user:
-                    users.append(db_user)
+                    db_issue.users_issue.append(db_user)
 
-            issue_data["users_issue"] = users
             del issue_data["users"]
 
         if ("text_html" in issue_data) and (issue_data["text_html"] is not None):
             issue_data["text"] = BeautifulSoup(issue.text_html, "html.parser").get_text()
+        del issue_data["text_html"]
 
         issue_data["updated_at"] = datetime.now(timezone.utc)
 
         self.issue_repo.update(db_issue.id, **issue_data)
-        db_issue = self.issue_repo.get_by_uuid(issue_uuid)
-        return db_issue
+        return None

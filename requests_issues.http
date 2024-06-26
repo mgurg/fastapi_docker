@@ -29,18 +29,18 @@ Content-Type: application/json
   "files": []
 }
 
-#### Edit item
-PATCH {{baseUrl}}/issue_test/{{item_uuid}}
+#### Edit issue
+PATCH {{baseUrl}}/issue_test/{{issue_uuid}}
 Accept: application/json
 tenant: {{tenant}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Rower",
-  "symbol": "RO",
-  "summary": "Some public summary",
-  "text_html": "<p>Cube XL</p>",
+  "color": "red",
+  "name": "Rozładowany akumulator",
+  "description": "desc",
+  "priority": 10,
   "text_json": {
     "type": "doc",
     "content": [
@@ -49,13 +49,17 @@ Content-Type: application/json
         "content": [
           {
             "type": "text",
-            "text": "Cube XL"
+            "text": "Marka: Varta"
           }
         ]
       }
     ]
   },
-  "files": []
+  "text_html": "<p>Marka: Varta</p>",
+  "files": [
+    "5790c4cd-3603-4b60-9741-033b27330e3f"
+  ],
+  "tags": []
 }
 
 
