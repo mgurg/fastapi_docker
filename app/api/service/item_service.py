@@ -20,8 +20,6 @@ from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
 from app.storage.storage_interface import StorageInterface
 from app.storage.storage_service_provider import get_storage_provider
 
-# from app.storage.aws_s3 import generate_presigned_url
-
 
 class ItemService:
     def __init__(
