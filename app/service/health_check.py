@@ -8,6 +8,7 @@ from app.storage.storage_service_provider import get_storage_provider
 
 settings = get_settings()
 
+
 def check_required_tables() -> set:
     required_tables = {"public_users", "public_companies"}
     try:
@@ -20,12 +21,13 @@ def check_required_tables() -> set:
                 """)
             )
 
-            existing_tables = {row['table_name'] for row in result.mappings()}
+            existing_tables = {row["table_name"] for row in result.mappings()}
 
             return required_tables - existing_tables
     except Exception as err:
         logger.exception("Database table check failed: {}", err)
         return required_tables  # Retu
+
 
 def test_db() -> dict[str, str]:
     missing_tables = check_required_tables()

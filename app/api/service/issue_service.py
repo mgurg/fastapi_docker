@@ -199,3 +199,14 @@ class IssueService:
 
         self.issue_repo.update(db_issue.id, **issue_data)
         return None
+
+    def delete(self, issue_uuid: UUID) -> None:
+        db_issue = self.issue_repo.get_by_uuid(issue_uuid)
+        if not db_issue:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Issue `{issue_uuid}` not found")
+
+        db_issue.files_issue.clear()
+        self.issue_repo.update(db_issue.id)  # TODO: check if delete files
+        self.issue_repo.delete(db_issue.id)
+
+        return None

@@ -16,9 +16,11 @@ from app.api.controller.permissions import permission_test_router
 from app.api.controller.settings import setting_test_router
 from app.api.controller.statistics import statistics_test_router
 from app.api.controller.tags import tag_test_router
+
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
+
 # from app.api.files import file_router
 # from app.api.guides import guide_router
 # from app.api.issues import issue_router
@@ -29,10 +31,11 @@ from app.api.controller.users import user_test_router
 # from app.api.tags import tag_router
 from app.api.users import user_router
 from app.api.users_permissions import permission_router
+
 # from app.api.users_groups import group_router
 # from app.api.users_permissions import permission_router
 from app.config import get_settings
-from app.service.health_check import run_healthcheck, check_required_tables
+from app.service.health_check import check_required_tables, run_healthcheck
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
 
@@ -122,9 +125,9 @@ def startup():
     missing_tables = check_required_tables()
 
     if missing_tables:
-        logger.info(f"Missing tables detected: {', '.join(missing_tables)}, Running Alembic upgrade...")
+        logger.info(f"Missing tables detected: {', '.join(missing_tables)}, running Alembic upgrade...")
         alembic_upgrade_head("public", "d6ba8c13303e")
-        logger.info("Alembic upgrade completed")
+        logger.info("✅  Alembic upgrade completed")
     else:
         logger.info("✅ All required tables present. Skipping Alembic upgrade.")
     logger.info("🎽 [Job] Running test Job")
@@ -147,6 +150,7 @@ def shutdown_event():
 @app.get("/", include_in_schema=False)
 async def read_root(request: Request):
     return {"Hello": "World", "tenant": request.headers.get("tenant", "public"), "env": settings.ENVIRONMENT}
+
 
 @app.get("/health")
 def health_check():

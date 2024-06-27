@@ -3,6 +3,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Query
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.api.service.issue_service import IssueService
 from app.models.models import User
@@ -71,3 +72,10 @@ def issue_add(
 @issue_test_router.patch("/{issue_uuid}")  # , response_model=IssueResponse
 def issue_edit(issue_service: issueServiceDependency, issue_uuid: UUID, issue: IssueEditIn, auth_user: CurrentUser):
     issue_service.edit(issue_uuid, issue)
+
+
+@issue_test_router.delete("/{issue_uuid}", status_code=HTTP_204_NO_CONTENT)
+def issue_delete(issue_service: issueServiceDependency, issue_uuid: UUID, auth_user: CurrentUser):
+    issue_service.delete(issue_uuid)
+
+    return None
