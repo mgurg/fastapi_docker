@@ -1,4 +1,3 @@
-import sys
 from typing import Any
 
 import sentry_sdk
@@ -17,11 +16,9 @@ from app.api.controller.permissions import permission_test_router
 from app.api.controller.settings import setting_test_router
 from app.api.controller.statistics import statistics_test_router
 from app.api.controller.tags import tag_test_router
-
 # from app.api.auth import auth_router
 # from app.api.cc import cc_router
 from app.api.controller.users import user_test_router
-
 # from app.api.files import file_router
 # from app.api.guides import guide_router
 # from app.api.issues import issue_router
@@ -32,11 +29,10 @@ from app.api.controller.users import user_test_router
 # from app.api.tags import tag_router
 from app.api.users import user_router
 from app.api.users_permissions import permission_router
-
 # from app.api.users_groups import group_router
 # from app.api.users_permissions import permission_router
 from app.config import get_settings
-from app.service.health_check import run_healthcheck
+from app.service.health_check import run_healthcheck, check_required_tables
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
 
@@ -122,17 +118,21 @@ if settings.ENVIRONMENT == "PRD":
 
 @app.on_event("startup")
 def startup():
-    logger.info("🚀 [Starting up] Initializing DB data...")
-    alembic_upgrade_head("public", "d6ba8c13303e")
-    print(sys.getrecursionlimit())
+    logger.info("🚀 [Starting up] Initializing DB...")
+    missing_tables = check_required_tables()
+
+    if missing_tables:
+        logger.info(f"Missing tables detected: {', '.join(missing_tables)}, Running Alembic upgrade...")
+        alembic_upgrade_head("public", "d6ba8c13303e")
+        logger.info("Alembic upgrade completed")
+    else:
+        logger.info("✅ All required tables present. Skipping Alembic upgrade.")
     logger.info("🎽 [Job] Running test Job")
 
 
 def welcome_message(text: str):
     logger.info("👍 Job Message: " + text)
     logger.info("Waiting for first request ...")
-    print("👍 Job Message: " + text)
-    print("Waiting for first request ...")
 
 
 start_scheduler(app)
@@ -142,25 +142,12 @@ job = scheduler.add_job(welcome_message, args=["Everything OK, application is ru
 @app.on_event("shutdown")
 def shutdown_event():
     logger.info("👋 Bye!")
-    print("👋 Bye!")
-    # scheduler.shutdown()
 
 
 @app.get("/", include_in_schema=False)
 async def read_root(request: Request):
     return {"Hello": "World", "tenant": request.headers.get("tenant", "public"), "env": settings.ENVIRONMENT}
 
-
 @app.get("/health")
-async def health_check():
-    # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
-
+def health_check():
     return run_healthcheck()
-
-
-# if __name__ == "__main__":
-#     logger.info("Running APP locally (not docker)")
-#     if settings.ENVIRONMENT == "PRD":
-#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-#     else:
-#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)

@@ -1,5 +1,5 @@
-from fastapi import Depends
 from loguru import logger
+from sqlalchemy import text
 
 from app.config import get_settings
 from app.db import engine
@@ -8,8 +8,34 @@ from app.storage.storage_service_provider import get_storage_provider
 
 settings = get_settings()
 
+def check_required_tables() -> set:
+    required_tables = {"public_users", "public_companies"}
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(
+                text("""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                """)
+            )
 
-def test_storage(storage_provider: StorageInterface = Depends(get_storage_provider)) -> dict[str, str]:
+            existing_tables = {row['table_name'] for row in result.mappings()}
+
+            return required_tables - existing_tables
+    except Exception as err:
+        logger.exception("Database table check failed: {}", err)
+        return required_tables  # Retu
+
+def test_db() -> dict[str, str]:
+    missing_tables = check_required_tables()
+    if not missing_tables:
+        return {"db": "healthy"}
+    else:
+        return {"db": "unhealthy"}
+
+
+def test_storage(storage_provider: StorageInterface) -> dict[str, str]:
     try:
         test_url = storage_provider.get_url("healthcheck_test_object", expiration=10)
         if test_url:
@@ -21,17 +47,9 @@ def test_storage(storage_provider: StorageInterface = Depends(get_storage_provid
         return {"storage": "unhealthy"}
 
 
-def test_db() -> dict[str, str]:
-    try:
-        with engine.connect():
-            return {"db": "healthy"}
-    except Exception as err:
-        logger.exception("Database connection failed: {}", err)
-        raise err
-
-
-def run_healthcheck(storage_provider: StorageInterface = Depends(get_storage_provider)) -> dict[str, str]:
+def run_healthcheck() -> dict[str, str]:
     db_status = test_db()
+    storage_provider = get_storage_provider()
     storage_status = test_storage(storage_provider)
 
     overall_status = (
