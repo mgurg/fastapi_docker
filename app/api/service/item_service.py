@@ -169,8 +169,8 @@ def delete_item(self, item_uuid: UUID, force: bool = False) -> bool:
         self.item_repo.update(db_item.id, **{"deleted_at": datetime.now(timezone.utc)})
         return True
 
-    for file in db_item.files_item:
-        db_file = self.file_repo.get_by_uuid(file.uuid)
+    # for file in db_item.files_item:
+    #     db_file = self.file_repo.get_by_uuid(file.uuid)
 
     # TODO: Guides / Guides_Files - add when refactored
     # for guide in db_item.item_guides:

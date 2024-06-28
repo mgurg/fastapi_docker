@@ -107,7 +107,7 @@ UserDB = Annotated[Session, Depends(get_db)]
 #     if not db_file:
 #         raise HTTPException(status_code=404, detail="File not found")
 #
-#     s3_folder_path = "".join([str(request.headers.get("tenant", "None")), "/", str(file_uuid), "_", db_file.file_name])
+#     s3_folder_path="".join([str(request.headers.get("tenant", "None")), "/", str(file_uuid), "_", db_file.file_name])
 #
 #     try:
 #         s3_resource.Object(settings.s3_bucket_name, s3_folder_path).delete()

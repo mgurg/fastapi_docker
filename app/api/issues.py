@@ -52,7 +52,7 @@ UserDB = Annotated[Session, Depends(get_db)]
 #             raise HTTPException(status_code=401, detail="User not found")
 #         user_id = db_user.id
 #
-#     db_issues_query = crud_issues.get_issues(field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
+#     db_issues_query=crud_issues.get_issues(field, order, search, status, user_id, priority, dateFrom, dateTo, tag_ids)
 #     return paginate(db, db_issues_query)
 
 

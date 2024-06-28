@@ -40,7 +40,7 @@ class StatisticsService:
         items = dict(items)
 
         active = ["new", "accepted", "assigned", "in_progress", "paused"]
-        inactive = ["rejected", "done"]
+        _inactive = ["rejected", "done"]  # TODO: why not used?
 
         issues_active = self.issue_repo.count_by_status(active)
         issues_active = dict(issues_active)

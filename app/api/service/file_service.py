@@ -55,7 +55,7 @@ class FileService:
             header = {"Content-Disposition": f'inline; filename="{db_file.file_name}"'}
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=404, detail="File not found")
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="File not found") from e
 
         return StreamingResponse(file, media_type=db_file.mimetype, headers=header)
 

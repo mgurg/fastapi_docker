@@ -61,7 +61,7 @@ class SettingsService:
                 adapter = self.get_type_adapter(setting.value_type)
                 result[setting.name] = adapter.validate_python(setting.value)
             except ValueError as e:
-                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e))
+                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
         for status in settings or []:
             result.setdefault(status, ALLOWED_SETTINGS[status])
