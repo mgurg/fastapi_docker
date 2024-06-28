@@ -231,6 +231,13 @@ class GuideResponse(BaseResponse):
     item: list[ItemNameResponse] | None = None
 
 
+class GuidesPaginated(BaseResponse):
+    data: list[GuideResponse]
+    count: int
+    limit: int
+    offset: int
+
+
 class ItemIndexResponse(BaseResponse):
     uuid: UUID
     name: str | None = None

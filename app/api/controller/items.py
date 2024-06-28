@@ -16,9 +16,6 @@ CurrentUser = Annotated[User, Depends(check_token)]
 itemServiceDependency = Annotated[ItemService, Depends()]
 
 
-# UserDB = Annotated[Session, Depends(get_session)]
-
-
 @item_test_router.get("", response_model=ItemsPaginated)
 def item_get_all(
     item_service: itemServiceDependency,

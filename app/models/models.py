@@ -225,9 +225,9 @@ file_guide_rel = sa.Table(
 )
 
 
-class Guide(Base):
+class Guide(BaseModel):
     __tablename__ = "guides"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)

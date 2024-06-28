@@ -10,6 +10,7 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 from app.api.controller.auth import auth_test_router
 from app.api.controller.files import file_test_router
+from app.api.controller.guides import guide_test_router
 from app.api.controller.issues import issue_test_router
 from app.api.controller.items import item_test_router
 from app.api.controller.permissions import permission_test_router
@@ -82,6 +83,7 @@ def create_application() -> FastAPI:
     app.include_router(auth_test_router, prefix="/auth_test", tags=["TEST_A"])
     app.include_router(user_test_router, prefix="/user_test", tags=["TEST_U"])
     app.include_router(item_test_router, prefix="/item_test", tags=["TEST_I"])
+    app.include_router(guide_test_router, prefix="/guide_test", tags=["TEST_GUIDES"])
     app.include_router(issue_test_router, prefix="/issue_test", tags=["TEST_ISSUES"])
     app.include_router(file_test_router, prefix="/file_test", tags=["TEST_FILES"])
     app.include_router(tag_test_router, prefix="/tag_test", tags=["TEST_TAGS"])
