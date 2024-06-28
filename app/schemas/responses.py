@@ -135,6 +135,11 @@ class RoleSummaryResponse(BaseResponse):
     count: int
     uncounted: int
 
+class RolesPaginated(BaseResponse):
+    data: list[RoleSummaryResponse]
+    count: int
+    limit: int
+    offset: int
 
 class PermissionResponse(BaseResponse):
     uuid: UUID

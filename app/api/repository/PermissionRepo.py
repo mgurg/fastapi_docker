@@ -25,13 +25,13 @@ class PermissionRepo(GenericRepo[Permission]):
         return result.scalar_one_or_none()
 
     def get_all_sorted(self) -> Sequence[Permission]:
-        query = select(Permission).order_by(self.Model.group.asc(), Permission.id.asc())
+        query = select(self.Model).order_by(self.Model.group.asc(), Permission.id.asc())
 
         result = self.session.execute(query)
         return result.scalars().all()
 
     def get_role_by_name(self, name: str) -> Permission | None:
-        query = select(self.Model).where(func.lower(self.self.Model.role_title) == name.lower())
+        query = select(self.Model).where(func.lower(self.Model.title) == name.lower())
 
         result = self.session.execute(query)
         return result.scalar_one_or_none()

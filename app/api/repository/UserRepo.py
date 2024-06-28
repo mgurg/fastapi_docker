@@ -31,6 +31,17 @@ class UserRepo(GenericRepo[User]):
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
+    def get_users_by_role_id(self, id: int):
+        query = (
+            select(User.uuid, User.first_name, User.last_name)
+            .where(self.Model.user_role_id == id)
+            .where(self.Model.deleted_at.is_(None))
+        )
+
+        result = self.session.execute(query)
+
+        return result.all()
+
     def get_users(
         self, offset: int, limit: int, sort_column: str, sort_order: str, search: str | None = None
     ) -> tuple[Sequence[User], int]:
