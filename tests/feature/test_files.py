@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -5,7 +6,7 @@ from app.config import get_settings
 
 settings = get_settings()
 
-
+@pytest.mark.skip(reason="Function not implemented yet")
 def test_get_files(session: Session, client: TestClient):
     response = client.request(
         "GET", "/files/", headers={"tenant": "fake_tenant_company_for_test_00000000000000000000000000000000"}

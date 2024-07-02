@@ -1,0 +1,53 @@
+#### Get general settings
+GET {{baseUrl}}/settings_test?settings=dashboard_show_intro&settings=idea_registration_mode
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Add new setting (from predefined list)
+POST {{baseUrl}}/settings_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "string",
+  "value": "string",
+  "type": "string"
+}
+
+### Add new setting (from predefined list)
+POST {{baseUrl}}/settings_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "dashboard_show_intro",
+  "value": "true",
+  "type": "bool"
+}
+
+
+### Update notification settings
+POST {{baseUrl}}/settings_test/notifications
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "sms_notification_level": "none",
+  "email_notification_level": "all"
+}
+
+### Update user language
+POST {{baseUrl}}/settings_test/user_lang/pl
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

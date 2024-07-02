@@ -1,0 +1,38 @@
+@file_uuid = 2e80d572-7663-4dc0-a261-feb4408b370e
+
+### Get all files size
+GET {{baseUrl}}/file_test/used_space
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get all files
+GET {{baseUrl}}/file_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get presigned URL
+GET {{baseUrl}}/file_test/{{file_uuid}}/presigned_url
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Download file
+GET {{baseUrl}}/file_test/{{file_uuid}}/download
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Delete file
+DELETE {{baseUrl}}/file_test/{{file_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

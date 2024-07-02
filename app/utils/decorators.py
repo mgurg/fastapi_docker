@@ -4,6 +4,8 @@ import tracemalloc
 from functools import wraps
 from time import perf_counter, strftime
 
+from loguru import logger
+
 
 def trycatch(func):
     """Wraps the decorated function in a try-catch. If function fails print out the exception."""
@@ -33,10 +35,10 @@ def performance_check(func):
 
         print(
             f"\nFunction:             {func.__name__} ({func.__doc__})"
-            f"\nMemory usage:         {current / 10**6:.6f} MB"
-            f"\nPeak memory usage:    {peak / 10**6:.6f} MB"
+            f"\nMemory usage:         {current / 10 ** 6:.6f} MB"
+            f"\nPeak memory usage:    {peak / 10 ** 6:.6f} MB"
             f"\nDuration:             {duration:.6f} sec"
-            f"\n{'-'*40}"
+            f"\n{'-' * 40}"
         )
         return res
 
@@ -50,9 +52,7 @@ def timer(func):
         value = func(*args, **kwargs)
         toc = perf_counter()
         elapsed_time = toc - tic
-        print(
-            f"\n{func.__name__!r} finished at {strftime('%l:%M%p %Z on %b %d, %Y') } in {elapsed_time:0.4f} seconds\n"
-        )
+        logger.info(f"{func.__name__!r} finished at {strftime('%Y-%m-%d %H:%M:%S')} in {elapsed_time:0.4f} seconds")
         return value
 
     return wrapper_timer

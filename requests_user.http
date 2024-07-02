@@ -1,0 +1,70 @@
+### Add user
+POST {{baseUrl}}/user_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "httpAPIUser",
+  "last_name": "string",
+  "email": "httpAPIUser@example.com",
+  "phone": "string",
+  "password": "string",
+  "password_confirmation": "string",
+  "is_verified": true,
+  "role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
+}
+
+### Edit user
+PATCH {{baseUrl}}/user_test/6dd0ade6-706a-44fb-8ef5-d79026257054
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Jan",
+  "last_name": "Kowalski",
+  "email": "jk@example.com",
+  "phone": "2231478",
+  "password": "string",
+  "password_confirmation": "string",
+  "role_uuid": "758fb334-fe25-40b6-9ac4-98417522afd7"
+}
+
+### Delete user
+DELETE {{baseUrl}}/user_test/347bd71e-d6f1-42d8-867c-983a55b2e453?force=true
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get user by uuid
+GET {{baseUrl}}/user_test/59e49dd8-efb0-4201-b767-607257fd13de
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get all users
+GET {{baseUrl}}/user_test?limit=10&offset=0
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Export users to CSV
+GET {{baseUrl}}/user_test/export
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Count users
+GET {{baseUrl}}/user_test/count
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

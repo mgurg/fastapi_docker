@@ -20,63 +20,63 @@ CurrentUser = Annotated[User, Depends(has_token)]
 UserDB = Annotated[Session, Depends(get_db)]
 
 
-@permission_router.get("/", response_model=Page[RoleSummaryResponse])  # , response_model=Page[UserIndexResponse]
-def role_get_all(
-    *,
-    db: UserDB,
-    params: Annotated[Params, Depends()],
-    auth_user: CurrentUser,
-    search: str = None,
-    all: bool = True,
-    sortOrder: str = "asc",
-    sortColumn: str = "name",
-):
-    sortTable = {"name": "role_title"}
-
-    db_roles = crud_permission.get_roles_summary(db, search, all, sortTable[sortColumn], sortOrder)
-    return paginate(db_roles, params)
-
-
-@permission_router.get("/all", response_model=list[PermissionResponse])
-def permissions_get_all(*, db: UserDB, auth_user: CurrentUser):
-    db_permissions = crud_permission.get_permissions(db)
-    return db_permissions
+# @permission_router.get("/", response_model=Page[RoleSummaryResponse])  # , response_model=Page[UserIndexResponse]
+# def role_get_all(
+#     *,
+#     db: UserDB,
+#     params: Annotated[Params, Depends()],
+#     auth_user: CurrentUser,
+#     search: str = None,
+#     all: bool = True,
+#     sortOrder: str = "asc",
+#     sortColumn: str = "name",
+# ):
+#     sortTable = {"name": "role_title"}
+#
+#     db_roles = crud_permission.get_roles_summary(db, search, all, sortTable[sortColumn], sortOrder)
+#     return paginate(db_roles, params)
 
 
-@permission_router.get("/{role_uuid}", response_model=RolePermissionFull)  # , response_model=Page[UserIndexResponse]
-def role_get_one(*, db: UserDB, role_uuid: UUID, auth_user: CurrentUser):
-    db_roles = crud_permission.get_role_by_uuid(db, role_uuid)
-    if not db_roles:
-        raise HTTPException(status_code=400, detail="Role already exists!")
-    return db_roles
+# @permission_router.get("/all", response_model=list[PermissionResponse])
+# def permissions_get_all(*, db: UserDB, auth_user: CurrentUser):
+#     db_permissions = crud_permission.get_permissions(db)
+#     return db_permissions
 
 
-@permission_router.post("/", response_model=RolePermissionFull)
-def role_add(*, db: UserDB, role: RoleAddIn, auth_user: CurrentUser):
-    db_role = crud_permission.get_role_by_name(db, role.title)
-    if db_role:
-        raise HTTPException(status_code=400, detail="Role already exists!")
+# @permission_router.get("/{role_uuid}", response_model=RolePermissionFull)  # , response_model=Page[UserIndexResponse]
+# def role_get_one(*, db: UserDB, role_uuid: UUID, auth_user: CurrentUser):
+#     db_roles = crud_permission.get_role_by_uuid(db, role_uuid)
+#     if not db_roles:
+#         raise HTTPException(status_code=400, detail="Role already exists!")
+#     return db_roles
 
-    permissions = []
-    if role.permissions is not None:
-        for permissions_uuid in role.permissions:
-            db_permission = crud_permission.get_permission_by_uuid(db, permissions_uuid)
-            if db_permission:
-                permissions.append(db_permission)
 
-    role_data = {
-        "uuid": str(uuid4()),
-        "is_custom": True,
-        "is_visible": True,
-        "is_system": False,
-        "role_name": role.title,
-        "role_title": role.title,
-        "role_description": role.description,
-        "permission": permissions,
-    }
-
-    new_role = crud_permission.create_role_with_permissions(db, role_data)
-    return new_role
+# @permission_router.post("/", response_model=RolePermissionFull)
+# def role_add(*, db: UserDB, role: RoleAddIn, auth_user: CurrentUser):
+#     db_role = crud_permission.get_role_by_name(db, role.title)
+#     if db_role:
+#         raise HTTPException(status_code=400, detail="Role already exists!")
+#
+#     permissions = []
+#     if role.permissions is not None:
+#         for permissions_uuid in role.permissions:
+#             db_permission = crud_permission.get_permission_by_uuid(db, permissions_uuid)
+#             if db_permission:
+#                 permissions.append(db_permission)
+#
+#     role_data = {
+#         "uuid": str(uuid4()),
+#         "is_custom": True,
+#         "is_visible": True,
+#         "is_system": False,
+#         "role_name": role.title,
+#         "role_title": role.title,
+#         "role_description": role.description,
+#         "permission": permissions,
+#     }
+#
+#     new_role = crud_permission.create_role_with_permissions(db, role_data)
+#     return new_role
 
 
 @permission_router.patch("/{role_uuid}", response_model=RolePermissionFull)

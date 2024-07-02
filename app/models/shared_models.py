@@ -2,15 +2,28 @@ from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
 metadata = sa.MetaData(schema="shared")
 Base = declarative_base(metadata=metadata)
 
 
-class Tenant(Base):
+class BaseModel(Base):
+    __abstract__ = True
+    """
+    Base model for all tables
+
+    Attributes:
+        id (int): Primary key for all tables
+        created_at (datetime): Date and time of creation
+        updated_at (datetime): Date and time of last update
+    """
+
+    id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+
+
+class Tenant(BaseModel):
     __tablename__ = "tenants"
-    id = sa.Column(sa.Integer(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), default=uuid4(), unique=True)
     name = sa.Column("name", sa.String(128), nullable=True)
     schema = sa.Column(sa.String(128), nullable=True)
@@ -19,9 +32,8 @@ class Tenant(Base):
     __table_args__ = {"schema": "public"}
 
 
-class PublicUser(Base):
+class PublicUser(BaseModel):
     __tablename__ = "public_users"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     first_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     last_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
@@ -40,9 +52,8 @@ class PublicUser(Base):
     __table_args__ = {"schema": "public"}
 
 
-class PublicCompany(Base):
+class PublicCompany(BaseModel):
     __tablename__ = "public_companies"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     short_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)

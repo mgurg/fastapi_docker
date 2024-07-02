@@ -5,16 +5,18 @@ import pendulum
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from sqlalchemy.orm import Session
+from starlette.status import HTTP_401_UNAUTHORIZED
 
+from app.api.service.user_service import UserService
 from app.config import get_settings
 from app.crud import crud_auth
-from app.db import get_db
+from app.db import get_session
 from app.models.models import User
 
 settings = get_settings()
 security = HTTPBearer()
 
-UserDB = Annotated[Session, Depends(get_db)]
+UserDB = Annotated[Session, Depends(get_session)]
 
 
 def is_base64(sb: str) -> bool:
@@ -32,6 +34,23 @@ def is_base64(sb: str) -> bool:
 
     except Exception:
         return False
+
+
+def check_token(
+    user_service: Annotated[UserService, Depends()], credentials: Annotated[HTTPBasicCredentials, Depends(security)]
+):
+    """
+    Function that is used to validate the token in the case that it requires it
+    """
+    token = credentials.credentials
+    if token is None:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Missing auth token")
+
+    current_user = user_service.get_user_by_auth_token(token)
+    if current_user:
+        return current_user
+
+    raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect auth token")
 
 
 def has_token(*, db: UserDB, credentials: Annotated[HTTPBasicCredentials, Depends(security)]) -> User:

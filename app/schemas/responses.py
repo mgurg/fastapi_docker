@@ -44,6 +44,10 @@ class RoleLoginBasic(BaseResponse):
     permission: list[PermissionsLoginBasic]
 
 
+class TenantUidOut(BaseResponse):
+    tenant_uid: str
+
+
 class UserLoginOut(BaseResponse):
     auth_token: str
     auth_token_valid_to: datetime
@@ -78,6 +82,13 @@ class UserIndexResponse(BaseResponse):
     is_active: bool
     is_verified: bool
     role_FK: RoleBasic
+
+
+class UsersPaginated(BaseResponse):
+    data: list[UserIndexResponse]
+    count: int
+    limit: int
+    offset: int
 
 
 class FileResponse(BaseResponse):
@@ -124,6 +135,11 @@ class RoleSummaryResponse(BaseResponse):
     count: int
     uncounted: int
 
+class RolesPaginated(BaseResponse):
+    data: list[RoleSummaryResponse]
+    count: int
+    limit: int
+    offset: int
 
 class PermissionResponse(BaseResponse):
     uuid: UUID
@@ -163,6 +179,13 @@ class TagResponse(BaseResponse):
     name: str
     color: Color | None = "#66b3ff"
     is_hidden: bool | None = None
+
+
+class TagsPaginated(BaseResponse):
+    data: list[TagResponse]
+    count: int
+    limit: int
+    offset: int
 
 
 class PartResponse(BaseResponse):
@@ -211,7 +234,13 @@ class GuideResponse(BaseResponse):
     text: str | None = None
     text_json: dict | None = None
     item: list[ItemNameResponse] | None = None
-    # video_id: str | None
+
+
+class GuidesPaginated(BaseResponse):
+    data: list[GuideResponse]
+    count: int
+    limit: int
+    offset: int
 
 
 class ItemIndexResponse(BaseResponse):
@@ -219,6 +248,13 @@ class ItemIndexResponse(BaseResponse):
     name: str | None = None
     text: str | None = None
     text_json: dict | None = None
+
+
+class ItemsPaginated(BaseResponse):
+    data: list[ItemIndexResponse]
+    count: int
+    limit: int
+    offset: int
 
 
 class EventTimelineResponse(BaseResponse):
@@ -262,6 +298,13 @@ class IssueIndexResponse(BaseResponse):
     created_at: datetime
 
 
+class IssuesPaginated(BaseResponse):
+    data: list[IssueIndexResponse]
+    count: int
+    limit: int
+    offset: int
+
+
 class IssueResponse(BaseResponse):
     uuid: UUID
     symbol: str | None = None
@@ -298,8 +341,6 @@ class GuideIndexResponse(BaseResponse):
     name: str | None = None
     text: str | None = None
     text_json: dict | None = None
-    # video_id: str | None
-    # video_json: dict | None
     files_guide: list[FileBasicInfo] | None = None
     item: list[BasicItems] | None = None
     qr_code: QRCodeItemResponse | None = None

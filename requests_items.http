@@ -1,0 +1,104 @@
+@item_uuid = c2e8100f-d309-45b5-b1bc-13f6f0929c93
+
+#### Add item
+POST {{baseUrl}}/item_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "ROWER",
+  "symbol": "RO",
+  "summary": "Some public summary",
+  "text_html": "<p>HEAD - INDIGO PERFORMANCE [VT4] - Purism in perfection</p>",
+  "text_json": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "HEAD - INDIGO PERFORMANCE [VT4] - Purism in perfection"
+          }
+        ]
+      }
+    ]
+  },
+  "files": []
+}
+
+#### Edit item
+PATCH {{baseUrl}}/item_test/{{item_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Rower",
+  "symbol": "RO",
+  "summary": "Some public summary",
+  "text_html": "<p>Cube XL</p>",
+  "text_json": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Cube XL"
+          }
+        ]
+      }
+    ]
+  },
+  "files": []
+}
+
+
+
+#### Delete user
+#DELETE {{baseUrl}}/user_test/347bd71e-d6f1-42d8-867c-983a55b2e453?force=true
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json
+#
+#### Get user by uuid
+#GET {{baseUrl}}/user_test/59e49dd8-efb0-4201-b767-607257fd13de
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json
+
+### Get all items
+GET {{baseUrl}}/item_test?limit=10&offset=0
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Get all users with search
+GET {{baseUrl}}/item_test?limit=10&offset=0&search=koparka
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+#
+#### Export users to CSV
+GET {{baseUrl}}/item_test/export
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+#
+#### Count users
+#GET {{baseUrl}}/user_test/count
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json

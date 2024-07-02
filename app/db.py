@@ -1,17 +1,16 @@
 import time
 from contextlib import contextmanager
-from functools import lru_cache
-from typing import Annotated
 
 import sqlalchemy as sa
-from fastapi import Depends, Request
+from fastapi import HTTPException, Request
 from loguru import logger
-from sqlalchemy import create_engine, event, select
+from psycopg.errors import UndefinedTable
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session, declarative_base
 
 from app.config import get_settings
-from app.models.shared_models import PublicCompany
 
 settings = get_settings()
 
@@ -36,16 +35,15 @@ sql_performance_monitoring = False
 if sql_performance_monitoring is True:
 
     @event.listens_for(Engine, "before_cursor_execute")
-    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-        conn.info.setdefault("query_start_time", []).append(time.time())
-        logger.debug("Start Query:")
-        logger.debug("%s" % statement)
+    def before_cursor_execute(conn, _cursor, statement, parameters, _context, _executemany) -> None:
+        conn.info.setdefault("query_start_time", []).append(time.perf_counter())
+        logger.debug(f"Start Query:\n{statement}", extra={"task": "SQL"})
+        logger.debug(f"Parameters:\n{parameters!r}", extra={"task": "SQL"})
 
     @event.listens_for(Engine, "after_cursor_execute")
-    def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-        total = time.time() - conn.info["query_start_time"].pop(-1)
-        logger.debug("Query Complete!")
-        logger.debug("Total Time: %f" % total)
+    def after_cursor_execute(conn, _cursor, _statement, _parameters, _context, _executemany) -> None:
+        total_seconds = time.perf_counter() - conn.info["query_start_time"].pop(-1)
+        logger.debug("Query Complete, total Time: %.02fms" % (total_seconds * 1000), extra={"task": "SQL"})
 
 
 SQLALCHEMY_DB_URL = f"postgresql+psycopg://{DEFAULT_DB_USER}:{DEFAULT_DB_PASS}@{DEFAULT_DB_HOST}:5432/{DEFAULT_DB}"
@@ -64,63 +62,137 @@ metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
 
-class TenantNotFoundError(Exception):
-    def __init__(self, tenant_name):
-        self.message = "Tenant %s not found!" % str(tenant_name)
-        super().__init__(self.message)
+# class TenantNotFoundError(Exception):
+#     def __init__(self, tenant_name):
+#         self.message = "Tenant %s not found!" % str(tenant_name)
+#         super().__init__(self.message)
 
 
-@lru_cache
-def get_tenant(request: Request) -> PublicCompany | None:
+# @lru_cache
+# def get_tenant(request: Request) -> PublicCompany | None:
+#     try:
+#         # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
+#         host_without_port = request.headers.get("tenant")  # based on tenant header: abc
+#
+#         if host_without_port is None:
+#             return None
+#
+#         with with_db(None) as db:
+#             query = select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
+#
+#             result = db.execute(query)
+#             tenant = result.scalar_one_or_none()
+#
+#         if tenant is None:
+#             # raise TenantNotFoundError(host_without_port)
+#             return None
+#     except Exception as e:
+#         print(e)
+#     return tenant
+
+
+# def get_db(tenant: Annotated[PublicCompany, Depends(get_tenant)]):
+#     if tenant is None:
+#         yield None
+#
+#     with with_db(tenant.tenant_id) as db:
+#         yield db
+#
+#
+# def get_public_db():
+#     with with_db("public") as db:
+#         yield db
+# --------------------
+
+
+# TODO: tenant: Annotated[str | None, Header()] = None
+def get_db(request: Request):
+    session = None
+    tenant_schema = request.headers.get("tenant")
     try:
-        # host_without_port = request.headers["host"].split(":", 1)[0] # based on domain: __abc__.domain.com
-        host_without_port = request.headers.get("tenant")  # based on tenant header: abc
-
-        if host_without_port is None:
-            return None
-
-        with with_db(None) as db:
-            query = select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
-
-            result = db.execute(query)
-            tenant = result.scalar_one_or_none()
-
-        if tenant is None:
-            # raise TenantNotFoundError(host_without_port)
-            return None
+        schema_translate_map = {"tenant": tenant_schema} if tenant_schema else None
+        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        with Session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
+    except HTTPException:
+        raise
+    except ProgrammingError as pe:
+        if isinstance(pe.orig, UndefinedTable):
+            logger.error(f"Table does not exist for schema: public, msg: {str(pe)}")
+        else:
+            logger.error(f"App error, schema: 'public', msg: {str(pe)}")
+        raise HTTPException(status_code=400, detail=f"App error, schema: ' {tenant_schema}', msg: {str(pe)}") from pe
     except Exception as e:
-        print(e)
-    return tenant
-
-
-def get_db(tenant: Annotated[PublicCompany, Depends(get_tenant)]):
-    if tenant is None:
-        yield None
-
-    with with_db(tenant.tenant_id) as db:
-        yield db
+        raise HTTPException(status_code=500, detail=f"App error, schema: ' {tenant_schema}', msg: {str(e)}") from e
+    finally:
+        if session:
+            session.rollback()
+            session.close()
 
 
 def get_public_db():
+    session = None
+    try:
+        connectable = engine.execution_options(schema_translate_map={"tenant": "public"})
+        with Session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
+    except HTTPException:
+        raise
+    except ProgrammingError as pe:
+        if isinstance(pe.orig, UndefinedTable):
+            logger.error(f"Table does not exist for schema: public, msg: {str(pe)}")
+        else:
+            logger.error(f"App error, schema: 'public', msg: {str(pe)}")
+        raise HTTPException(status_code=400, detail=f"App error, schema: 'public', msg: {str(pe)}") from pe
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"App error, schema: 'public', msg: {str(e)}") from e
+    finally:
+        if session:
+            session.rollback()
+            session.close()
+
+
+def get_session(request: Request):
+    tenant = request.headers.get("tenant")
+    pg_schema = tenant if tenant else "public"
+    with with_db(pg_schema) as db:
+        yield db
+
+
+def get_public_session(request: Request):
     with with_db("public") as db:
         yield db
-    # --------------------
 
 
 @contextmanager
 def with_db(tenant_schema: str | None):
-    if tenant_schema:
-        schema_translate_map = {"tenant": tenant_schema}
-    else:
-        schema_translate_map = None
-
+    schema_translate_map = {"tenant": tenant_schema} if tenant_schema else None
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     try:
-        db = Session(autocommit=False, autoflush=False, bind=connectable)
-        yield db
+        with Session(autocommit=False, autoflush=False, bind=connectable) as session:
+            yield session
     except Exception as e:
-        logger.error(e)
+        print(e)
+        session.rollback()
         print("ERRRR: " + tenant_schema)
-        raise
     finally:
-        db.close()
+        session.close()
+
+
+# @contextmanager
+# def with_db(tenant_schema: str | None):
+#     if tenant_schema:
+#         schema_translate_map = {"tenant": tenant_schema}
+#     else:
+#         schema_translate_map = None
+#
+#     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+#     try:
+#         db = Session(autocommit=False, autoflush=False, bind=connectable)
+#         yield db
+#     except Exception as e:
+#         logger.error(e)
+#         print("ERRRR: " + tenant_schema)
+#         raise
+#     finally:
+#         db.close()

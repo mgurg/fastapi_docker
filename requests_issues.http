@@ -1,0 +1,114 @@
+@issue_uuid = 63dc7be2-3f22-4257-81f9-cf3b399280d8
+
+#### Add item
+POST {{baseUrl}}/issue_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "ROWER",
+  "symbol": "RO",
+  "summary": "Some public summary",
+  "text_html": "<p>HEAD - INDIGO PERFORMANCE [VT4] - Purism in perfection</p>",
+  "text_json": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "HEAD - INDIGO PERFORMANCE [VT4] - Purism in perfection"
+          }
+        ]
+      }
+    ]
+  },
+  "files": []
+}
+
+#### Edit issue
+PATCH {{baseUrl}}/issue_test/{{issue_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "color": "red",
+  "name": "Rozładowany akumulator",
+  "description": "desc",
+  "priority": 10,
+  "text_json": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Marka: Varta"
+          }
+        ]
+      }
+    ]
+  },
+  "text_html": "<p>Marka: Varta</p>",
+  "files": [
+    "5790c4cd-3603-4b60-9741-033b27330e3f"
+  ],
+  "tags": []
+}
+
+
+
+#### Delete user
+#DELETE {{baseUrl}}/user_test/347bd71e-d6f1-42d8-867c-983a55b2e453?force=true
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json
+#
+
+
+### Get issue by uuid
+GET {{baseUrl}}/issue_test/{{issue_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+
+### Get all issues
+GET {{baseUrl}}/issue_test?limit=10&offset=0
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+### Get all issues with search
+GET {{baseUrl}}/issue_test?limit=10&offset=0&search=akumulator
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Export issues to CSV
+GET {{baseUrl}}/issue_test/export
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+#
+#### Count users
+#GET {{baseUrl}}/user_test/count
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json

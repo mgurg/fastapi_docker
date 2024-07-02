@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
@@ -33,9 +33,23 @@ users_items_rel = sa.Table(
 )
 
 
-class Role(Base):
+class BaseModel(Base):
+    __abstract__ = True
+    """
+    Base model for all tables
+
+    Attributes:
+        id (int): Primary key for all tables
+        created_at (datetime): Date and time of creation
+        updated_at (datetime): Date and time of last update
+    """
+
+    id: Mapped[int] = mapped_column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+
+
+class Role(BaseModel):
     __tablename__ = "roles"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
@@ -50,9 +64,9 @@ class Role(Base):
     permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
 
 
-class Permission(Base):
+class Permission(BaseModel):
     __tablename__ = "permissions"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
@@ -66,9 +80,9 @@ class Permission(Base):
     role = relationship("Role", secondary=role_permission_rel, back_populates="permission")
 
 
-class User(Base):
+class User(BaseModel):
     __tablename__ = "users"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     phone = sa.Column(sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True)
@@ -169,7 +183,6 @@ file_item_rel = sa.Table(
     sa.Column("file_id", sa.ForeignKey("files.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
-
 item_guide_rel = sa.Table(
     "items_guides_link",
     Base.metadata,
@@ -212,9 +225,9 @@ file_guide_rel = sa.Table(
 )
 
 
-class Guide(Base):
+class Guide(BaseModel):
     __tablename__ = "guides"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), unique=False, autoincrement=False, nullable=False)
@@ -246,6 +259,7 @@ tag_issue_rel = sa.Table(
     sa.Column("tag_id", sa.ForeignKey("tags.id"), autoincrement=False, nullable=False, primary_key=True),
 )
 
+
 # part_used_issue_rel = sa.Table(
 #     "parts_used_issues_link",
 #     Base.metadata,
@@ -254,9 +268,9 @@ tag_issue_rel = sa.Table(
 # )
 
 
-class Issue(Base):
+class Issue(BaseModel):
     __tablename__ = "issues"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     author_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     author_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
@@ -303,9 +317,9 @@ class PartUsed(Base):
     # issue_part = relationship("Issue", secondary=part_used_issue_rel, back_populates="part")
 
 
-class File(Base):
+class File(BaseModel):
     __tablename__ = "files"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     owner_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     file_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
@@ -323,9 +337,9 @@ class File(Base):
     issue = relationship("Issue", secondary=file_issue_rel, back_populates="files_issue")
 
 
-class Setting(Base):
+class Setting(BaseModel):
     __tablename__ = "settings"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
     value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     value_type = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
@@ -335,9 +349,9 @@ class Setting(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-class SettingUser(Base):
+class SettingUser(BaseModel):
     __tablename__ = "settings_users"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     user_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), unique=True, autoincrement=False, nullable=True)
     value = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
@@ -347,20 +361,20 @@ class SettingUser(Base):
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-class SettingNotification(Base):
+class SettingNotification(BaseModel):
     __tablename__ = "settings_notifications"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     user_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
-    user_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    # user_uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     sms_notification_level = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True)
     email_notification_level = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
 
-class QrCode(Base):
+class QrCode(BaseModel):
     __tablename__ = "qr_codes"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     resource = sa.Column(sa.VARCHAR(length=64), unique=True, autoincrement=False, nullable=True)
     qr_code_id = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True)
@@ -375,9 +389,9 @@ class QrCode(Base):
     guides_FK = relationship("Guide", back_populates="qr_code")
 
 
-class UserGroup(Base):
+class UserGroup(BaseModel):
     __tablename__ = "users_groups"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True)
     description = sa.Column(sa.VARCHAR(length=512), autoincrement=False, nullable=True)
@@ -390,9 +404,9 @@ class UserGroup(Base):
     users = relationship("User", secondary=users_groups_rel, back_populates="user_group")  # Roles
 
 
-class Tag(Base):
+class Tag(BaseModel):
     __tablename__ = "tags"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
     name = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)
     color = sa.Column(sa.VARCHAR(length=512), unique=True, autoincrement=False, nullable=True)

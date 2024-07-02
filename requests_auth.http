@@ -1,0 +1,56 @@
+### AUTH
+POST {{baseUrl}}/auth_test/company_info
+accept: application/json
+Content-Type: application/json
+
+{
+  "country": "pl",
+  "company_tax_id": "9542752600"
+}
+
+### Register new company account with admin user account
+POST {{baseUrl}}/auth_test/register
+accept: application/json
+Content-Type: application/json
+
+{
+  "first_name": "string",
+  "last_name": "string",
+  "email": "user3@example.com",
+  "password": "string",
+  "password_confirmation": "string",
+  "country": "pl",
+  "company_tax_id": "5223071241",
+  "company_name": "Żabka",
+  "company_street": "string",
+  "company_city": "string",
+  "company_postcode": "string",
+  "company_info_changed": true,
+  "tos": true,
+  "tz": "Europe/Warsaw",
+  "lang": "pl"
+}
+
+### Get tenant uid
+GET {{baseUrl}}/auth_test/get_tenant_uid?email=user@example.com
+accept: application/json
+Content-Type: application/json
+
+### Login user
+POST {{baseUrl}}/auth_test/login
+accept: application/json
+Content-Type: application/json
+
+{
+  "permanent": false,
+  "password": "string",
+  "email": "user@examlpe.com"
+}
+
+
+### Company summary
+GET {{baseUrl}}/auth_test/company_summary
+accept: application/json
+tenant: {{tenant}}
+Content-Type: application/json
+

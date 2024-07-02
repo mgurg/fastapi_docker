@@ -1,0 +1,61 @@
+@role_uuid = 758fb334-fe25-40b6-9ac4-98417522afd7
+@role2_uuid = c6c609db-17a9-487c-96d2-0000998e30dd
+
+### Get all roles
+GET {{baseUrl}}/permission_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get all permissions
+GET {{baseUrl}}/permission_test/all
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Get role with permissions and users by UUID
+GET {{baseUrl}}/permission_test/{{role_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Add new role with permissions
+POST {{baseUrl}}/permission_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "USER_VIEW",
+  "description": "Only USER_VIEW",
+  "permissions": [
+    "7298b761-db6b-4cac-b779-5178b369037f"
+  ]
+}
+
+### Edit role with permissions
+PATCH {{baseUrl}}/permission_test/{{role2_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "USER_ADD",
+  "description": "Only USER_ADD",
+  "permissions": [
+    "7e3a27d6-3163-4d26-af80-96ab80817082"
+  ]
+}
+
+
+### Delete unused role with permissions
+DELETE {{baseUrl}}/permission_test/{{role2_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

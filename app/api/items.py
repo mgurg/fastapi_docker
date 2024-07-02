@@ -1,74 +1,63 @@
-import csv
-import io
 import sys
-from datetime import datetime, time, timezone
+from datetime import datetime, time
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from bs4 import BeautifulSoup
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sentry_sdk import capture_exception
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from starlette.responses import StreamingResponse
 
-from app.crud import crud_files, crud_guides, crud_issues, crud_items, crud_qr, crud_users
-from app.crud.crud_auth import get_public_company_from_tenant
+from app.crud import crud_issues, crud_items, crud_users
 from app.db import get_db
 from app.models.models import User
-from app.schemas.requests import FavouritesAddIn, ItemAddIn, ItemEditIn
-from app.schemas.responses import ItemIndexResponse, ItemResponse, StandardResponse
 from app.service.bearer_auth import has_token
-from app.storage.aws_s3 import generate_presigned_url
 
 item_router = APIRouter()
 CurrentUser = Annotated[User, Depends(has_token)]
 UserDB = Annotated[Session, Depends(get_db)]
 
 
-@item_router.get("/", response_model=Page[ItemIndexResponse])
-def item_get_all(
-    *,
-    db: UserDB,
-    params: Annotated[Params, Depends()],
-    auth_user: CurrentUser,
-    search: str | None = None,
-    user_uuid: UUID | None = None,
-    field: str = "name",
-    order: str = "asc",
-):
-    if field not in ["name", "created_at"]:
-        field = "name"
+# @item_router.get("/", response_model=Page[ItemIndexResponse])
+# def item_get_all(
+#     *,
+#     db: UserDB,
+#     params: Annotated[Params, Depends()],
+#     auth_user: CurrentUser,
+#     search: str | None = None,
+#     user_uuid: UUID | None = None,
+#     field: str = "name",
+#     order: str = "asc",
+# ):
+#     if field not in ["name", "created_at"]:
+#         field = "name"
+#
+#     user_id = None
+#     if user_uuid is not None:
+#         db_user = crud_users.get_user_by_uuid(db, user_uuid)
+#         if db_user is None:
+#             raise HTTPException(status_code=401, detail="User not found")
+#         user_id = db_user.id
+#
+#     db_items_query = crud_items.get_items(field, order, search, user_id)
+#     return paginate(db, db_items_query)
 
-    user_id = None
-    if user_uuid is not None:
-        db_user = crud_users.get_user_by_uuid(db, user_uuid)
-        if db_user is None:
-            raise HTTPException(status_code=401, detail="User not found")
-        user_id = db_user.id
 
-    db_items_query = crud_items.get_items(field, order, search, user_id)
-    return paginate(db, db_items_query)
-
-
-@item_router.get("/export")
-def get_export_items(*, db: UserDB, auth_user: CurrentUser):
-    db_items_query = crud_items.get_items("name", "asc")
-    result = db.execute(db_items_query)  # await db.execute(query)
-    db_items = result.scalars().all()
-
-    f = io.StringIO()
-    csv_file = csv.writer(f, delimiter=";")
-    csv_file.writerow(["Name", "Description", "Symbol"])
-    for u in db_items:
-        csv_file.writerow([u.name, u.text, u.symbol])
-
-    f.seek(0)
-    response = StreamingResponse(f, media_type="text/csv")
-    filename = f"items_{datetime.today().strftime('%Y-%m-%d')}.csv"
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-    return response
+# @item_router.get("/export")
+# def get_export_items(*, db: UserDB, auth_user: CurrentUser):
+#     db_items_query = crud_items.get_items("name", "asc")
+#     result = db.execute(db_items_query)  # await db.execute(query)
+#     db_items = result.scalars().all()
+#
+#     f = io.StringIO()
+#     csv_file = csv.writer(f, delimiter=";")
+#     csv_file.writerow(["Name", "Description", "Symbol"])
+#     for u in db_items:
+#         csv_file.writerow([u.name, u.text, u.symbol])
+#
+#     f.seek(0)
+#     response = StreamingResponse(f, media_type="text/csv")
+#     filename = f"items_{datetime.today().strftime('%Y-%m-%d')}.csv"
+#     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+#     return response
 
 
 # @item_router.post("/import")
@@ -94,22 +83,22 @@ def get_export_items(*, db: UserDB, auth_user: CurrentUser):
 #     return data
 
 
-@item_router.get("/{item_uuid}", response_model=ItemResponse)
-def item_get_one(*, db: UserDB, item_uuid: UUID, request: Request, auth_user: CurrentUser):
-    db_item = crud_items.get_item_by_uuid(db, item_uuid)
-
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
-
-    try:
-        for picture in db_item.files_item:
-            picture.url = generate_presigned_url(
-                request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
-            )
-    except Exception as e:
-        capture_exception(e)
-
-    return db_item
+# @item_router.get("/{item_uuid}", response_model=ItemResponse)
+# def item_get_one(*, db: UserDB, item_uuid: UUID, request: Request, auth_user: CurrentUser):
+#     db_item = crud_items.get_item_by_uuid(db, item_uuid)
+#
+#     if not db_item:
+#         raise HTTPException(status_code=400, detail="Item not found!")
+#
+#     try:
+#         for picture in db_item.files_item:
+#             picture.url = generate_presigned_url(
+#                 request.headers.get("tenant", "public"), "_".join([str(picture.uuid), picture.file_name])
+#             )
+#     except Exception as e:
+#         capture_exception(e)
+#
+#     return db_item
 
 
 # @item_router.get("/timeline/{item_uuid}", response_model=list[EventTimelineResponse])
@@ -230,18 +219,14 @@ def item_get_statistics(
     # średni czas potrzebny na podjęcie zgłoszenia
 
     data = {
-        "issuesCount": None,
-        "issuesPerDay": None,
-        "issuesPerHour": None,
-        "issuesStatus": None,
+        "issuesCount": len(db_issues_uuid),
+        "issuesPerDay": issues_per_day_dict,
+        "issuesPerHour": issues_per_hour_dict,
+        "issuesStatus": issues_status_dict,
         "repairTime": None,
         "users": None,
     }
 
-    data["issuesCount"] = len(db_issues_uuid)
-    data["issuesPerDay"] = issues_per_day_dict
-    data["issuesPerHour"] = issues_per_hour_dict
-    data["issuesStatus"] = issues_status_dict
     if issues_total_time_list and len(issues_total_time_list) > 0:
         data["totalTime"] = {"max": issues_total_time_list[0], "avg": issues_total_time_list[1]}
     if issues_repair_time_list and len(issues_repair_time_list) > 0:
@@ -252,137 +237,137 @@ def item_get_statistics(
     return data
 
 
-@item_router.post("/favourites", response_model=StandardResponse)
-def item_add_to_favourites(*, db: UserDB, favourites: FavouritesAddIn, auth_user: CurrentUser):
-    db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
-
-    for user in db_item.users_item:
-        if user.uuid == favourites.user_uuid:
-            db_item.users_item.remove(user)
-            db.add(user)
-            db.commit()
-            return {"ok": True}
-
-    db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    item_data = {"users_item": [db_user]}
-
-    crud_items.update_item(db, db_item, item_data)
-
-    return {"ok": True}
-
-
-@item_router.post("/", response_model=ItemIndexResponse)
-def item_add(*, db: UserDB, request: Request, item: ItemAddIn, auth_user: CurrentUser):
-    tenant_id = request.headers.get("tenant", None)
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Unknown Company!")
-
-    company = get_public_company_from_tenant(tenant_id)
-
-    files = []
-    if item.files is not None:
-        for file in item.files:
-            db_file = crud_files.get_file_by_uuid(db, file)
-            if db_file:
-                files.append(db_file)
-
-    item_uuid = str(uuid4())
-
-    qr_code_id = crud_qr.generate_item_qr_id(db)
-    qr_code_company = crud_qr.add_noise_to_qr(company.qr_id)
-
-    qr_code_data = {
-        "uuid": str(uuid4()),
-        "resource": "items",
-        "resource_uuid": item_uuid,
-        "qr_code_id": qr_code_id,
-        "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
-        "ecc": "L",
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
-
-    description = BeautifulSoup(item.text_html, "html.parser").get_text()
-
-    item_data = {
-        "uuid": item_uuid,
-        "author_id": auth_user.id,
-        "name": item.name,
-        "symbol": item.symbol,
-        "summary": item.summary,
-        "text": description,
-        "text_json": item.text_json,
-        "qr_code_id": new_qr_code.id,
-        "files_item": files,
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    new_item = crud_items.create_item(db, item_data)
-
-    return new_item
+# @item_router.post("/favourites", response_model=StandardResponse)
+# def item_add_to_favourites(*, db: UserDB, favourites: FavouritesAddIn, auth_user: CurrentUser):
+#     db_item = crud_items.get_item_by_uuid(db, favourites.item_uuid)
+#     if not db_item:
+#         raise HTTPException(status_code=400, detail="Item not found!")
+#
+#     for user in db_item.users_item:
+#         if user.uuid == favourites.user_uuid:
+#             db_item.users_item.remove(user)
+#             db.add(user)
+#             db.commit()
+#             return {"ok": True}
+#
+#     db_user = crud_users.get_user_by_uuid(db, favourites.user_uuid)
+#     if not db_user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#
+#     item_data = {"users_item": [db_user]}
+#
+#     crud_items.update_item(db, db_item, item_data)
+#
+#     return {"ok": True}
 
 
-@item_router.patch("/{item_uuid}", response_model=ItemIndexResponse)
-def item_edit(*, db: UserDB, item_uuid: UUID, item: ItemEditIn, auth_user: CurrentUser):
-    db_item = crud_items.get_item_by_uuid(db, item_uuid)
-    if not db_item:
-        raise HTTPException(status_code=400, detail="Item not found!")
+# @item_router.post("/", response_model=ItemIndexResponse)
+# def item_add(*, db: UserDB, request: Request, item: ItemAddIn, auth_user: CurrentUser):
+#     tenant_id = request.headers.get("tenant", None)
+#     if not tenant_id:
+#         raise HTTPException(status_code=400, detail="Unknown Company!")
+#
+#     company = get_public_company_from_tenant(tenant_id)
+#
+#     files = []
+#     if item.files is not None:
+#         for file in item.files:
+#             db_file = crud_files.get_file_by_uuid(db, file)
+#             if db_file:
+#                 files.append(db_file)
+#
+#     item_uuid = str(uuid4())
+#
+#     qr_code_id = crud_qr.generate_item_qr_id(db)
+#     qr_code_company = crud_qr.add_noise_to_qr(company.qr_id)
+#
+#     qr_code_data = {
+#         "uuid": str(uuid4()),
+#         "resource": "items",
+#         "resource_uuid": item_uuid,
+#         "qr_code_id": qr_code_id,
+#         "qr_code_full_id": f"{qr_code_company}+{qr_code_id}",
+#         "ecc": "L",
+#         "created_at": datetime.now(timezone.utc),
+#     }
+#
+#     new_qr_code = crud_qr.create_qr_code(db, qr_code_data)
+#
+#     description = BeautifulSoup(item.text_html, "html.parser").get_text()
+#
+#     item_data = {
+#         "uuid": item_uuid,
+#         "author_id": auth_user.id,
+#         "name": item.name,
+#         "symbol": item.symbol,
+#         "summary": item.summary,
+#         "text": description,
+#         "text_json": item.text_json,
+#         "qr_code_id": new_qr_code.id,
+#         "files_item": files,
+#         "created_at": datetime.now(timezone.utc),
+#     }
+#
+#     new_item = crud_items.create_item(db, item_data)
+#
+#     return new_item
 
-    item_data = item.model_dump(exclude_unset=True)
 
-    files = []
-    if ("files" in item_data) and (item_data["files"] is not None):
-        for file in db_item.files_item:
-            db_item.files_item.remove(file)
-        for file in item_data["files"]:
-            db_file = crud_files.get_file_by_uuid(db, file)
-            if db_file:
-                files.append(db_file)
+# @item_router.patch("/{item_uuid}", response_model=ItemIndexResponse)
+# def item_edit(*, db: UserDB, item_uuid: UUID, item: ItemEditIn, auth_user: CurrentUser):
+#     db_item = crud_items.get_item_by_uuid(db, item_uuid)
+#     if not db_item:
+#         raise HTTPException(status_code=400, detail="Item not found!")
+#
+#     item_data = item.model_dump(exclude_unset=True)
+#
+#     files = []
+#     if ("files" in item_data) and (item_data["files"] is not None):
+#         for file in db_item.files_item:
+#             db_item.files_item.remove(file)
+#         for file in item_data["files"]:
+#             db_file = crud_files.get_file_by_uuid(db, file)
+#             if db_file:
+#                 files.append(db_file)
+#
+#         item_data["files_item"] = files
+#         del item_data["files"]
+#
+#     if ("text_html" in item_data) and (item_data["text_html"] is not None):
+#         item_data["text"] = BeautifulSoup(item.text_html, "html.parser").get_text()
+#
+#     item_data["updated_at"] = datetime.now(timezone.utc)
+#
+#     new_item = crud_items.update_item(db, db_item, item_data)
+#
+#     return new_item
 
-        item_data["files_item"] = files
-        del item_data["files"]
 
-    if ("text_html" in item_data) and (item_data["text_html"] is not None):
-        item_data["text"] = BeautifulSoup(item.text_html, "html.parser").get_text()
-
-    item_data["updated_at"] = datetime.now(timezone.utc)
-
-    new_item = crud_items.update_item(db, db_item, item_data)
-
-    return new_item
-
-
-@item_router.delete("/{item_uuid}", response_model=StandardResponse)
-def item_delete(*, db: UserDB, item_uuid: UUID, auth_user: CurrentUser, force: bool = False):
-    db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
-    db_item = crud_items.get_item_by_uuid(db, item_uuid)
-
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    if force is False:
-        crud_items.update_item(db, db_item, {"deleted_at": datetime.now(timezone.utc)})
-        return {"ok": True}
-
-    # TODO: Guides / Guides_Files
-
-    print("DELETE files")
-    for file in db_item.files_item:
-        db_file = crud_files.get_file_by_uuid(db, file.uuid)
-        print(db_file.file_name)
-
-    print("DELETE guides")
-    for guide in db_item.item_guides:
-        crud_guides.get_guide_by_uuid(db, guide.uuid)
-
-    db.delete(db_item)
-    db.delete(db_qr)
-    db.commit()
-
-    return {"ok": True}
+# @item_router.delete("/{item_uuid}", response_model=StandardResponse)
+# def item_delete(*, db: UserDB, item_uuid: UUID, auth_user: CurrentUser, force: bool = False):
+#     db_qr = crud_qr.get_qr_code_by_resource_uuid(db, item_uuid)
+#     db_item = crud_items.get_item_by_uuid(db, item_uuid)
+#
+#     if not db_item:
+#         raise HTTPException(status_code=404, detail="Item not found")
+#
+#     if force is False:
+#         crud_items.update_item(db, db_item, {"deleted_at": datetime.now(timezone.utc)})
+#         return {"ok": True}
+#
+#     # TODO: Guides / Guides_Files
+#
+#     print("DELETE files")
+#     for file in db_item.files_item:
+#         db_file = crud_files.get_file_by_uuid(db, file.uuid)
+#         print(db_file.file_name)
+#
+#     print("DELETE guides")
+#     for guide in db_item.item_guides:
+#         crud_guides.get_guide_by_uuid(db, guide.uuid)
+#
+#     db.delete(db_item)
+#     db.delete(db_qr)
+#     db.commit()
+#
+#     return {"ok": True}

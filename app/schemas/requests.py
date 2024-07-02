@@ -1,4 +1,5 @@
 # from typing import list
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, condecimal
@@ -55,7 +56,7 @@ class UserCreateIn(BaseRequest):
     password: str | None = None
     password_confirmation: str | None = None
     is_verified: bool | None = None
-    user_role_uuid: UUID | None = None
+    role_uuid: UUID | None = None
 
 
 class IdeaAddIn(BaseRequest):
@@ -131,8 +132,6 @@ class GuideAddIn(BaseRequest):
     name: str
     text_html: str
     text_json: dict
-    # video_id: str | None
-    # video_json: dict | None
     files: list[UUID] | None = None
     item_uuid: UUID | None = None
 
@@ -141,8 +140,6 @@ class GuideEditIn(BaseRequest):
     name: str | None = None
     text_html: str | None = None
     text_json: dict | None = None
-    # video_id: str | None
-    # video_json: dict | None
     files: list[UUID] | None = None
 
 
@@ -184,8 +181,8 @@ class IssueChangeStatus(BaseRequest):
 
 
 class SettingNotificationIn(BaseRequest):
-    sms_notification_level: str | None = None
-    email_notification_level: str | None = None
+    sms_notification_level: Literal["all", "none"] | None = None
+    email_notification_level: Literal["all", "none"] | None = None
 
 
 class SettingUserLanguage(BaseRequest):
@@ -195,7 +192,7 @@ class SettingUserLanguage(BaseRequest):
 class SettingGeneralIn(BaseRequest):
     name: str
     value: str
-    type: str
+    type: Literal["bool", "int", "float", "str"]
 
 
 class TagCreateIn(BaseRequest):

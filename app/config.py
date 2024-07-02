@@ -1,7 +1,6 @@
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,15 +9,21 @@ APP_DIR = Path(__file__).parent.parent / "app"
 
 class Settings(BaseSettings):
     PROJECT_DIR: os.PathLike[str] = Path(__file__).parent.parent
-    ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] | None = os.getenv("APP_ENV", "PYTEST")
+    ENVIRONMENT: str | None = os.getenv("APP_ENV", "PYTEST")  # Literal["DEV", "PYTEST", "STG", "PRD"]
     OPEN_API: str | None = os.getenv("APP_OPEN_API")
     base_app_url: str | None = os.getenv("APP_HOST", "https://frontend-host.com")
 
-    s3_region: str | None = os.getenv("AWS_DEFAULT_REGION")
-    s3_access_key: str | None = os.getenv("AWS_S3_ACCESS_KEY_ID")
-    s3_secret_access_key: str | None = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
-    s3_bucket_name: str | None = os.getenv("AWS_S3_BUCKET")
-    s3_bucket_region: str | None = os.getenv("AWS_S3_DEFAULT_REGION")
+    STORAGE_PROVIDER: str = "aws_s3"
+    AWS_BUCKET_NAME: str = os.getenv("AWS_S3_BUCKET")
+    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_S3_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+    AWS_REGION_NAME: str = os.getenv("AWS_S3_DEFAULT_REGION")
+
+    # s3_region: str | None = os.getenv("AWS_DEFAULT_REGION")
+    # s3_access_key: str | None = os.getenv("AWS_S3_ACCESS_KEY_ID")
+    # s3_secret_access_key: str | None = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+    # s3_bucket_name: str | None = os.getenv("AWS_S3_BUCKET")
+    # s3_bucket_region: str | None = os.getenv("AWS_S3_DEFAULT_REGION")
 
     sentry_dsn: str | None = os.getenv("SENTRY_DSN")
 
@@ -38,8 +43,6 @@ class Settings(BaseSettings):
     REJESTR_IO_KEY: str | None = os.getenv("REJESTR_IO_KEY")
     GUS_KEY: str | None = os.getenv("GUS_API")
     GUS_API_DEV: str | None = os.getenv("GUS_API_DEV")
-    API_VIDEO: str | None = os.getenv("API_VIDEO")
-    API_VIDEO_UPLOAD: str | None = os.getenv("API_VIDEO_UPLOAD")
 
     # POSTGRESQL DEFAULT DATABASE
     DEFAULT_DATABASE_HOSTNAME: str | None = os.getenv("DB_HOST")

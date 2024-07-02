@@ -1,4 +1,4 @@
-from apscheduler.schedulers.sync import Scheduler
+from apscheduler import Scheduler
 from fastapi import FastAPI
 
 scheduler = Scheduler()

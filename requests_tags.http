@@ -1,0 +1,50 @@
+@tag_uuid = 80feaa21-40c7-4d61-8391-b90422dc8014
+
+#### Add tag
+POST {{baseUrl}}/tag_test
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "test_tag",
+  "color": "#1976D2",
+  "icon": null
+}
+
+#### Edit tag
+PATCH {{baseUrl}}/tag_test/{{tag_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "test_tag_ed",
+  "color": "#1976C2",
+  "icon": null
+}
+
+#### Delete tag
+DELETE {{baseUrl}}/tag_test/{{tag_uuid}}
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+
+#### Get tag by uuid
+#GET {{baseUrl}}/tag_test/{{tag_uuid}}
+#Accept: application/json
+#tenant: {{tenant}}
+#Authorization: Bearer {{token}}
+#Content-Type: application/json
+
+
+### Get all tags
+GET {{baseUrl}}/tag_test?limit=10&offset=0
+Accept: application/json
+tenant: {{tenant}}
+Authorization: Bearer {{token}}
+Content-Type: application/json

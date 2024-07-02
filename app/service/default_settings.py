@@ -1,3 +1,4 @@
+# TODO: remove
 allowed_settings: dict = {
     "idea_registration_mode": None,
     "issue_registration_email": None,

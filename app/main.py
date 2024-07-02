@@ -1,31 +1,44 @@
 from typing import Any
 
 import sentry_sdk
-from fastapi import FastAPI, Request, UploadFile
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from loguru import logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-from app.api.auth import auth_router
-from app.api.cc import cc_router
-from app.api.files import file_router
-from app.api.guides import guide_router
-from app.api.issues import issue_router
-from app.api.items import item_router
-from app.api.parts import part_router
-from app.api.settings import setting_router
-from app.api.statistics import statistics_router
-from app.api.tags import tag_router
+from app.api.controller.auth import auth_test_router
+from app.api.controller.files import file_test_router
+from app.api.controller.guides import guide_test_router
+from app.api.controller.issues import issue_test_router
+from app.api.controller.items import item_test_router
+from app.api.controller.permissions import permission_test_router
+from app.api.controller.settings import setting_test_router
+from app.api.controller.statistics import statistics_test_router
+from app.api.controller.tags import tag_test_router
+
+# from app.api.auth import auth_router
+# from app.api.cc import cc_router
+from app.api.controller.users import user_test_router
+
+# from app.api.files import file_router
+# from app.api.guides import guide_router
+# from app.api.issues import issue_router
+# from app.api.items import item_router
+# from app.api.parts import part_router
+# from app.api.settings import setting_router
+# from app.api.statistics import statistics_router
+# from app.api.tags import tag_router
 from app.api.users import user_router
-from app.api.users_groups import group_router
 from app.api.users_permissions import permission_router
+
+# from app.api.users_groups import group_router
+# from app.api.users_permissions import permission_router
 from app.config import get_settings
-from app.service.health_check import test_db
+from app.service.health_check import check_required_tables, run_healthcheck
 from app.service.scheduler import scheduler, start_scheduler
 from app.service.tenants import alembic_upgrade_head
-from app.storage.s3 import S3Storage
 
 settings = get_settings()
 
@@ -40,7 +53,7 @@ def create_application() -> FastAPI:
     Returns:
         FastAPI: [description]
     """
-    app = FastAPI(debug=False, openapi_url=settings.OPEN_API)
+    app = FastAPI(debug=False)
 
     app.add_middleware(
         CORSMiddleware,
@@ -51,21 +64,33 @@ def create_application() -> FastAPI:
         max_age=86400,
     )
 
-    app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
+    # app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
     app.include_router(user_router, prefix="/users", tags=["USER"])
     app.include_router(permission_router, prefix="/permissions", tags=["PERMISSION"])
-    app.include_router(group_router, prefix="/groups", tags=["USER_GROUP"])
+    # app.include_router(group_router, prefix="/groups", tags=["USER_GROUP"])
+    #
+    # app.include_router(item_router, prefix="/items", tags=["ITEM"])
+    # app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
+    # app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
+    # app.include_router(part_router, prefix="/parts", tags=["PART"])
+    #
+    # app.include_router(file_router, prefix="/files", tags=["FILE"])
+    # app.include_router(tag_router, prefix="/tags", tags=["TAG"])
+    # app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
+    # app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
+    # app.include_router(cc_router, prefix="/cc", tags=["C&C"])
 
-    app.include_router(item_router, prefix="/items", tags=["ITEM"])
-    app.include_router(guide_router, prefix="/guides", tags=["GUIDE"])
-    app.include_router(issue_router, prefix="/issues", tags=["ISSUE"])
-    app.include_router(part_router, prefix="/parts", tags=["PART"])
+    app.include_router(auth_test_router, prefix="/auth_test", tags=["TEST_A"])
+    app.include_router(user_test_router, prefix="/user_test", tags=["TEST_U"])
+    app.include_router(item_test_router, prefix="/item_test", tags=["TEST_I"])
+    app.include_router(guide_test_router, prefix="/guide_test", tags=["TEST_GUIDES"])
+    app.include_router(issue_test_router, prefix="/issue_test", tags=["TEST_ISSUES"])
+    app.include_router(file_test_router, prefix="/file_test", tags=["TEST_FILES"])
+    app.include_router(tag_test_router, prefix="/tag_test", tags=["TEST_TAGS"])
+    app.include_router(setting_test_router, prefix="/settings_test", tags=["TEST_SETTINGS"])
 
-    app.include_router(file_router, prefix="/files", tags=["FILE"])
-    app.include_router(tag_router, prefix="/tags", tags=["TAG"])
-    app.include_router(setting_router, prefix="/settings", tags=["SETTINGS"])
-    app.include_router(statistics_router, prefix="/statistics", tags=["STATISTICS"])
-    app.include_router(cc_router, prefix="/cc", tags=["C&C"])
+    app.include_router(permission_test_router, prefix="/permission_test", tags=["TEST_P"])
+    app.include_router(statistics_test_router, prefix="/statistics_test", tags=["TEST_S"])
     return app
 
 
@@ -96,31 +121,23 @@ if settings.ENVIRONMENT == "PRD":
     app.add_middleware(SentryAsgiMiddleware)
 
 
-# if settings.ENVIRONMENT != "PRD":
-
-#     @app.middleware("http")
-#     async def add_sql_tap(request: Request, call_next):
-#         profiler = SessionProfiler()
-#         profiler.begin()
-#         response = await call_next(request)
-#         profiler.commit()
-#         reporter = StreamReporter().report(f"{request.method} {request.url}", profiler.stats)
-#         print(reporter)
-#         return response
-
-
 @app.on_event("startup")
 def startup():
-    logger.info("🚀 [Starting up] Initializing DB data...")
-    alembic_upgrade_head("public", "d6ba8c13303e")
+    logger.info("🚀 [Starting up] Initializing DB...")
+    missing_tables = check_required_tables()
+
+    if missing_tables:
+        logger.info(f"Missing tables detected: {', '.join(missing_tables)}, running Alembic upgrade...")
+        alembic_upgrade_head("public", "d6ba8c13303e")
+        logger.info("✅  Alembic upgrade completed")
+    else:
+        logger.info("✅ All required tables present. Skipping Alembic upgrade.")
     logger.info("🎽 [Job] Running test Job")
 
 
 def welcome_message(text: str):
     logger.info("👍 Job Message: " + text)
     logger.info("Waiting for first request ...")
-    print("👍 Job Message: " + text)
-    print("Waiting for first request ...")
 
 
 start_scheduler(app)
@@ -130,8 +147,6 @@ job = scheduler.add_job(welcome_message, args=["Everything OK, application is ru
 @app.on_event("shutdown")
 def shutdown_event():
     logger.info("👋 Bye!")
-    print("👋 Bye!")
-    # scheduler.shutdown()
 
 
 @app.get("/", include_in_schema=False)
@@ -140,56 +155,5 @@ async def read_root(request: Request):
 
 
 @app.get("/health")
-async def health_check():
-    # https://github.com/publichealthengland/coronavirus-dashboard-api-v2-server/blob/development/app/engine/healthcheck.py
-    # try:
-    #     response = run_healthcheck()
-    # except Exception as err:
-    #     logger.exception(err)
-    #     raise err
-    # return response
-    return {"status": "ok"}
-
-
-@app.get("/health_db")
-def health_check_db():
-    return test_db()
-
-
-class PublicAssetS3Storage(S3Storage):
-    AWS_DEFAULT_ACL = "public-read"
-    AWS_QUERYSTRING_AUTH = True
-
-
-storage = PublicAssetS3Storage()
-
-
-@app.post("/test")
-def test_endpoint(file: UploadFile):
-    try:
-        print("NAME:", storage.get_name("test (1)ąśćł.txt"))
-        print(storage.get_path("test (1).txt"))
-
-        # tmp_path = Path(__file__).resolve().parent
-        # tmp_file = tmp_path / "example.txt"
-        # tmp_file.write_bytes(b"123")
-        # file_hdd = tmp_file.open("rb")
-        # print(file_hdd)
-
-        # file_web = file.file
-        #
-        # save = storage.write(file_web, "example.txt")
-        # print(save)
-        # print(storage.get_size("example.txt"))
-
-    except BaseException as error:
-        print(error)
-    return {"status": "ok"}
-
-
-# if __name__ == "__main__":
-#     logger.info("Running APP locally (not docker)")
-#     if settings.ENVIRONMENT == "PRD":
-#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=False, debug=False)
-#     else:
-#         uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=True, debug=True)
+def health_check():
+    return run_healthcheck()
